@@ -1,5 +1,8 @@
+#include "Matrices.hpp"
 #include <Application.hpp>
 #include <cstdint>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/trigonometric.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -24,6 +27,7 @@ Application::Application()
 
     CreateVertexBuffer();
     CreateIndexBuffer();
+    CreateMatricesBuffer();
 
     LoadShaders();
 
@@ -32,6 +36,15 @@ Application::Application()
     CreateCommandBuffer();
 
     LoadTextures();
+    
+    matrices = std::make_shared<Matrices>();
+
+    matrices->Translate({ 0.f, 0.f, -5.f });
+    matrices->Scale({ 1.f, 1.f, 1.f });
+    matrices->Rotate(glm::radians(45.f), { 0.3f, 0.3f, 0.3f });
+
+    matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 }
 
 Application::~Application() {}
@@ -51,24 +64,32 @@ void Application::Run()
 
     while(window.ProcessEvents() && !window.HasQuit())
     {
+        auto matricesBinding = matrices->GetBinding();
+
         commandBuffer->Begin();
         {
             commandBuffer->SetVertexBuffer(*vertexBuffer);
             commandBuffer->SetIndexBuffer(*indexBuffer);
+            commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::MatricesBinding));
             
             commandBuffer->BeginRenderPass(*swapChain);
             {
                 commandBuffer->SetViewport(swapChain->GetResolution());
-                commandBuffer->Clear(LLGL::ClearFlags::Color, { 0.1, 0.1, 0.1, 1.0 });
+                commandBuffer->Clear(LLGL::ClearFlags::ColorDepth, { 0.1, 0.1, 0.1, 1.0 });
+
                 commandBuffer->SetPipelineState(*pipeline);
 
-                commandBuffer->SetResource(0, *texture);
+                commandBuffer->SetResource(0, *matricesBuffer);
+                commandBuffer->SetResource(1, *texture);
+                commandBuffer->SetResource(2, *sampler);
 
                 commandBuffer->DrawIndexed(sizeof(indices) / sizeof(uint32_t), 0);
             }
             commandBuffer->EndRenderPass();
         }
         commandBuffer->End();
+
+        commandQueue->Submit(*commandBuffer);
 
         swapChain->Present();
     }
@@ -81,6 +102,8 @@ void Application::LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc)
     renderSystem = LLGL::RenderSystem::Load(desc, &report);
     if(renderSystem == nullptr)
         throw std::runtime_error(report.GetText());
+
+    commandQueue = renderSystem->GetCommandQueue();
 }
 
 void Application::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)
@@ -96,7 +119,8 @@ void Application::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscree
 
 void Application::SetupVertexFormat()
 {
-    vertexFormat.AppendAttribute({ "position", LLGL::Format::RG32Float });
+    vertexFormat.AppendAttribute({ "position", LLGL::Format::RGB32Float });
+    vertexFormat.AppendAttribute({ "normal", LLGL::Format::RGB32Float });
     vertexFormat.AppendAttribute({ "texCoord", LLGL::Format::RG32Float });
 }
 
@@ -112,6 +136,13 @@ void Application::CreateIndexBuffer()
     LLGL::BufferDescriptor bufferDesc = LLGL::IndexBufferDesc(sizeof(indices), LLGL::Format::R32UInt);
 
     indexBuffer = renderSystem->CreateBuffer(bufferDesc, indices);
+}
+
+void Application::CreateMatricesBuffer()
+{
+    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::MatricesBinding));
+
+    matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
 }
 
 void Application::LoadShaders()
@@ -141,8 +172,9 @@ void Application::CreatePipeline()
     LLGL::PipelineLayoutDescriptor layoutDesc;
     layoutDesc.bindings = 
     {
-        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 0 },
-        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 0 }
+        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 0 },
+        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
+        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
     };
 
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
@@ -158,7 +190,15 @@ void Application::CreatePipeline()
     pipelineStateDesc.vertexShader = vertexShader;
     pipelineStateDesc.fragmentShader = fragmentShader;
     pipelineStateDesc.pipelineLayout = pipelineLayout;
+    pipelineStateDesc.renderPass = swapChain->GetRenderPass();
+    pipelineStateDesc.primitiveTopology = LLGL::PrimitiveTopology::TriangleList;
+    
+    pipelineStateDesc.depth.testEnabled = true;
+    pipelineStateDesc.depth.writeEnabled = true;
+
     pipelineStateDesc.blend = blendDesc;
+    
+    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Front;
     pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
 
     pipeline = renderSystem->CreatePipelineState(pipelineStateDesc);
@@ -180,7 +220,7 @@ void Application::LoadTextures()
     if(data)
     {
         imageView.data = data;
-        imageView.dataSize = width * height * 4;
+        imageView.dataSize = width * height * 4 * 8;
         imageView.dataType = LLGL::DataType::UInt8;
 
         LLGL::TextureDescriptor textureDesc;

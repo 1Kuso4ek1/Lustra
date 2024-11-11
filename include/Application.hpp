@@ -1,12 +1,5 @@
 #pragma once
-#include <LLGL/Buffer.h>
-#include <LLGL/CommandQueue.h>
-#include <LLGL/LLGL.h>
-#include <LLGL/Utils/VertexFormat.h>
-#include <LLGL/Utils/Utility.h>
-
-#include <Matrices.hpp>
-#include <memory>
+#include <Utils.hpp>
 
 class Application
 {
@@ -32,9 +25,9 @@ private:
 
     struct Vertex
     {
-        float pos[3];
-        float normal[3];
-        float coords[2];
+        glm::vec3 pos;
+        glm::vec3 normal;
+        glm::vec2 coords;
     };
 
     /*Vertex vertices[36] = {

@@ -1,8 +1,4 @@
-#include "Matrices.hpp"
 #include <Application.hpp>
-#include <cstdint>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/trigonometric.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -51,9 +47,9 @@ Application::~Application() {}
 
 void Application::Run()
 {
-    if(swapChain == nullptr)
+    if(renderSystem == nullptr)
     {
-        LLGL::Log::Errorf("Error: Trying to run app with no swap chain\n");
+        LLGL::Log::Errorf("Error: Trying to run app with no render system\n");
         return;
     }
 

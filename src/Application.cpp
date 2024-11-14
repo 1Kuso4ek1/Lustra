@@ -1,4 +1,7 @@
+#include "Renderer.hpp"
 #include <Application.hpp>
+#include <LLGL/RenderSystem.h>
+#include <memory>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -7,7 +10,7 @@ Application::Application()
 {
     LLGL::Log::RegisterCallbackStd();
 
-    try
+    /*try
     {
         LoadRenderSystem("OpenGL");
     }
@@ -15,25 +18,25 @@ Application::Application()
     {
         LLGL::Log::Errorf("Error: Render system loading failed: %s", error.what());
         return;
-    }
+    }*/
 
-    InitSwapChain({ 800, 800 });
+    Renderer::Get().InitSwapChain({ 800, 800 });
 
-    SetupVertexFormat();
-
-    CreateVertexBuffer();
-    CreateIndexBuffer();
-    CreateMatricesBuffer();
+    //SetupVertexFormat();
 
     LoadShaders();
 
-    CreatePipeline();
+    /*CreatePipeline();
 
-    CreateCommandBuffer();
+    CreateCommandBuffer();*/
 
     LoadTextures();
+
+    mesh = std::make_unique<Mesh>();
+    mesh->CreateCube();
     
-    matrices = std::make_shared<Matrices>();
+    pipeline = Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
+    matrices = Renderer::Get().GetMatrices();
 
     matrices->Translate({ 0.f, 0.f, -5.f });
     matrices->Scale({ 1.f, 1.f, 1.f });
@@ -47,98 +50,29 @@ Application::~Application() {}
 
 void Application::Run()
 {
-    if(renderSystem == nullptr)
+    if(!Renderer::Get().IsInit())
     {
-        LLGL::Log::Errorf("Error: Trying to run app with no render system\n");
+        LLGL::Log::Errorf("Error: Renderer is not initialized\n");
         return;
     }
 
-    LLGL::Window& window = LLGL::CastTo<LLGL::Window>(swapChain->GetSurface());
+    auto window = Renderer::Get().GetWindow();
 
-    window.SetTitle("LLGLTest");
-    window.Show();
+    window->SetTitle("LLGLTest");
+    window->Show();
 
-    while(window.ProcessEvents() && !window.HasQuit())
+    while(window->ProcessEvents() && !window->HasQuit())
     {
-        auto matricesBinding = matrices->GetBinding();
+        Renderer::Get().RenderPass(
+        [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
+        { { 0, Renderer::Get().GetMatricesBuffer() },
+                    { 1, texture },
+                    { 2, sampler } },
+        [&](auto commandBuffer) { mesh->Draw(commandBuffer); },
+        pipeline);
 
-        commandBuffer->Begin();
-        {
-            commandBuffer->SetVertexBuffer(*vertexBuffer);
-            commandBuffer->SetIndexBuffer(*indexBuffer);
-            commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::MatricesBinding));
-            
-            commandBuffer->BeginRenderPass(*swapChain);
-            {
-                commandBuffer->SetViewport(swapChain->GetResolution());
-                commandBuffer->Clear(LLGL::ClearFlags::ColorDepth, { 0.1, 0.1, 0.1, 1.0 });
-
-                commandBuffer->SetPipelineState(*pipeline);
-
-                commandBuffer->SetResource(0, *matricesBuffer);
-                commandBuffer->SetResource(1, *texture);
-                commandBuffer->SetResource(2, *sampler);
-
-                commandBuffer->DrawIndexed(sizeof(indices) / sizeof(uint32_t), 0);
-            }
-            commandBuffer->EndRenderPass();
-        }
-        commandBuffer->End();
-
-        commandQueue->Submit(*commandBuffer);
-
-        swapChain->Present();
+        Renderer::Get().Present();
     }
-}
-
-void Application::LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc)
-{
-    LLGL::Report report;
-
-    renderSystem = LLGL::RenderSystem::Load(desc, &report);
-    if(renderSystem == nullptr)
-        throw std::runtime_error(report.GetText());
-
-    commandQueue = renderSystem->GetCommandQueue();
-}
-
-void Application::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)
-{
-    LLGL::SwapChainDescriptor swapChainDesc;
-
-    swapChainDesc.resolution = resolution;
-    swapChainDesc.fullscreen = fullscreen;
-    swapChainDesc.samples = samples;
-
-    swapChain = renderSystem->CreateSwapChain(swapChainDesc);
-}
-
-void Application::SetupVertexFormat()
-{
-    vertexFormat.AppendAttribute({ "position", LLGL::Format::RGB32Float });
-    vertexFormat.AppendAttribute({ "normal", LLGL::Format::RGB32Float });
-    vertexFormat.AppendAttribute({ "texCoord", LLGL::Format::RG32Float });
-}
-
-void Application::CreateVertexBuffer()
-{
-    LLGL::BufferDescriptor bufferDesc = LLGL::VertexBufferDesc(sizeof(vertices), vertexFormat);
-
-    vertexBuffer = renderSystem->CreateBuffer(bufferDesc, vertices);
-}
-
-void Application::CreateIndexBuffer()
-{
-    LLGL::BufferDescriptor bufferDesc = LLGL::IndexBufferDesc(sizeof(indices), LLGL::Format::R32UInt);
-
-    indexBuffer = renderSystem->CreateBuffer(bufferDesc, indices);
-}
-
-void Application::CreateMatricesBuffer()
-{
-    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::MatricesBinding));
-
-    matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
 }
 
 void Application::LoadShaders()
@@ -146,10 +80,10 @@ void Application::LoadShaders()
     LLGL::ShaderDescriptor vertexShaderDesc = { LLGL::ShaderType::Vertex, "../shaders/vertex.vert" };
     LLGL::ShaderDescriptor fragmentShaderDesc = { LLGL::ShaderType::Fragment, "../shaders/fragment.frag" };
 
-    vertexShaderDesc.vertex.inputAttribs = vertexFormat.attributes;
+    vertexShaderDesc.vertex.inputAttribs = Renderer::Get().GetDefaultVertexFormat().attributes;
 
-    vertexShader = renderSystem->CreateShader(vertexShaderDesc);
-    fragmentShader = renderSystem->CreateShader(fragmentShaderDesc);
+    vertexShader = Renderer::Get().CreateShader(vertexShaderDesc);
+    fragmentShader = Renderer::Get().CreateShader(fragmentShaderDesc);
 
     for(LLGL::Shader* shader : { vertexShader, fragmentShader })
     {
@@ -161,48 +95,6 @@ void Application::LoadShaders()
                 LLGL::Log::Printf("Shader compile warnings:\n%s", report->GetText());
         }
     }
-}
-
-void Application::CreatePipeline()
-{
-    LLGL::PipelineLayoutDescriptor layoutDesc;
-    layoutDesc.bindings = 
-    {
-        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 0 },
-        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
-    };
-
-    LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
-
-    LLGL::BlendTargetDescriptor blendTargetDesc;
-    blendTargetDesc.blendEnabled = true;
-
-    LLGL::BlendDescriptor blendDesc;
-    blendDesc.independentBlendEnabled = true;
-    blendDesc.targets[0] = blendTargetDesc;
-
-    LLGL::GraphicsPipelineDescriptor pipelineStateDesc;
-    pipelineStateDesc.vertexShader = vertexShader;
-    pipelineStateDesc.fragmentShader = fragmentShader;
-    pipelineStateDesc.pipelineLayout = pipelineLayout;
-    pipelineStateDesc.renderPass = swapChain->GetRenderPass();
-    pipelineStateDesc.primitiveTopology = LLGL::PrimitiveTopology::TriangleList;
-    
-    pipelineStateDesc.depth.testEnabled = true;
-    pipelineStateDesc.depth.writeEnabled = true;
-
-    pipelineStateDesc.blend = blendDesc;
-    
-    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Front;
-    pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
-
-    pipeline = renderSystem->CreatePipelineState(pipelineStateDesc);
-}
-
-void Application::CreateCommandBuffer()
-{
-    commandBuffer = renderSystem->CreateCommandBuffer(LLGL::CommandBufferFlags::ImmediateSubmit);
 }
 
 void Application::LoadTextures()
@@ -225,12 +117,12 @@ void Application::LoadTextures()
         textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
         textureDesc.miscFlags = LLGL::MiscFlags::GenerateMips;
 
-        texture = renderSystem->CreateTexture(textureDesc, &imageView);
+        texture = Renderer::Get().CreateTexture(textureDesc, &imageView);
 
         LLGL::SamplerDescriptor samplerDesc;
         samplerDesc.maxAnisotropy = 8;
 
-        sampler = renderSystem->CreateSampler(samplerDesc);
+        sampler = Renderer::Get().CreateSampler(samplerDesc);
     }
     else
         LLGL::Log::Errorf("Failed to load texture");

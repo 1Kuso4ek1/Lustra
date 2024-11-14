@@ -1,3 +1,4 @@
+#include <LLGL/RenderSystem.h>
 #include <Renderer.hpp>
 
 Renderer::Renderer()
@@ -13,8 +14,8 @@ Renderer::Renderer()
     }
 
     SetupDefaultVertexFormat();
-    SetupDefaultPipeline();
     SetupCommandBuffer();
+    CreateMatricesBuffer();
 
     matrices = std::make_shared<Matrices>();
 }
@@ -51,7 +52,7 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
             commandBuffer->SetViewport(swapChain->GetResolution());
             commandBuffer->Clear(LLGL::ClearFlags::ColorDepth, { 0.0, 0.0, 0.0, 0.0 });
 
-            commandBuffer->SetPipelineState(pipeline ? *pipeline : *defaultPipeline);
+            commandBuffer->SetPipelineState(*pipeline);
 
             for(auto const& [key, val] : resources)
                 commandBuffer->SetResource(key, *val);
@@ -73,6 +74,58 @@ LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, c
     return renderSystem->CreateBuffer(bufferDesc, data);
 }
 
+LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderDescriptor& shaderDesc)
+{
+    return renderSystem->CreateShader(shaderDesc);
+}
+
+LLGL::Texture* Renderer::CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage)
+{
+    return renderSystem->CreateTexture(textureDesc, initialImage);
+}
+
+LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDesc)
+{
+    return renderSystem->CreateSampler(samplerDesc);
+}
+
+LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader)
+{
+    LLGL::PipelineLayoutDescriptor layoutDesc;
+    layoutDesc.bindings =
+    {
+        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 0 },
+        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
+        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
+    };
+
+    LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
+
+    LLGL::BlendTargetDescriptor blendTargetDesc;
+    blendTargetDesc.blendEnabled = true;
+
+    LLGL::BlendDescriptor blendDesc;
+    blendDesc.independentBlendEnabled = true;
+    blendDesc.targets[0] = blendTargetDesc;
+
+    LLGL::GraphicsPipelineDescriptor pipelineStateDesc;
+    pipelineStateDesc.vertexShader = vertexShader;
+    pipelineStateDesc.fragmentShader = fragmentShader;
+    pipelineStateDesc.pipelineLayout = pipelineLayout;
+    pipelineStateDesc.renderPass = swapChain->GetRenderPass();
+    pipelineStateDesc.primitiveTopology = LLGL::PrimitiveTopology::TriangleList;
+
+    pipelineStateDesc.depth.testEnabled = true;
+    pipelineStateDesc.depth.writeEnabled = true;
+
+    pipelineStateDesc.blend = blendDesc;
+
+    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Front;
+    pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
+
+    return renderSystem->CreatePipelineState(pipelineStateDesc);
+}
+
 LLGL::Window* Renderer::GetWindow() const
 {
     return swapChain ? &LLGL::CastTo<LLGL::Window>(swapChain->GetSurface()) : nullptr;
@@ -83,14 +136,19 @@ LLGL::VertexFormat Renderer::GetDefaultVertexFormat() const
     return defaultVertexFormat;
 }
 
-LLGL::PipelineState* Renderer::GetDefaultPipeline() const
+LLGL::Buffer* Renderer::GetMatricesBuffer() const
 {
-    return defaultPipeline;
+    return matricesBuffer;
+}
+
+std::shared_ptr<Matrices> Renderer::GetMatrices() const
+{
+    return matrices;
 }
 
 bool Renderer::IsInit()
 {
-    return renderSystem != nullptr;
+    return renderSystem != nullptr && swapChain != nullptr;
 }
 
 void Renderer::LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc)
@@ -111,42 +169,14 @@ void Renderer::SetupDefaultVertexFormat()
     defaultVertexFormat.AppendAttribute({ "texCoord", LLGL::Format::RG32Float });
 }
 
-void Renderer::SetupDefaultPipeline()
-{
-    LLGL::PipelineLayoutDescriptor layoutDesc;
-    layoutDesc.bindings =
-    {
-        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 0 },
-        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
-    };
-
-    LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
-
-    LLGL::BlendTargetDescriptor blendTargetDesc;
-    blendTargetDesc.blendEnabled = true;
-
-    LLGL::BlendDescriptor blendDesc;
-    blendDesc.independentBlendEnabled = true;
-    blendDesc.targets[0] = blendTargetDesc;
-
-    LLGL::GraphicsPipelineDescriptor pipelineStateDesc;
-    pipelineStateDesc.pipelineLayout = pipelineLayout;
-    pipelineStateDesc.renderPass = swapChain->GetRenderPass();
-    pipelineStateDesc.primitiveTopology = LLGL::PrimitiveTopology::TriangleList;
-
-    pipelineStateDesc.depth.testEnabled = true;
-    pipelineStateDesc.depth.writeEnabled = true;
-
-    pipelineStateDesc.blend = blendDesc;
-
-    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Front;
-    pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
-
-    defaultPipeline = renderSystem->CreatePipelineState(pipelineStateDesc);
-}
-
 void Renderer::SetupCommandBuffer()
 {
     commandBuffer = renderSystem->CreateCommandBuffer(LLGL::CommandBufferFlags::ImmediateSubmit);
+}
+
+void Renderer::CreateMatricesBuffer()
+{
+    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::MatricesBinding));
+
+    matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
 }

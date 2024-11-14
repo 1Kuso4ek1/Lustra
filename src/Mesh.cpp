@@ -9,6 +9,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 void Mesh::SetupBuffers()
 {
     vertexFormat = Renderer::Get().GetDefaultVertexFormat();
+    matricesBuffer = Renderer::Get().GetMatricesBuffer();
 
     CreateVertexBuffer();
     CreateIndexBuffer();
@@ -58,6 +59,34 @@ void Mesh::CreateCube()
     };
 
     SetupBuffers();
+}
+
+void Mesh::CreatePlane()
+{
+    vertices = {
+        { { -1, 1, 0 }, { 0, 1, 0 }, { 0, 0 } },
+        { { 1, 1, 0 }, { 0, 1, 0 }, { 1, 0 } },
+        { { -1, -1, 0 }, { 0, 1, 0 }, { 0, 1 } },
+        { { 1, -1, 0 }, { 0, 1, 0 }, { 1, 1 } }
+    };
+
+    indices = { 0, 1, 2, 2, 1, 3 };
+
+    SetupBuffers();
+}
+
+void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer)
+{
+    auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
+
+    commandBuffer->SetVertexBuffer(*vertexBuffer);
+    commandBuffer->SetIndexBuffer(*indexBuffer);
+    commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::MatricesBinding));
+}
+
+void Mesh::Draw(LLGL::CommandBuffer* commandBuffer)
+{
+    commandBuffer->DrawIndexed(indices.size(), 0);
 }
 
 void Mesh::CreateVertexBuffer()

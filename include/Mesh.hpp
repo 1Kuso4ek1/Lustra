@@ -17,15 +17,22 @@ public:
     void SetupBuffers();
 
     void CreateCube();
+    void CreatePlane();
+
+    void BindBuffers(LLGL::CommandBuffer* commandBuffer);
+
+    void Draw(LLGL::CommandBuffer* commandBuffer);
 
 private:
     void CreateVertexBuffer();
     void CreateIndexBuffer();
 
+private:
     LLGL::VertexFormat vertexFormat;
 
     LLGL::Buffer* vertexBuffer;
     LLGL::Buffer* indexBuffer;
+    LLGL::Buffer* matricesBuffer;
 
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;

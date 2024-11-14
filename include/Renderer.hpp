@@ -1,7 +1,10 @@
 #pragma once
+#include "Matrices.hpp"
+#include <LLGL/Texture.h>
 #include <Utils.hpp>
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 
 class Renderer
@@ -15,15 +18,21 @@ public: // Public methods
     void RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
                     std::unordered_map<uint32_t, LLGL::Resource*> resources, // A map of resources { binding, Resource_ptr }
                     std::function<void(LLGL::CommandBuffer*)> draw, // Call the draw function
-                    LLGL::PipelineState* pipeline = nullptr); // If nullptr, use the default one
+                    LLGL::PipelineState* pipeline);
 
     void Present();
 
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* data = nullptr);
+    LLGL::Shader* CreateShader(const LLGL::ShaderDescriptor& shaderDesc);
+    LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
+    LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);
+    LLGL::PipelineState* CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader);
 
     LLGL::Window* GetWindow() const;
     LLGL::VertexFormat GetDefaultVertexFormat() const;
-    LLGL::PipelineState* GetDefaultPipeline() const;
+
+    LLGL::Buffer* GetMatricesBuffer() const;
+    std::shared_ptr<Matrices> GetMatrices() const;
 
     bool IsInit(); // Will return false if RenderSystem init failed
 
@@ -35,21 +44,18 @@ private: // Singleton-related
 private: // Private methods
     void LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc);
     void SetupDefaultVertexFormat();
-    void SetupDefaultPipeline();
     void SetupCommandBuffer();
+    void CreateMatricesBuffer();
 
 private: // Private members
     LLGL::RenderSystemPtr renderSystem;
 
     LLGL::SwapChain* swapChain{};
-
-    LLGL::PipelineState* defaultPipeline{};
-
     LLGL::CommandBuffer* commandBuffer{};
-
     LLGL::CommandQueue* commandQueue{}; // Unused for now
 
     LLGL::VertexFormat defaultVertexFormat;
 
+    LLGL::Buffer* matricesBuffer;
     std::shared_ptr<Matrices> matrices;
 };

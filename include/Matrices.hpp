@@ -7,7 +7,7 @@
 class Matrices
 {
 public:
-    struct MatricesBinding
+    struct Binding
     {
         glm::mat4 model;
         glm::mat4 view;
@@ -27,7 +27,7 @@ public:
     glm::mat4& GetView();
     glm::mat4& GetProjection();
 
-    MatricesBinding GetBinding();
+    Binding GetBinding();
 
 private:
 

@@ -30,9 +30,9 @@ private:
 private:
     LLGL::VertexFormat vertexFormat;
 
-    LLGL::Buffer* vertexBuffer;
-    LLGL::Buffer* indexBuffer;
-    LLGL::Buffer* matricesBuffer;
+    LLGL::Buffer* vertexBuffer{};
+    LLGL::Buffer* indexBuffer{};
+    LLGL::Buffer* matricesBuffer{};
 
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;

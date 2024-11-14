@@ -13,6 +13,8 @@ void Mesh::SetupBuffers()
 
     CreateVertexBuffer();
     CreateIndexBuffer();
+
+    //CreateVertexBuffer(); WHY DOES THIS FIX EVERYTHING
 }
 
 void Mesh::CreateCube()
@@ -81,7 +83,7 @@ void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer)
 
     commandBuffer->SetVertexBuffer(*vertexBuffer);
     commandBuffer->SetIndexBuffer(*indexBuffer);
-    commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::MatricesBinding));
+    commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::Binding));
 }
 
 void Mesh::Draw(LLGL::CommandBuffer* commandBuffer)

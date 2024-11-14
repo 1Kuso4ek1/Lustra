@@ -94,9 +94,9 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     LLGL::PipelineLayoutDescriptor layoutDesc;
     layoutDesc.bindings =
     {
-        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 0 },
-        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
+        { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
+        { "albedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+        { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
     };
 
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
@@ -120,7 +120,7 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
 
     pipelineStateDesc.blend = blendDesc;
 
-    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Front;
+    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Disabled;
     pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
 
     return renderSystem->CreatePipelineState(pipelineStateDesc);
@@ -176,7 +176,7 @@ void Renderer::SetupCommandBuffer()
 
 void Renderer::CreateMatricesBuffer()
 {
-    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::MatricesBinding));
+    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::Binding));
 
     matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
 }

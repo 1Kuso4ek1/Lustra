@@ -1,7 +1,4 @@
-#include "Renderer.hpp"
 #include <Application.hpp>
-#include <LLGL/RenderSystem.h>
-#include <memory>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -10,25 +7,9 @@ Application::Application()
 {
     LLGL::Log::RegisterCallbackStd();
 
-    /*try
-    {
-        LoadRenderSystem("OpenGL");
-    }
-    catch(const std::runtime_error& error)
-    {
-        LLGL::Log::Errorf("Error: Render system loading failed: %s", error.what());
-        return;
-    }*/
-
     Renderer::Get().InitSwapChain({ 800, 800 });
 
-    //SetupVertexFormat();
-
     LoadShaders();
-
-    /*CreatePipeline();
-
-    CreateCommandBuffer();*/
 
     LoadTextures();
 
@@ -38,12 +19,11 @@ Application::Application()
     pipeline = Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = Renderer::Get().GetMatrices();
 
-    matrices->Translate({ 0.f, 0.f, -5.f });
-    matrices->Scale({ 1.f, 1.f, 1.f });
-    matrices->Rotate(glm::radians(45.f), { 0.3f, 0.3f, 0.3f });
+    matrices->Translate({ 0.f, 0.f, 0.f });
+    matrices->Rotate(glm::radians(45.f), { 0.f, 1.0f, 0.f });
 
     matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 100.0f);
-    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, -5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f));
 }
 
 Application::~Application() {}
@@ -61,17 +41,28 @@ void Application::Run()
     window->SetTitle("LLGLTest");
     window->Show();
 
+    LLGL::Input input(*window);
+
     while(window->ProcessEvents() && !window->HasQuit())
     {
         Renderer::Get().RenderPass(
         [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
-        { { 0, Renderer::Get().GetMatricesBuffer() },
-                    { 1, texture },
-                    { 2, sampler } },
+        {
+            { 0, Renderer::Get().GetMatricesBuffer() },
+            { 1, texture },
+            { 2, sampler }
+        },
         [&](auto commandBuffer) { mesh->Draw(commandBuffer); },
         pipeline);
 
         Renderer::Get().Present();
+
+        if(input.KeyPressed(LLGL::Key::Q))
+            degrees -= 0.1f;
+        else if(input.KeyPressed(LLGL::Key::E))
+            degrees += 0.1f;
+
+        matrices->Rotate(glm::radians(degrees), { 0.3f, 0.3f, 0.3f });
     }
 }
 

@@ -18,6 +18,8 @@ private:
     void LoadShaders();
     void LoadTextures();
 
+    float degrees = 0.f;
+
     std::unique_ptr<Mesh> mesh;
 
     LLGL::PipelineState* pipeline{};

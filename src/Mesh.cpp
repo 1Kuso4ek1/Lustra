@@ -13,8 +13,6 @@ void Mesh::SetupBuffers()
 
     CreateVertexBuffer();
     CreateIndexBuffer();
-
-    //CreateVertexBuffer(); WHY DOES THIS FIX EVERYTHING
 }
 
 void Mesh::CreateCube()

@@ -5,7 +5,7 @@ find_package(LLGL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(glm REQUIRED)
 
-add_executable(LLGLTest main.cpp src/Renderer.cpp src/Matrices.cpp src/Mesh.cpp src/Application.cpp)
+add_executable(LLGLTest main.cpp src/Renderer.cpp src/Matrices.cpp src/Mesh.cpp src/Application.cpp src/CubeApp.cpp)
 
 set_target_properties(LLGLTest PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 

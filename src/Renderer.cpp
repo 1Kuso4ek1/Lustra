@@ -1,4 +1,6 @@
+#include <LLGL/Log.h>
 #include <LLGL/RenderSystem.h>
+#include <LLGL/Utils/Utility.h>
 #include <Renderer.hpp>
 
 Renderer::Renderer()
@@ -12,10 +14,6 @@ Renderer::Renderer()
         LLGL::Log::Errorf("Error: Render system loading failed: %s", error.what());
         return;
     }
-
-    SetupDefaultVertexFormat();
-    SetupCommandBuffer();
-    CreateMatricesBuffer();
 
     matrices = std::make_shared<Matrices>();
 }
@@ -36,6 +34,10 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
     swapChainDesc.samples = samples;
 
     swapChain = renderSystem->CreateSwapChain(swapChainDesc);
+
+    SetupDefaultVertexFormat();
+    SetupCommandBuffer();
+    CreateMatricesBuffer();
 }
 
 void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
@@ -69,9 +71,9 @@ void Renderer::Present()
     swapChain->Present();
 }
 
-LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* data)
+LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData)
 {
-    return renderSystem->CreateBuffer(bufferDesc, data);
+    return renderSystem->CreateBuffer(bufferDesc, initialData);
 }
 
 LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderDescriptor& shaderDesc)

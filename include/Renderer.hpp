@@ -22,7 +22,7 @@ public: // Public methods
 
     void Present();
 
-    LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* data = nullptr);
+    LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);
     LLGL::Shader* CreateShader(const LLGL::ShaderDescriptor& shaderDesc);
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
     LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);

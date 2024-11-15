@@ -20,9 +20,10 @@ Renderer::Renderer()
 
 Renderer& Renderer::Get()
 {
-    static std::unique_ptr<Renderer> instance = std::unique_ptr<Renderer>(new Renderer());
+    //static std::unique_ptr<Renderer> instance = std::unique_ptr<Renderer>(new Renderer());
+    static Renderer instance; // I guess stack allocation is better? But who really cares? There's almost no difference...
 
-    return *instance;
+    return instance;
 }
 
 void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)

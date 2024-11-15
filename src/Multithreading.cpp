@@ -2,9 +2,9 @@
 
 Multithreading& Multithreading::GetInstance()
 {
-    static std::unique_ptr<Multithreading> instance(new Multithreading());
+    static Multithreading instance;
     
-    return *instance;
+    return instance;
 }
 
 void Multithreading::Update()

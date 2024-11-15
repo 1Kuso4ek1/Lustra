@@ -10,6 +10,7 @@ TextureManager::TextureManager()
 TextureManager& TextureManager::Get()
 {
     static TextureManager instance;
+    
     return instance;
 }
 

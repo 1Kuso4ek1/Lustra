@@ -19,9 +19,6 @@ CubeApp::CubeApp()
     pipeline = Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = Renderer::Get().GetMatrices();
 
-    matrices->Translate({ 0.f, 0.f, 0.f });
-    matrices->Rotate(glm::radians(45.f), { 0.f, 1.0f, 0.f });
-
     matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 100.0f);
     matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f));
 }
@@ -66,24 +63,8 @@ void CubeApp::Run()
 
 void CubeApp::LoadShaders()
 {
-    LLGL::ShaderDescriptor vertexShaderDesc = { LLGL::ShaderType::Vertex, "../shaders/vertex.vert" };
-    LLGL::ShaderDescriptor fragmentShaderDesc = { LLGL::ShaderType::Fragment, "../shaders/fragment.frag" };
-
-    vertexShaderDesc.vertex.inputAttribs = Renderer::Get().GetDefaultVertexFormat().attributes;
-
-    vertexShader = Renderer::Get().CreateShader(vertexShaderDesc);
-    fragmentShader = Renderer::Get().CreateShader(fragmentShaderDesc);
-
-    for(LLGL::Shader* shader : { vertexShader, fragmentShader })
-    {
-        if(const LLGL::Report* report = shader->GetReport())
-        {
-            if(report->HasErrors())
-                LLGL::Log::Errorf("Shader compile errors:\n%s", report->GetText());
-            else
-                LLGL::Log::Printf("Shader compile warnings:\n%s", report->GetText());
-        }
-    }
+    vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
+    fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/fragment.frag");
 }
 
 void CubeApp::LoadTextures()
@@ -105,7 +86,6 @@ void CubeApp::LoadTextures()
         textureDesc.format = LLGL::Format::RGBA8UNorm;
         textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
         textureDesc.miscFlags = LLGL::MiscFlags::GenerateMips;
-
         texture = Renderer::Get().CreateTexture(textureDesc, &imageView);
 
         LLGL::SamplerDescriptor samplerDesc;

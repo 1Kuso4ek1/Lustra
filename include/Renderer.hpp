@@ -1,8 +1,7 @@
 #pragma once
-#include "Matrices.hpp"
-#include <LLGL/Texture.h>
 #include <Utils.hpp>
 
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <unordered_map>
@@ -22,8 +21,10 @@ public: // Public methods
 
     void Present();
 
+    void WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView);
+
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);
-    LLGL::Shader* CreateShader(const LLGL::ShaderDescriptor& shaderDesc);
+    LLGL::Shader* CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes = {});
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
     LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);
     LLGL::PipelineState* CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader);

@@ -52,7 +52,7 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
         commandBuffer->BeginRenderPass(*swapChain);
         {
             commandBuffer->SetViewport(swapChain->GetResolution());
-            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth, { 0.0, 0.0, 0.0, 0.0 });
+            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 
             commandBuffer->SetPipelineState(*pipeline);
 
@@ -71,14 +71,34 @@ void Renderer::Present()
     swapChain->Present();
 }
 
+void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView)
+{
+    renderSystem->WriteTexture(texture, textureRegion, srcImageView);
+}
+
 LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData)
 {
     return renderSystem->CreateBuffer(bufferDesc, initialData);
 }
 
-LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderDescriptor& shaderDesc)
+LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes)
 {
-    return renderSystem->CreateShader(shaderDesc);
+    LLGL::ShaderDescriptor shaderDesc = { type, path.c_str() };
+
+    if(type == LLGL::ShaderType::Vertex)
+        shaderDesc.vertex.inputAttribs = attributes.empty() ? defaultVertexFormat.attributes : attributes;
+
+    auto shader = renderSystem->CreateShader(shaderDesc);
+
+    if(const LLGL::Report* report = shader->GetReport())
+    {
+        if(report->HasErrors())
+            LLGL::Log::Errorf("Shader compile errors:\n%s", report->GetText());
+        else
+            LLGL::Log::Printf("Shader compile warnings:\n%s", report->GetText());
+    }
+
+    return shader;
 }
 
 LLGL::Texture* Renderer::CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage)
@@ -122,7 +142,8 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
 
     pipelineStateDesc.blend = blendDesc;
 
-    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Disabled;
+    pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Back;
+    pipelineStateDesc.rasterizer.frontCCW = true;
     pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
 
     return renderSystem->CreatePipelineState(pipelineStateDesc);

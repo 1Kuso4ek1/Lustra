@@ -14,7 +14,7 @@ out vec2 coord;
 
 void main()
 {
-    mNormal = mat3(model) * normal;
+    mNormal = (model * vec4(normal, 1.0f)).xyz;
     coord = texCoord;
     
 	gl_Position = projection * view * model * vec4(position, 1.0f);

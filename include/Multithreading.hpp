@@ -1,25 +1,28 @@
 #pragma once
-#include <thread>
 #include <vector>
 #include <future>
-#include <functional>
 
 using namespace std::chrono_literals;
 
 class Multithreading
 {
 public:
-    static Multithreading& GetInstance();
+    static Multithreading& Get();
 
+public:
     void Update();
-    void AddJob(std::thread::id threadID, std::future<void>&& future);
+
+    void AddJob(std::future<void>&& future);
+    void AddJob(std::function<void()> job);
+
     void AddMainThreadJob(std::function<void()> job);
 
-    size_t GetJobsNum();
+    size_t GetJobsNum() const;
 
 private:
     Multithreading() {};
 
+private:
     std::vector<std::future<void>> jobs;
     std::vector<std::function<void()>> mainThread;
 };

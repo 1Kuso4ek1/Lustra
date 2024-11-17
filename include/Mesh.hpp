@@ -19,9 +19,9 @@ public:
     void CreateCube();
     void CreatePlane();
 
-    void BindBuffers(LLGL::CommandBuffer* commandBuffer);
+    void BindBuffers(LLGL::CommandBuffer* commandBuffer) const;
 
-    void Draw(LLGL::CommandBuffer* commandBuffer);
+    void Draw(LLGL::CommandBuffer* commandBuffer) const;
 
 private:
     void CreateVertexBuffer();

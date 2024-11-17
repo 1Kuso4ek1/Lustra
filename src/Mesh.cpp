@@ -75,7 +75,7 @@ void Mesh::CreatePlane()
     SetupBuffers();
 }
 
-void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer)
+void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer) const
 {
     auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
 
@@ -84,7 +84,7 @@ void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer)
     commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::Binding));
 }
 
-void Mesh::Draw(LLGL::CommandBuffer* commandBuffer)
+void Mesh::Draw(LLGL::CommandBuffer* commandBuffer) const
 {
     commandBuffer->DrawIndexed(indices.size(), 0);
 }

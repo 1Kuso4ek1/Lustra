@@ -1,8 +1,5 @@
 #include <CubeApp.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 CubeApp::CubeApp()
 {
     LLGL::Log::RegisterCallbackStd();
@@ -40,11 +37,13 @@ void CubeApp::Run()
 
     while(window->ProcessEvents() && !window->HasQuit())
     {
+        Multithreading::Get().Update();
+
         Renderer::Get().RenderPass(
         [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
         {
             { 0, Renderer::Get().GetMatricesBuffer() },
-            { 1, texture },
+            { 1, texture->texture },
             { 2, sampler }
         },
         [&](auto commandBuffer) { mesh->Draw(commandBuffer); },
@@ -69,7 +68,10 @@ void CubeApp::LoadShaders()
 
 void CubeApp::LoadTextures()
 {
-    LLGL::ImageView imageView;
+    texture = TextureManager::Get().LoadTexture("../textures/tex.jpg");
+    sampler = TextureManager::Get().GetAnisotropySampler();
+
+    /*LLGL::ImageView imageView;
     imageView.format = LLGL::ImageFormat::RGBA;
 
     int width, height, channels;
@@ -96,5 +98,5 @@ void CubeApp::LoadTextures()
     else
         LLGL::Log::Errorf("Failed to load texture");
 
-    stbi_image_free(data);
+    stbi_image_free(data);*/
 }

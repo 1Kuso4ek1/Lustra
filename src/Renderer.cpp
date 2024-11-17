@@ -1,6 +1,3 @@
-#include <LLGL/Log.h>
-#include <LLGL/RenderSystem.h>
-#include <LLGL/Utils/Utility.h>
 #include <Renderer.hpp>
 
 Renderer::Renderer()
@@ -20,8 +17,7 @@ Renderer::Renderer()
 
 Renderer& Renderer::Get()
 {
-    //static std::unique_ptr<Renderer> instance = std::unique_ptr<Renderer>(new Renderer());
-    static Renderer instance; // I guess stack allocation is better? But who really cares? There's almost no difference...
+    static Renderer instance;
 
     return instance;
 }

@@ -2,13 +2,20 @@
 #include <Utils.hpp>
 #include <Multithreading.hpp>
 
+struct TextureHandle // For multithreaded loading
+{
+    LLGL::Texture* texture{};
+};
+
 class TextureManager
 {
 public:
     static TextureManager& Get();
 
 public:
-    LLGL::Texture* LoadTexture(const std::filesystem::path& path);
+    std::shared_ptr<TextureHandle> LoadTexture(const std::filesystem::path& path);
+
+    LLGL::Sampler* GetAnisotropySampler() const;
 
 private:
     TextureManager();
@@ -16,5 +23,7 @@ private:
 private:
     LLGL::Sampler* anisotropySampler{};
 
-    std::vector<LLGL::Texture*> textures;
+    LLGL::Texture* defaultTexture{};
+
+    std::vector<std::shared_ptr<TextureHandle>> textures;
 };

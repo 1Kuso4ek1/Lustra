@@ -1,5 +1,6 @@
 #pragma once
 #include <Application.hpp>
+#include <TextureManager.hpp>
 
 class CubeApp : Application
 {
@@ -21,7 +22,8 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    LLGL::Texture* texture{};
+    //LLGL::Texture* texture{};
+    std::shared_ptr<TextureHandle> texture;
     LLGL::Sampler* sampler{};
 
     std::shared_ptr<Matrices> matrices;

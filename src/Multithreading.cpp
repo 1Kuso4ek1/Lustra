@@ -1,6 +1,6 @@
 #include <Multithreading.hpp>
 
-Multithreading& Multithreading::GetInstance()
+Multithreading& Multithreading::Get()
 {
     static Multithreading instance;
     
@@ -23,9 +23,14 @@ void Multithreading::Update()
     }
 }
 
-void Multithreading::AddJob(std::thread::id threadID, std::future<void>&& future)
+void Multithreading::AddJob(std::future<void>&& future)
 {
     jobs.emplace_back(std::move(future));
+}
+
+void Multithreading::AddJob(std::function<void()> job)
+{
+    jobs.emplace_back(std::async(std::launch::async, job));
 }
 
 void Multithreading::AddMainThreadJob(std::function<void()> job)
@@ -33,7 +38,7 @@ void Multithreading::AddMainThreadJob(std::function<void()> job)
     mainThread.push_back(job);
 }
 
-size_t Multithreading::GetJobsNum()
+size_t Multithreading::GetJobsNum() const
 {
     return jobs.size();
 }

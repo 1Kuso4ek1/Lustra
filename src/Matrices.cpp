@@ -57,7 +57,7 @@ glm::mat4& Matrices::GetProjection()
     return projection.back();
 }
 
-Matrices::Binding Matrices::GetBinding()
+Matrices::Binding Matrices::GetBinding() const
 {
     return { model.back(), view.back(), projection.back() };
 }

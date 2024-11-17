@@ -27,7 +27,7 @@ public:
     glm::mat4& GetView();
     glm::mat4& GetProjection();
 
-    Binding GetBinding();
+    Binding GetBinding() const;
 
 private:
 

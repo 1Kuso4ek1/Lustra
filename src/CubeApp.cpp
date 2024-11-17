@@ -7,11 +7,9 @@ CubeApp::CubeApp()
     Renderer::Get().InitSwapChain({ 800, 800 });
 
     LoadShaders();
-
     LoadTextures();
 
-    mesh = std::make_unique<Mesh>();
-    mesh->CreateCube();
+    (mesh = std::make_unique<Mesh>())->CreateCube();
     
     pipeline = Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = Renderer::Get().GetMatrices();
@@ -40,14 +38,15 @@ void CubeApp::Run()
         Multithreading::Get().Update();
 
         Renderer::Get().RenderPass(
-        [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
-        {
-            { 0, Renderer::Get().GetMatricesBuffer() },
-            { 1, texture->texture },
-            { 2, sampler }
-        },
-        [&](auto commandBuffer) { mesh->Draw(commandBuffer); },
-        pipeline);
+            [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
+            {
+                { 0, Renderer::Get().GetMatricesBuffer() },
+                { 1, texture->texture },
+                { 2, sampler }
+            },
+            [&](auto commandBuffer) { mesh->Draw(commandBuffer); },
+            pipeline
+        );
 
         Renderer::Get().Present();
 
@@ -70,33 +69,4 @@ void CubeApp::LoadTextures()
 {
     texture = TextureManager::Get().LoadTexture("../textures/tex.jpg");
     sampler = TextureManager::Get().GetAnisotropySampler();
-
-    /*LLGL::ImageView imageView;
-    imageView.format = LLGL::ImageFormat::RGBA;
-
-    int width, height, channels;
-    unsigned char* data = stbi_load("../textures/tex.jpg", &width, &height, &channels, 4);
-
-    if(data)
-    {
-        imageView.data = data;
-        imageView.dataSize = width * height * 4 * 8;
-        imageView.dataType = LLGL::DataType::UInt8;
-
-        LLGL::TextureDescriptor textureDesc;
-        textureDesc.type = LLGL::TextureType::Texture2D;
-        textureDesc.format = LLGL::Format::RGBA8UNorm;
-        textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
-        textureDesc.miscFlags = LLGL::MiscFlags::GenerateMips;
-        texture = Renderer::Get().CreateTexture(textureDesc, &imageView);
-
-        LLGL::SamplerDescriptor samplerDesc;
-        samplerDesc.maxAnisotropy = 8;
-
-        sampler = Renderer::Get().CreateSampler(samplerDesc);
-    }
-    else
-        LLGL::Log::Errorf("Failed to load texture");
-
-    stbi_image_free(data);*/
 }

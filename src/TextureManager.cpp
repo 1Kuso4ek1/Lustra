@@ -8,20 +8,14 @@ TextureManager::TextureManager()
     LLGL::SamplerDescriptor samplerDesc;
     samplerDesc.maxAnisotropy = 8;
     anisotropySampler = Renderer::Get().CreateSampler(samplerDesc);
-
-    LLGL::TextureDescriptor defaultTextureDesc;
-    defaultTextureDesc.type = LLGL::TextureType::Texture2D;
-    defaultTextureDesc.format = LLGL::Format::RGBA8UNorm;
-    defaultTextureDesc.extent = { 1, 1, 1 };
-
-    LLGL::ImageView defaultImageView;
-    defaultImageView.format = LLGL::ImageFormat::RGBA;
-    defaultImageView.dataType = LLGL::DataType::UInt8;
-    defaultImageView.dataSize = 4 * 8;
+    
+    defaultTexture.textureDesc.extent = { 1, 1, 1 };
+    
     unsigned char defaultData[] = { 0, 0, 0, 255 };
-    defaultImageView.data = defaultData;
+    defaultTexture.imageView.dataSize = 4 * 8;
+    defaultTexture.imageView.data = defaultData;
 
-    defaultTexture = Renderer::Get().CreateTexture(defaultTextureDesc, &defaultImageView);
+    defaultTexture = Renderer::Get().CreateTexture(defaultTexture.textureDesc, &defaultTexture.imageView);
 }
 
 TextureManager& TextureManager::Get()
@@ -33,39 +27,30 @@ TextureManager& TextureManager::Get()
 
 std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem::path& path)
 {
-    auto textureHandle = std::make_shared<TextureHandle>(defaultTexture);
+    auto textureHandle = std::make_shared<TextureHandle>(defaultTexture.texture);
 
-    auto textureDesc = std::make_shared<LLGL::TextureDescriptor>();
-    textureDesc->type = LLGL::TextureType::Texture2D;
-    textureDesc->format = LLGL::Format::RGBA8UNorm;
-    textureDesc->miscFlags = LLGL::MiscFlags::GenerateMips;
-    
-    auto imageView = std::make_shared<LLGL::ImageView>();
-    imageView->format = LLGL::ImageFormat::RGBA;
-    imageView->dataType = LLGL::DataType::UInt8;
-
-    auto load = [imageView, textureDesc, path]()
+    auto load = [textureHandle, path]()
     {
         int width, height, channels;
         unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
 
         if(data)
         {
-            imageView->data = data;
-            imageView->dataSize = width * height * 4 * 8;
+            textureHandle->imageView.data = data;
+            textureHandle->imageView.dataSize = width * height * 4 * 8;
             
-            textureDesc->extent = { (uint32_t)width, (uint32_t)height, 1 };
+            textureHandle->textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
         }
         else
             LLGL::Log::Errorf("Failed to load texture: %s\n", path.string().c_str());
     };
 
-    auto create = [imageView, textureDesc, textureHandle]()
+    auto create = [textureHandle]()
     {
-        if(imageView->data)
-            textureHandle->texture = Renderer::Get().CreateTexture(*textureDesc, imageView.get());
+        if(textureHandle->imageView.data)
+            textureHandle->texture = Renderer::Get().CreateTexture(textureHandle->textureDesc, &textureHandle->imageView);
 
-        stbi_image_free((void*)imageView->data);
+        stbi_image_free((void*)textureHandle->imageView.data);
     };
 
     Multithreading::Get().AddJob(load);

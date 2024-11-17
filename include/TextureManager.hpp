@@ -4,7 +4,20 @@
 
 struct TextureHandle // For multithreaded loading
 {
+    TextureHandle(LLGL::Texture* texture = nullptr) : texture(texture)
+    {
+        textureDesc.type = LLGL::TextureType::Texture2D;
+        textureDesc.format = LLGL::Format::RGBA8UNorm;
+        textureDesc.miscFlags = LLGL::MiscFlags::GenerateMips;
+        
+        imageView.format = LLGL::ImageFormat::RGBA;
+        imageView.dataType = LLGL::DataType::UInt8;
+    };
+
     LLGL::Texture* texture{};
+
+    LLGL::TextureDescriptor textureDesc;
+    LLGL::ImageView imageView;
 };
 
 class TextureManager
@@ -23,7 +36,7 @@ private:
 private:
     LLGL::Sampler* anisotropySampler{};
 
-    LLGL::Texture* defaultTexture{};
+    TextureHandle defaultTexture;
 
     std::vector<std::shared_ptr<TextureHandle>> textures;
 };

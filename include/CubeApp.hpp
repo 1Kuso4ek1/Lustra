@@ -22,7 +22,6 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    //LLGL::Texture* texture{};
     std::shared_ptr<TextureHandle> texture;
     LLGL::Sampler* sampler{};
 

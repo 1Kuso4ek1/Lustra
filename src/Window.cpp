@@ -1,4 +1,3 @@
-#include <GLFW/glfw3.h>
 #include <Window.hpp>
 
 bool glfw::Window::glfwInitialized = false;

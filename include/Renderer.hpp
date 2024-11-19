@@ -1,4 +1,5 @@
 #pragma once
+#include <LLGL/Surface.h>
 #include <Utils.hpp>
 
 #include <filesystem>
@@ -13,6 +14,7 @@ public: // Get the singleton instance
 
 public: // Public methods
     void InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen = false, int samples = 1);
+    void InitSwapChain(const LLGL::Extent2D& resolution, std::shared_ptr<LLGL::Surface> surface);
 
     void RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
                     std::unordered_map<uint32_t, LLGL::Resource*> resources, // A map of resources { binding, Resource_ptr }
@@ -44,9 +46,12 @@ private: // Singleton-related
 
 private: // Private methods
     void LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc);
+    
     void SetupDefaultVertexFormat();
     void SetupCommandBuffer();
     void CreateMatricesBuffer();
+
+    void SetupBuffers();
 
 private: // Private members
     LLGL::RenderSystemPtr renderSystem;

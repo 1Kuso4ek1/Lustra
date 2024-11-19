@@ -1,6 +1,7 @@
 #pragma once
 #include <Application.hpp>
 #include <TextureManager.hpp>
+#include <Window.hpp>
 
 class CubeApp : Application
 {
@@ -13,7 +14,9 @@ private:
     void LoadShaders();
     void LoadTextures();
 
-    float degrees = 0.f;
+    float degrees = 0.5f;
+
+    glfw::WindowPtr window;
 
     std::unique_ptr<Mesh> mesh;
 

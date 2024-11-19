@@ -1,3 +1,4 @@
+#include <LLGL/RenderSystem.h>
 #include <Renderer.hpp>
 
 Renderer::Renderer()
@@ -32,9 +33,17 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
 
     swapChain = renderSystem->CreateSwapChain(swapChainDesc);
 
-    SetupDefaultVertexFormat();
-    SetupCommandBuffer();
-    CreateMatricesBuffer();
+    SetupBuffers();
+}
+
+void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, std::shared_ptr<LLGL::Surface> surface)
+{
+    LLGL::SwapChainDescriptor swapChainDesc;
+    swapChainDesc.resolution = resolution;
+
+    swapChain = renderSystem->CreateSwapChain(swapChainDesc, surface);
+
+    SetupBuffers();
 }
 
 void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
@@ -199,4 +208,11 @@ void Renderer::CreateMatricesBuffer()
     LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::Binding));
 
     matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
+}
+
+void Renderer::SetupBuffers()
+{
+    SetupDefaultVertexFormat();
+    SetupCommandBuffer();
+    CreateMatricesBuffer();
 }

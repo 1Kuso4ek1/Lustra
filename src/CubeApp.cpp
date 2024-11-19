@@ -4,7 +4,9 @@ CubeApp::CubeApp()
 {
     LLGL::Log::RegisterCallbackStd();
 
-    Renderer::Get().InitSwapChain({ 800, 800 });
+    window = std::make_shared<glfw::Window>(LLGL::Extent2D{ 800, 800 }, "LLGLTest");
+
+    Renderer::Get().InitSwapChain({ 800, 800 }, window);
 
     LoadShaders();
     LoadTextures();
@@ -26,14 +28,7 @@ void CubeApp::Run()
         return;
     }
 
-    auto window = Renderer::Get().GetWindow();
-
-    window->SetTitle("LLGLTest");
-    window->Show();
-
-    LLGL::Input input(*window);
-
-    while(window->ProcessEvents() && !window->HasQuit())
+    while(window->PollEvents())
     {
         Multithreading::Get().Update();
 
@@ -50,12 +45,9 @@ void CubeApp::Run()
 
         Renderer::Get().Present();
 
-        if(input.KeyPressed(LLGL::Key::Q))
-            degrees -= 0.1f;
-        else if(input.KeyPressed(LLGL::Key::E))
-            degrees += 0.1f;
-
         matrices->Rotate(glm::radians(degrees), { 0.0f, 1.0f, 0.0f });
+
+        window->SwapBuffers();
     }
 }
 

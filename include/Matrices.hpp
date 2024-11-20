@@ -4,6 +4,8 @@
 
 #include <vector>
 
+namespace dev {
+
 class Matrices
 {
 public:
@@ -33,3 +35,5 @@ private:
 
     std::vector<glm::mat4> model, view, projection;
 };
+
+}

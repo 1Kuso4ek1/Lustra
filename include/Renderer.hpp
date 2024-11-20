@@ -7,6 +7,8 @@
 #include <memory>
 #include <unordered_map>
 
+namespace dev {
+
 class Renderer
 {
 public: // Get the singleton instance
@@ -65,3 +67,5 @@ private: // Private members
     LLGL::Buffer* matricesBuffer;
     std::shared_ptr<Matrices> matrices;
 };
+
+}

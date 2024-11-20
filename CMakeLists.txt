@@ -22,6 +22,8 @@ add_executable(
     src/Multithreading.cpp
     src/TextureManager.cpp
     src/Window.cpp
+    src/Keyboard.cpp
+    src/Mouse.cpp
 )
 
 set_target_properties(LLGLTest PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)

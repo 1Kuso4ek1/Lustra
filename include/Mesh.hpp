@@ -1,6 +1,8 @@
 #pragma once
 #include <Utils.hpp>
 
+namespace dev {
+
 struct Vertex
 {
     glm::vec3 position;
@@ -37,3 +39,5 @@ private:
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
 };
+
+}

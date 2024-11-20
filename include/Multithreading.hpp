@@ -4,6 +4,8 @@
 
 using namespace std::chrono_literals;
 
+namespace dev {
+
 class Multithreading
 {
 public:
@@ -26,3 +28,5 @@ private:
     std::vector<std::future<void>> jobs;
     std::vector<std::function<void()>> mainThread;
 };
+
+}

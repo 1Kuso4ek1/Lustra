@@ -1,5 +1,7 @@
 #include <Mesh.hpp>
 
+namespace dev {
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
             : vertices(vertices), indices(indices)
 {
@@ -101,4 +103,6 @@ void Mesh::CreateIndexBuffer()
     LLGL::BufferDescriptor bufferDesc = LLGL::IndexBufferDesc(indices.size() * sizeof(uint32_t), LLGL::Format::R32UInt);
 
     indexBuffer = Renderer::Get().CreateBuffer(bufferDesc, indices.data());
+}
+
 }

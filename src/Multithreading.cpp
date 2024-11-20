@@ -1,5 +1,7 @@
 #include <Multithreading.hpp>
 
+namespace dev {
+
 Multithreading& Multithreading::Get()
 {
     static Multithreading instance;
@@ -41,4 +43,6 @@ void Multithreading::AddMainThreadJob(std::function<void()> job)
 size_t Multithreading::GetJobsNum() const
 {
     return jobs.size();
+}
+
 }

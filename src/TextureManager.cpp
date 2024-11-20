@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+namespace dev {
+
 TextureManager::TextureManager()
 {
     LLGL::SamplerDescriptor samplerDesc;
@@ -64,4 +66,6 @@ std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem
 LLGL::Sampler* TextureManager::GetAnisotropySampler() const
 {
     return anisotropySampler;
+}
+
 }

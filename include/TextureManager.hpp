@@ -2,6 +2,8 @@
 #include <Utils.hpp>
 #include <Multithreading.hpp>
 
+namespace dev {
+
 struct TextureHandle // For multithreaded loading
 {
     TextureHandle(LLGL::Texture* texture = nullptr) : texture(texture)
@@ -40,3 +42,5 @@ private:
 
     std::vector<std::shared_ptr<TextureHandle>> textures;
 };
+
+}

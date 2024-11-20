@@ -1,5 +1,7 @@
 #include <Matrices.hpp>
 
+namespace dev {
+
 Matrices::Matrices()
 {
     // I guess it can optimize everything a little bit
@@ -60,4 +62,6 @@ glm::mat4& Matrices::GetProjection()
 Matrices::Binding Matrices::GetBinding() const
 {
     return { model.back(), view.back(), projection.back() };
+}
+
 }

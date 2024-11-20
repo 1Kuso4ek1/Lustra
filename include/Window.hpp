@@ -14,7 +14,7 @@
 #include <LLGL/Surface.h>
 #include <LLGL/Platform/NativeHandle.h>
 
-namespace glfw
+namespace dev
 {
 
 class Window : public LLGL::Surface
@@ -25,7 +25,10 @@ public:
 
     void SwapBuffers();
 
-    bool PollEvents();
+    GLFWwindow* GetGLFWWindow() const;
+    static GLFWwindow* GetLastCreatedGLFWWindow();
+
+    bool PollEvents() const;
 
 public: // Interface implementation
     void ResetPixelFormat() override;
@@ -41,6 +44,7 @@ private:
 
 private:
     static bool glfwInitialized;
+    static GLFWwindow* lastCreatedWindow;
 
     LLGL::Extent2D size;
     std::string_view title;

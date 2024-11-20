@@ -2,8 +2,10 @@
 #include <Application.hpp>
 #include <TextureManager.hpp>
 #include <Window.hpp>
+#include <Keyboard.hpp>
+#include <Mouse.hpp>
 
-class CubeApp : Application
+class CubeApp : public dev::Application
 {
 public:
     CubeApp();
@@ -16,17 +18,17 @@ private:
 
     float degrees = 0.5f;
 
-    glfw::WindowPtr window;
+    dev::WindowPtr window;
 
-    std::unique_ptr<Mesh> mesh;
+    std::unique_ptr<dev::Mesh> mesh;
 
     LLGL::PipelineState* pipeline{};
 
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    std::shared_ptr<TextureHandle> texture;
+    std::shared_ptr<dev::TextureHandle> texture;
     LLGL::Sampler* sampler{};
 
-    std::shared_ptr<Matrices> matrices;
+    std::shared_ptr<dev::Matrices> matrices;
 };

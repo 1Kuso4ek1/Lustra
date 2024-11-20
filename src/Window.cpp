@@ -1,8 +1,11 @@
 #include <Window.hpp>
 
-bool glfw::Window::glfwInitialized = false;
+namespace dev {
 
-glfw::Window::Window(const LLGL::Extent2D& size, const std::string_view& title)
+bool Window::glfwInitialized = false;
+GLFWwindow* Window::lastCreatedWindow{};
+
+Window::Window(const LLGL::Extent2D& size, const std::string_view& title)
     : size(size), title(title)
 {
     if(!glfwInitialized)
@@ -15,34 +18,44 @@ glfw::Window::Window(const LLGL::Extent2D& size, const std::string_view& title)
 
         glfwInitialized = true;
 
-        window = CreateWindow();
+        lastCreatedWindow = window = CreateWindow();
     }
 }
 
-glfw::Window::~Window()
+Window::~Window()
 {
     glfwDestroyWindow(window);
 }
 
-void glfw::Window::SwapBuffers()
+void Window::SwapBuffers()
 {
     glfwSwapBuffers(window);
 }
 
-bool glfw::Window::PollEvents()
+GLFWwindow* Window::GetGLFWWindow() const
+{
+    return window;
+}
+
+GLFWwindow* Window::GetLastCreatedGLFWWindow()
+{
+    return lastCreatedWindow;
+}
+
+bool Window::PollEvents() const
 {
     glfwPollEvents();
 
     return !glfwWindowShouldClose(window);
 }
 
-void glfw::Window::ResetPixelFormat()
+void Window::ResetPixelFormat()
 {
     glfwDestroyWindow(window);
     window = CreateWindow();
 }
 
-bool glfw::Window::GetNativeHandle(void* nativeHandle, size_t size)
+bool Window::GetNativeHandle(void* nativeHandle, size_t size)
 {
     if(nativeHandle && size == sizeof(LLGL::NativeHandle) && window)
     {
@@ -64,7 +77,7 @@ bool glfw::Window::GetNativeHandle(void* nativeHandle, size_t size)
     return false;
 }
 
-bool glfw::Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen)
+bool Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen)
 {
     size = *resolution;
     
@@ -73,17 +86,17 @@ bool glfw::Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscree
     return true;
 }
 
-LLGL::Extent2D glfw::Window::GetContentSize() const
+LLGL::Extent2D Window::GetContentSize() const
 {
     return size;
 }
 
-LLGL::Display* glfw::Window::FindResidentDisplay() const
+LLGL::Display* Window::FindResidentDisplay() const
 {
     return LLGL::Display::GetPrimary();
 }
 
-GLFWwindow* glfw::Window::CreateWindow()
+GLFWwindow* Window::CreateWindow()
 {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -99,4 +112,6 @@ GLFWwindow* glfw::Window::CreateWindow()
     glfwSwapInterval(0);
 
     return window;
+}
+
 }

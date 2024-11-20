@@ -1,5 +1,7 @@
 #include <Renderer.hpp>
 
+namespace dev {
+
 Renderer::Renderer()
 {
     try
@@ -214,4 +216,6 @@ void Renderer::SetupBuffers()
     SetupDefaultVertexFormat();
     SetupCommandBuffer();
     CreateMatricesBuffer();
+}
+
 }

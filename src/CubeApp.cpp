@@ -1,4 +1,3 @@
-#include "Mouse.hpp"
 #include <CubeApp.hpp>
 
 CubeApp::CubeApp()

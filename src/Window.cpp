@@ -5,8 +5,8 @@ namespace dev {
 bool Window::glfwInitialized = false;
 GLFWwindow* Window::lastCreatedWindow{};
 
-Window::Window(const LLGL::Extent2D& size, const std::string_view& title, bool fullscreen)
-    : size(size), title(title), fullscreen(fullscreen)
+Window::Window(const LLGL::Extent2D& size, const std::string_view& title, int samples, bool fullscreen)
+    : size(size), title(title), samples(samples), fullscreen(fullscreen)
 {
     if(!glfwInitialized)
     {
@@ -25,6 +25,8 @@ Window::Window(const LLGL::Extent2D& size, const std::string_view& title, bool f
 Window::~Window()
 {
     glfwDestroyWindow(window);
+
+    glfwTerminate();
 }
 
 void Window::SwapBuffers()
@@ -92,6 +94,7 @@ LLGL::Display* Window::FindResidentDisplay() const
 
 GLFWwindow* Window::CreateWindow()
 {
+    glfwWindowHint(GLFW_SAMPLES, samples);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

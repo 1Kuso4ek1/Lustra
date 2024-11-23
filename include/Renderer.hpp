@@ -25,6 +25,8 @@ public: // Public methods
 
     void Present();
 
+    void Unload();
+
     void WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView);
 
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);

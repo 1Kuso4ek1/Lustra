@@ -1,3 +1,4 @@
+#include <LLGL/RenderSystem.h>
 #include <Renderer.hpp>
 
 namespace dev {
@@ -74,6 +75,11 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
 void Renderer::Present()
 {
     swapChain->Present();
+}
+
+void Renderer::Unload()
+{
+    LLGL::RenderSystem::Unload(std::move(renderSystem));
 }
 
 void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView)

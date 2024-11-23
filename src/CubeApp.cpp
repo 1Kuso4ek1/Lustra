@@ -1,3 +1,4 @@
+#include "Renderer.hpp"
 #include <CubeApp.hpp>
 
 CubeApp::CubeApp()
@@ -24,9 +25,9 @@ CubeApp::CubeApp()
 
 CubeApp::~CubeApp()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    DestroyImGui();
+
+    dev::Renderer::Get().Unload();
 }
 
 void CubeApp::Run()
@@ -41,35 +42,9 @@ void CubeApp::Run()
     {
         LLGL::Surface::ProcessEvents();
         
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-
         dev::Multithreading::Get().Update();
 
-        dev::Renderer::Get().RenderPass(
-            [&](auto commandBuffer)
-            {
-                mesh->BindBuffers(commandBuffer);
-            },
-            {
-                { 0, dev::Renderer::Get().GetMatricesBuffer() },
-                { 1, texture->texture },
-                { 2, sampler }
-            },
-            [&](auto commandBuffer)
-            {
-                mesh->Draw(commandBuffer);
-            },
-            pipeline
-        );
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        dev::Renderer::Get().Present();
+        Draw();
 
         if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Escape))
             break;
@@ -77,7 +52,7 @@ void CubeApp::Run()
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
             degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
 
-        matrices->Rotate(glm::radians(degrees), { 0.0f, 1.0f, 0.0f });
+        matrices->GetModel() = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(axis[0], axis[1], axis[2]));
 
         window->SwapBuffers();
     }
@@ -108,4 +83,63 @@ void CubeApp::InitImGui()
 
     ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 460");
+}
+
+void CubeApp::DestroyImGui()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void CubeApp::NewImGuiFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void CubeApp::DrawImGui()
+{
+    NewImGuiFrame();
+
+    ImGui::ShowDemoWindow();
+
+    ImGui::Begin("Cube Rotation");
+
+    ImGui::Text("Choose Axis for Rotation:");
+    ImGui::SliderFloat3("Axis", axis, -1.0f, 1.0f);
+    
+    ImGui::Text("Choose Angle for Rotation:");
+    ImGui::SliderFloat("Angle", &angle, 0.0f, 360.0f);
+
+    ImGui::End();
+
+    ImGui::Render();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void CubeApp::Draw()
+{
+    dev::Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            mesh->BindBuffers(commandBuffer);
+        },
+        {
+            { 0, dev::Renderer::Get().GetMatricesBuffer() },
+            { 1, texture->texture },
+            { 2, sampler }
+        },
+        [&](auto commandBuffer)
+        {
+            mesh->Draw(commandBuffer);
+        },
+        pipeline
+    );
+
+    DrawImGui();
+
+    dev::Renderer::Get().Present();
 }

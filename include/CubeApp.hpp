@@ -20,8 +20,15 @@ private:
     void LoadShaders();
     void LoadTextures();
     void InitImGui();
+    void DestroyImGui();
+    void NewImGuiFrame();
+    void DrawImGui();
+    void Draw();
 
     float degrees = 0.5f;
+
+    float axis[3] = { 1.0f, 0.0f, 0.0f };
+    float angle = 0.0f;
 
     dev::WindowPtr window;
 

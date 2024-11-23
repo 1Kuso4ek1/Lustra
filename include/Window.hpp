@@ -20,7 +20,7 @@ namespace dev
 class Window : public LLGL::Surface
 {
 public:
-    Window(const LLGL::Extent2D& size, const std::string_view& title, bool fullscreen = false);
+    Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);
     ~Window();
 
     void SwapBuffers();
@@ -43,6 +43,8 @@ private:
 private:
     static bool glfwInitialized;
     static GLFWwindow* lastCreatedWindow;
+
+    int samples = 1;
 
     bool fullscreen = false;
 

@@ -1,3 +1,8 @@
-[submodule "include/stb"]
-	path = include/stb
+[submodule "libraries/stb"]
+	path = libraries/stb
 	url = https://github.com/nothings/stb.git
+
+[submodule "libraries/imgui"]
+	path = libraries/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

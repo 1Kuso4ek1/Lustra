@@ -5,8 +5,8 @@ namespace dev {
 bool Window::glfwInitialized = false;
 GLFWwindow* Window::lastCreatedWindow{};
 
-Window::Window(const LLGL::Extent2D& size, const std::string_view& title)
-    : size(size), title(title)
+Window::Window(const LLGL::Extent2D& size, const std::string_view& title, bool fullscreen)
+    : size(size), title(title), fullscreen(fullscreen)
 {
     if(!glfwInitialized)
     {
@@ -17,9 +17,9 @@ Window::Window(const LLGL::Extent2D& size, const std::string_view& title)
         glfwInit();
 
         glfwInitialized = true;
-
-        lastCreatedWindow = window = CreateWindow();
     }
+
+    lastCreatedWindow = window = CreateWindow();
 }
 
 Window::~Window()
@@ -49,12 +49,6 @@ bool Window::PollEvents() const
     return !glfwWindowShouldClose(window);
 }
 
-void Window::ResetPixelFormat()
-{
-    glfwDestroyWindow(window);
-    window = CreateWindow();
-}
-
 bool Window::GetNativeHandle(void* nativeHandle, size_t size)
 {
     if(nativeHandle && size == sizeof(LLGL::NativeHandle) && window)
@@ -67,9 +61,8 @@ bool Window::GetNativeHandle(void* nativeHandle, size_t size)
             nativeHandlePtr->window = glfwGetCocoaWindow(window);
         #elif __linux__
             nativeHandlePtr->window = glfwGetX11Window(window);
+            nativeHandlePtr->display = glfwGetX11Display();
         #endif
-
-        nativeHandlePtr->display = glfwGetX11Display();
 
         return true;
     }
@@ -88,7 +81,10 @@ bool Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen)
 
 LLGL::Extent2D Window::GetContentSize() const
 {
-    return size;
+    int x, y;
+    glfwGetWindowSize(window, &x, &y);
+
+    return { (uint32_t)x, (uint32_t)y };
 }
 
 LLGL::Display* Window::FindResidentDisplay() const
@@ -103,7 +99,7 @@ GLFWwindow* Window::CreateWindow()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-    auto window = glfwCreateWindow(size.width, size.height, title.data(), nullptr, nullptr);
+    auto window = glfwCreateWindow(size.width, size.height, title.data(), fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
     if(!window)
         throw std::runtime_error("Failed to create GLFW window");

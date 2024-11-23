@@ -20,7 +20,7 @@ namespace dev
 class Window : public LLGL::Surface
 {
 public:
-    Window(const LLGL::Extent2D& size, const std::string_view& title);
+    Window(const LLGL::Extent2D& size, const std::string_view& title, bool fullscreen = false);
     ~Window();
 
     void SwapBuffers();
@@ -31,8 +31,6 @@ public:
     bool PollEvents() const;
 
 public: // Interface implementation
-    void ResetPixelFormat() override;
-
     bool GetNativeHandle(void* nativeHandle, size_t size) override;
     bool AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen) override;
     
@@ -45,6 +43,8 @@ private:
 private:
     static bool glfwInitialized;
     static GLFWwindow* lastCreatedWindow;
+
+    bool fullscreen = false;
 
     LLGL::Extent2D size;
     std::string_view title;

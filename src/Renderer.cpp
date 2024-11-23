@@ -40,6 +40,7 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
 void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, std::shared_ptr<LLGL::Surface> surface)
 {
     LLGL::SwapChainDescriptor swapChainDesc;
+    
     swapChainDesc.resolution = resolution;
 
     swapChain = renderSystem->CreateSwapChain(swapChainDesc, surface);
@@ -58,6 +59,7 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
 
         commandBuffer->BeginRenderPass(*swapChain);
         {
+            //swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
             commandBuffer->SetViewport(swapChain->GetResolution());
             commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 

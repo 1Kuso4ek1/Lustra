@@ -4,11 +4,15 @@
 #include <Window.hpp>
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 class CubeApp : public dev::Application
 {
 public:
     CubeApp();
+    ~CubeApp();
 
     void Run() override;
 

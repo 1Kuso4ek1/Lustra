@@ -1,4 +1,3 @@
-#include "Renderer.hpp"
 #include <CubeApp.hpp>
 
 CubeApp::CubeApp()
@@ -52,7 +51,7 @@ void CubeApp::Run()
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
             degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
 
-        matrices->GetModel() = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(axis[0], axis[1], axis[2]));
+        matrices->GetModel() = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
 
         window->SwapBuffers();
     }
@@ -66,7 +65,7 @@ void CubeApp::LoadShaders()
 
 void CubeApp::LoadTextures()
 {
-    texture = dev::TextureManager::Get().LoadTexture("../textures/tex.jpg");
+    texture = dev::TextureManager::Get().LoadTexture("../resources/textures/tex.jpg");
     sampler = dev::TextureManager::Get().GetAnisotropySampler();
 }
 
@@ -80,6 +79,14 @@ void CubeApp::InitImGui()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    ImFontConfig config;
+    config.OversampleH = 8;
+    config.OversampleV = 8;
+
+    SetupImGuiStyle();
+
+    io.Fonts->AddFontFromFileTTF("../resources/fonts/OpenSans-Regular.ttf", 18.0f, &config);
 
     ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 460");
@@ -99,6 +106,47 @@ void CubeApp::NewImGuiFrame()
     ImGui::NewFrame();
 }
 
+void CubeApp::SetupImGuiStyle()
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    style.WindowPadding = ImVec2(15, 15);
+    style.WindowRounding = 5.0f;
+    style.FramePadding = ImVec2(5, 5);
+    style.FrameRounding = 4.0f;
+    style.ItemSpacing = ImVec2(12, 8);
+    style.ItemInnerSpacing = ImVec2(8, 6);
+    style.IndentSpacing = 25.0f;
+    style.ScrollbarSize = 15.0f;
+    style.ScrollbarRounding = 9.0f;
+    style.GrabMinSize = 5.0f;
+    style.GrabRounding = 3.0f;
+    
+    style.Colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+
+    style.Colors[ImGuiCol_Header] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    
+    style.Colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    style.Colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    style.Colors[ImGuiCol_Tab] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    style.Colors[ImGuiCol_TabHovered] = ImVec4{ 0.38f, 0.3805f, 0.381f, 1.0f };
+    style.Colors[ImGuiCol_TabActive] = ImVec4{ 0.28f, 0.2805f, 0.281f, 1.0f };
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+
+    style.Colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+}
+
 void CubeApp::DrawImGui()
 {
     NewImGuiFrame();
@@ -108,7 +156,7 @@ void CubeApp::DrawImGui()
     ImGui::Begin("Cube Rotation");
 
     ImGui::Text("Choose Axis for Rotation:");
-    ImGui::SliderFloat3("Axis", axis, -1.0f, 1.0f);
+    ImGui::SliderFloat3("Axis", &axis[0], -1.0f, 1.0f);
     
     ImGui::Text("Choose Angle for Rotation:");
     ImGui::SliderFloat("Angle", &angle, 0.0f, 360.0f);

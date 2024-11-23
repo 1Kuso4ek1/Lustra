@@ -22,12 +22,13 @@ private:
     void InitImGui();
     void DestroyImGui();
     void NewImGuiFrame();
+    void SetupImGuiStyle();
     void DrawImGui();
     void Draw();
 
     float degrees = 0.5f;
 
-    float axis[3] = { 1.0f, 0.0f, 0.0f };
+    glm::vec3 axis{ 0.0f, 1.0f, 0.0f };
     float angle = 0.0f;
 
     dev::WindowPtr window;

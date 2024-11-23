@@ -38,12 +38,8 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
 }
 
 void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
-{
-    LLGL::SwapChainDescriptor swapChainDesc;
-    
-    swapChainDesc.resolution = surface->GetContentSize();
-
-    swapChain = renderSystem->CreateSwapChain(swapChainDesc, surface);
+{   
+    swapChain = renderSystem->CreateSwapChain({}, surface);
 
     SetupBuffers();
 }

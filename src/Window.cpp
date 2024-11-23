@@ -58,7 +58,7 @@ bool Window::GetNativeHandle(void* nativeHandle, size_t size)
         #ifdef _WIN32
             nativeHandlePtr->window = glfwGetWin32Window(window);
         #elif __APPLE__
-            nativeHandlePtr->window = glfwGetCocoaWindow(window);
+            nativeHandlePtr->responder = glfwGetCocoaWindow(window);
         #elif __linux__
             nativeHandlePtr->window = glfwGetX11Window(window);
             nativeHandlePtr->display = glfwGetX11Display();

@@ -4,9 +4,9 @@ CubeApp::CubeApp()
 {
     LLGL::Log::RegisterCallbackStd();
 
-    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 800, 800 }, "LLGLTest");
+    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest");
 
-    dev::Renderer::Get().InitSwapChain({ 800, 800 }, window);
+    dev::Renderer::Get().InitSwapChain(window);
 
     LoadShaders();
     LoadTextures();
@@ -28,7 +28,7 @@ CubeApp::CubeApp()
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = dev::Renderer::Get().GetMatrices();
 
-    matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 100.0f);
+    matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
     matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f));
 }
 
@@ -43,7 +43,7 @@ void CubeApp::Run()
 {
     if(!dev::Renderer::Get().IsInit())
     {
-        LLGL::Log::Errorf("Error: dev::Renderer is not initialized\n");
+        LLGL::Log::Errorf("Error: Renderer is not initialized\n");
         return;
     }
 
@@ -61,7 +61,10 @@ void CubeApp::Run()
         dev::Multithreading::Get().Update();
 
         dev::Renderer::Get().RenderPass(
-            [&](auto commandBuffer) { mesh->BindBuffers(commandBuffer); },
+            [&](auto commandBuffer)
+            {
+                mesh->BindBuffers(commandBuffer);
+            },
             {
                 { 0, dev::Renderer::Get().GetMatricesBuffer() },
                 { 1, texture->texture },
@@ -81,22 +84,10 @@ void CubeApp::Run()
         if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Escape))
             break;
 
-        degrees = (dev::Mouse::GetPosition().x - 400.0) / 100.0;
+        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
+            degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
 
         matrices->Rotate(glm::radians(degrees), { 0.0f, 1.0f, 0.0f });
-
-        /*ImGui::Begin("Debug");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        if(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-        }*/
 
         window->SwapBuffers();
     }

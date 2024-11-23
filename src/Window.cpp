@@ -72,9 +72,7 @@ bool Window::GetNativeHandle(void* nativeHandle, size_t size)
 
 bool Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen)
 {
-    size = *resolution;
-    
-    glfwSetWindowSize(window, size.width, size.height);
+    glfwSetWindowSize(window, resolution->width, resolution->height);
 
     return true;
 }

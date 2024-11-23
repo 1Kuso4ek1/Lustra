@@ -19,6 +19,7 @@ public:
 private:
     void LoadShaders();
     void LoadTextures();
+    void InitImGui();
 
     float degrees = 0.5f;
 

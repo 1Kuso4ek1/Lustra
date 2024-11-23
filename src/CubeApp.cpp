@@ -11,17 +11,7 @@ CubeApp::CubeApp()
     LoadShaders();
     LoadTextures();
 
-    IMGUI_CHECKVERSION();
-    
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-    ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 460");
+    InitImGui();
 
     (mesh = std::make_unique<dev::Mesh>())->CreateCube();
 
@@ -103,4 +93,19 @@ void CubeApp::LoadTextures()
 {
     texture = dev::TextureManager::Get().LoadTexture("../textures/tex.jpg");
     sampler = dev::TextureManager::Get().GetAnisotropySampler();
+}
+
+void CubeApp::InitImGui()
+{
+    IMGUI_CHECKVERSION();
+    
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 460");
 }

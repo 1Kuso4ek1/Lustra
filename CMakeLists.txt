@@ -5,37 +5,35 @@ find_package(LLGL REQUIRED)
 find_package(Threads REQUIRED)
 find_package(glm REQUIRED)
 
-include(FindPkgConfig)
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
 
-pkg_search_module(glfw REQUIRED glfw)
+add_subdirectory(libraries/glfw)
+
+#include(FindPkgConfig)
+
+#pkg_search_module(glfw REQUIRED glfw)
+
+file(GLOB ENGINE_SOURCES "src/*.cpp")
+file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
+
+file(
+    GLOB
+    IMGUI_BACKEND_SOURCES
+    
+    libraries/imgui/backends/imgui_impl_glfw.cpp
+    libraries/imgui/backends/imgui_impl_opengl3.cpp
+)
 
 add_executable(
     LLGLTest
 
     main.cpp
 
-    src/Renderer.cpp
-    src/Matrices.cpp
-    src/Mesh.cpp
-    src/Application.cpp
-    src/CubeApp.cpp
-    src/Multithreading.cpp
-    src/TextureManager.cpp
-    src/Window.cpp
-    src/Keyboard.cpp
-    src/Mouse.cpp
-
-    libraries/imgui/imgui.cpp
-    libraries/imgui/imgui_demo.cpp
-    libraries/imgui/imgui_draw.cpp
-    libraries/imgui/imgui_tables.cpp
-    libraries/imgui/imgui_widgets.cpp
-
-    libraries/imgui/backends/imgui_impl_glfw.cpp
-    libraries/imgui/backends/imgui_impl_opengl3.cpp
-
-    libraries/imgui/backends/imgui_impl_glfw.cpp
-    libraries/imgui/backends/imgui_impl_opengl3.cpp
+    ${ENGINE_SOURCES}
+    ${IMGUI_SOURCES}
+    ${IMGUI_BACKEND_SOURCES}
 
     libraries/imgui/misc/cpp/imgui_stdlib.cpp
 )

@@ -6,3 +6,12 @@
 	path = libraries/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "libraries/glfw"]
+	path = libraries/glfw
+	url = https://github.com/glfw/glfw
+[submodule "libraries/LLGL"]
+	path = libraries/LLGL
+	url = https://github.com/LukasBanana/LLGL
+[submodule "libraries/glm"]
+	path = libraries/glm
+	url = https://github.com/g-truc/glm

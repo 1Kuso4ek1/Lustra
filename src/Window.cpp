@@ -29,9 +29,11 @@ Window::~Window()
     glfwTerminate();
 }
 
-void Window::SwapBuffers()
+void Window::SetFullscreen(bool fullscreen)
 {
-    glfwSwapBuffers(window);
+    this->fullscreen = fullscreen;
+
+    glfwSetWindowMonitor(window, fullscreen ? glfwGetPrimaryMonitor() : nullptr, 0, 0, size.width, size.height, GLFW_DONT_CARE);
 }
 
 GLFWwindow* Window::GetGLFWWindow() const
@@ -49,6 +51,11 @@ bool Window::PollEvents() const
     glfwPollEvents();
 
     return !glfwWindowShouldClose(window);
+}
+
+bool Window::IsFullscreen() const
+{
+    return fullscreen;
 }
 
 bool Window::GetNativeHandle(void* nativeHandle, size_t size)

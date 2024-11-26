@@ -23,12 +23,13 @@ public:
     Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);
     ~Window();
 
-    void SwapBuffers();
+    void SetFullscreen(bool fullscreen);
 
     GLFWwindow* GetGLFWWindow() const;
     static GLFWwindow* GetLastCreatedGLFWWindow();
 
     bool PollEvents() const;
+    bool IsFullscreen() const;
 
 public: // Interface implementation
     bool GetNativeHandle(void* nativeHandle, size_t size) override;

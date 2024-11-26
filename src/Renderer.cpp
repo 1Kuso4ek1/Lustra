@@ -42,6 +42,8 @@ void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
 {   
     swapChain = renderSystem->CreateSwapChain({}, surface);
 
+    swapChain->SetVsyncInterval(0);
+
     SetupBuffers();
 }
 
@@ -182,7 +184,7 @@ std::shared_ptr<Matrices> Renderer::GetMatrices() const
 
 bool Renderer::IsInit()
 {
-    return renderSystem != nullptr && swapChain != nullptr;
+    return renderSystem != nullptr;// && swapChain != nullptr;
 }
 
 void Renderer::LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc)

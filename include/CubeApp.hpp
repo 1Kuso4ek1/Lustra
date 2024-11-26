@@ -1,9 +1,12 @@
 #pragma once
 #include <Application.hpp>
 #include <TextureManager.hpp>
+
 #include <Window.hpp>
+
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>

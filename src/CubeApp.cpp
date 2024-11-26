@@ -4,7 +4,12 @@ CubeApp::CubeApp()
 {
     LLGL::Log::RegisterCallbackStd();
 
+    dev::ScopedTimer timer("Engine initialization");
+
     window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest");
+
+    if(!dev::Renderer::Get().IsInit())
+        return;
 
     dev::Renderer::Get().InitSwapChain(window);
 
@@ -24,9 +29,12 @@ CubeApp::CubeApp()
 
 CubeApp::~CubeApp()
 {
-    DestroyImGui();
+    if(dev::Renderer::Get().IsInit())
+    {
+        DestroyImGui();
 
-    dev::Renderer::Get().Unload();
+        dev::Renderer::Get().Unload();
+    }
 }
 
 void CubeApp::Run()
@@ -48,12 +56,13 @@ void CubeApp::Run()
         if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Escape))
             break;
 
+        if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::F11))
+            window->SetFullscreen(!window->IsFullscreen());
+
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
             degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
 
         matrices->GetModel() = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
-
-        window->SwapBuffers();
     }
 }
 

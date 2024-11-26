@@ -36,6 +36,8 @@ private:
 
     dev::WindowPtr window;
 
+    dev::Timer keyboardTimer;
+
     std::unique_ptr<dev::Mesh> mesh;
 
     LLGL::PipelineState* pipeline{};

@@ -56,8 +56,11 @@ void CubeApp::Run()
         if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Escape))
             break;
 
-        if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::F11))
+        if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::F11) && keyboardTimer.GetElapsedSeconds() > 0.2f)
+        {
             window->SetFullscreen(!window->IsFullscreen());
+            keyboardTimer.Reset();
+        }
 
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
             degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;

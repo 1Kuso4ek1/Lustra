@@ -47,31 +47,42 @@ void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
     SetupBuffers();
 }
 
+void Renderer::Begin()
+{
+    commandBuffer->Begin();
+}
+
+void Renderer::End()
+{
+    commandBuffer->End();
+}
+
 void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
                           std::unordered_map<uint32_t, LLGL::Resource*> resources,
                           std::function<void(LLGL::CommandBuffer*)> draw,
                           LLGL::PipelineState* pipeline)
 {
-    commandBuffer->Begin();
+    setupBuffers(commandBuffer);
+
+    commandBuffer->BeginRenderPass(*swapChain);
     {
-        setupBuffers(commandBuffer);
+        //swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
+        commandBuffer->SetViewport(swapChain->GetResolution());
+        commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 
-        commandBuffer->BeginRenderPass(*swapChain);
-        {
-            //swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
-            commandBuffer->SetViewport(swapChain->GetResolution());
-            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
+        commandBuffer->SetPipelineState(*pipeline);
 
-            commandBuffer->SetPipelineState(*pipeline);
+        for(auto const& [key, val] : resources)
+            commandBuffer->SetResource(key, *val);
 
-            for(auto const& [key, val] : resources)
-                commandBuffer->SetResource(key, *val);
-
-            draw(commandBuffer);
-        }
-        commandBuffer->EndRenderPass();
+        draw(commandBuffer);
     }
-    commandBuffer->End();
+    commandBuffer->EndRenderPass();
+}
+
+void Renderer::Submit()
+{
+    commandQueue->Submit(*commandBuffer);
 }
 
 void Renderer::Present()
@@ -207,7 +218,8 @@ void Renderer::SetupDefaultVertexFormat()
 
 void Renderer::SetupCommandBuffer()
 {
-    commandBuffer = renderSystem->CreateCommandBuffer(LLGL::CommandBufferFlags::ImmediateSubmit);
+    commandBuffer = renderSystem->CreateCommandBuffer();
+    commandQueue = renderSystem->GetCommandQueue();
 }
 
 void Renderer::CreateMatricesBuffer()

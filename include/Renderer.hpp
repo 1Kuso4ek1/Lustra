@@ -18,11 +18,15 @@ public: // Public methods
     void InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen = false, int samples = 1);
     void InitSwapChain(std::shared_ptr<LLGL::Surface> surface);
 
+    void Begin(); // Start writing to the command buffer
+    void End(); // End writing to the command buffer
+
     void RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
                     std::unordered_map<uint32_t, LLGL::Resource*> resources, // A map of resources { binding, Resource_ptr }
                     std::function<void(LLGL::CommandBuffer*)> draw, // Call the draw function
                     LLGL::PipelineState* pipeline);
 
+    void Submit();
     void Present();
 
     void Unload();
@@ -62,7 +66,7 @@ private: // Private members
 
     LLGL::SwapChain* swapChain{};
     LLGL::CommandBuffer* commandBuffer{};
-    LLGL::CommandQueue* commandQueue{}; // Unused for now
+    LLGL::CommandQueue* commandQueue{};
 
     LLGL::VertexFormat defaultVertexFormat;
 

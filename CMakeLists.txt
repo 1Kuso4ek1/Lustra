@@ -40,7 +40,7 @@ add_executable(
 
 set_target_properties(LLGLTest PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
-include_directories(include libraries/stb libraries/imgui libraries/imgui/backends)
+include_directories(include libraries/stb libraries/imgui libraries/imgui/backends libraries/entt)
 
 target_include_directories(LLGLTest PUBLIC libraries/stb libraries/imgui/backends include ${glfw_INCLUDE_DIRS})
 target_link_libraries(LLGLTest LLGL::LLGL Threads::Threads stdc++fs glm::glm glfw)

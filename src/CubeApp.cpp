@@ -1,3 +1,4 @@
+#include "Renderer.hpp"
 #include <CubeApp.hpp>
 
 CubeApp::CubeApp()
@@ -182,6 +183,8 @@ void CubeApp::DrawImGui()
 
 void CubeApp::Draw()
 {
+    dev::Renderer::Get().Begin();
+
     dev::Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
@@ -198,6 +201,10 @@ void CubeApp::Draw()
         },
         pipeline
     );
+
+    dev::Renderer::Get().End();
+
+    dev::Renderer::Get().Submit();
 
     DrawImGui();
 

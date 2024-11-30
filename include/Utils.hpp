@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <Timer.hpp>
 

@@ -1,6 +1,6 @@
-#include <CubeApp.hpp>
+#include <SceneTestApp.hpp>
 
-CubeApp::CubeApp()
+SceneTestApp::SceneTestApp()
 {
     LLGL::Log::RegisterCallbackStd();
 
@@ -18,16 +18,23 @@ CubeApp::CubeApp()
 
     InitImGui();
 
-    (mesh = std::make_unique<dev::Mesh>())->CreateCube();
+    (mesh = std::make_shared<dev::Mesh>())->CreateCube();
 
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = dev::Renderer::Get().GetMatrices();
 
     matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
     matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f));
+
+    entity = scene.CreateEntity();
+
+    entity.AddComponent<dev::TransformComponent>();
+    entity.AddComponent<dev::MeshComponent>().meshes.push_back(mesh);
+    entity.AddComponent<dev::MaterialComponent>().albedo.push_back(texture);
+    entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
 }
 
-CubeApp::~CubeApp()
+SceneTestApp::~SceneTestApp()
 {
     if(dev::Renderer::Get().IsInit())
     {
@@ -37,7 +44,7 @@ CubeApp::~CubeApp()
     }
 }
 
-void CubeApp::Run()
+void SceneTestApp::Run()
 {
     if(!dev::Renderer::Get().IsInit())
     {
@@ -65,23 +72,23 @@ void CubeApp::Run()
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
             degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
 
-        matrices->GetModel() = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+        entity.GetComponent<dev::TransformComponent>().rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
     }
 }
 
-void CubeApp::LoadShaders()
+void SceneTestApp::LoadShaders()
 {
     vertexShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
     fragmentShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/fragment.frag");
 }
 
-void CubeApp::LoadTextures()
+void SceneTestApp::LoadTextures()
 {
     texture = dev::TextureManager::Get().LoadTexture("../resources/textures/tex.jpg");
     sampler = dev::TextureManager::Get().GetAnisotropySampler();
 }
 
-void CubeApp::InitImGui()
+void SceneTestApp::InitImGui()
 {
     IMGUI_CHECKVERSION();
     
@@ -104,21 +111,21 @@ void CubeApp::InitImGui()
     ImGui_ImplOpenGL3_Init("#version 460");
 }
 
-void CubeApp::DestroyImGui()
+void SceneTestApp::DestroyImGui()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void CubeApp::NewImGuiFrame()
+void SceneTestApp::NewImGuiFrame()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
-void CubeApp::SetupImGuiStyle()
+void SceneTestApp::SetupImGuiStyle()
 {
     ImGuiStyle& style = ImGui::GetStyle();
     
@@ -159,7 +166,7 @@ void CubeApp::SetupImGuiStyle()
     style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 }
 
-void CubeApp::DrawImGui()
+void SceneTestApp::DrawImGui()
 {
     NewImGuiFrame();
 
@@ -180,30 +187,9 @@ void CubeApp::DrawImGui()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void CubeApp::Draw()
+void SceneTestApp::Draw()
 {
-    dev::Renderer::Get().Begin();
-
-    dev::Renderer::Get().RenderPass(
-        [&](auto commandBuffer)
-        {
-            mesh->BindBuffers(commandBuffer);
-        },
-        {
-            { 0, dev::Renderer::Get().GetMatricesBuffer() },
-            { 1, texture->texture },
-            { 2, sampler }
-        },
-        [&](auto commandBuffer)
-        {
-            mesh->Draw(commandBuffer);
-        },
-        pipeline
-    );
-
-    dev::Renderer::Get().End();
-
-    dev::Renderer::Get().Submit();
+    scene.Draw();
 
     DrawImGui();
 

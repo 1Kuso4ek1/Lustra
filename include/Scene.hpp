@@ -14,6 +14,7 @@ class Scene
 {
 public:
     void Update();
+    void Draw();
 
     Entity CreateEntity();
 

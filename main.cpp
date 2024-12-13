@@ -1,8 +1,8 @@
-#include <CubeApp.hpp>
+#include <SceneTestApp.hpp>
 
 int main()
 {
-    CubeApp app;
+    SceneTestApp app;
 
     app.Run();
 }

@@ -10,9 +10,7 @@
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <ImGuiManager.hpp>
 
 class SceneTestApp : public dev::Application
 {
@@ -25,10 +23,7 @@ public:
 private:
     void LoadShaders();
     void LoadTextures();
-    void InitImGui();
-    void DestroyImGui();
-    void NewImGuiFrame();
-    void SetupImGuiStyle();
+    
     void DrawImGui();
     void Draw();
 

@@ -57,5 +57,10 @@ Entity Scene::CreateEntity()
 
     return entity;
 }
+
+entt::registry& Scene::GetRegistry()
+{
+    return registry;
+}
     
 }

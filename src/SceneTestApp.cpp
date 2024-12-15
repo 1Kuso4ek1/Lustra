@@ -2,7 +2,7 @@
 
 SceneTestApp::SceneTestApp()
 {
-    LLGL::Log::RegisterCallbackStd();
+    LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
 
     dev::ScopedTimer timer("Engine initialization");
 
@@ -16,7 +16,7 @@ SceneTestApp::SceneTestApp()
     LoadShaders();
     LoadTextures();
 
-    InitImGui();
+    dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
     (mesh = std::make_shared<dev::Mesh>())->CreateCube();
 
@@ -28,6 +28,7 @@ SceneTestApp::SceneTestApp()
 
     entity = scene.CreateEntity();
 
+    entity.AddComponent<dev::NameComponent>().name = "Cube";
     entity.AddComponent<dev::TransformComponent>();
     entity.AddComponent<dev::MeshComponent>().meshes.push_back(mesh);
     entity.AddComponent<dev::MaterialComponent>().albedo.push_back(texture);
@@ -38,7 +39,7 @@ SceneTestApp::~SceneTestApp()
 {
     if(dev::Renderer::Get().IsInit())
     {
-        DestroyImGui();
+        dev::ImGuiManager::Get().Destroy();
 
         dev::Renderer::Get().Unload();
     }
@@ -88,87 +89,9 @@ void SceneTestApp::LoadTextures()
     sampler = dev::TextureManager::Get().GetAnisotropySampler();
 }
 
-void SceneTestApp::InitImGui()
-{
-    IMGUI_CHECKVERSION();
-    
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-    ImFontConfig config;
-    config.OversampleH = 8;
-    config.OversampleV = 8;
-
-    SetupImGuiStyle();
-
-    io.Fonts->AddFontFromFileTTF("../resources/fonts/OpenSans-Regular.ttf", 18.0f, &config);
-
-    ImGui_ImplGlfw_InitForOpenGL(window->GetGLFWWindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 460");
-}
-
-void SceneTestApp::DestroyImGui()
-{
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void SceneTestApp::NewImGuiFrame()
-{
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
-
-void SceneTestApp::SetupImGuiStyle()
-{
-    ImGuiStyle& style = ImGui::GetStyle();
-    
-    style.WindowPadding = ImVec2(15, 15);
-    style.WindowRounding = 5.0f;
-    style.FramePadding = ImVec2(5, 5);
-    style.FrameRounding = 4.0f;
-    style.ItemSpacing = ImVec2(12, 8);
-    style.ItemInnerSpacing = ImVec2(8, 6);
-    style.IndentSpacing = 25.0f;
-    style.ScrollbarSize = 15.0f;
-    style.ScrollbarRounding = 9.0f;
-    style.GrabMinSize = 5.0f;
-    style.GrabRounding = 3.0f;
-    
-    style.Colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
-
-    style.Colors[ImGuiCol_Header] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    
-    style.Colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-
-    style.Colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-    style.Colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-
-    style.Colors[ImGuiCol_Tab] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    style.Colors[ImGuiCol_TabHovered] = ImVec4{ 0.38f, 0.3805f, 0.381f, 1.0f };
-    style.Colors[ImGuiCol_TabActive] = ImVec4{ 0.28f, 0.2805f, 0.281f, 1.0f };
-    style.Colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-
-    style.Colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-}
-
 void SceneTestApp::DrawImGui()
 {
-    NewImGuiFrame();
+    dev::ImGuiManager::Get().NewFrame();
 
     ImGui::ShowDemoWindow();
 
@@ -182,9 +105,13 @@ void SceneTestApp::DrawImGui()
 
     ImGui::End();
 
-    ImGui::Render();
+    ImGui::Begin("Scene");
 
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent>(scene.GetRegistry(), entity);
+    
+    ImGui::End();
+
+    dev::ImGuiManager::Get().Render();
 }
 
 void SceneTestApp::Draw()

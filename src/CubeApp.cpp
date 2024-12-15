@@ -2,7 +2,7 @@
 
 CubeApp::CubeApp()
 {
-    LLGL::Log::RegisterCallbackStd();
+    LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
 
     dev::ScopedTimer timer("Engine initialization");
 

@@ -18,6 +18,8 @@ public:
 
     Entity CreateEntity();
 
+    entt::registry& GetRegistry();
+
 private:
     entt::registry registry;
 

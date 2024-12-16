@@ -1,6 +1,7 @@
 #include <Matrices.hpp>
 
-namespace dev {
+namespace dev
+{
 
 Matrices::Matrices()
 {

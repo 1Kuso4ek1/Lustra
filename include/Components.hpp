@@ -16,7 +16,7 @@ struct NameComponent
 struct TransformComponent
 {
     glm::vec3 position = { 0.0f, 0.0f, 0.0f };
-    glm::quat rotation = { 1.0f, 0.0f, 0.0f, 0.0f };
+    glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
     glm::vec3 scale =    { 1.0f, 1.0f, 1.0f };
 
     glm::mat4 GetTransform() const;
@@ -37,19 +37,22 @@ struct PipelineComponent
     LLGL::PipelineState* pipeline;
 };
 
-inline void DrawComponentUI(dev::NameComponent& component, entt::entity entity)
+inline void DrawComponentUI(NameComponent& component, entt::entity entity)
 {
     if(ImGui::CollapsingHeader("NameComponent"))
         ImGui::InputText("Name", &component.name);
 }
 
-inline void DrawComponentUI(dev::TransformComponent& component, entt::entity entity)
+inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
 {
     if(ImGui::CollapsingHeader("TransformComponent"))
     {
-        ImGui::InputFloat3("Position", &component.position[0]);
-        ImGui::InputFloat4("Rotation", &component.rotation[0]);
-        ImGui::InputFloat3("Scale", &component.scale[0]);
+        ImGui::DragFloat3("Position", &component.position.x, 0.05f);
+        ImGui::DragFloat3("Rotation", &component.rotation.x, 0.05f);
+        ImGui::DragFloat3("Scale", &component.scale.x, 0.01f);
+
+        if(ImGui::Button("Reset Scale"))
+            component.scale = glm::vec3(1.0f);
     }
 }
 

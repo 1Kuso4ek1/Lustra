@@ -4,7 +4,8 @@
 
 #include <vector>
 
-namespace dev {
+namespace dev
+{
 
 class Matrices
 {

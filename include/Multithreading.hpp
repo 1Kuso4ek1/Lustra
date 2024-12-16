@@ -4,7 +4,8 @@
 
 using namespace std::chrono_literals;
 
-namespace dev {
+namespace dev
+{
 
 class Multithreading
 {

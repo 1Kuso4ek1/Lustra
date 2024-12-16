@@ -1,7 +1,8 @@
 #include <LLGL/RenderSystem.h>
 #include <Renderer.hpp>
 
-namespace dev {
+namespace dev
+{
 
 Renderer::Renderer()
 {

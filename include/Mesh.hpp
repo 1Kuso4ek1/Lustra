@@ -1,7 +1,8 @@
 #pragma once
 #include <Utils.hpp>
 
-namespace dev {
+namespace dev
+{
 
 struct Vertex
 {

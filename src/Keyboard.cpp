@@ -1,8 +1,10 @@
 #include <Keyboard.hpp>
 
-namespace dev {
+namespace dev
+{
 
-namespace Keyboard {
+namespace Keyboard
+{
 
 bool IsKeyPressed(Key key)
 {

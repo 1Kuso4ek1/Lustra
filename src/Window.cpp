@@ -1,6 +1,7 @@
 #include <Window.hpp>
 
-namespace dev {
+namespace dev
+{
 
 bool Window::glfwInitialized = false;
 GLFWwindow* Window::lastCreatedWindow{};

@@ -1,8 +1,10 @@
 #include <Mouse.hpp>
 
-namespace dev {
+namespace dev
+{
 
-namespace Mouse {
+namespace Mouse
+{
 
 bool IsButtonPressed(Button button)
 {

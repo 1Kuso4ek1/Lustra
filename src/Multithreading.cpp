@@ -1,6 +1,7 @@
 #include <Multithreading.hpp>
 
-namespace dev {
+namespace dev
+{
 
 Multithreading& Multithreading::Get()
 {

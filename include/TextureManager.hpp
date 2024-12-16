@@ -2,11 +2,12 @@
 #include <Utils.hpp>
 #include <Multithreading.hpp>
 
-namespace dev {
+namespace dev
+{
 
 struct TextureHandle // For multithreaded loading
 {
-    TextureHandle(LLGL::Texture* texture = nullptr) : texture(texture)
+    TextureHandle(LLGL::Texture* texture = {}) : texture(texture)
     {
         textureDesc.type = LLGL::TextureType::Texture2D;
         textureDesc.format = LLGL::Format::RGBA8UNorm;

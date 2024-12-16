@@ -7,7 +7,8 @@
 #include <memory>
 #include <unordered_map>
 
-namespace dev {
+namespace dev
+{
 
 class Renderer
 {

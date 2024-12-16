@@ -1,9 +1,11 @@
 #pragma once
 #include <Window.hpp>
 
-namespace dev {
+namespace dev
+{
 
-namespace Keyboard {
+namespace Keyboard
+{
 
     enum class Key
     {

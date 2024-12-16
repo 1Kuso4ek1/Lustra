@@ -2,7 +2,8 @@
 #include <Mesh.hpp>
 #include <Renderer.hpp>
 
-namespace dev {
+namespace dev
+{
  
 class Application
 {

@@ -4,9 +4,11 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 
-namespace dev {
+namespace dev
+{
 
-namespace Mouse {
+namespace Mouse
+{
 
     enum class Button
     {

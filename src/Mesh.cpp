@@ -1,6 +1,7 @@
 #include <Mesh.hpp>
 
-namespace dev {
+namespace dev
+{
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
             : vertices(vertices), indices(indices)

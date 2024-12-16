@@ -27,7 +27,7 @@ private:
     void DrawImGui();
     void Draw();
 
-    float degrees = 0.5f;
+    float degrees = 0.0f;
 
     glm::vec3 axis{ 0.0f, 1.0f, 0.0f };
     float angle = 0.0f;

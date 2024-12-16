@@ -71,9 +71,10 @@ void SceneTestApp::Run()
         }
 
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
-            degrees = (dev::Mouse::GetPosition().x - 640.0) / 100.0;
-
-        entity.GetComponent<dev::TransformComponent>().rotation = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+        {
+            degrees = (dev::Mouse::GetPosition().x - 640.0) / 10.0;
+            entity.GetComponent<dev::TransformComponent>().rotation.y = degrees;
+        }
     }
 }
 
@@ -94,16 +95,6 @@ void SceneTestApp::DrawImGui()
     dev::ImGuiManager::Get().NewFrame();
 
     ImGui::ShowDemoWindow();
-
-    ImGui::Begin("Cube Rotation");
-
-    ImGui::Text("Choose Axis for Rotation:");
-    ImGui::SliderFloat3("Axis", &axis[0], -1.0f, 1.0f);
-    
-    ImGui::Text("Choose Angle for Rotation:");
-    ImGui::SliderFloat("Angle", &angle, 0.0f, 360.0f);
-
-    ImGui::End();
 
     ImGui::Begin("Scene");
 

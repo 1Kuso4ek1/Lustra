@@ -23,8 +23,8 @@ SceneTestApp::SceneTestApp()
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = dev::Renderer::Get().GetMatrices();
 
-    matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f));
+    /* matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f)); */
 
     entity = scene.CreateEntity();
 
@@ -33,6 +33,14 @@ SceneTestApp::SceneTestApp()
     entity.AddComponent<dev::MeshComponent>().meshes.push_back(mesh);
     entity.AddComponent<dev::MaterialComponent>().albedo.push_back(texture);
     entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+
+    camera = scene.CreateEntity();
+
+    camera.AddComponent<dev::NameComponent>().name = "Camera";
+    camera.AddComponent<dev::TransformComponent>().position = { 0.0f, 0.0f, 5.0f };
+    camera.AddComponent<dev::CameraComponent>().camera.SetViewport(window->GetContentSize());
+    
+    camera.GetComponent<dev::CameraComponent>().camera.SetPerspective();
 }
 
 SceneTestApp::~SceneTestApp()
@@ -98,7 +106,17 @@ void SceneTestApp::DrawImGui()
 
     ImGui::Begin("Scene");
 
-    dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent>(scene.GetRegistry(), entity);
+    if(ImGui::CollapsingHeader("Cube"))
+    {
+        ImGui::Indent();
+        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent>(scene.GetRegistry(), entity);
+    }
+
+    if(ImGui::CollapsingHeader("Camera"))
+    {
+        ImGui::Indent();
+        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::CameraComponent>(scene.GetRegistry(), camera);
+    }
     
     ImGui::End();
 

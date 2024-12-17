@@ -32,7 +32,7 @@ private:
     glm::vec3 axis{ 0.0f, 1.0f, 0.0f };
     float angle = 0.0f;
 
-    dev::Entity entity;
+    dev::Entity entity, camera;
 
     dev::Scene scene;
 

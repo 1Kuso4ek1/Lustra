@@ -12,7 +12,27 @@ void Scene::Update()
 
 void Scene::Draw()
 {
+    auto cameraView = registry.view<TransformComponent, CameraComponent>();
     auto view = registry.view<TransformComponent, MeshComponent, MaterialComponent, PipelineComponent>();
+
+    Camera* cam{};
+    TransformComponent cameraTransform;
+
+    for(auto entity : cameraView)
+    {
+        cam = &cameraView.get<CameraComponent>(entity).camera;
+        cameraTransform = cameraView.get<TransformComponent>(entity);
+
+        break;
+    }
+
+    if(cam)
+    {
+        auto delta = glm::quat(cameraTransform.rotation) * glm::vec3(0.0f, 0.0f, -1.0f);
+        
+        Renderer::Get().GetMatrices()->GetView() = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
+        Renderer::Get().GetMatrices()->GetProjection() = cam->GetProjectionMatrix();
+    }
 
     Renderer::Get().Begin();
 

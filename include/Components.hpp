@@ -2,6 +2,7 @@
 #include <TextureManager.hpp>
 #include <Mesh.hpp>
 #include <ImGuiManager.hpp>
+#include <Camera.hpp>
 
 #include <entt/entt.hpp>
 
@@ -37,6 +38,11 @@ struct PipelineComponent
     LLGL::PipelineState* pipeline;
 };
 
+struct CameraComponent
+{
+    Camera camera;
+};
+
 inline void DrawComponentUI(NameComponent& component, entt::entity entity)
 {
     if(ImGui::CollapsingHeader("NameComponent"))
@@ -53,6 +59,21 @@ inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
 
         if(ImGui::Button("Reset Scale"))
             component.scale = glm::vec3(1.0f);
+    }
+}
+
+inline void DrawComponentUI(CameraComponent& component, entt::entity entity)
+{
+    if(ImGui::CollapsingHeader("CameraComponent"))
+    {
+        if(ImGui::DragFloat("FOV", &component.camera.fov, 0.05f, 1.0f, 179.0f))
+            component.camera.SetPerspective();
+
+        if(ImGui::DragFloat("Near", &component.camera.near, 0.05f, 0.01f, 10.0f))
+            component.camera.SetPerspective();
+
+        if(ImGui::DragFloat("Far", &component.camera.far, 0.05f, 0.01f, 5000.0f))
+            component.camera.SetPerspective();
     }
 }
 

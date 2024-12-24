@@ -25,7 +25,8 @@ public: // Public methods
     void RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
                     std::unordered_map<uint32_t, LLGL::Resource*> resources, // A map of resources { binding, Resource_ptr }
                     std::function<void(LLGL::CommandBuffer*)> draw, // Call the draw function
-                    LLGL::PipelineState* pipeline);
+                    LLGL::PipelineState* pipeline,
+                    LLGL::RenderTarget* renderTarget = nullptr);
 
     void Submit();
     void Present();
@@ -38,7 +39,12 @@ public: // Public methods
     LLGL::Shader* CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes = {});
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
     LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);
+    LLGL::RenderTarget* CreateRenderTarget(const LLGL::Extent2D& resolution, LLGL::Texture* colorTexture, LLGL::Texture* depthTexture = nullptr);
+
     LLGL::PipelineState* CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader);
+    LLGL::PipelineState* CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc,
+                                             LLGL::GraphicsPipelineDescriptor& pipelineDesc);
+    LLGL::PipelineState* CreateRenderTargetPipeline(LLGL::RenderTarget* renderTarget);
 
     LLGL::Window* GetWindow() const;
     LLGL::VertexFormat GetDefaultVertexFormat() const;

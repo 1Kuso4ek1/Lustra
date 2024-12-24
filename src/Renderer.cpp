@@ -60,14 +60,15 @@ void Renderer::End()
 void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
                           std::unordered_map<uint32_t, LLGL::Resource*> resources,
                           std::function<void(LLGL::CommandBuffer*)> draw,
-                          LLGL::PipelineState* pipeline)
+                          LLGL::PipelineState* pipeline,
+                          LLGL::RenderTarget* renderTarget)
 {
     setupBuffers(commandBuffer);
 
-    commandBuffer->BeginRenderPass(*swapChain);
+    commandBuffer->BeginRenderPass(renderTarget ? *renderTarget : *swapChain);
     {
         //swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
-        commandBuffer->SetViewport(swapChain->GetResolution());
+        commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
         commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 
         commandBuffer->SetPipelineState(*pipeline);
@@ -135,6 +136,18 @@ LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDes
     return renderSystem->CreateSampler(samplerDesc);
 }
 
+LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, LLGL::Texture* colorTexture, LLGL::Texture* depthTexture)
+{
+    LLGL::RenderTargetDescriptor renderTargetDesc;
+    renderTargetDesc.resolution = resolution;
+    renderTargetDesc.colorAttachments[0] = colorTexture;
+
+    if(depthTexture)
+        renderTargetDesc.depthStencilAttachment = depthTexture;
+
+    return renderSystem->CreateRenderTarget(renderTargetDesc);
+}
+
 LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader)
 {
     LLGL::PipelineLayoutDescriptor layoutDesc;
@@ -169,6 +182,26 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     pipelineStateDesc.rasterizer.cullMode = LLGL::CullMode::Back;
     pipelineStateDesc.rasterizer.frontCCW = true;
     pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
+
+    return renderSystem->CreatePipelineState(pipelineStateDesc);
+}
+
+LLGL::PipelineState* Renderer::CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc,
+                                                   LLGL::GraphicsPipelineDescriptor& pipelineDesc)
+{
+    LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
+
+    pipelineDesc.pipelineLayout = pipelineLayout;
+
+    return renderSystem->CreatePipelineState(pipelineDesc);
+}
+
+LLGL::PipelineState* Renderer::CreateRenderTargetPipeline(LLGL::RenderTarget* renderTarget)
+{
+    LLGL::GraphicsPipelineDescriptor pipelineStateDesc;
+    pipelineStateDesc.renderPass = renderTarget->GetRenderPass();
+    pipelineStateDesc.viewports  = { renderTarget->GetResolution() };
+    pipelineStateDesc.rasterizer.multiSampleEnabled = false;
 
     return renderSystem->CreatePipelineState(pipelineStateDesc);
 }

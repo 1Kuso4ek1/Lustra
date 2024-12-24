@@ -23,6 +23,8 @@ public:
 private:
     void LoadShaders();
     void LoadTextures();
+
+    void CreateEntities();
     
     void DrawImGui();
     void Draw();
@@ -47,7 +49,9 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    std::shared_ptr<dev::TextureHandle> texture;
+    LLGL::RenderTarget* renderTarget{};
+
+    std::shared_ptr<dev::TextureHandle> texture, frame;
     LLGL::Sampler* sampler{};
 
     std::shared_ptr<dev::Matrices> matrices;

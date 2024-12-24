@@ -22,7 +22,7 @@ public:
     void CreateCube();
     void CreatePlane();
 
-    void BindBuffers(LLGL::CommandBuffer* commandBuffer) const;
+    void BindBuffers(LLGL::CommandBuffer* commandBuffer, bool bindMatrices = true) const;
 
     void Draw(LLGL::CommandBuffer* commandBuffer) const;
 

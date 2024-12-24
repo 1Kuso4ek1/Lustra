@@ -39,6 +39,11 @@ void Camera::SetFar(float far)
     SetPerspective();
 }
 
+void Camera::SetFirstPerson(bool firstPerson)
+{
+    this->firstPerson = firstPerson;
+}
+
 glm::mat4 Camera::GetProjectionMatrix() const
 {
     return projectionMatrix;
@@ -67,6 +72,11 @@ float Camera::GetFar() const
 float Camera::GetAspect() const
 {
     return aspect;
+}
+
+bool Camera::IsFirstPerson() const
+{
+    return firstPerson;
 }
 
 }

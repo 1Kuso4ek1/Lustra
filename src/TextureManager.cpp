@@ -64,6 +64,17 @@ std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem
     return textureHandle;
 }
 
+std::shared_ptr<TextureHandle> TextureManager::CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage)
+{
+    auto textureHandle = std::make_shared<TextureHandle>(textureDesc, initialImage);
+
+    textureHandle->texture = Renderer::Get().CreateTexture(textureDesc, initialImage);
+
+    textures.push_back(textureHandle);
+
+    return textureHandle;
+}
+
 LLGL::Sampler* TextureManager::GetAnisotropySampler() const
 {
     return anisotropySampler;

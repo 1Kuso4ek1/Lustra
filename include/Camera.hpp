@@ -23,6 +23,8 @@ public:
     void SetNear(float near);
     void SetFar(float far);
 
+    void SetFirstPerson(bool firstPerson);
+
     glm::mat4 GetProjectionMatrix() const;
     glm::vec2 GetViewportSize() const;
     
@@ -31,6 +33,8 @@ public:
     float GetFar() const;
 
     float GetAspect() const;
+
+    bool IsFirstPerson() const;
     
 private:
     float fov = 90.0f;
@@ -38,6 +42,8 @@ private:
     float far = 100.0f;
 
     float aspect;
+
+    bool firstPerson = true;
 
 private:
     glm::mat4 projectionMatrix;

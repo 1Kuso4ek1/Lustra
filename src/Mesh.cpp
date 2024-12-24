@@ -20,7 +20,8 @@ void Mesh::SetupBuffers()
 
 void Mesh::CreateCube()
 {
-    vertices = {
+    vertices =
+    {
         { { -1, -1, -1 }, { 0, 0, -1 }, { 0, 1 } },
         { { -1, 1, -1 }, { 0, 0, -1 }, { 0, 0 } },
         { { 1, 1, -1 }, { 0, 0, -1 }, { 1, 0 } },
@@ -52,7 +53,8 @@ void Mesh::CreateCube()
         { { -1, -1, 1 }, { 0, 0, 1 }, { 1, 1 } }
     };
 
-    indices = {
+    indices =
+    {
         0, 1, 2, 0, 2, 3,
         4, 5, 6, 4, 6, 7,
         8, 9, 10, 8, 10, 11,
@@ -66,7 +68,8 @@ void Mesh::CreateCube()
 
 void Mesh::CreatePlane()
 {
-    vertices = {
+    vertices =
+    {
         { { -1, 1, 0 }, { 0, 1, 0 }, { 0, 0 } },
         { { 1, 1, 0 }, { 0, 1, 0 }, { 1, 0 } },
         { { -1, -1, 0 }, { 0, 1, 0 }, { 0, 1 } },
@@ -78,13 +81,17 @@ void Mesh::CreatePlane()
     SetupBuffers();
 }
 
-void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer) const
+void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer, bool bindMatrices) const
 {
-    auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
-
     commandBuffer->SetVertexBuffer(*vertexBuffer);
     commandBuffer->SetIndexBuffer(*indexBuffer);
-    commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::Binding));
+
+    if(bindMatrices)
+    {
+        auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
+        
+        commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::Binding));
+    }
 }
 
 void Mesh::Draw(LLGL::CommandBuffer* commandBuffer) const

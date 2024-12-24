@@ -7,6 +7,13 @@ namespace dev
 
 struct TextureHandle // For multithreaded loading
 {
+    TextureHandle(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* imageView)
+        : textureDesc(textureDesc)
+    {
+        if(imageView)
+            this->imageView = *imageView;
+    }
+
     TextureHandle(LLGL::Texture* texture = {}) : texture(texture)
     {
         textureDesc.type = LLGL::TextureType::Texture2D;
@@ -30,6 +37,8 @@ public:
 
 public:
     std::shared_ptr<TextureHandle> LoadTexture(const std::filesystem::path& path);
+
+    std::shared_ptr<TextureHandle> CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
 
     LLGL::Sampler* GetAnisotropySampler() const;
 

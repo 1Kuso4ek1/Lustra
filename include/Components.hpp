@@ -9,6 +9,11 @@
 namespace dev
 {
 
+struct IDComponent
+{
+    uint64_t id;
+};
+
 struct NameComponent
 {
     std::string name;
@@ -28,9 +33,9 @@ struct MeshComponent
     std::vector<std::shared_ptr<Mesh>> meshes;
 };
 
-struct MaterialComponent
+struct MeshRendererComponent
 {
-    std::vector<std::shared_ptr<TextureHandle>> albedo;
+    std::vector<std::shared_ptr<TextureHandle>> materials;
 };
 
 struct PipelineComponent
@@ -42,6 +47,8 @@ struct CameraComponent
 {
     Camera camera;
 };
+
+using Drawable = std::tuple<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>;
 
 inline void DrawComponentUI(NameComponent& component, entt::entity entity)
 {
@@ -93,8 +100,14 @@ void DrawEntityUI(entt::registry& registry, entt::entity entity)
 {
     auto Fold = [&]<class Component>(Component& c) 
     {
+        uint64_t id = registry.get<IDComponent>(entity).id;
+
+        ImGui::PushID(id);
+
         if constexpr (HasComponentUI<Component>::value)
             DrawComponentUI(c, entity);
+
+        ImGui::PopID();
     };
 
     if(registry.valid(entity))

@@ -14,11 +14,14 @@ class Scene
 {
 public:
     void Update();
-    void Draw();
+    void Draw(LLGL::RenderTarget* renderTarget = nullptr);
 
     Entity CreateEntity();
 
     entt::registry& GetRegistry();
+
+private:
+    void SetupCamera();
 
 private:
     entt::registry registry;

@@ -9,10 +9,7 @@
 namespace dev
 {
 
-struct IDComponent
-{
-    uint64_t id;
-};
+class Entity;
 
 struct NameComponent
 {
@@ -46,6 +43,19 @@ struct PipelineComponent
 struct CameraComponent
 {
     Camera camera;
+};
+
+struct LightComponent
+{
+    glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+
+    float intensity = 1.0f;
+};
+
+struct ScriptComponent
+{
+    std::function<void()> start;
+    std::function<void(Entity self, float)> update;
 };
 
 using Drawable = std::tuple<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>;
@@ -84,6 +94,15 @@ inline void DrawComponentUI(CameraComponent& component, entt::entity entity)
     }
 }
 
+inline void DrawComponentUI(LightComponent& component, entt::entity entity)
+{
+    if(ImGui::CollapsingHeader("LightComponent"))
+    {
+        ImGui::ColorEdit3("Color", &component.color.x);
+        ImGui::DragFloat("Intensity", &component.intensity, 0.05f, 0.0f, 100.0f);
+    }
+}
+
 // Jesus Christ what is that
 template<class T>
 struct HasComponentUI
@@ -100,9 +119,7 @@ void DrawEntityUI(entt::registry& registry, entt::entity entity)
 {
     auto Fold = [&]<class Component>(Component& c) 
     {
-        uint64_t id = registry.get<IDComponent>(entity).id;
-
-        ImGui::PushID(id);
+        ImGui::PushID((uint64_t)entity);
 
         if constexpr (HasComponentUI<Component>::value)
             DrawComponentUI(c, entity);

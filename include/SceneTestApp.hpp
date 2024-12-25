@@ -40,7 +40,7 @@ private:
 
     dev::WindowPtr window;
 
-    dev::Timer keyboardTimer;
+    dev::Timer deltaTimeTimer, keyboardTimer;
 
     std::shared_ptr<dev::Mesh> mesh;
 
@@ -49,10 +49,7 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    LLGL::RenderTarget* renderTarget{};
-
-    std::shared_ptr<dev::TextureHandle> texture, frame;
-    LLGL::Sampler* sampler{};
+    std::shared_ptr<dev::TextureHandle> texture;
 
     std::shared_ptr<dev::Matrices> matrices;
 };

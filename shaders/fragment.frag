@@ -2,12 +2,17 @@
 
 uniform sampler2D albedo;
 
+in vec3 mPosition;
 in vec3 mNormal;
 in vec2 coord;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 gPosition;
+layout(location = 1) out vec4 gAlbedo;
+layout(location = 2) out vec4 gNormal;
 
 void main()
 {
-	fragColor = texture(albedo, coord) + (vec4(mNormal, 0.0) / 5.0);
+	gPosition = vec4(mPosition, 1.0f);
+	gAlbedo = texture(albedo, coord);
+	gNormal = vec4(mNormal, 1.0f);
 }

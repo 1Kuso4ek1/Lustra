@@ -136,11 +136,15 @@ LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDes
     return renderSystem->CreateSampler(samplerDesc);
 }
 
-LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, LLGL::Texture* colorTexture, LLGL::Texture* depthTexture)
+LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, std::vector<LLGL::Texture*> colorAttachments, LLGL::Texture* depthTexture)
 {
     LLGL::RenderTargetDescriptor renderTargetDesc;
     renderTargetDesc.resolution = resolution;
-    renderTargetDesc.colorAttachments[0] = colorTexture;
+
+    const auto max = LLGL_MAX_NUM_COLOR_ATTACHMENTS;
+
+    for(int i = 0; i < (colorAttachments.size() > max ? max : colorAttachments.size()); i++)
+        renderTargetDesc.colorAttachments[i] = colorAttachments[i];
 
     if(depthTexture)
         renderTargetDesc.depthStencilAttachment = depthTexture;
@@ -187,7 +191,7 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
 }
 
 LLGL::PipelineState* Renderer::CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc,
-                                                   LLGL::GraphicsPipelineDescriptor& pipelineDesc)
+                                                   LLGL::GraphicsPipelineDescriptor pipelineDesc)
 {
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
 
@@ -204,6 +208,11 @@ LLGL::PipelineState* Renderer::CreateRenderTargetPipeline(LLGL::RenderTarget* re
     pipelineStateDesc.rasterizer.multiSampleEnabled = false;
 
     return renderSystem->CreatePipelineState(pipelineStateDesc);
+}
+
+LLGL::SwapChain* Renderer::GetSwapChain() const
+{
+    return swapChain;
 }
 
 LLGL::Window* Renderer::GetWindow() const

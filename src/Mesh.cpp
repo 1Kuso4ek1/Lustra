@@ -85,7 +85,7 @@ void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer, bool bindMatrices) co
 {
     commandBuffer->SetVertexBuffer(*vertexBuffer);
     commandBuffer->SetIndexBuffer(*indexBuffer);
-
+    
     if(bindMatrices)
     {
         auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();

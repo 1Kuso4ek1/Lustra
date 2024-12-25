@@ -116,6 +116,8 @@ GLFWwindow* Window::CreateWindow()
     glfwMakeContextCurrent(window);
     glfwSwapInterval(0);
 
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
     return window;
 }
 

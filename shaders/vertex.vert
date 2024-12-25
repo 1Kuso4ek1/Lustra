@@ -9,11 +9,13 @@ in vec3 position;
 in vec3 normal;
 in vec2 texCoord;
 
+out vec3 mPosition;
 out vec3 mNormal;
 out vec2 coord;
 
 void main()
 {
+    mPosition = (model * vec4(position, 1.0f)).xyz;
     mNormal = (model * vec4(normal, 1.0f)).xyz;
     coord = texCoord;
     

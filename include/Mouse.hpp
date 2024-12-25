@@ -23,6 +23,10 @@ namespace Mouse
         Last = GLFW_MOUSE_BUTTON_LAST
     };
 
+    void SetCursorVisible(bool visible = true);
+
+    void SetPosition(glm::vec2 pos);
+
     bool IsButtonPressed(Button button);
     bool IsButtonReleased(Button button);
     bool IsButtonRepeated(Button button);

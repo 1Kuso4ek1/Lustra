@@ -14,7 +14,7 @@ TextureManager::TextureManager()
     
     defaultTexture.textureDesc.extent = { 1, 1, 1 };
     
-    unsigned char defaultData[] = { 0, 0, 0, 255 };
+    unsigned char defaultData[] = { 255, 20, 147, 255 };
     defaultTexture.imageView.dataSize = 4 * 8;
     defaultTexture.imageView.data = defaultData;
 
@@ -28,7 +28,7 @@ TextureManager& TextureManager::Get()
     return instance;
 }
 
-std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem::path& path)
+std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem::path& path, bool separateThread)
 {
     auto textureHandle = std::make_shared<TextureHandle>(defaultTexture.texture);
 
@@ -56,8 +56,16 @@ std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem
         stbi_image_free((void*)textureHandle->imageView.data);
     };
 
-    Multithreading::Get().AddJob(load);
-    Multithreading::Get().AddMainThreadJob(create);
+    if(separateThread)
+    {
+        Multithreading::Get().AddJob(load);
+        Multithreading::Get().AddMainThreadJob(create);
+    }
+    else
+    {
+        load();
+        create();
+    }
 
     textures.push_back(textureHandle);
 

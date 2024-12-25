@@ -13,7 +13,7 @@ public:
     void Reset();
 
     float GetElapsedSeconds();
-    float GetElapsedMilliseconds();
+    long GetElapsedMilliseconds();
 
 private:
     std::chrono::high_resolution_clock::time_point start;

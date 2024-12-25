@@ -36,7 +36,7 @@ public:
     static TextureManager& Get();
 
 public:
-    std::shared_ptr<TextureHandle> LoadTexture(const std::filesystem::path& path);
+    std::shared_ptr<TextureHandle> LoadTexture(const std::filesystem::path& path, bool separateThread = true);
 
     std::shared_ptr<TextureHandle> CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
 

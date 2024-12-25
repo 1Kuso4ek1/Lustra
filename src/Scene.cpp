@@ -5,12 +5,30 @@
 namespace dev
 {
 
-void Scene::Update()
+void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
 {
-    
+    this->renderer = renderer;
 }
 
-void Scene::Draw(LLGL::RenderTarget* renderTarget)
+void Scene::Start()
+{
+    registry.view<ScriptComponent>().each([](auto& script)
+    {
+        if(script.start)
+            script.start();
+    });
+}
+
+void Scene::Update(float deltaTime)
+{
+    registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+    {
+        if(script.update)
+            script.update(Entity{ entity, this }, deltaTime);
+    });
+}
+
+void Scene::Draw()
 {
     SetupCamera();
 
@@ -41,7 +59,7 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
                 mesh.meshes[0]->Draw(commandBuffer);
             },
             pipeline.pipeline,
-            renderTarget
+            renderer->GetPrimaryRenderTarget()
         );
 
         Renderer::Get().GetMatrices()->PopMatrix();
@@ -50,13 +68,13 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     Renderer::Get().End();
 
     Renderer::Get().Submit();
+
+    renderer->Draw();
 }
 
 Entity Scene::CreateEntity()
 {
     Entity entity{ registry.create(), this };
-
-    entity.AddComponent<IDComponent>().id = idCounter;
 
     entities[idCounter++] = entity;
 
@@ -85,7 +103,7 @@ void Scene::SetupCamera()
 
     if(cam)
     {
-        auto delta = glm::quat(cameraTransform.rotation) * glm::vec3(0.0f, 0.0f, -1.0f);
+        auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
         
         Renderer::Get().GetMatrices()->GetView() = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
         Renderer::Get().GetMatrices()->GetProjection() = cam->GetProjectionMatrix();

@@ -1,6 +1,7 @@
 #pragma once
 #include <Components.hpp>
 #include <Renderer.hpp>
+#include <DeferredRenderer.hpp>
 
 #include <entt/entt.hpp>
 #include <unordered_map>
@@ -13,8 +14,14 @@ class Entity;
 class Scene
 {
 public:
-    void Update();
-    void Draw(LLGL::RenderTarget* renderTarget = nullptr);
+    Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>()) : renderer(renderer) {};
+
+    void SetRenderer(std::shared_ptr<RendererBase> renderer);
+
+    void Start();
+
+    void Update(float deltaTime);
+    void Draw();
 
     Entity CreateEntity();
 
@@ -22,6 +29,9 @@ public:
 
 private:
     void SetupCamera();
+
+private:
+    std::shared_ptr<RendererBase> renderer;
 
 private:
     entt::registry registry;

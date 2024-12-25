@@ -2,11 +2,12 @@
 
 SceneTestApp::SceneTestApp()
 {
+    // LLGL::StorageBufferDesc(1, LLGL::StorageBufferType::RWStructuredBuffer, 1); for lights
     LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
 
     dev::ScopedTimer timer("Engine initialization");
 
-    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest");
+    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, true);
 
     if(!dev::Renderer::Get().IsInit())
         return;
@@ -18,8 +19,6 @@ SceneTestApp::SceneTestApp()
     LoadShaders();
     LoadTextures();
 
-    renderTarget = dev::Renderer::Get().CreateRenderTarget(window->GetContentSize(), frame->texture);
-
     (mesh = std::make_shared<dev::Mesh>())->CreateCube();
 
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
@@ -27,6 +26,8 @@ SceneTestApp::SceneTestApp()
 
     /* matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
     matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f)); */
+
+    scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
 
     CreateEntities();
 }
@@ -49,11 +50,16 @@ void SceneTestApp::Run()
         return;
     }
 
+    scene.Start();
+
     while(window->PollEvents())
     {
         LLGL::Surface::ProcessEvents();
         
         dev::Multithreading::Get().Update();
+
+        scene.Update(deltaTimeTimer.GetElapsedSeconds());
+        deltaTimeTimer.Reset();
 
         Draw();
 
@@ -64,12 +70,6 @@ void SceneTestApp::Run()
         {
             window->SetFullscreen(!window->IsFullscreen());
             keyboardTimer.Reset();
-        }
-
-        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
-        {
-            degrees = (dev::Mouse::GetPosition().x - 640.0) / 10.0;
-            entity.GetComponent<dev::TransformComponent>().rotation.y = degrees;
         }
     }
 }
@@ -83,18 +83,6 @@ void SceneTestApp::LoadShaders()
 void SceneTestApp::LoadTextures()
 {
     texture = dev::TextureManager::Get().LoadTexture("../resources/textures/tex.jpg");
-    sampler = dev::TextureManager::Get().GetAnisotropySampler();
-
-    frame = dev::TextureManager::Get().CreateTexture(
-        {
-            .type = LLGL::TextureType::Texture2D,
-            .format = LLGL::Format::RGBA8UNorm,
-            .extent = LLGL::Extent3D{ window->GetContentSize().width, window->GetContentSize().height, 1 },
-            .mipLevels = 1,
-            .samples = 1
-        }
-    );
-
 }
 
 void SceneTestApp::CreateEntities()
@@ -106,14 +94,57 @@ void SceneTestApp::CreateEntities()
     entity.AddComponent<dev::MeshComponent>().meshes.push_back(mesh);
     entity.AddComponent<dev::MeshRendererComponent>().materials.push_back(texture);
     entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+    
+    auto& script = entity.AddComponent<dev::ScriptComponent>();
+
+    script.start = []() {};
+    script.update = [](dev::Entity entity, float deltaTime)
+    {
+        entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
+    };
 
     camera = scene.CreateEntity();
 
     camera.AddComponent<dev::NameComponent>().name = "Camera";
     camera.AddComponent<dev::TransformComponent>().position = { 0.0f, 0.0f, 5.0f };
-    camera.AddComponent<dev::CameraComponent>().camera.SetViewport(window->GetContentSize());
     
-    camera.GetComponent<dev::CameraComponent>().camera.SetPerspective();
+    auto& cameraComponent = camera.AddComponent<dev::CameraComponent>();
+    
+    cameraComponent.camera.SetViewport(window->GetContentSize());
+    cameraComponent.camera.SetPerspective();
+
+    auto& cameraScript = camera.AddComponent<dev::ScriptComponent>();
+
+    cameraScript.start = []() {};
+    cameraScript.update = [&](dev::Entity entity, float deltaTime)
+    {
+        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
+        {
+            dev::Mouse::SetCursorVisible(false);
+
+            auto& transform = entity.GetComponent<dev::TransformComponent>();
+            auto rotation = glm::quat(glm::radians(transform.rotation));
+
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::W))
+                transform.position -= rotation * glm::vec3(0.0f, 0.0f, 0.001f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S))
+                transform.position += rotation * glm::vec3(0.0f, 0.0f, 0.001f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::A))
+                transform.position -= rotation * glm::vec3(0.001f, 0.0f, 0.0f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
+                transform.position += rotation * glm::vec3(0.001f, 0.0f, 0.0f);
+
+            glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
+            glm::vec2 delta = center - dev::Mouse::GetPosition();
+
+            transform.rotation.x += delta.y / 100.0f;
+            transform.rotation.y += delta.x / 100.0f;
+
+            dev::Mouse::SetPosition(center);
+        }
+        else
+            dev::Mouse::SetCursorVisible();
+    };
 }
 
 void SceneTestApp::DrawImGui()
@@ -142,17 +173,22 @@ void SceneTestApp::DrawImGui()
     
     ImGui::End();
 
-    static uint32_t selectedImage = 0;
+    ImGui::Begin("Texture viewer");
 
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Tab) && keyboardTimer.GetElapsedSeconds() > 0.2f)
-    {
-        selectedImage++;
-        keyboardTimer.Reset();
-    }
+    static uint32_t texturesCount = 5;
 
-    ImGui::Begin("Image");
+    ImGui::Text("Textures count");
+    if(ImGui::Button("-") && texturesCount > 1) texturesCount--;
+        ImGui::SameLine();
 
-    ImGui::Image(selectedImage, ImVec2(256, 256));
+        ImGui::SetNextItemWidth(30); 
+        ImGui::InputScalar("##Input", ImGuiDataType_U32, &texturesCount, NULL, 0);
+        
+        ImGui::SameLine();
+    if(ImGui::Button("+")) texturesCount++;
+    
+    for(uint32_t i = 1; i <= texturesCount; i++)
+        ImGui::Image(i, ImVec2(320, 180));
     
     ImGui::End();
 
@@ -161,7 +197,6 @@ void SceneTestApp::DrawImGui()
 
 void SceneTestApp::Draw()
 {
-    scene.Draw(renderTarget);
     scene.Draw();
 
     DrawImGui();

@@ -17,7 +17,7 @@
 namespace dev
 {
 
-class Window : public LLGL::Surface
+class Window final : public LLGL::Surface
 {
 public:
     Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);

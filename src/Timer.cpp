@@ -18,12 +18,12 @@ void Timer::Reset()
 float Timer::GetElapsedSeconds()
 {
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+    auto duration = std::chrono::duration_cast<std::chrono::duration<float>>(end - start);
 
     return duration.count();
 }
 
-float Timer::GetElapsedMilliseconds()
+long Timer::GetElapsedMilliseconds()
 {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

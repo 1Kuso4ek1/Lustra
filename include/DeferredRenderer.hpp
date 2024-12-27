@@ -24,11 +24,8 @@ private:
     LLGL::RenderTarget* gBuffer;
     LLGL::PipelineState* gBufferPipeline;
 
-    LLGL::PipelineState* lightingPipeline;
-
-    LLGL::PipelineState* rectPipeline;
-
     std::shared_ptr<Mesh> rect;
+    LLGL::PipelineState* rectPipeline;
 };
 
 }

@@ -40,6 +40,7 @@ public:
 
     std::shared_ptr<TextureHandle> CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
 
+    TextureHandle* GetDefaultTexture();
     LLGL::Sampler* GetAnisotropySampler() const;
 
 private:

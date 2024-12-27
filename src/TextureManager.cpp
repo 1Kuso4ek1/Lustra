@@ -83,6 +83,11 @@ std::shared_ptr<TextureHandle> TextureManager::CreateTexture(const LLGL::Texture
     return textureHandle;
 }
 
+TextureHandle* TextureManager::GetDefaultTexture()
+{
+    return &defaultTexture;
+}
+
 LLGL::Sampler* TextureManager::GetAnisotropySampler() const
 {
     return anisotropySampler;

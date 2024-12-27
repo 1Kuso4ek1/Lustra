@@ -58,7 +58,7 @@ void Renderer::End()
 }
 
 void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
-                          std::unordered_map<uint32_t, LLGL::Resource*> resources,
+                          const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
                           std::function<void(LLGL::CommandBuffer*)> draw,
                           LLGL::PipelineState* pipeline,
                           LLGL::RenderTarget* renderTarget)
@@ -118,9 +118,9 @@ LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::fi
     if(const LLGL::Report* report = shader->GetReport())
     {
         if(report->HasErrors())
-            LLGL::Log::Errorf("Shader compile errors:\n%s", report->GetText());
+            LLGL::Log::Errorf("Shader compile errors:\n\t%s\n%s", path.filename().string().c_str(), report->GetText());
         else
-            LLGL::Log::Printf("Shader compile warnings:\n%s", report->GetText());
+            LLGL::Log::Errorf("Shader compile warnings:\n\t%s\n%s", path.filename().string().c_str(), report->GetText());
     }
 
     return shader;
@@ -136,7 +136,7 @@ LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDes
     return renderSystem->CreateSampler(samplerDesc);
 }
 
-LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, std::vector<LLGL::Texture*> colorAttachments, LLGL::Texture* depthTexture)
+LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::Texture*>& colorAttachments, LLGL::Texture* depthTexture)
 {
     LLGL::RenderTargetDescriptor renderTargetDesc;
     renderTargetDesc.resolution = resolution;

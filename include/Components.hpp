@@ -3,6 +3,7 @@
 #include <Mesh.hpp>
 #include <ImGuiManager.hpp>
 #include <Camera.hpp>
+#include <PostProcessing.hpp>
 
 #include <entt/entt.hpp>
 
@@ -58,6 +59,17 @@ struct ScriptComponent
     std::function<void(Entity self, float)> update;
 };
 
+struct ACESTonemappingComponent
+{
+    ACESTonemappingComponent();
+
+    float exposure = 1.0f;
+
+    std::shared_ptr<PostProcessing> postProcessing;
+
+    std::function<void(LLGL::CommandBuffer*)> setUniforms;
+};
+
 using Drawable = std::tuple<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>;
 
 inline void DrawComponentUI(NameComponent& component, entt::entity entity)
@@ -100,6 +112,14 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     {
         ImGui::ColorEdit3("Color", &component.color.x);
         ImGui::DragFloat("Intensity", &component.intensity, 0.05f, 0.0f, 100.0f);
+    }
+}
+
+inline void DrawComponentUI(ACESTonemappingComponent& component, entt::entity entity)
+{
+    if(ImGui::CollapsingHeader("ACESTonemappingComponent"))
+    {
+        ImGui::DragFloat("Exposure", &component.exposure, 0.05f, 0.0f, 100.0f);
     }
 }
 

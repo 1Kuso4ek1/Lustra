@@ -32,12 +32,7 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution)
     gBufferDepth = Renderer::Get().CreateTexture(depthAttachmentDesc);
 
     gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal }, gBufferDepth);
-    gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
-
-    /* lightingPipeline = Renderer::Get().CreatePipelineState(
-        LLGL::PipelineLayoutDescriptor{},
-        LLGL::GraphicsPipelineDescriptor{}
-    ); */
+    //gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
 
     rect = std::make_shared<Mesh>();
     rect->CreatePlane();
@@ -56,7 +51,7 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution)
         LLGL::GraphicsPipelineDescriptor
         {
             .renderPass = Renderer::Get().GetSwapChain()->GetRenderPass(),
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/post.vert"),
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
             .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/lightingPass.frag"),
             .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
         }

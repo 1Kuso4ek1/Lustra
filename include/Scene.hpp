@@ -30,6 +30,10 @@ public:
 private:
     void SetupCamera();
 
+    void RenderMeshes(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline);
+
+    void ApplyPostProcessing();
+
 private:
     std::shared_ptr<RendererBase> renderer;
 

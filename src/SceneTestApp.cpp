@@ -87,6 +87,13 @@ void SceneTestApp::LoadTextures()
 
 void SceneTestApp::CreateEntities()
 {
+    CreateCubeEntity();
+    CreateCameraEntity();
+    CreatePostProcessingEntity();
+}
+
+void SceneTestApp::CreateCubeEntity()
+{
     entity = scene.CreateEntity();
 
     entity.AddComponent<dev::NameComponent>().name = "Cube";
@@ -102,7 +109,10 @@ void SceneTestApp::CreateEntities()
     {
         entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
     };
+}
 
+void SceneTestApp::CreateCameraEntity()
+{
     camera = scene.CreateEntity();
 
     camera.AddComponent<dev::NameComponent>().name = "Camera";
@@ -147,6 +157,14 @@ void SceneTestApp::CreateEntities()
     };
 }
 
+void SceneTestApp::CreatePostProcessingEntity()
+{
+    postProcessing = scene.CreateEntity();
+
+    postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
+    postProcessing.AddComponent<dev::ACESTonemappingComponent>();
+}
+
 void SceneTestApp::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
@@ -168,6 +186,13 @@ void SceneTestApp::DrawImGui()
     {
         ImGui::Indent();
         dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::CameraComponent>(scene.GetRegistry(), camera);
+        ImGui::Unindent();
+    }
+
+    if(ImGui::CollapsingHeader("PostProcessing"))
+    {
+        ImGui::Indent();
+        dev::DrawEntityUI<dev::NameComponent, dev::ACESTonemappingComponent>(scene.GetRegistry(), postProcessing);
         ImGui::Unindent();
     }
     

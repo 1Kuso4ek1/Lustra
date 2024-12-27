@@ -44,23 +44,7 @@ void Scene::Draw()
         Renderer::Get().GetMatrices()->PushMatrix();
         Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
 
-        Renderer::Get().RenderPass(
-            [&](auto commandBuffer)
-            {
-                mesh.meshes[0]->BindBuffers(commandBuffer);
-            },
-            {
-                { 0, Renderer::Get().GetMatricesBuffer() },
-                { 1, meshRenderer.materials[0]->texture },
-                { 2, TextureManager::Get().GetAnisotropySampler() }
-            },
-            [&](auto commandBuffer)
-            {
-                mesh.meshes[0]->Draw(commandBuffer);
-            },
-            pipeline.pipeline,
-            renderer->GetPrimaryRenderTarget()
-        );
+        RenderMeshes(mesh, meshRenderer, pipeline);
 
         Renderer::Get().GetMatrices()->PopMatrix();
     }
@@ -69,7 +53,7 @@ void Scene::Draw()
 
     Renderer::Get().Submit();
 
-    renderer->Draw();
+    ApplyPostProcessing();
 }
 
 Entity Scene::CreateEntity()
@@ -108,6 +92,59 @@ void Scene::SetupCamera()
         Renderer::Get().GetMatrices()->GetView() = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
         Renderer::Get().GetMatrices()->GetProjection() = cam->GetProjectionMatrix();
     }
+}
+
+void Scene::RenderMeshes(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline)
+{
+    for(size_t i = 0; i < mesh.meshes.size(); i++)
+    {
+        auto material = TextureManager::Get().GetDefaultTexture();
+
+        if(meshRenderer.materials.size() > i)
+            material = meshRenderer.materials[i].get();
+
+        Renderer::Get().RenderPass(
+            [&](auto commandBuffer)
+            {
+                mesh.meshes[i]->BindBuffers(commandBuffer);
+            },
+            {
+                { 0, Renderer::Get().GetMatricesBuffer() },
+                { 1, material->texture },
+                { 2, TextureManager::Get().GetAnisotropySampler() }
+            },
+            [&](auto commandBuffer)
+            {
+                mesh.meshes[i]->Draw(commandBuffer);
+            },
+            pipeline.pipeline,
+            renderer->GetPrimaryRenderTarget()
+        );
+    }
+}
+
+void Scene::ApplyPostProcessing()
+{
+    auto acesView = registry.view<ACESTonemappingComponent>();
+
+    if(acesView->begin() == acesView->end())
+    {
+        renderer->Draw();
+        return;
+    }
+
+    auto postProcessing = *acesView->begin();
+
+    renderer->Draw(postProcessing.postProcessing->GetRenderTarget());
+
+    postProcessing.postProcessing->Apply(
+        {
+            { 0, postProcessing.postProcessing->GetFrame() },
+            { 1, TextureManager::Get().GetAnisotropySampler() }
+        },
+        postProcessing.setUniforms,
+        Renderer::Get().GetSwapChain()
+    );
 }
     
 }

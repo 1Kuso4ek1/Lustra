@@ -2,7 +2,6 @@
 
 SceneTestApp::SceneTestApp()
 {
-    // LLGL::StorageBufferDesc(1, LLGL::StorageBufferType::RWStructuredBuffer, 1); for lights
     LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
 
     dev::ScopedTimer timer("Engine initialization");
@@ -23,9 +22,6 @@ SceneTestApp::SceneTestApp()
 
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = dev::Renderer::Get().GetMatrices();
-
-    /* matrices->GetProjection() = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-    matrices->GetView() = glm::lookAt(glm::vec3(0.f, 0.f, 5.f), { 0, 0, 0.f }, glm::vec3(0.f, 1.f, 0.f)); */
 
     scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
 
@@ -235,19 +231,30 @@ void SceneTestApp::DrawImGui()
 
     ImGui::Begin("Texture viewer");
 
+    static uint32_t startIndex = 12;
     static uint32_t texturesCount = 5;
 
-    ImGui::Text("Textures count");
-    if(ImGui::Button("-") && texturesCount > 1) texturesCount--;
+    ImGui::Text("Start index");
+    if(ImGui::Button("-") && startIndex > 1) startIndex--;
         ImGui::SameLine();
 
         ImGui::SetNextItemWidth(30); 
-        ImGui::InputScalar("##Input", ImGuiDataType_U32, &texturesCount, NULL, 0);
+        ImGui::InputScalar("##Input", ImGuiDataType_U32, &startIndex, NULL, 0);
         
         ImGui::SameLine();
-    if(ImGui::Button("+")) texturesCount++;
+    if(ImGui::Button("+")) startIndex++;
+
+    ImGui::Text("Textures count");
+    if(ImGui::Button("-##") && texturesCount > 1) texturesCount--;
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(30); 
+        ImGui::InputScalar("##Input1", ImGuiDataType_U32, &texturesCount, NULL, 0);
+        
+        ImGui::SameLine();
+    if(ImGui::Button("+##")) texturesCount++;
     
-    for(uint32_t i = 1; i <= texturesCount; i++)
+    for(uint32_t i = startIndex; i < startIndex + texturesCount; i++)
         ImGui::Image(i, ImVec2(320, 180));
     
     ImGui::End();

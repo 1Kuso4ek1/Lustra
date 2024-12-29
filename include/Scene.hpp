@@ -4,6 +4,7 @@
 #include <DeferredRenderer.hpp>
 
 #include <entt/entt.hpp>
+
 #include <unordered_map>
 
 namespace dev
@@ -11,7 +12,7 @@ namespace dev
 
 class Entity;
 
-class Scene
+class Scene : public EventListener
 {
 public:
     Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>());
@@ -22,6 +23,8 @@ public:
 
     void Update(float deltaTime);
     void Draw();
+
+    void OnEvent(Event& event) override;
 
     Entity CreateEntity();
 

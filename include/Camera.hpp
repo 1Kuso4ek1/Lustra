@@ -1,4 +1,6 @@
 #pragma once
+#include <EventManager.hpp>
+
 #include <LLGL/Types.h>
 #include <entt/fwd.hpp>
 
@@ -10,10 +12,10 @@ namespace dev
 
 struct CameraComponent;
 
-class Camera
+class Camera : public EventListener
 {
 public:
-    Camera() = default;
+    Camera();
 
     void SetPerspective();
     void SetOrthographic(float left, float right, float bottom, float top);
@@ -24,6 +26,8 @@ public:
     void SetFar(float far);
 
     void SetFirstPerson(bool firstPerson);
+
+    void OnEvent(Event& event) override;
 
     glm::mat4 GetProjectionMatrix() const;
     glm::vec2 GetViewportSize() const;

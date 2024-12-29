@@ -68,7 +68,8 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
 
     commandBuffer->BeginRenderPass(renderTarget ? *renderTarget : *swapChain);
     {
-        //swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
+        swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
+        
         commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
         commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 
@@ -91,6 +92,16 @@ void Renderer::Submit()
 void Renderer::Present()
 {
     swapChain->Present();
+}
+
+void Renderer::Release(LLGL::Texture* texture)
+{
+    renderSystem->Release(*texture);
+}
+
+void Renderer::Release(LLGL::RenderTarget* renderTarget)
+{
+    renderSystem->Release(*renderTarget);
 }
 
 void Renderer::Unload()

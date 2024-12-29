@@ -7,7 +7,7 @@ namespace dev
 Scene::Scene(std::shared_ptr<RendererBase> renderer)
     : renderer(renderer)
 {
-    
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
 }
 
 void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
@@ -70,6 +70,16 @@ void Scene::Draw()
     Renderer::Get().Submit();
 
     ApplyPostProcessing();
+}
+
+void Scene::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        
+
+    }
 }
 
 Entity Scene::CreateEntity()

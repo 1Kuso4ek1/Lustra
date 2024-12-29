@@ -6,6 +6,12 @@ namespace dev
 bool Window::glfwInitialized = false;
 GLFWwindow* Window::lastCreatedWindow{};
 
+static void OnWindowResize(GLFWwindow* window, int width, int height)
+{
+    auto event = std::make_unique<WindowResizeEvent>(LLGL::Extent2D{ (uint32_t)width, (uint32_t)height });
+    EventManager::Get().Dispatch(std::move(event));
+}
+
 Window::Window(const LLGL::Extent2D& size, const std::string_view& title, int samples, bool fullscreen)
     : size(size), title(title), samples(samples), fullscreen(fullscreen)
 {
@@ -117,6 +123,8 @@ GLFWwindow* Window::CreateWindow()
     glfwSwapInterval(0);
 
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetWindowSizeCallback(window, OnWindowResize);
 
     return window;
 }

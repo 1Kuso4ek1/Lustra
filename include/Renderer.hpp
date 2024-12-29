@@ -31,6 +31,9 @@ public: // Public methods
     void Submit();
     void Present();
 
+    void Release(LLGL::Texture* texture);
+    void Release(LLGL::RenderTarget* renderTarget);
+
     void Unload();
 
     void WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView);

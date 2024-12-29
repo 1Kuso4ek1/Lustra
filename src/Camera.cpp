@@ -3,6 +3,11 @@
 namespace dev
 {
 
+Camera::Camera()
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+}
+
 void Camera::SetPerspective()
 {
     projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);
@@ -42,6 +47,16 @@ void Camera::SetFar(float far)
 void Camera::SetFirstPerson(bool firstPerson)
 {
     this->firstPerson = firstPerson;
+}
+
+void Camera::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+        SetViewport(resizeEvent->GetSize());
+    }
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const

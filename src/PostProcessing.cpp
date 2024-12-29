@@ -6,13 +6,17 @@ namespace dev
 PostProcessing::PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc,
                                LLGL::GraphicsPipelineDescriptor pipelineDesc,
                                const LLGL::Extent2D& resolution,
-                               bool newRenderTarget)
+                               bool newRenderTarget,
+                               bool registerEvent)
 {
     rect = std::make_shared<Mesh>();
     rect->CreatePlane();
 
     if(newRenderTarget)
     {
+        if(registerEvent)
+            EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
         LLGL::TextureDescriptor frameDesc =
         {
             .type = LLGL::TextureType::Texture2D,
@@ -28,6 +32,32 @@ PostProcessing::PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc,
     }
 
     rectPipeline = Renderer::Get().CreatePipelineState(layoutDesc, pipelineDesc);
+}
+
+void PostProcessing::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+        LLGL::Extent2D size = resizeEvent->GetSize();
+
+        Renderer::Get().Release(frame);
+        Renderer::Get().Release(renderTarget);
+
+        LLGL::TextureDescriptor frameDesc =
+        {
+            .type = LLGL::TextureType::Texture2D,
+            .bindFlags = LLGL::BindFlags::ColorAttachment,
+            .format = LLGL::Format::RGBA16Float,
+            .extent = { size.width, size.height, 1 },
+            .mipLevels = 1,
+            .samples = 1
+        };
+
+        frame = Renderer::Get().CreateTexture(frameDesc);
+        renderTarget = Renderer::Get().CreateRenderTarget(size, { frame });
+    }
 }
 
 LLGL::Texture* PostProcessing::Apply(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,

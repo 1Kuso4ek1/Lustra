@@ -2,18 +2,21 @@
 #include <Mesh.hpp>
 #include <TextureManager.hpp>
 #include <RendererBase.hpp>
+#include <EventManager.hpp>
 
 namespace dev
 {
 
-class DeferredRenderer final : public RendererBase
+class DeferredRenderer final : public RendererBase, public EventListener
 {
 public:
-    DeferredRenderer(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    DeferredRenderer(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(), bool registerEvent = true);
 
     void Draw(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
               std::function<void(LLGL::CommandBuffer*)> setUniforms,
               LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain()) override;
+
+    void OnEvent(Event& event) override;
 
     LLGL::RenderTarget* GetPrimaryRenderTarget() override;
 

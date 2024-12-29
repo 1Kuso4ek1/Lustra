@@ -8,6 +8,8 @@
     #define GLFW_EXPOSE_NATIVE_X11
 #endif
 
+#include <EventManager.hpp>
+
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
@@ -16,6 +18,8 @@
 
 namespace dev
 {
+
+static void OnWindowResize(GLFWwindow* window, int width, int height);
 
 class Window final : public LLGL::Surface
 {

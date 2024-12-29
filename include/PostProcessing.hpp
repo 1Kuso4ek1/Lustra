@@ -1,15 +1,20 @@
 #pragma once
 #include <Renderer.hpp>
 #include <Mesh.hpp>
+#include <EventManager.hpp>
 
 namespace dev
 {
 
-class PostProcessing
+class PostProcessing : public EventListener
 {
 public:
     PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc,
-                       const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(), bool newRenderTarget = true);
+                   const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+                   bool newRenderTarget = true,
+                   bool registerEvent = true);
+
+    void OnEvent(Event& event) override;
 
     LLGL::Texture* Apply(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
                          std::function<void(LLGL::CommandBuffer*)> setUniforms,

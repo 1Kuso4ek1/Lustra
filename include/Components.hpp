@@ -50,7 +50,7 @@ struct LightComponent
 {
     glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 
-    float intensity = 1.0f;
+    float intensity = 1.0f, cutoff = 0.0f, outerCutoff = 0.0f;
 };
 
 struct ScriptComponent
@@ -112,6 +112,8 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     {
         ImGui::ColorEdit3("Color", &component.color.x);
         ImGui::DragFloat("Intensity", &component.intensity, 0.05f, 0.0f, 100.0f);
+        ImGui::DragFloat("Cutoff", &component.cutoff, 0.05f, 0.0f, 360.0f);
+        ImGui::DragFloat("Outer Cutoff", &component.outerCutoff, 0.05f, 0.0f, 360.0f);
     }
 }
 

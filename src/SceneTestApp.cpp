@@ -105,7 +105,7 @@ void SceneTestApp::CreateCubeEntity()
     script.start = []() {};
     script.update = [](dev::Entity entity, float deltaTime)
     {
-        entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
+        //entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
     };
 }
 

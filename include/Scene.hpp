@@ -46,10 +46,11 @@ private:
 private:
     struct Light
     {
-        glm::vec3 position __attribute__ ((aligned(16))); // Uniform buffer padding
-        glm::vec3 color    __attribute__ ((aligned(16)));
+        glm::vec3 position  __attribute__ ((aligned(16))); // Uniform buffer padding
+        glm::vec3 direction __attribute__ ((aligned(16)));
+        glm::vec3 color     __attribute__ ((aligned(16)));
         
-        float intensity;
+        float intensity, cutoff, outerCutoff;
     };
 
     std::vector<Light> lights;

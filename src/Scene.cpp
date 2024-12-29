@@ -143,7 +143,16 @@ void Scene::SetupLights()
     {
         auto [light, transform] = lightsView.get<LightComponent, TransformComponent>(entity);
 
-        lights.push_back({ transform.position, light.color, light.intensity });
+        lights.push_back(
+            {
+                transform.position,
+                glm::quat(glm::radians(transform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
+                light.color,
+                light.intensity,
+                glm::cos(glm::radians(light.cutoff)),
+                glm::cos(glm::radians(light.outerCutoff))
+            }
+        );
     }
 }
 

@@ -134,28 +134,28 @@ struct HasComponentUI
 };
 
 // This is just magic
-template <class... Components>
+template <typename... Components>
 void DrawEntityUI(entt::registry& registry, entt::entity entity)
 {
-    auto Fold = [&]<class Component>(Component& c) 
+    if(!registry.valid(entity))
+        return;
+
+    auto draw = [&]<typename Component>(Component* component)
     {
         ImGui::PushID((uint64_t)entity);
 
         if constexpr (HasComponentUI<Component>::value)
-            DrawComponentUI(c, entity);
+            DrawComponentUI(*component, entity);
 
         ImGui::PopID();
     };
 
-    if(registry.valid(entity))
+    ([&]<typename Component>()
     {
-        auto components = registry.get<Components...>(entity);
-
-        std::apply([&](auto&... component)
-        {
-            (Fold(component), ...);
-        }, components);
-    }
+        Component* component = registry.try_get<Component>(entity);
+        if(component)
+            draw(component);
+    }.template operator()<Components>(), ...); 
 }
 
 }

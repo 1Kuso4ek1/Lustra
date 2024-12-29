@@ -192,39 +192,20 @@ void SceneTestApp::DrawImGui()
 
     ImGui::Begin("Scene");
 
-    if(ImGui::CollapsingHeader("Cube"))
-    {
-        ImGui::Indent();
-        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent>(scene.GetRegistry(), entity);
-        ImGui::Unindent();
-    }
+    static std::vector<dev::Entity> list { entity, camera, postProcessing, light, light1 };
 
-    if(ImGui::CollapsingHeader("Camera"))
+    for(auto entity : list)
     {
-        ImGui::Indent();
-        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::CameraComponent>(scene.GetRegistry(), camera);
-        ImGui::Unindent();
-    }
-
-    if(ImGui::CollapsingHeader("PostProcessing"))
-    {
-        ImGui::Indent();
-        dev::DrawEntityUI<dev::NameComponent, dev::ACESTonemappingComponent>(scene.GetRegistry(), postProcessing);
-        ImGui::Unindent();
-    }
-
-    if(ImGui::CollapsingHeader("Light"))
-    {
-        ImGui::Indent();
-        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::LightComponent>(scene.GetRegistry(), light);
-        ImGui::Unindent();
-    }
-
-    if(ImGui::CollapsingHeader("Light1"))
-    {
-        ImGui::Indent();
-        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::LightComponent>(scene.GetRegistry(), light1);
-        ImGui::Unindent();
+        if(ImGui::CollapsingHeader(entity.GetComponent<dev::NameComponent>().name.c_str()))
+        {
+            ImGui::Indent();
+            dev::DrawEntityUI<dev::NameComponent,
+                              dev::TransformComponent,
+                              dev::CameraComponent,
+                              dev::LightComponent,
+                              dev::ACESTonemappingComponent>(scene.GetRegistry(), entity);
+            ImGui::Unindent();
+        }
     }
     
     ImGui::End();

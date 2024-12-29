@@ -46,7 +46,7 @@ void SceneTestApp::Run()
 {
     if(!dev::Renderer::Get().IsInit())
     {
-        LLGL::Log::Errorf("Error: Renderer is not initialized\n");
+        LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError, "Error: Renderer is not initialized\n");
         return;
     }
 
@@ -90,6 +90,8 @@ void SceneTestApp::CreateEntities()
     CreateCubeEntity();
     CreateCameraEntity();
     CreatePostProcessingEntity();
+    CreateLightEntity();
+    CreateLight1Entity();
 }
 
 void SceneTestApp::CreateCubeEntity()
@@ -165,6 +167,25 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing.AddComponent<dev::ACESTonemappingComponent>();
 }
 
+void SceneTestApp::CreateLightEntity()
+{
+    light = scene.CreateEntity();
+
+    light.AddComponent<dev::NameComponent>().name = "Light";
+    light.AddComponent<dev::TransformComponent>().position = { 5.0f, 5.0f, 5.0f };
+    light.AddComponent<dev::LightComponent>().intensity = 1.0f;
+}
+
+void SceneTestApp::CreateLight1Entity()
+{
+    light1 = scene.CreateEntity();
+
+    light1.AddComponent<dev::NameComponent>().name = "Light1";
+    light1.AddComponent<dev::TransformComponent>().position = { -5.0f, 5.0f, 5.0f };
+    light1.AddComponent<dev::LightComponent>().color = { 1.0f, 0.0f, 0.0f };
+    light1.GetComponent<dev::LightComponent>().intensity = 1.0f;
+}
+
 void SceneTestApp::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
@@ -193,6 +214,20 @@ void SceneTestApp::DrawImGui()
     {
         ImGui::Indent();
         dev::DrawEntityUI<dev::NameComponent, dev::ACESTonemappingComponent>(scene.GetRegistry(), postProcessing);
+        ImGui::Unindent();
+    }
+
+    if(ImGui::CollapsingHeader("Light"))
+    {
+        ImGui::Indent();
+        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::LightComponent>(scene.GetRegistry(), light);
+        ImGui::Unindent();
+    }
+
+    if(ImGui::CollapsingHeader("Light1"))
+    {
+        ImGui::Indent();
+        dev::DrawEntityUI<dev::NameComponent, dev::TransformComponent, dev::LightComponent>(scene.GetRegistry(), light1);
         ImGui::Unindent();
     }
     

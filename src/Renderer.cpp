@@ -11,7 +11,8 @@ Renderer::Renderer()
     }
     catch(const std::runtime_error& error)
     {
-        LLGL::Log::Errorf("Error: Render system loading failed: %s", error.what());
+        LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError,
+                          "Error: Render system loading failed: %s", error.what());
         return;
     }
 
@@ -71,7 +72,8 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
         commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
         commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
 
-        commandBuffer->SetPipelineState(*pipeline);
+        if(pipeline)
+            commandBuffer->SetPipelineState(*pipeline);
 
         for(auto const& [key, val] : resources)
             commandBuffer->SetResource(key, *val);
@@ -118,9 +120,13 @@ LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::fi
     if(const LLGL::Report* report = shader->GetReport())
     {
         if(report->HasErrors())
-            LLGL::Log::Errorf("Shader compile errors:\n\t%s\n%s", path.filename().string().c_str(), report->GetText());
+            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError, 
+                              "Shader compile errors:\n\t%s\n%s",
+                                      path.filename().string().c_str(), report->GetText());
         else
-            LLGL::Log::Errorf("Shader compile warnings:\n\t%s\n%s", path.filename().string().c_str(), report->GetText());
+            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdWarning, 
+                              "Shader compile warnings:\n\t%s\n%s",
+                                      path.filename().string().c_str(), report->GetText());
     }
 
     return shader;
@@ -155,6 +161,7 @@ LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolutio
 LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader)
 {
     LLGL::PipelineLayoutDescriptor layoutDesc;
+
     layoutDesc.bindings =
     {
         { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },

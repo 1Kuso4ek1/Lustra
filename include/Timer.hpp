@@ -2,6 +2,8 @@
 #include <chrono>
 #include <string_view>
 
+#include <LLGL/Log.h>
+
 namespace dev
 {
 

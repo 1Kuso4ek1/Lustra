@@ -29,6 +29,8 @@ private:
     void CreateCubeEntity();
     void CreateCameraEntity();
     void CreatePostProcessingEntity();
+    void CreateLightEntity();
+    void CreateLight1Entity();
     
     void DrawImGui();
     void Draw();
@@ -38,7 +40,7 @@ private:
     glm::vec3 axis{ 0.0f, 1.0f, 0.0f };
     float angle = 0.0f;
 
-    dev::Entity entity, camera, postProcessing;
+    dev::Entity entity, camera, postProcessing, light, light1;
 
     dev::Scene scene;
 

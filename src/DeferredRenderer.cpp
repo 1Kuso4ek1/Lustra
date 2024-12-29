@@ -45,8 +45,14 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution)
                 { "gPosition", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
                 { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
                 { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
+                { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 4 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
-            }
+            },
+            .uniforms = 
+            {
+                { "numLights", LLGL::UniformType::Int1 },
+                { "cameraPosition", LLGL::UniformType::Float3 }
+            }            
         },
         LLGL::GraphicsPipelineDescriptor
         {
@@ -58,7 +64,9 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution)
     );
 }
 
-void DeferredRenderer::Draw(LLGL::RenderTarget* renderTarget)
+void DeferredRenderer::Draw(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+                            std::function<void(LLGL::CommandBuffer*)> setUniforms,
+                            LLGL::RenderTarget* renderTarget)
 {
     Renderer::Get().Begin();
 
@@ -71,10 +79,13 @@ void DeferredRenderer::Draw(LLGL::RenderTarget* renderTarget)
             { 0, gBufferPosition },
             { 1, gBufferAlbedo },
             { 2, gBufferNormal },
-            { 3, TextureManager::Get().GetAnisotropySampler() }
+            { 3, resources.at(3) },
+            { 4, TextureManager::Get().GetAnisotropySampler() }
         },
         [&](auto commandBuffer)
         {
+            setUniforms(commandBuffer);
+
             rect->Draw(commandBuffer);
         },
         rectPipeline,

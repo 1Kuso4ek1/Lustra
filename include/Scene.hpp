@@ -12,7 +12,7 @@ namespace dev
 
 class Entity;
 
-class Scene : public EventListener
+class Scene
 {
 public:
     Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>());
@@ -23,8 +23,6 @@ public:
 
     void Update(float deltaTime);
     void Draw();
-
-    void OnEvent(Event& event) override;
 
     Entity CreateEntity();
 
@@ -46,9 +44,12 @@ private:
 private:
     struct Light
     {
-        glm::vec3 position  __attribute__ ((aligned(16))); // Uniform buffer padding
-        glm::vec3 direction __attribute__ ((aligned(16)));
-        glm::vec3 color     __attribute__ ((aligned(16)));
+        // Uniform buffer padding //
+        // | //
+        // V //
+        alignas(16) glm::vec3 position;
+        alignas(16) glm::vec3 direction;
+        alignas(16) glm::vec3 color;
         
         float intensity, cutoff, outerCutoff;
     };

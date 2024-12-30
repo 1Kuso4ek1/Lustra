@@ -74,7 +74,7 @@ struct ProceduralSkyComponent
 {
     ProceduralSkyComponent();
 
-    float time = 100.0f, cirrus = 0.3f, cumulus = 0.6f;
+    float time = 100.0f, cirrus = 0.0f, cumulus = 0.0f;
 
     // Maybe it will be better to pass pipeline as a separate component?
     LLGL::PipelineState* pipeline;
@@ -146,7 +146,7 @@ inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity enti
 {
     if(ImGui::CollapsingHeader("ProceduralSkyComponent"))
     {
-        ImGui::DragFloat("Time", &component.time, 0.05f, 0.0f, 1000.0f);
+        ImGui::DragFloat("Time", &component.time, 0.1f, 0.0f, 1000.0f);
         ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
         ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
     }

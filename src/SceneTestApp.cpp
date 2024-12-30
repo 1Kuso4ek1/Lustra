@@ -6,7 +6,7 @@ SceneTestApp::SceneTestApp()
 
     dev::ScopedTimer timer("Engine initialization");
 
-    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, false);
+    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, true);
 
     if(!dev::Renderer::Get().IsInit())
         return;

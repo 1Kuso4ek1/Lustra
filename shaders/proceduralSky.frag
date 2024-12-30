@@ -2,8 +2,6 @@
 
 #version 450 core
 
-uniform sampler2D cubemap;
-
 in vec3 vertex;
 in vec3 sun;
 
@@ -51,7 +49,7 @@ float fbm(vec3 p)
 
 void main()
 {
-    vec3 position = normalize(vertex);
+    vec3 position = normalize(vertex) + vec3(0.0, 0.1, 0.0);
 
     if(position.y < -0.4)
         position.y = -0.4;
@@ -61,22 +59,29 @@ void main()
     float rayleigh = 3.0 / (8.0 * 3.14) * (1.0 + mu * mu);
     vec3 mie = (Kr + Km * (1.0 - g * g) / (2.0 + g * g) / pow(1.0 + g * g - 2.0 * g * mu, 1.5)) / (Br + Bm);
 
-    vec3 day_extinction = exp(-exp(-((position.y + sun.y * 4.0) * (exp(-position.y * 16.0) + 0.1) / 80.0) / Br) * (exp(-position.y * 16.0) + 0.1) * Kr / Br) * exp(-position.y * exp(-position.y * 8.0 ) * 4.0) * exp(-position.y * 2.0) * 4.0;
-    vec3 night_extinction = vec3(1.0 - exp(sun.y)) * 0.2;
+    vec3 day_extinction = exp(-exp(-((position.y + sun.y * 4.0) * (exp(-position.y * 16.0) + 0.1) / 80.0) / Br) *
+                         (exp(-position.y * 16.0) + 0.1) * Kr / Br) * exp(-position.y * exp(-position.y * 8.0 ) * 4.0) * exp(-position.y * 2.0) * 4.0;
+                         
+    vec3 night_extinction = vec3(1.0 - exp(sun.y)) * 0.05;
     vec3 extinction = mix(day_extinction, night_extinction, -sun.y * 0.2 + 0.5);
-    fragColor.rgb = rayleigh * mie * extinction;
+    fragColor.rgb = rayleigh * mie * clamp(extinction, vec3(0.0), vec3(1.0));
+
+    position -= vec3(0.0, 0.1, 0.0);
 
     // Cirrus Clouds
-    float density = smoothstep(1.0 - cirrus, 1.0, fbm(position.xyz / position.y * 2.0)) * 0.3;
-    fragColor.rgb = mix(fragColor.rgb, extinction * 4.0, density * max(position.y, 0.0));
-
-    // Cumulus Clouds
-    for (int i = 0; i < 3; i++)
+    if(cirrus > 0.0)
     {
-        float density = smoothstep(1.0 - cumulus, 1.0, fbm((0.7 + float(i) * 0.01) * position.xyz / position.y));
-        fragColor.rgb = mix(fragColor.rgb, extinction * density * 5.0, min(density, 1.0) * max(position.y, 0.0));
+        float density = smoothstep(1.0 - cirrus, 1.0, fbm(position.xyz / position.y * 2.0)) * 0.3;
+        fragColor.rgb = mix(fragColor.rgb, extinction * 4.0, density * max(position.y, 0.0));
     }
 
-    // Dithering Noise
-    fragColor.rgb += noise(position * 1000) * 0.01;
+    // Cumulus Clouds
+    if(cumulus > 0.0)
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            float density = smoothstep(1.0 - cumulus, 1.0, fbm((0.7 + float(i) * 0.01) * position.xyz / position.y));
+            fragColor.rgb = mix(fragColor.rgb, extinction * density * 5.0, min(density, 1.0) * max(position.y, 0.0));
+        }
+    }
 }

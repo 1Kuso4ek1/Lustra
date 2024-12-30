@@ -50,6 +50,8 @@ void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
 
 void Renderer::Begin()
 {
+    renderPassCounter = 0;
+
     commandBuffer->Begin();
 }
 
@@ -70,11 +72,17 @@ void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers
     {
         swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
         
-        commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
-        commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
-
         if(pipeline)
+        {
+            commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
+
+            if(renderPassCounter == 0)
+                commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
+
             commandBuffer->SetPipelineState(*pipeline);
+
+            renderPassCounter++;
+        }
 
         for(auto const& [key, val] : resources)
             commandBuffer->SetResource(key, *val);

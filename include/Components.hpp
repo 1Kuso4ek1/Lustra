@@ -70,6 +70,23 @@ struct ACESTonemappingComponent
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
+struct ProceduralSkyComponent
+{
+    ProceduralSkyComponent();
+
+    float time = 100.0f, cirrus = 0.3f, cumulus = 0.6f;
+
+    // Maybe it will be better to pass pipeline as a separate component?
+    LLGL::PipelineState* pipeline;
+
+    std::function<void(LLGL::CommandBuffer*)> setUniforms;
+};
+
+struct HDRISkyComponent
+{
+    HDRISkyComponent() = default;
+};
+
 using Drawable = std::tuple<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>;
 
 inline void DrawComponentUI(NameComponent& component, entt::entity entity)
@@ -122,6 +139,16 @@ inline void DrawComponentUI(ACESTonemappingComponent& component, entt::entity en
     if(ImGui::CollapsingHeader("ACESTonemappingComponent"))
     {
         ImGui::DragFloat("Exposure", &component.exposure, 0.05f, 0.0f, 100.0f);
+    }
+}
+
+inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity entity)
+{
+    if(ImGui::CollapsingHeader("ProceduralSkyComponent"))
+    {
+        ImGui::DragFloat("Time", &component.time, 0.05f, 0.0f, 1000.0f);
+        ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
+        ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
     }
 }
 

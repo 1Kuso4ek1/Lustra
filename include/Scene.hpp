@@ -30,11 +30,27 @@ public:
 
 private:
     void SetupLightsBuffer();
+    void UpdateLightsBuffer();
 
     void SetupCamera();
     void SetupLights();
 
-    void RenderMeshes(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline);
+    void RenderMeshes();
+    void RenderSky(LLGL::RenderTarget* renderTarget);
+
+    void MeshRenderPass(
+        MeshComponent mesh,
+        MeshRendererComponent meshRenderer,
+        PipelineComponent pipeline,
+        LLGL::RenderTarget* renderTarget
+    );
+    void ProceduralSkyRenderPass(
+        MeshComponent mesh,
+        ProceduralSkyComponent sky,
+        LLGL::RenderTarget* renderTarget
+    );
+
+    void RenderResult(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
     void ApplyPostProcessing();
 

@@ -6,7 +6,7 @@ SceneTestApp::SceneTestApp()
 
     dev::ScopedTimer timer("Engine initialization");
 
-    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, true);
+    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, false);
 
     if(!dev::Renderer::Get().IsInit())
         return;
@@ -88,6 +88,7 @@ void SceneTestApp::CreateEntities()
     CreatePostProcessingEntity();
     CreateLightEntity();
     CreateLight1Entity();
+    CreateSkyEntity();
 }
 
 void SceneTestApp::CreateCubeEntity()
@@ -126,6 +127,15 @@ void SceneTestApp::CreateCameraEntity()
     cameraScript.start = []() {};
     cameraScript.update = [&](dev::Entity entity, float deltaTime)
     {
+        static auto lerp = [](float a, float b, float t)
+        {
+            return a + t * (b - a);
+        };
+
+        static float speed = 0.0f;
+
+        static glm::vec3 movement = glm::vec3(0.0f);
+
         if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
         {
             dev::Mouse::SetCursorVisible(false);
@@ -133,20 +143,35 @@ void SceneTestApp::CreateCameraEntity()
             auto& transform = entity.GetComponent<dev::TransformComponent>();
             auto rotation = glm::quat(glm::radians(transform.rotation));
 
+            glm::vec3 input = glm::vec3(0.0f);
+
             if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::W))
-                transform.position -= rotation * glm::vec3(0.0f, 0.0f, 0.001f);
+                input -= rotation * glm::vec3(0.0f, 0.0f, 1.0f);
             if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S))
-                transform.position += rotation * glm::vec3(0.0f, 0.0f, 0.001f);
+                input += rotation * glm::vec3(0.0f, 0.0f, 1.0f);
             if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::A))
-                transform.position -= rotation * glm::vec3(0.001f, 0.0f, 0.0f);
+                input -= rotation * glm::vec3(1.0f, 0.0f, 0.0f);
             if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
-                transform.position += rotation * glm::vec3(0.001f, 0.0f, 0.0f);
+                input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+
+            if(glm::length(input) > 0.1f)
+            {
+                speed = lerp(speed, 3.0f, 0.01f);
+                movement = input;
+            }
+            else
+                speed = lerp(speed, 0.0f, 0.01f);
+
+            if(speed > 0.0f)
+                transform.position += glm::normalize(movement) * deltaTime * speed;
 
             glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
             glm::vec2 delta = center - dev::Mouse::GetPosition();
 
             transform.rotation.x += delta.y / 100.0f;
             transform.rotation.y += delta.x / 100.0f;
+
+            transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
 
             dev::Mouse::SetPosition(center);
         }
@@ -182,6 +207,17 @@ void SceneTestApp::CreateLight1Entity()
     light1.GetComponent<dev::LightComponent>().intensity = 1.0f;
 }
 
+void SceneTestApp::CreateSkyEntity()
+{
+    sky = scene.CreateEntity();
+
+    sky.AddComponent<dev::NameComponent>().name = "Sky";
+    sky.AddComponent<dev::MeshComponent>().meshes.push_back(std::make_shared<dev::Mesh>());
+    sky.GetComponent<dev::MeshComponent>().meshes[0]->CreateCube();
+
+    sky.AddComponent<dev::ProceduralSkyComponent>();
+}
+
 void SceneTestApp::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
@@ -192,19 +228,22 @@ void SceneTestApp::DrawImGui()
 
     ImGui::Begin("Scene");
 
-    static std::vector<dev::Entity> list { entity, camera, postProcessing, light, light1 };
+    static std::vector<dev::Entity> list { entity, camera, postProcessing, light, light1, sky };
 
     for(auto entity : list)
     {
-        if(ImGui::CollapsingHeader(entity.GetComponent<dev::NameComponent>().name.c_str()))
+        if(ImGui::TreeNodeEx(entity.GetComponent<dev::NameComponent>().name.c_str()))
         {
             ImGui::Indent();
             dev::DrawEntityUI<dev::NameComponent,
                               dev::TransformComponent,
                               dev::CameraComponent,
                               dev::LightComponent,
-                              dev::ACESTonemappingComponent>(scene.GetRegistry(), entity);
+                              dev::ACESTonemappingComponent,
+                              dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
             ImGui::Unindent();
+
+            ImGui::TreePop();
         }
     }
     

@@ -40,29 +40,11 @@ void Scene::Draw()
     SetupCamera();
     SetupLights();
 
-    auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
-
     Renderer::Get().Begin();
 
-    Renderer::Get().RenderPass(
-        [&](auto commandBuffer)
-        {
-            commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
-        }, {}, [](auto){}, nullptr
-    );
+    UpdateLightsBuffer();
 
-    for(auto entity : view)
-    {
-        auto [transform, mesh, meshRenderer, pipeline] = 
-                view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
-
-        Renderer::Get().GetMatrices()->PushMatrix();
-        Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
-
-        RenderMeshes(mesh, meshRenderer, pipeline);
-
-        Renderer::Get().GetMatrices()->PopMatrix();
-    }
+    RenderMeshes();
     
     Renderer::Get().End();
 
@@ -94,6 +76,16 @@ void Scene::SetupLightsBuffer()
     lightsBuffer = Renderer::Get().CreateBuffer(lightBufferDesc);
 
     lights.reserve(maxLights);
+}
+
+void Scene::UpdateLightsBuffer()
+{
+    Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
+        }, {}, [](auto){}, nullptr
+    );
 }
 
 void Scene::SetupCamera()
@@ -145,7 +137,49 @@ void Scene::SetupLights()
     }
 }
 
-void Scene::RenderMeshes(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline)
+void Scene::RenderMeshes()
+{
+    auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
+
+    for(auto entity : view)
+    {
+        auto [transform, mesh, meshRenderer, pipeline] = 
+                view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
+
+        Renderer::Get().GetMatrices()->PushMatrix();
+        Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
+
+        MeshRenderPass(mesh, meshRenderer, pipeline, renderer->GetPrimaryRenderTarget());
+
+        Renderer::Get().GetMatrices()->PopMatrix();
+    }
+}
+
+void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
+{
+    auto hdriSkyView = registry.view<MeshComponent, MeshRendererComponent, PipelineComponent, HDRISkyComponent>();
+
+    if(hdriSkyView.begin() != hdriSkyView.end())
+    {
+        auto [mesh, meshRenderer, pipeline] = 
+            hdriSkyView.get<MeshComponent, MeshRendererComponent, PipelineComponent>(*hdriSkyView.begin());
+
+        MeshRenderPass(mesh, meshRenderer, pipeline, renderTarget);
+
+        return;
+    }
+
+    auto proceduralSkyView = registry.view<MeshComponent, ProceduralSkyComponent>();
+
+    if(proceduralSkyView.begin() != proceduralSkyView.end())
+    {
+        auto [mesh, sky] = proceduralSkyView.get<MeshComponent, ProceduralSkyComponent>(*proceduralSkyView.begin());
+
+        ProceduralSkyRenderPass(mesh, sky, renderTarget);
+    }
+}
+
+void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline, LLGL::RenderTarget* renderTarget)
 {
     for(size_t i = 0; i < mesh.meshes.size(); i++)
     {
@@ -174,33 +208,64 @@ void Scene::RenderMeshes(MeshComponent mesh, MeshRendererComponent meshRenderer,
     }
 }
 
-void Scene::ApplyPostProcessing()
+void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent sky, LLGL::RenderTarget* renderTarget)
 {
-    auto acesView = registry.view<ACESTonemappingComponent>();
+    Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            mesh.meshes[0]->BindBuffers(commandBuffer);
+        },
+        {
+            { 0, Renderer::Get().GetMatricesBuffer() }
+        },
+        [&](auto commandBuffer)
+        {
+            sky.setUniforms(commandBuffer);
+            
+            mesh.meshes[0]->Draw(commandBuffer);
+        },
+        sky.pipeline,
+        renderTarget
+    );
+}
 
-    auto uniforms = [&](auto commandBuffer)
+void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
+{
+    static auto uniforms = [&](auto commandBuffer)
     {
         auto numLights = lights.size();
         commandBuffer->SetUniforms(0, &numLights, sizeof(numLights));
         commandBuffer->SetUniforms(1, &cameraPosition, sizeof(cameraPosition));
     };
 
+    Renderer::Get().Begin();
+
+    RenderSky(renderTarget);
+
+    renderer->Draw(
+        { { 3, lightsBuffer } },
+        uniforms,
+        renderTarget
+    );
+
+    Renderer::Get().End();
+
+    Renderer::Get().Submit();
+}
+
+void Scene::ApplyPostProcessing()
+{
+    auto acesView = registry.view<ACESTonemappingComponent>();
+
     if(acesView->begin() == acesView->end())
     {
-        renderer->Draw(
-            { { 3, lightsBuffer } },
-            uniforms
-        );
+        RenderResult();
         return;
     }
 
     auto postProcessing = *acesView->begin();
 
-    renderer->Draw(
-        { { 3, lightsBuffer } },
-        uniforms,
-        postProcessing.postProcessing->GetRenderTarget()
-    );
+    RenderResult(postProcessing.postProcessing->GetRenderTarget());
 
     postProcessing.postProcessing->Apply(
         {

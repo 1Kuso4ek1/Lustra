@@ -22,11 +22,13 @@ public: // Public methods
     void Begin(); // Start writing to the command buffer
     void End(); // End writing to the command buffer
 
-    void RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
-                    const std::unordered_map<uint32_t, LLGL::Resource*>& resources, // A map of resources { binding, Resource_ptr }
-                    std::function<void(LLGL::CommandBuffer*)> draw, // Call the draw function
-                    LLGL::PipelineState* pipeline,
-                    LLGL::RenderTarget* renderTarget = nullptr);
+    void RenderPass(
+        std::function<void(LLGL::CommandBuffer*)> setupBuffers, // Set vert/ind/static buffers with CommandBuffer
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources, // A map of resources { binding, Resource_ptr }
+        std::function<void(LLGL::CommandBuffer*)> draw, // Call the draw function
+        LLGL::PipelineState* pipeline,
+        LLGL::RenderTarget* renderTarget = nullptr
+    );
 
     void Submit();
     void Present();
@@ -72,6 +74,8 @@ private: // Private methods
     void SetupBuffers();
 
 private: // Private members
+    uint64_t renderPassCounter = 0;
+
     LLGL::RenderSystemPtr renderSystem;
 
     LLGL::SwapChain* swapChain{};

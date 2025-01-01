@@ -34,8 +34,10 @@ ScopedTimer::ScopedTimer(std::string_view name) : name(name) {}
 
 ScopedTimer::~ScopedTimer()
 {
-    LLGL::Log::Printf(LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue, 
-                      "%s took %d ms\n", name.data(), timer.GetElapsedMilliseconds());
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue, 
+        "%s took %d ms\n", name.data(), timer.GetElapsedMilliseconds()
+    );
 }
 
 }

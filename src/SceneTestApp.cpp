@@ -26,6 +26,21 @@ SceneTestApp::SceneTestApp()
     scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
 
     CreateEntities();
+
+
+    dev::AssetManager::Get().AddLoader<dev::DummyAsset, dev::DummyAssetLoader>();
+
+    auto dummy = dev::AssetManager::Get().Load<dev::DummyAsset>("/some/stupid/path");
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
+        "Dummy asset value: %d\n",
+        dummy->data
+    );
+
+    dummy = dev::AssetManager::Get().Load<dev::DummyAsset>("/some/stupid/path");
+
+    auto dummy1 = dev::AssetManager::Get().Load<dev::AnotherDummyAsset>("/some/stupid/path");
 }
 
 SceneTestApp::~SceneTestApp()

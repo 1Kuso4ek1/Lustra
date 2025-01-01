@@ -11,19 +11,33 @@ Renderer::Renderer()
     }
     catch(const std::runtime_error& error)
     {
-        LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError,
-                          "Error: Render system loading failed: %s", error.what());
+        LLGL::Log::Errorf(
+            LLGL::Log::ColorFlags::StdError,
+            "Error: Render system loading failed: %s", error.what()
+        );
         return;
     }
 
+    const LLGL::RendererInfo& info = renderSystem->GetRendererInfo();
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue,
+        "Render system:\n");
+    
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Blue,
+        "*  Graphics API:       %s\n"
+        "*  Device:             %s\n"
+        "*  Vendor:             %s\n"
+        "*  Shading language:   %s\n"
+        "\n",
+        info.rendererName.c_str(),
+        info.deviceName.c_str(),
+        info.vendorName.c_str(),
+        info.shadingLanguageName.c_str()
+    );
+
     matrices = std::make_shared<Matrices>();
-}
-
-Renderer& Renderer::Get()
-{
-    static Renderer instance;
-
-    return instance;
 }
 
 void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)

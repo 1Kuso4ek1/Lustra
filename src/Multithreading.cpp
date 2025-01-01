@@ -3,13 +3,6 @@
 namespace dev
 {
 
-Multithreading& Multithreading::Get()
-{
-    static Multithreading instance;
-    
-    return instance;
-}
-
 void Multithreading::Update()
 {
     if(jobs.empty())

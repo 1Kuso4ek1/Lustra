@@ -1,37 +1,73 @@
 #pragma once
-#include <AssetHandle.hpp>
+#include <AssetLoader.hpp>
 #include <Multithreading.hpp>
 
 #include <LLGL/Log.h>
 #include <LLGL/Texture.h>
 
 #include <filesystem>
+#include <typeindex>
 
 namespace dev
 {
 
-class AssetManager
+class AssetManager : public Singleton<AssetManager>
 {
 public:
-    static AssetManager& Get();
-
-public:
     template<class T>
-    AssetHandle<T> Load(const std::filesystem::path& path);
+    std::shared_ptr<T> Load(const std::filesystem::path& path)
+    {
+        auto it = assets.find(path);
+
+        if(it != assets.end())
+        {
+            auto asset = *(it->second);
+
+            if(typeid(T) == typeid(asset))
+            {
+                LLGL::Log::Printf(
+                    LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
+                    "Asset %s already loaded.\n",
+                    path.string().c_str()
+                );
+
+                return std::static_pointer_cast<T>(it->second);
+            }
+        }
+
+        auto& loader = loaders[std::type_index(typeid(T))];
+
+        if(!loader)
+        {
+            LLGL::Log::Errorf(
+                LLGL::Log::ColorFlags::StdError,
+                "No loader found for asset type %s\n", typeid(T).name()
+            );
+            return nullptr;
+        }
+
+        auto asset = loader->Load(path);
+
+        assets[path] = asset;
+
+        return std::static_pointer_cast<T>(asset);
+    }
 
     template<class T>
-    AssetHandle<T> Get(uint64_t id);
+    void Unload(const std::filesystem::path& path)
+    {
+        assets.erase(path);
+    }
 
-    template<class T>
-    void Unload(uint64_t id);
+    template<class AssetType, class LoaderType>
+    void AddLoader()
+    {
+        loaders[typeid(AssetType)] = &LoaderType::Get();
+    }
 
 private:
-    AssetManager() {};
-
-private:
-    uint64_t idCounter = 0;
-
-    std::unordered_map<uint64_t, AssetHandle<LLGL::Texture*>> textures;
+    std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> assets;
+    std::unordered_map<std::type_index, AssetLoader*> loaders;
 };
 
 }

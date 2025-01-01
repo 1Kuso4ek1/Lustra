@@ -1,4 +1,6 @@
 #pragma once
+#include <Singleton.hpp>
+
 #include <vector>
 #include <future>
 
@@ -7,11 +9,8 @@ using namespace std::chrono_literals;
 namespace dev
 {
 
-class Multithreading
+class Multithreading : public Singleton<Multithreading>
 {
-public:
-    static Multithreading& Get();
-
 public:
     void Update();
 
@@ -21,9 +20,6 @@ public:
     void AddMainThreadJob(std::function<void()> job);
 
     size_t GetJobsNum() const;
-
-private:
-    Multithreading() {};
 
 private:
     std::vector<std::future<void>> jobs;

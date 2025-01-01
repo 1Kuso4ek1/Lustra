@@ -4,12 +4,6 @@
 namespace dev
 {
 
-EventManager& EventManager::Get()
-{
-    static EventManager instance;
-    return instance;
-}
-
 void EventManager::AddListener(Event::Type eventType, EventListener* listener)
 {
     listeners[eventType].push_back(listener);

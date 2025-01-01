@@ -21,12 +21,12 @@ TextureManager::TextureManager()
     defaultTexture = Renderer::Get().CreateTexture(defaultTexture.textureDesc, &defaultTexture.imageView);
 }
 
-TextureManager& TextureManager::Get()
+/* TextureManager& TextureManager::Get()
 {
     static TextureManager instance;
     
     return instance;
-}
+} */
 
 std::shared_ptr<TextureHandle> TextureManager::LoadTexture(const std::filesystem::path& path, bool separateThread)
 {

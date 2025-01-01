@@ -60,11 +60,11 @@ void main()
     vec3 mie = (Kr + Km * (1.0 - g * g) / (2.0 + g * g) / pow(1.0 + g * g - 2.0 * g * mu, 1.5)) / (Br + Bm);
 
     vec3 day_extinction = exp(-exp(-((position.y + sun.y * 4.0) * (exp(-position.y * 16.0) + 0.1) / 80.0) / Br) *
-                         (exp(-position.y * 16.0) + 0.1) * Kr / Br) * exp(-position.y * exp(-position.y * 8.0 ) * 4.0) * exp(-position.y * 2.0) * 4.0;
+                         (exp(-position.y * 16.0) + 0.1) * Kr / Br) * exp(-position.y * exp(-position.y * 8.0 ) * 4.0) * exp(-position.y * 2.0);
                          
     vec3 night_extinction = vec3(1.0 - exp(sun.y)) * 0.05;
-    vec3 extinction = mix(day_extinction, night_extinction, -sun.y * 0.2 + 0.5);
-    fragColor.rgb = rayleigh * mie * clamp(extinction, vec3(0.0), vec3(1.0));
+    vec3 extinction = mix(clamp(day_extinction, vec3(0.0), vec3(1.0)), night_extinction, -sun.y * 0.2 + 0.5);
+    fragColor.rgb = rayleigh * mie * extinction;
 
     position -= vec3(0.0, 0.1, 0.0);
 
@@ -85,3 +85,48 @@ void main()
         }
     }
 }
+
+// Another possible implementation
+// https://www.shadertoy.com/view/4tVSRt
+/* const float coeiff = 0.25;
+const vec3 totalSkyLight = vec3(0.3, 0.5, 1.0);
+
+vec3 mie(float dist, vec3 sunL)
+{
+    return max(exp(-pow(dist, 0.25)) * sunL - 0.4, 0.0);
+}
+
+vec3 getSky(vec3 position, vec3 sunPosition)
+{   
+    float sunDistance = distance(position, sunPosition);
+	
+	float scatterMult = clamp(sunDistance, 0.0, 1.0);
+	float sun = clamp(1.0 - smoothstep(0.01, 0.011, scatterMult), 0.0, 1.0);
+	
+	float dist = position.y;
+	dist = (coeiff * mix(scatterMult, 1.0, dist)) / dist;
+    
+    vec3 mieScatter = mie(sunDistance, vec3(1.0));
+	
+	vec3 color = (dist * totalSkyLight);
+    
+    color = max(color, 0.0);
+    
+	color = max(mix(pow(color, 1.0 - color),
+	                    color / (2.0 * color + 0.5 - color),
+                        clamp(sunPosition.y * 2.0, 0.0, 1.0)), 0.0)
+	                    + sun + mieScatter;
+	
+	color *= (pow(1.0 - scatterMult, 10.0) * 10.0) + 1.0;
+	
+	float underscatter = distance(sunPosition.y * 0.5 + 0.5, 1.0);
+	
+	color = mix(color, vec3(0.0), clamp(underscatter, 0.0, 1.0));
+	
+	return color;	
+}
+
+void main()
+{
+    fragColor = vec4(getSky(normalize(vertex), sun), 1.0);
+} */

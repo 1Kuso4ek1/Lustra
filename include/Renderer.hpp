@@ -1,6 +1,8 @@
 #pragma once
-#include <LLGL/Surface.h>
 #include <Utils.hpp>
+#include <Singleton.hpp>
+
+#include <LLGL/Surface.h>
 
 #include <filesystem>
 #include <functional>
@@ -10,11 +12,8 @@
 namespace dev
 {
 
-class Renderer
+class Renderer : public Singleton<Renderer>
 {
-public: // Get the singleton instance
-    static Renderer& Get();
-
 public: // Public methods
     void InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen = false, int samples = 1);
     void InitSwapChain(std::shared_ptr<LLGL::Surface> surface);
@@ -62,7 +61,7 @@ public: // Public methods
 private: // Singleton-related
     Renderer();
 
-    std::unique_ptr<Renderer> instance;
+    friend class Singleton<Renderer>;
 
 private: // Private methods
     void LoadRenderSystem(const LLGL::RenderSystemDescriptor& desc);

@@ -1,6 +1,7 @@
 #pragma once
 #include <Utils.hpp>
 #include <Multithreading.hpp>
+#include <Singleton.hpp>
 
 namespace dev
 {
@@ -30,11 +31,8 @@ struct TextureHandle // For multithreaded loading
     LLGL::ImageView imageView;
 };
 
-class TextureManager
+class TextureManager final : public Singleton<TextureManager>
 {
-public:
-    static TextureManager& Get();
-
 public:
     std::shared_ptr<TextureHandle> LoadTexture(const std::filesystem::path& path, bool separateThread = true);
 
@@ -45,6 +43,8 @@ public:
 
 private:
     TextureManager();
+
+    friend class Singleton<TextureManager>;
 
 private:
     LLGL::Sampler* anisotropySampler{};

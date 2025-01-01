@@ -11,6 +11,9 @@
 #include <Mouse.hpp>
 
 #include <ImGuiManager.hpp>
+#include <ComponentsUI.hpp>
+
+#include <AssetManager.hpp>
 
 class SceneTestApp : public dev::Application
 {

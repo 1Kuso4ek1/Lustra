@@ -183,10 +183,11 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
 {
     for(size_t i = 0; i < mesh.meshes.size(); i++)
     {
-        auto material = TextureManager::Get().GetDefaultTexture();
+        //auto material = TextureManager::Get().GetDefaultTexture();
+        auto material = AssetManager::Get().Load<TextureAsset>("");
 
         if(meshRenderer.materials.size() > i)
-            material = meshRenderer.materials[i].get();
+            material = meshRenderer.materials[i];
 
         Renderer::Get().RenderPass(
             [&](auto commandBuffer)
@@ -196,7 +197,7 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
             {
                 { 0, Renderer::Get().GetMatricesBuffer() },
                 { 1, material->texture },
-                { 2, TextureManager::Get().GetAnisotropySampler() }
+                { 2, material->sampler }
             },
             [&](auto commandBuffer)
             {
@@ -270,7 +271,7 @@ void Scene::ApplyPostProcessing()
     postProcessing.postProcessing->Apply(
         {
             { 0, postProcessing.postProcessing->GetFrame() },
-            { 1, TextureManager::Get().GetAnisotropySampler() }
+            { 1, AssetManager::Get().Load<TextureAsset>("")->sampler }
         },
         postProcessing.setUniforms,
         Renderer::Get().GetSwapChain()

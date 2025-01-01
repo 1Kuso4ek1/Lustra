@@ -13,6 +13,8 @@ CubeApp::CubeApp()
 
     dev::Renderer::Get().InitSwapChain(window);
 
+    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>();
+
     LoadShaders();
     LoadTextures();
 
@@ -77,8 +79,8 @@ void CubeApp::LoadShaders()
 
 void CubeApp::LoadTextures()
 {
-    texture = dev::TextureManager::Get().LoadTexture("../resources/textures/tex.jpg");
-    sampler = dev::TextureManager::Get().GetAnisotropySampler();
+    texture = dev::AssetManager::Get().Load<dev::TextureAsset>("../resources/textures/tex.jpg");
+    sampler = texture->sampler;
 }
 
 void CubeApp::InitImGui()

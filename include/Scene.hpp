@@ -2,6 +2,7 @@
 #include <Components.hpp>
 #include <Renderer.hpp>
 #include <DeferredRenderer.hpp>
+#include <AssetManager.hpp>
 
 #include <entt/entt.hpp>
 

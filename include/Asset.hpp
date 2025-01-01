@@ -3,21 +3,18 @@
 namespace dev
 {
 
-class Asset
+struct Asset
 {
-public:
     virtual ~Asset() = default;
 };
 
-class DummyAsset : public Asset
+struct DummyAsset : public Asset
 {
-public:
     int data = 0;
 };
 
-class AnotherDummyAsset : public Asset
+struct AnotherDummyAsset : public Asset
 {
-public:
     int data = 0;
 };
 

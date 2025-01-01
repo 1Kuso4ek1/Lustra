@@ -71,8 +71,6 @@ void DeferredRenderer::Draw(const std::unordered_map<uint32_t, LLGL::Resource*>&
                             std::function<void(LLGL::CommandBuffer*)> setUniforms,
                             LLGL::RenderTarget* renderTarget)
 {
-    /* Renderer::Get().Begin(); */
-
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
@@ -83,7 +81,7 @@ void DeferredRenderer::Draw(const std::unordered_map<uint32_t, LLGL::Resource*>&
             { 1, gBufferAlbedo },
             { 2, gBufferNormal },
             { 3, resources.at(3) },
-            { 4, TextureManager::Get().GetAnisotropySampler() }
+            { 4, AssetManager::Get().Load<TextureAsset>("")->sampler }
         },
         [&](auto commandBuffer)
         {
@@ -94,10 +92,6 @@ void DeferredRenderer::Draw(const std::unordered_map<uint32_t, LLGL::Resource*>&
         rectPipeline,
         renderTarget
     );
-
-    /* Renderer::Get().End();
-
-    Renderer::Get().Submit(); */
 }
 
 void DeferredRenderer::OnEvent(Event& event)

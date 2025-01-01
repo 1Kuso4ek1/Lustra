@@ -1,8 +1,10 @@
 #pragma once
 #include <Application.hpp>
-#include <TextureManager.hpp>
-
 #include <Window.hpp>
+#include <Multithreading.hpp>
+
+#include <TextureLoader.hpp>
+#include <AssetManager.hpp>
 
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
@@ -45,7 +47,7 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    std::shared_ptr<dev::TextureHandle> texture;
+    std::shared_ptr<dev::TextureAsset> texture;
     LLGL::Sampler* sampler{};
 
     std::shared_ptr<dev::Matrices> matrices;

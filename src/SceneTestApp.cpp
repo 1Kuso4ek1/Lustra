@@ -15,6 +15,8 @@ SceneTestApp::SceneTestApp()
 
     dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
+    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>();
+
     LoadShaders();
     LoadTextures();
 
@@ -26,21 +28,6 @@ SceneTestApp::SceneTestApp()
     scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
 
     CreateEntities();
-
-
-    dev::AssetManager::Get().AddLoader<dev::DummyAsset, dev::DummyAssetLoader>();
-
-    auto dummy = dev::AssetManager::Get().Load<dev::DummyAsset>("/some/stupid/path");
-
-    LLGL::Log::Printf(
-        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
-        "Dummy asset value: %d\n",
-        dummy->data
-    );
-
-    dummy = dev::AssetManager::Get().Load<dev::DummyAsset>("/some/stupid/path");
-
-    auto dummy1 = dev::AssetManager::Get().Load<dev::AnotherDummyAsset>("/some/stupid/path");
 }
 
 SceneTestApp::~SceneTestApp()
@@ -93,7 +80,7 @@ void SceneTestApp::LoadShaders()
 
 void SceneTestApp::LoadTextures()
 {
-    texture = dev::TextureManager::Get().LoadTexture("../resources/textures/tex.jpg");
+    texture = dev::AssetManager::Get().Load<dev::TextureAsset>("../resources/textures/tex.jpg");
 }
 
 void SceneTestApp::CreateEntities()

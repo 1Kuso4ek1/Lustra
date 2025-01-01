@@ -1,8 +1,9 @@
 #pragma once
 #include <Mesh.hpp>
-#include <TextureManager.hpp>
 #include <RendererBase.hpp>
 #include <EventManager.hpp>
+#include <TextureAsset.hpp>
+#include <AssetManager.hpp>
 
 namespace dev
 {

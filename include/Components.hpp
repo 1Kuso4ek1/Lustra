@@ -1,9 +1,9 @@
 #pragma once
-#include <TextureManager.hpp>
 #include <Mesh.hpp>
 #include <ImGuiManager.hpp>
 #include <Camera.hpp>
 #include <PostProcessing.hpp>
+#include <TextureAsset.hpp>
 
 #include <entt/entt.hpp>
 
@@ -33,7 +33,7 @@ struct MeshComponent
 
 struct MeshRendererComponent
 {
-    std::vector<std::shared_ptr<TextureHandle>> materials;
+    std::vector<std::shared_ptr<TextureAsset>> materials;
 };
 
 struct PipelineComponent

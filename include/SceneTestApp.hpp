@@ -1,6 +1,5 @@
 #pragma once
 #include <Application.hpp>
-#include <TextureManager.hpp>
 
 #include <Scene.hpp>
 #include <Entity.hpp>
@@ -13,6 +12,7 @@
 #include <ImGuiManager.hpp>
 #include <ComponentsUI.hpp>
 
+#include <TextureLoader.hpp>
 #include <AssetManager.hpp>
 
 class SceneTestApp : public dev::Application
@@ -59,7 +59,7 @@ private:
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    std::shared_ptr<dev::TextureHandle> texture;
+    std::shared_ptr<dev::TextureAsset> texture;
 
     std::shared_ptr<dev::Matrices> matrices;
 };

@@ -18,3 +18,6 @@
 [submodule "libraries/entt"]
 	path = libraries/entt
 	url = https://github.com/skypjack/entt
+[submodule "libraries/assimp"]
+	path = libraries/assimp
+	url = https://github.com/assimp/assimp

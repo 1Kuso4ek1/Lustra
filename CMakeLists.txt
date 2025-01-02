@@ -12,17 +12,36 @@ set(LLGL_BUILD_RENDERER_NULL OFF)
 set(LLGL_BUILD_RENDERER_OPENGL ON)
 set(LLGL_GL_ENABLE_DSA_EXT ON)
 
-add_subdirectory(libraries/glfw)
-add_subdirectory(libraries/glm)
-add_subdirectory(libraries/LLGL)
+set(ASSIMP_NO_EXPORT ON)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF)
 
-set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
-set(EXECUTABLE_OUTPUT_PATH ${OUTPUT_DIR} CACHE PATH "Build directory" FORCE)
-set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIR} CACHE PATH "Build directory" FORCE)
+set(OUTPUT_DIR ${CMAKE_BINARY_DIR})
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
 
 file(GLOB ENGINE_SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
 file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
-file(GLOB ENGINE_INCLUDE_DIRS "include" "include/*" "include/*/*")
+
+set(
+    ENGINE_INCLUDE_DIRS
+    
+    include
+    include/Assets
+    include/Assets/Loaders
+    include/Core
+    include/Events
+    include/Graphics
+    include/ImGui
+    include/Input
+    include/Scene
+    include/TestApps
+)
+
+set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
 
 set(
     INCLUDE_DIRS
@@ -33,6 +52,7 @@ set(
     libraries/glfw/include
     libraries/LLGL/include
     libraries/entt/src
+    libraries/assimp/include
 
     ${ENGINE_INCLUDE_DIRS}
 )
@@ -55,7 +75,7 @@ add_library(
 )
 
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})
-target_link_libraries(Engine LLGL Threads::Threads stdc++fs glm glfw)
+target_link_libraries(Engine assimp LLGL Threads::Threads stdc++fs glm glfw)
 
 add_executable(
     LLGLTest
@@ -69,3 +89,8 @@ include_directories(${INCLUDE_DIRS})
 
 target_include_directories(LLGLTest PUBLIC include)
 target_link_libraries(LLGLTest Engine)
+
+add_subdirectory(libraries/glfw)
+add_subdirectory(libraries/glm)
+add_subdirectory(libraries/LLGL)
+add_subdirectory(libraries/assimp)

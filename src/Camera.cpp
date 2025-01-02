@@ -8,6 +8,11 @@ Camera::Camera()
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 }
 
+Camera::~Camera()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+}
+
 void Camera::SetPerspective()
 {
     projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);

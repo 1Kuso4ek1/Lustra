@@ -10,7 +10,7 @@ glm::mat4 TransformComponent::GetTransform() const
             * glm::scale(glm::mat4(1.0f), scale);
 }
 
-ACESTonemappingComponent::ACESTonemappingComponent()
+ACESTonemappingComponent::ACESTonemappingComponent() : ComponentBase("ACESTonemappingComponent")
 {
     postProcessing = std::make_shared<PostProcessing>(
         LLGL::PipelineLayoutDescriptor
@@ -40,7 +40,7 @@ ACESTonemappingComponent::ACESTonemappingComponent()
     };
 }
 
-ProceduralSkyComponent::ProceduralSkyComponent()
+ProceduralSkyComponent::ProceduralSkyComponent() : ComponentBase("ProceduralSkyComponent")
 {
     pipeline = Renderer::Get().CreatePipelineState(
         LLGL::PipelineLayoutDescriptor

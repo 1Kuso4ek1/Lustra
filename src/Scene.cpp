@@ -53,6 +53,11 @@ void Scene::Draw()
     ApplyPostProcessing();
 }
 
+void Scene::RemoveEntity(const Entity& entity)
+{
+    registry.destroy(entity);
+}
+
 Entity Scene::CreateEntity()
 {
     Entity entity{ registry.create(), this };
@@ -153,6 +158,17 @@ void Scene::RenderMeshes()
 
         Renderer::Get().GetMatrices()->PopMatrix();
     }
+
+    if(view.begin() == view.end())
+        Renderer::Get().RenderPass(
+            [](auto){}, {}, 
+            [](auto commandBuffer)
+            {
+                commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
+            },
+            nullptr,
+            renderer->GetPrimaryRenderTarget()
+        );
 }
 
 void Scene::RenderSky(LLGL::RenderTarget* renderTarget)

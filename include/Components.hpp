@@ -12,13 +12,25 @@ namespace dev
 
 class Entity;
 
-struct NameComponent
+struct ComponentBase
 {
+    ComponentBase(const std::string_view& componentName) : componentName(componentName) {}
+    virtual ~ComponentBase() = default;
+
+    std::string_view componentName;
+};
+
+struct NameComponent : public ComponentBase
+{
+    NameComponent() : ComponentBase("NameComponent") {}
+
     std::string name;
 };
 
-struct TransformComponent
+struct TransformComponent : public ComponentBase
 {
+    TransformComponent() : ComponentBase("TransformComponent") {}
+
     glm::vec3 position = { 0.0f, 0.0f, 0.0f };
     glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
     glm::vec3 scale =    { 1.0f, 1.0f, 1.0f };
@@ -26,40 +38,52 @@ struct TransformComponent
     glm::mat4 GetTransform() const;
 };
 
-struct MeshComponent
+struct MeshComponent : public ComponentBase
 {
+    MeshComponent() : ComponentBase("MeshComponent") {}
+
     std::vector<std::shared_ptr<Mesh>> meshes;
 };
 
-struct MeshRendererComponent
+struct MeshRendererComponent : public ComponentBase
 {
+    MeshRendererComponent() : ComponentBase("MeshRendererComponent") {}
+
     std::vector<std::shared_ptr<TextureAsset>> materials;
 };
 
-struct PipelineComponent
+struct PipelineComponent : public ComponentBase
 {
+    PipelineComponent() : ComponentBase("PipelineComponent") {}
+
     LLGL::PipelineState* pipeline;
 };
 
-struct CameraComponent
+struct CameraComponent : public ComponentBase
 {
+    CameraComponent() : ComponentBase("CameraComponent") {}
+
     Camera camera;
 };
 
-struct LightComponent
+struct LightComponent : public ComponentBase
 {
+    LightComponent() : ComponentBase("LightComponent") {}
+
     glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 
     float intensity = 1.0f, cutoff = 0.0f, outerCutoff = 0.0f;
 };
 
-struct ScriptComponent
+struct ScriptComponent : public ComponentBase
 {
+    ScriptComponent() : ComponentBase("ScriptComponent") {}
+
     std::function<void()> start;
     std::function<void(Entity self, float)> update;
 };
 
-struct ACESTonemappingComponent
+struct ACESTonemappingComponent : public ComponentBase
 {
     ACESTonemappingComponent();
 
@@ -70,7 +94,7 @@ struct ACESTonemappingComponent
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
-struct ProceduralSkyComponent
+struct ProceduralSkyComponent : public ComponentBase
 {
     ProceduralSkyComponent();
 
@@ -82,9 +106,9 @@ struct ProceduralSkyComponent
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
-struct HDRISkyComponent
+struct HDRISkyComponent : public ComponentBase
 {
-    HDRISkyComponent() = default;
+    HDRISkyComponent() : ComponentBase("HDRISkyComponent") {}
 };
 
 }

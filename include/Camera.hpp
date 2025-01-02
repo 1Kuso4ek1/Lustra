@@ -16,6 +16,7 @@ class Camera : public EventListener
 {
 public:
     Camera();
+    ~Camera();
 
     void SetPerspective();
     void SetOrthographic(float left, float right, float bottom, float top);

@@ -9,10 +9,13 @@ namespace dev
 class PostProcessing : public EventListener
 {
 public:
-    PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc,
-                   const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
-                   bool newRenderTarget = true,
-                   bool registerEvent = true);
+    PostProcessing(
+        const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc,
+        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+        bool newRenderTarget = true,
+        bool registerEvent = true
+    );
+    ~PostProcessing();
 
     void OnEvent(Event& event) override;
 

@@ -67,9 +67,16 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution, bool regist
     );
 }
 
-void DeferredRenderer::Draw(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-                            std::function<void(LLGL::CommandBuffer*)> setUniforms,
-                            LLGL::RenderTarget* renderTarget)
+DeferredRenderer::~DeferredRenderer()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+}
+
+void DeferredRenderer::Draw(
+    const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+    std::function<void(LLGL::CommandBuffer*)> setUniforms,
+    LLGL::RenderTarget* renderTarget
+)
 {
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)

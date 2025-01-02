@@ -3,11 +3,13 @@
 namespace dev
 {
 
-PostProcessing::PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc,
-                               LLGL::GraphicsPipelineDescriptor pipelineDesc,
-                               const LLGL::Extent2D& resolution,
-                               bool newRenderTarget,
-                               bool registerEvent)
+PostProcessing::PostProcessing(
+    const LLGL::PipelineLayoutDescriptor& layoutDesc,
+    LLGL::GraphicsPipelineDescriptor pipelineDesc,
+    const LLGL::Extent2D& resolution,
+    bool newRenderTarget,
+    bool registerEvent
+)
 {
     rect = std::make_shared<Mesh>();
     rect->CreatePlane();
@@ -32,6 +34,11 @@ PostProcessing::PostProcessing(const LLGL::PipelineLayoutDescriptor& layoutDesc,
     }
 
     rectPipeline = Renderer::Get().CreatePipelineState(layoutDesc, pipelineDesc);
+}
+
+PostProcessing::~PostProcessing()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
 }
 
 void PostProcessing::OnEvent(Event& event)

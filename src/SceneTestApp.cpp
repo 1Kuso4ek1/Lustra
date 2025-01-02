@@ -108,7 +108,8 @@ void SceneTestApp::CreateCubeEntity()
     script.start = []() {};
     script.update = [](dev::Entity entity, float deltaTime)
     {
-        entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
+        if(entity.HasComponent<dev::TransformComponent>())
+            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
     };
 }
 
@@ -234,15 +235,29 @@ void SceneTestApp::DrawImGui()
 
     for(auto entity : list)
     {
-        if(ImGui::TreeNodeEx(entity.GetComponent<dev::NameComponent>().name.c_str()))
+        std::string name = (entity.HasComponent<dev::NameComponent>() ? entity.GetComponent<dev::NameComponent>().name : "Entity");
+
+        if(ImGui::TreeNodeEx(name.c_str()))
         {
             ImGui::Indent();
             dev::DrawEntityUI<dev::NameComponent,
-                              dev::TransformComponent,
-                              dev::CameraComponent,
-                              dev::LightComponent,
-                              dev::ACESTonemappingComponent,
-                              dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
+                            dev::TransformComponent,
+                            dev::CameraComponent,
+                            dev::LightComponent,
+                            dev::ACESTonemappingComponent,
+                            dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
+            ImGui::Separator();
+            
+            if(ImGui::Button("Remove"))
+            {
+                // remove the entity from std::vector list
+                auto it = std::find(list.begin(), list.end(), (entt::entity)entity);
+                if (it != list.end())
+                    list.erase(it);
+
+                scene.RemoveEntity(entity);
+            }
+
             ImGui::Unindent();
 
             ImGui::TreePop();

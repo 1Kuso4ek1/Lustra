@@ -25,6 +25,8 @@ public:
     void Update(float deltaTime);
     void Draw();
 
+    void RemoveEntity(const Entity& entity);
+
     Entity CreateEntity();
 
     entt::registry& GetRegistry();

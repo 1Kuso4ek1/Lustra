@@ -3,12 +3,6 @@
 namespace dev
 {
 
-ImGuiManager& ImGuiManager::Get()
-{
-    static ImGuiManager instance;
-    return instance;
-}
-
 void ImGuiManager::Init(GLFWwindow* window, std::filesystem::path fontPath)
 {
     IMGUI_CHECKVERSION();

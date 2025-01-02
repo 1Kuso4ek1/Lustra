@@ -1,4 +1,6 @@
 #pragma once
+#include <Singleton.hpp>
+
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
@@ -11,19 +13,13 @@
 namespace dev
 {
 
-class ImGuiManager
+class ImGuiManager : public Singleton<ImGuiManager>
 {
-public:
-    static ImGuiManager& Get();
-
 public:
     void Init(GLFWwindow* window, std::filesystem::path fontPath = {});
     void NewFrame();
     void Render();
     void Destroy();
-
-private:
-    ImGuiManager() = default;
 
 private:
     void SetupStyle();

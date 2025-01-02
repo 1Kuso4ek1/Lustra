@@ -1,4 +1,7 @@
 #pragma once
+
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <LLGL/LLGL.h>
 #include <LLGL/Utils/VertexFormat.h>
 #include <LLGL/Utils/Utility.h>

@@ -41,4 +41,6 @@ private:
     std::vector<uint32_t> indices;
 };
 
+using MeshPtr = std::shared_ptr<Mesh>;
+
 }

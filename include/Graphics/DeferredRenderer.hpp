@@ -33,7 +33,7 @@ private:
     LLGL::RenderTarget* gBuffer;
     LLGL::PipelineState* gBufferPipeline;
 
-    std::shared_ptr<Mesh> rect;
+    MeshPtr rect;
     LLGL::PipelineState* rectPipeline;
 };
 

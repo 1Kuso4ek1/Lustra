@@ -30,7 +30,7 @@ protected:
     LLGL::Texture* frame;
     LLGL::RenderTarget* renderTarget;
 
-    std::shared_ptr<Mesh> rect;
+    MeshPtr rect;
     LLGL::PipelineState* rectPipeline;
 };
 

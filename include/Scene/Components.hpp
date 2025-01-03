@@ -42,7 +42,7 @@ struct MeshComponent : public ComponentBase
 {
     MeshComponent() : ComponentBase("MeshComponent") {}
 
-    std::vector<std::shared_ptr<Mesh>> meshes;
+    std::vector<MeshPtr> meshes;
 };
 
 struct MeshRendererComponent : public ComponentBase

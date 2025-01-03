@@ -16,11 +16,12 @@ SceneTestApp::SceneTestApp()
     dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
     dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>();
+    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>();
 
     LoadShaders();
     LoadTextures();
 
-    (mesh = std::make_shared<dev::Mesh>())->CreateCube();
+    mesh = dev::AssetManager::Get().Load<dev::ModelAsset>("cube")->meshes[0];
 
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
     matrices = dev::Renderer::Get().GetMatrices();
@@ -99,8 +100,8 @@ void SceneTestApp::CreateCubeEntity()
 
     entity.AddComponent<dev::NameComponent>().name = "Cube";
     entity.AddComponent<dev::TransformComponent>();
-    entity.AddComponent<dev::MeshComponent>().meshes.push_back(mesh);
-    entity.AddComponent<dev::MeshRendererComponent>().materials.push_back(texture);
+    entity.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("../resources/ak-47.fbx")->meshes;
+    entity.AddComponent<dev::MeshRendererComponent>().materials = { texture, texture };
     entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
     
     auto& script = entity.AddComponent<dev::ScriptComponent>();

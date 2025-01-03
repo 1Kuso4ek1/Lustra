@@ -13,6 +13,7 @@
 #include <ComponentsUI.hpp>
 
 #include <TextureLoader.hpp>
+#include <ModelLoader.hpp>
 #include <AssetManager.hpp>
 
 class SceneTestApp : public dev::Application

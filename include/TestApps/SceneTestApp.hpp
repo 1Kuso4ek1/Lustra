@@ -9,6 +9,8 @@
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
 
+#include <ImGuizmo.h>
+
 #include <ImGuiManager.hpp>
 #include <ComponentsUI.hpp>
 

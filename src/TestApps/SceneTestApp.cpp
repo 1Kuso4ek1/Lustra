@@ -109,8 +109,8 @@ void SceneTestApp::CreateCubeEntity()
     script.start = []() {};
     script.update = [](dev::Entity entity, float deltaTime)
     {
-        if(entity.HasComponent<dev::TransformComponent>())
-            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
+        /* if(entity.HasComponent<dev::TransformComponent>())
+            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime; */
     };
 }
 
@@ -226,6 +226,8 @@ void SceneTestApp::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
 
+    ImGuizmo::BeginFrame();
+
     ImGui::ShowDemoWindow();
 
     ImGui::ShowMetricsWindow();
@@ -233,25 +235,30 @@ void SceneTestApp::DrawImGui()
     ImGui::Begin("Scene");
 
     static std::vector<dev::Entity> list { entity, camera, postProcessing, light, light1, sky };
+    static dev::Entity selectedEntity;
 
     for(auto entity : list)
     {
         std::string name = (entity.HasComponent<dev::NameComponent>() ? entity.GetComponent<dev::NameComponent>().name : "Entity");
 
-        if(ImGui::TreeNodeEx(name.c_str()))
+        ImGui::PushID((uint64_t)entity);
+
+        if(ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
         {
+            if(ImGui::IsItemClicked())
+                selectedEntity = entity;
+            
             ImGui::Indent();
             dev::DrawEntityUI<dev::NameComponent,
-                            dev::TransformComponent,
-                            dev::CameraComponent,
-                            dev::LightComponent,
-                            dev::ACESTonemappingComponent,
-                            dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
+                              dev::TransformComponent,
+                              dev::CameraComponent,
+                              dev::LightComponent,
+                              dev::ACESTonemappingComponent,
+                              dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
             ImGui::Separator();
             
             if(ImGui::Button("Remove"))
             {
-                // remove the entity from std::vector list
                 auto it = std::find(list.begin(), list.end(), (entt::entity)entity);
                 if (it != list.end())
                     list.erase(it);
@@ -263,9 +270,58 @@ void SceneTestApp::DrawImGui()
 
             ImGui::TreePop();
         }
+        
+        ImGui::PopID();
+
+        if(ImGui::IsItemClicked())
+            selectedEntity = entity;
     }
     
     ImGui::End();
+
+    ImGui::Begin("ImGuizmo Controls");
+
+    static ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
+    static float snap[3] = { 1.0f, 1.0f, 1.0f };
+
+    if(ImGui::RadioButton("Translate", currentOperation == ImGuizmo::OPERATION::TRANSLATE))
+        currentOperation = ImGuizmo::OPERATION::TRANSLATE;
+    
+    ImGui::SameLine();
+    if(ImGui::RadioButton("Rotate", currentOperation == ImGuizmo::OPERATION::ROTATE))
+        currentOperation = ImGuizmo::OPERATION::ROTATE;
+    
+    ImGui::SameLine();
+    if(ImGui::RadioButton("Scale", currentOperation == ImGuizmo::OPERATION::SCALE))
+        currentOperation = ImGuizmo::OPERATION::SCALE;
+
+    ImGui::DragFloat3("Snap", snap, 0.1f, 0.0f, 45.0f);
+
+    ImGui::End();
+
+    if(selectedEntity) 
+    {
+        if(selectedEntity.HasComponent<dev::TransformComponent>())
+        {
+            auto viewMatrix = dev::Renderer::Get().GetMatrices()->GetView();
+            auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
+
+            auto modelMatrix = selectedEntity.GetComponent<dev::TransformComponent>().GetTransform();
+
+            ImGuizmo::SetRect(0, 0, window->GetContentSize().width, window->GetContentSize().height);
+
+            ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(projectionMatrix),
+                                 currentOperation, ImGuizmo::MODE::WORLD,
+                                 glm::value_ptr(modelMatrix), nullptr,
+                                 dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr);
+
+            selectedEntity.GetComponent<dev::TransformComponent>().SetTransform(modelMatrix);
+
+            ImGuizmo::Enable(true);
+        }
+    }
+    else
+        ImGuizmo::Enable(false);
 
     ImGui::Begin("Texture viewer");
 

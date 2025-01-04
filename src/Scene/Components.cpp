@@ -1,7 +1,23 @@
 #include <Components.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace dev
 {
+
+void TransformComponent::SetTransform(const glm::mat4& transform)
+{
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 position;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    
+    glm::decompose(transform, scale, rotation, position, skew, perspective);
+    
+    this->position = position;
+    this->rotation = glm::degrees(glm::eulerAngles(rotation));
+    this->scale = scale;
+}
 
 glm::mat4 TransformComponent::GetTransform() const
 {

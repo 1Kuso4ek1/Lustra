@@ -21,3 +21,6 @@
 [submodule "libraries/assimp"]
 	path = libraries/assimp
 	url = https://github.com/assimp/assimp
+[submodule "libraries/ImGuizmo"]
+	path = libraries/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo

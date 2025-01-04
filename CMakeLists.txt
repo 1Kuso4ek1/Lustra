@@ -25,6 +25,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
 
 file(GLOB ENGINE_SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
 file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
+file(GLOB IMGUIZMO_SOURCES "libraries/ImGuizmo/*.cpp")
 
 set(
     ENGINE_INCLUDE_DIRS
@@ -41,19 +42,25 @@ set(
     include/TestApps
 )
 
+set(
+    EXTERNAL_INCLUDE_DIRS
+
+    libraries/stb
+    libraries/imgui
+    libraries/imgui/backends
+    libraries/ImGuizmo
+    libraries/glfw/include
+    libraries/LLGL/include
+    libraries/entt/src
+    libraries/assimp/include
+)
+
 set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
 
 set(
     INCLUDE_DIRS
 
-    libraries/stb
-    libraries/imgui
-    libraries/imgui/backends
-    libraries/glfw/include
-    libraries/LLGL/include
-    libraries/entt/src
-    libraries/assimp/include
-
+    ${EXTERNAL_INCLUDE_DIRS}
     ${ENGINE_INCLUDE_DIRS}
 )
 
@@ -72,6 +79,7 @@ add_library(
     ${ENGINE_SOURCES}
     ${IMGUI_SOURCES}
     ${IMGUI_BACKEND_SOURCES}
+    ${IMGUIZMO_SOURCES}
 )
 
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})

@@ -220,8 +220,7 @@ void SceneTestApp::CreateSkyEntity()
     sky = scene.CreateEntity();
 
     sky.AddComponent<dev::NameComponent>().name = "Sky";
-    sky.AddComponent<dev::MeshComponent>().meshes.push_back(std::make_shared<dev::Mesh>());
-    sky.GetComponent<dev::MeshComponent>().meshes[0]->CreateCube();
+    sky.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("cube")->meshes;
 
     sky.AddComponent<dev::ProceduralSkyComponent>();
 }

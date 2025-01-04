@@ -17,7 +17,17 @@ public:
     template<class T>
     std::shared_ptr<T> Load(const std::filesystem::path& path, bool relativeToAssetsDir = false)
     {
-        auto assetPath = (relativeToAssetsDir ? assetsDirectory / path : path);
+        auto assetPath = path;
+
+        if(relativeToAssetsDir)
+        {
+            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+
+            if(relativeAssetPath != assetsRelativePaths.end())
+                assetPath = assetsDirectory / relativeAssetPath->second / path;
+            else
+                assetPath = assetsDirectory / path;
+        }
 
         auto it = assets.find(assetPath);
 
@@ -75,15 +85,17 @@ public:
     }
 
     template<class AssetType, class LoaderType>
-    void AddLoader()
+    void AddLoader(std::filesystem::path relativePath = "")
     {
         loaders[typeid(AssetType)] = &LoaderType::Get();
+        assetsRelativePaths[typeid(AssetType)] = relativePath;
     }
 
 private:
     std::filesystem::path assetsDirectory = "assets";
 
     std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> assets;
+    std::unordered_map<std::type_index, std::filesystem::path> assetsRelativePaths;
     std::unordered_map<std::type_index, AssetLoader*> loaders;
 };
 

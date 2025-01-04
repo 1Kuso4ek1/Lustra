@@ -124,7 +124,7 @@ GLFWwindow* Window::CreateWindow()
 
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-    glfwSetWindowSizeCallback(window, OnWindowResize);
+    glfwSetFramebufferSizeCallback(window, OnWindowResize);
 
     return window;
 }

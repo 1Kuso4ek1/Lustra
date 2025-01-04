@@ -32,7 +32,7 @@ private:
 
     void CreateEntities();
 
-    void CreateCubeEntity();
+    void CreateRifleEntity();
     void CreateCameraEntity();
     void CreatePostProcessingEntity();
     void CreateLightEntity();
@@ -40,14 +40,20 @@ private:
     void CreateSkyEntity();
     
     void DrawImGui();
+
+    void DrawSceneTree();
+    void DrawImGuizmoControls();
+    void DrawImGuizmo();
+    void DrawTextureViewer();
+
     void Draw();
 
-    float degrees = 0.0f;
+    ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
+    float snap[3] = { 1.0f, 1.0f, 1.0f };
 
-    glm::vec3 axis{ 0.0f, 1.0f, 0.0f };
-    float angle = 0.0f;
+    dev::Entity rifle, camera, postProcessing, light, light1, sky, selectedEntity;
 
-    dev::Entity entity, camera, postProcessing, light, light1, sky;
+    std::vector<dev::Entity> list;
 
     dev::Scene scene;
 
@@ -55,14 +61,10 @@ private:
 
     dev::Timer deltaTimeTimer, keyboardTimer;
 
-    std::shared_ptr<dev::Mesh> mesh;
-
     LLGL::PipelineState* pipeline{};
 
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
 
-    std::shared_ptr<dev::TextureAsset> texture;
-
-    std::shared_ptr<dev::Matrices> matrices;
+    std::shared_ptr<dev::TextureAsset> texture, metal, wood;
 };

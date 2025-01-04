@@ -15,20 +15,20 @@ SceneTestApp::SceneTestApp()
 
     dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
-    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>();
-    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>();
+    dev::AssetManager::Get().SetAssetsDirectory("../resources/");
+    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
+    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
 
     LoadShaders();
     LoadTextures();
 
-    mesh = dev::AssetManager::Get().Load<dev::ModelAsset>("cube")->meshes[0];
-
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
-    matrices = dev::Renderer::Get().GetMatrices();
 
     scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
 
     CreateEntities();
+
+    list = { rifle, camera, postProcessing, light, light1, sky };
 }
 
 SceneTestApp::~SceneTestApp()
@@ -81,12 +81,15 @@ void SceneTestApp::LoadShaders()
 
 void SceneTestApp::LoadTextures()
 {
-    texture = dev::AssetManager::Get().Load<dev::TextureAsset>("../resources/textures/tex.jpg");
+    texture = dev::AssetManager::Get().Load<dev::TextureAsset>("tex.jpg", true);
+
+    metal = dev::AssetManager::Get().Load<dev::TextureAsset>("Metall_ak-47_Base_Color.png", true);
+    wood = dev::AssetManager::Get().Load<dev::TextureAsset>("Wood_ak-47_Base_Color.png", true);
 }
 
 void SceneTestApp::CreateEntities()
 {
-    CreateCubeEntity();
+    CreateRifleEntity();
     CreateCameraEntity();
     CreatePostProcessingEntity();
     CreateLightEntity();
@@ -94,23 +97,23 @@ void SceneTestApp::CreateEntities()
     CreateSkyEntity();
 }
 
-void SceneTestApp::CreateCubeEntity()
+void SceneTestApp::CreateRifleEntity()
 {
-    entity = scene.CreateEntity();
+    rifle = scene.CreateEntity();
 
-    entity.AddComponent<dev::NameComponent>().name = "Cube";
-    entity.AddComponent<dev::TransformComponent>();
-    entity.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("../resources/ak-47.fbx")->meshes;
-    entity.AddComponent<dev::MeshRendererComponent>().materials = { texture, texture };
-    entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+    rifle.AddComponent<dev::NameComponent>().name = "Rifle";
+    rifle.AddComponent<dev::TransformComponent>().rotation = { -90.0f, 180.0f, 0.0f };
+    rifle.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true)->meshes;
+    rifle.AddComponent<dev::MeshRendererComponent>().materials = { wood, metal };
+    rifle.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
     
-    auto& script = entity.AddComponent<dev::ScriptComponent>();
+    auto& script = rifle.AddComponent<dev::ScriptComponent>();
 
     script.start = []() {};
     script.update = [](dev::Entity entity, float deltaTime)
     {
-        /* if(entity.HasComponent<dev::TransformComponent>())
-            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime; */
+        if(entity.HasComponent<dev::TransformComponent>() && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Q))
+            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
     };
 }
 
@@ -136,6 +139,8 @@ void SceneTestApp::CreateCameraEntity()
             return a + t * (b - a);
         };
 
+        static auto& transform = entity.GetComponent<dev::TransformComponent>();
+
         static float speed = 0.0f;
 
         static glm::vec3 movement = glm::vec3(0.0f);
@@ -144,7 +149,6 @@ void SceneTestApp::CreateCameraEntity()
         {
             dev::Mouse::SetCursorVisible(false);
 
-            auto& transform = entity.GetComponent<dev::TransformComponent>();
             auto rotation = glm::quat(glm::radians(transform.rotation));
 
             glm::vec3 input = glm::vec3(0.0f);
@@ -232,10 +236,20 @@ void SceneTestApp::DrawImGui()
 
     ImGui::ShowMetricsWindow();
 
-    ImGui::Begin("Scene");
+    DrawSceneTree();
 
-    static std::vector<dev::Entity> list { entity, camera, postProcessing, light, light1, sky };
-    static dev::Entity selectedEntity;
+    DrawImGuizmoControls();
+
+    DrawImGuizmo();
+
+    DrawTextureViewer();
+
+    dev::ImGuiManager::Get().Render();
+}
+
+void SceneTestApp::DrawSceneTree()
+{
+    ImGui::Begin("Scene");
 
     for(auto entity : list)
     {
@@ -247,7 +261,7 @@ void SceneTestApp::DrawImGui()
         {
             if(ImGui::IsItemClicked())
                 selectedEntity = entity;
-            
+
             ImGui::Indent();
             dev::DrawEntityUI<dev::NameComponent,
                               dev::TransformComponent,
@@ -278,11 +292,11 @@ void SceneTestApp::DrawImGui()
     }
     
     ImGui::End();
+}
 
+void SceneTestApp::DrawImGuizmoControls()
+{
     ImGui::Begin("ImGuizmo Controls");
-
-    static ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
-    static float snap[3] = { 1.0f, 1.0f, 1.0f };
 
     if(ImGui::RadioButton("Translate", currentOperation == ImGuizmo::OPERATION::TRANSLATE))
         currentOperation = ImGuizmo::OPERATION::TRANSLATE;
@@ -298,7 +312,10 @@ void SceneTestApp::DrawImGui()
     ImGui::DragFloat3("Snap", snap, 0.1f, 0.0f, 45.0f);
 
     ImGui::End();
+}
 
+void SceneTestApp::DrawImGuizmo()
+{
     if(selectedEntity) 
     {
         if(selectedEntity.HasComponent<dev::TransformComponent>())
@@ -322,7 +339,10 @@ void SceneTestApp::DrawImGui()
     }
     else
         ImGuizmo::Enable(false);
+}
 
+void SceneTestApp::DrawTextureViewer()
+{
     ImGui::Begin("Texture viewer");
 
     static uint32_t startIndex = 12;
@@ -352,8 +372,6 @@ void SceneTestApp::DrawImGui()
         ImGui::Image(i, ImVec2(320, 180));
     
     ImGui::End();
-
-    dev::ImGuiManager::Get().Render();
 }
 
 void SceneTestApp::Draw()

@@ -11,7 +11,10 @@ namespace dev
 class DeferredRenderer final : public RendererBase, public EventListener
 {
 public:
-    DeferredRenderer(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(), bool registerEvent = true);
+    DeferredRenderer(
+        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+        bool registerEvent = true
+    );
     ~DeferredRenderer();
 
     void Draw(

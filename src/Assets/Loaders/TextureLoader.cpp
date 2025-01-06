@@ -47,6 +47,10 @@ std::shared_ptr<Asset> TextureLoader::Load(const std::filesystem::path& path)
         if(textureAsset->imageView.data)
         {
             textureAsset->texture = Renderer::Get().CreateTexture(textureAsset->textureDesc, &textureAsset->imageView);
+
+            LLGL::OpenGL::ResourceNativeHandle nativeHandle;
+            textureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
+            textureAsset->nativeHandle = nativeHandle.id;
           
             LLGL::Log::Printf(
                 LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,

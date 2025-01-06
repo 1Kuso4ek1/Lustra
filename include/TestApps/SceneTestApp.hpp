@@ -18,7 +18,9 @@
 #include <ModelLoader.hpp>
 #include <AssetManager.hpp>
 
-class SceneTestApp : public dev::Application
+#include <LLGL/Backend/OpenGL/NativeHandle.h>
+
+class SceneTestApp : public dev::Application, public dev::EventListener
 {
 public:
     SceneTestApp();
@@ -27,6 +29,8 @@ public:
     void Run() override;
 
 private:
+    void SetupAssetManager();
+
     void LoadShaders();
     void LoadTextures();
 
@@ -38,22 +42,33 @@ private:
     void CreateLightEntity();
     void CreateLight1Entity();
     void CreateSkyEntity();
-    
+
+    void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetSwapChain()->GetResolution());
+
     void DrawImGui();
 
     void DrawSceneTree();
+    void DrawPropertiesWindow();
     void DrawImGuizmoControls();
     void DrawImGuizmo();
     void DrawTextureViewer();
+    void DrawViewport();
 
     void Draw();
 
+    void ClearScreen();
+
+    void OnEvent(dev::Event& event) override;
+
+private:
     ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
     float snap[3] = { 1.0f, 1.0f, 1.0f };
 
     dev::Entity rifle, camera, postProcessing, light, light1, sky, selectedEntity;
 
     std::vector<dev::Entity> list;
+
+    std::shared_ptr<dev::DeferredRenderer> deferredRenderer;
 
     dev::Scene scene;
 
@@ -65,6 +80,11 @@ private:
 
     LLGL::Shader* vertexShader{};
     LLGL::Shader* fragmentShader{};
+
+    GLuint nativeViewportAttachment;
+
+    LLGL::Texture* viewportAttachment{};
+    LLGL::RenderTarget* viewportRenderTarget{};
 
     std::shared_ptr<dev::TextureAsset> texture, metal, wood;
 };

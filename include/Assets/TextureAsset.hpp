@@ -5,19 +5,22 @@
 #include <LLGL/Sampler.h>
 #include <LLGL/Texture.h>
 
+#include <LLGL/Backend/OpenGL/NativeHandle.h>
+
 namespace dev
 {
 
 struct TextureAsset : public Asset
 {
     TextureAsset(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* imageView)
-        : textureDesc(textureDesc)
+        : Asset(Type::Texture), textureDesc(textureDesc)
     {
         if(imageView)
             this->imageView = *imageView;
     }
 
-    TextureAsset(LLGL::Texture* texture = {}) : texture(texture)
+    TextureAsset(LLGL::Texture* texture = {})
+        : Asset(Type::Texture), texture(texture)
     {
         textureDesc.type = LLGL::TextureType::Texture2D;
         textureDesc.format = LLGL::Format::RGBA8UNorm;
@@ -26,6 +29,8 @@ struct TextureAsset : public Asset
         imageView.format = LLGL::ImageFormat::RGBA;
         imageView.dataType = LLGL::DataType::UInt8;
     };
+
+    GLuint nativeHandle;
 
     LLGL::Texture* texture{};
     LLGL::Sampler* sampler{};

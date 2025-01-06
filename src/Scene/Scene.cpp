@@ -35,7 +35,7 @@ void Scene::Update(float deltaTime)
     });
 }
 
-void Scene::Draw()
+void Scene::Draw(LLGL::RenderTarget* renderTarget)
 {
     SetupCamera();
     SetupLights();
@@ -50,7 +50,7 @@ void Scene::Draw()
 
     Renderer::Get().Submit();
 
-    ApplyPostProcessing();
+    ApplyPostProcessing(renderTarget);
 }
 
 void Scene::RemoveEntity(const Entity& entity)
@@ -270,13 +270,13 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     Renderer::Get().Submit();
 }
 
-void Scene::ApplyPostProcessing()
+void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
 {
     auto acesView = registry.view<ACESTonemappingComponent>();
 
     if(acesView->begin() == acesView->end())
     {
-        RenderResult();
+        RenderResult(renderTarget);
         return;
     }
 
@@ -290,7 +290,7 @@ void Scene::ApplyPostProcessing()
             { 1, AssetManager::Get().Load<TextureAsset>("")->sampler }
         },
         postProcessing.setUniforms,
-        Renderer::Get().GetSwapChain()
+        renderTarget
     );
 }
     

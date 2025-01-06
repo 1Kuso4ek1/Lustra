@@ -3,7 +3,10 @@
 namespace dev
 {
 
-DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution, bool registerEvent)
+DeferredRenderer::DeferredRenderer(
+    const LLGL::Extent2D& resolution,
+    bool registerEvent
+)
 {
     if(registerEvent)
         EventManager::Get().AddListener(Event::Type::WindowResize, this);
@@ -59,7 +62,6 @@ DeferredRenderer::DeferredRenderer(const LLGL::Extent2D& resolution, bool regist
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .renderPass = Renderer::Get().GetSwapChain()->GetRenderPass(),
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
             .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/lightingPass.frag"),
             .primitiveTopology = LLGL::PrimitiveTopology::TriangleList

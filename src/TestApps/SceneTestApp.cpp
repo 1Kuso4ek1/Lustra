@@ -15,18 +15,20 @@ SceneTestApp::SceneTestApp()
 
     dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
-    dev::AssetManager::Get().SetAssetsDirectory("../resources/");
-    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
-    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
+    dev::EventManager::Get().AddListener(dev::Event::Type::WindowResize, this);
+
+    SetupAssetManager();
 
     LoadShaders();
     LoadTextures();
 
-    pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
+    deferredRenderer = std::make_shared<dev::DeferredRenderer>();
 
-    scene.SetRenderer(std::make_shared<dev::DeferredRenderer>());
+    scene.SetRenderer(deferredRenderer);
 
     CreateEntities();
+
+    CreateRenderTarget();
 
     list = { rifle, camera, postProcessing, light, light1, sky };
 }
@@ -73,10 +75,19 @@ void SceneTestApp::Run()
     }
 }
 
+void SceneTestApp::SetupAssetManager()
+{
+    dev::AssetManager::Get().SetAssetsDirectory("../resources/");
+    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
+    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
+}
+
 void SceneTestApp::LoadShaders()
 {
     vertexShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
     fragmentShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/fragment.frag");
+
+    pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
 }
 
 void SceneTestApp::LoadTextures()
@@ -193,7 +204,7 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing = scene.CreateEntity();
 
     postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
-    postProcessing.AddComponent<dev::ACESTonemappingComponent>();
+    postProcessing.AddComponent<dev::ACESTonemappingComponent>(LLGL::Extent2D{ 1280, 720 }, false);
 }
 
 void SceneTestApp::CreateLightEntity()
@@ -225,23 +236,43 @@ void SceneTestApp::CreateSkyEntity()
     sky.AddComponent<dev::ProceduralSkyComponent>();
 }
 
+void SceneTestApp::CreateRenderTarget(const LLGL::Extent2D& resolution)
+{
+    LLGL::TextureDescriptor colorAttachmentDesc =
+    {
+        .type = LLGL::TextureType::Texture2D,
+        .bindFlags = LLGL::BindFlags::ColorAttachment,
+        .format = LLGL::Format::RGBA8UNorm,
+        .extent = { resolution.width, resolution.height, 1 },
+        .mipLevels = 1,
+        .samples = 1
+    };
+
+    viewportAttachment = dev::Renderer::Get().CreateTexture(colorAttachmentDesc);
+    viewportRenderTarget = dev::Renderer::Get().CreateRenderTarget(resolution, { viewportAttachment });
+
+    LLGL::OpenGL::ResourceNativeHandle nativeHandle;
+    viewportAttachment->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
+    nativeViewportAttachment = nativeHandle.id;
+}
+
 void SceneTestApp::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
 
     ImGuizmo::BeginFrame();
 
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
     ImGui::ShowDemoWindow();
 
     ImGui::ShowMetricsWindow();
 
     DrawSceneTree();
-
+    DrawPropertiesWindow();
     DrawImGuizmoControls();
-
-    DrawImGuizmo();
-
     DrawTextureViewer();
+    DrawViewport();
 
     dev::ImGuiManager::Get().Render();
 }
@@ -261,26 +292,6 @@ void SceneTestApp::DrawSceneTree()
             if(ImGui::IsItemClicked())
                 selectedEntity = entity;
 
-            ImGui::Indent();
-            dev::DrawEntityUI<dev::NameComponent,
-                              dev::TransformComponent,
-                              dev::CameraComponent,
-                              dev::LightComponent,
-                              dev::ACESTonemappingComponent,
-                              dev::ProceduralSkyComponent>(scene.GetRegistry(), entity);
-            ImGui::Separator();
-            
-            if(ImGui::Button("Remove"))
-            {
-                auto it = std::find(list.begin(), list.end(), (entt::entity)entity);
-                if (it != list.end())
-                    list.erase(it);
-
-                scene.RemoveEntity(entity);
-            }
-
-            ImGui::Unindent();
-
             ImGui::TreePop();
         }
         
@@ -290,6 +301,36 @@ void SceneTestApp::DrawSceneTree()
             selectedEntity = entity;
     }
     
+    ImGui::End();
+}
+
+void SceneTestApp::DrawPropertiesWindow()
+{
+    ImGui::Begin("Properties");
+
+    if(selectedEntity)
+    {
+        dev::DrawEntityUI<dev::NameComponent,
+                          dev::TransformComponent,
+                          dev::CameraComponent,
+                          dev::LightComponent,
+                          dev::ACESTonemappingComponent,
+                          dev::ProceduralSkyComponent>(scene.GetRegistry(), selectedEntity);
+
+        ImGui::Separator();
+            
+        if(ImGui::Button("Remove entity"))
+        {
+            auto it = std::find(list.begin(), list.end(), (entt::entity)selectedEntity);
+            if (it != list.end())
+                list.erase(it);
+
+            scene.RemoveEntity(selectedEntity);
+        }
+    }
+    else
+        ImGui::TextDisabled("Select an entity...");
+
     ImGui::End();
 }
 
@@ -324,12 +365,33 @@ void SceneTestApp::DrawImGuizmo()
 
             auto modelMatrix = selectedEntity.GetComponent<dev::TransformComponent>().GetTransform();
 
-            ImGuizmo::SetRect(0, 0, window->GetContentSize().width, window->GetContentSize().height);
+            ImGuizmo::SetDrawlist();
+            
+            ImGuizmo::SetRect(
+                ImGui::GetWindowPos().x,
+                ImGui::GetWindowPos().y,
+                ImGui::GetWindowWidth(),
+                ImGui::GetWindowHeight()
+            );
+            
+            //ImGuizmo::SetRect(0, 0, window->GetContentSize().width, window->GetContentSize().height);
 
-            ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(projectionMatrix),
-                                 currentOperation, ImGuizmo::MODE::WORLD,
-                                 glm::value_ptr(modelMatrix), nullptr,
-                                 dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr);
+            ImGuizmo::Manipulate(
+                glm::value_ptr(viewMatrix),
+                glm::value_ptr(projectionMatrix),
+                currentOperation,
+                ImGuizmo::MODE::WORLD,
+                glm::value_ptr(modelMatrix),
+                nullptr,
+                dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr
+            );
+
+            /* ImGuizmo::DrawGrid(
+                glm::value_ptr(viewMatrix),
+                glm::value_ptr(projectionMatrix),
+                glm::value_ptr(glm::mat4(1.0)),
+                10.0f
+            ); */
 
             selectedEntity.GetComponent<dev::TransformComponent>().SetTransform(modelMatrix);
 
@@ -342,42 +404,97 @@ void SceneTestApp::DrawImGuizmo()
 
 void SceneTestApp::DrawTextureViewer()
 {
-    ImGui::Begin("Texture viewer");
+    ImGui::Begin("Textures");
 
-    static uint32_t startIndex = 12;
-    static uint32_t texturesCount = 5;
+    auto& assets = dev::AssetManager::Get().GetAssets();
 
-    ImGui::Text("Start index");
-    if(ImGui::Button("-") && startIndex > 1) startIndex--;
-        ImGui::SameLine();
+    for(auto const& [path, asset] : assets)
+    {
+        auto textureAsset = std::dynamic_pointer_cast<dev::TextureAsset>(asset);
 
-        ImGui::SetNextItemWidth(30); 
-        ImGui::InputScalar("##Input", ImGuiDataType_U32, &startIndex, NULL, 0);
-        
-        ImGui::SameLine();
-    if(ImGui::Button("+")) startIndex++;
+        if(textureAsset)
+        {
+            ImGui::PushID(path.string().c_str());
 
-    ImGui::Text("Textures count");
-    if(ImGui::Button("-##") && texturesCount > 1) texturesCount--;
-        ImGui::SameLine();
+            ImGui::Image(textureAsset->nativeHandle, ImVec2(128, 128));
 
-        ImGui::SetNextItemWidth(30); 
-        ImGui::InputScalar("##Input1", ImGuiDataType_U32, &texturesCount, NULL, 0);
-        
-        ImGui::SameLine();
-    if(ImGui::Button("+##")) texturesCount++;
-    
-    for(uint32_t i = startIndex; i < startIndex + texturesCount; i++)
-        ImGui::Image(i, ImVec2(320, 180));
-    
+            ImGui::PopID();
+        }
+    }
+
     ImGui::End();
+}
+
+void SceneTestApp::DrawViewport()
+{
+    static dev::Timer eventTimer;
+    static ImGuiWindowFlags flags = 0;
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGui::Begin("Viewport", nullptr, flags);
+
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    flags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
+
+    auto size = window->InnerRect.GetSize();
+    if((size.x != viewportRenderTarget->GetResolution().width || 
+        size.y != viewportRenderTarget->GetResolution().height) &&
+        eventTimer.GetElapsedSeconds() > 0.2f)
+    {
+        dev::EventManager::Get().Dispatch(
+            std::make_unique<dev::WindowResizeEvent>(
+                LLGL::Extent2D{ (uint32_t)size.x, (uint32_t)size.y }
+            )
+        );
+
+        eventTimer.Reset();
+    }
+
+    ImGui::Image(nativeViewportAttachment, window->InnerRect.GetSize());
+
+    DrawImGuizmo();
+
+    ImGui::End();
+
+    ImGui::PopStyleVar();
 }
 
 void SceneTestApp::Draw()
 {
-    scene.Draw();
+    scene.Draw(viewportRenderTarget);
+
+    ClearScreen();
 
     DrawImGui();
 
     dev::Renderer::Get().Present();
+}
+
+void SceneTestApp::ClearScreen()
+{
+    dev::Renderer::Get().Begin();
+
+    dev::Renderer::Get().RenderPass(
+        [](auto){}, {}, 
+        [](auto commandBuffer)
+        {
+            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
+        },
+        nullptr
+    );
+
+    dev::Renderer::Get().End();
+
+    dev::Renderer::Get().Submit();
+}
+
+void SceneTestApp::OnEvent(dev::Event& event)
+{
+    if(event.GetType() == dev::Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<dev::WindowResizeEvent*>(&event);
+
+        CreateRenderTarget(resizeEvent->GetSize());
+    }
 }

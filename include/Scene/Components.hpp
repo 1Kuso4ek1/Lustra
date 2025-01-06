@@ -87,7 +87,10 @@ struct ScriptComponent : public ComponentBase
 
 struct ACESTonemappingComponent : public ComponentBase
 {
-    ACESTonemappingComponent();
+    ACESTonemappingComponent(
+        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+        bool registerEvent = true
+    );
 
     float exposure = 1.0f;
 

@@ -26,7 +26,10 @@ glm::mat4 TransformComponent::GetTransform() const
             * glm::scale(glm::mat4(1.0f), scale);
 }
 
-ACESTonemappingComponent::ACESTonemappingComponent() : ComponentBase("ACESTonemappingComponent")
+ACESTonemappingComponent::ACESTonemappingComponent(
+    const LLGL::Extent2D& resolution,
+    bool registerEvent
+) : ComponentBase("ACESTonemappingComponent")
 {
     postProcessing = std::make_shared<PostProcessing>(
         LLGL::PipelineLayoutDescriptor
@@ -43,11 +46,13 @@ ACESTonemappingComponent::ACESTonemappingComponent() : ComponentBase("ACESTonema
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .renderPass = Renderer::Get().GetSwapChain()->GetRenderPass(),
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
             .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/ACES.frag"),
             .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
-        }
+        },
+        resolution,
+        true,
+        registerEvent
     );
 
     setUniforms = [&](auto commandBuffer)
@@ -56,7 +61,8 @@ ACESTonemappingComponent::ACESTonemappingComponent() : ComponentBase("ACESTonema
     };
 }
 
-ProceduralSkyComponent::ProceduralSkyComponent() : ComponentBase("ProceduralSkyComponent")
+ProceduralSkyComponent::ProceduralSkyComponent()
+    : ComponentBase("ProceduralSkyComponent")
 {
     pipeline = Renderer::Get().CreatePipelineState(
         LLGL::PipelineLayoutDescriptor

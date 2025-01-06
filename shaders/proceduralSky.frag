@@ -84,6 +84,8 @@ void main()
             fragColor.rgb = mix(fragColor.rgb, extinction * density * 5.0, min(density, 1.0) * max(position.y, 0.0));
         }
     }
+
+    fragColor.a = 1.0;
 }
 
 // Another possible implementation

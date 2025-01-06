@@ -23,7 +23,7 @@ public:
     void Start();
 
     void Update(float deltaTime);
-    void Draw();
+    void Draw(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
     void RemoveEntity(const Entity& entity);
 
@@ -55,7 +55,7 @@ private:
 
     void RenderResult(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
-    void ApplyPostProcessing();
+    void ApplyPostProcessing(LLGL::RenderTarget* renderTarget);
 
 private:
     glm::vec3 cameraPosition; // Only for shaders

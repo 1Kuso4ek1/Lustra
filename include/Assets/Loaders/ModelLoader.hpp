@@ -18,13 +18,14 @@ namespace dev
 class ModelLoader : public AssetLoader, public Singleton<ModelLoader>
 {
 public:
-    std::shared_ptr<Asset> Load(const std::filesystem::path& path) override;
+    AssetPtr Load(const std::filesystem::path& path) override;
 
 private:
     void LoadDefaultData();
 
 private:
     void ProcessNode(aiNode* node, const aiScene* scene, std::shared_ptr<ModelAsset> modelAsset);
+    void ProcessMaterial(aiMaterial* material, std::shared_ptr<ModelAsset> modelAsset);
     
     MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene);
 

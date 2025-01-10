@@ -39,4 +39,6 @@ struct TextureAsset : public Asset
     LLGL::ImageView imageView;
 };
 
+using TextureAssetPtr = std::shared_ptr<TextureAsset>;
+
 }

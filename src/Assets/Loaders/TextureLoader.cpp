@@ -6,7 +6,7 @@
 namespace dev
 {
 
-std::shared_ptr<Asset> TextureLoader::Load(const std::filesystem::path& path)
+AssetPtr TextureLoader::Load(const std::filesystem::path& path)
 {
     if(!defaultTexture)
         LoadDefaultData();

@@ -8,19 +8,12 @@ namespace dev
 
 struct ModelAsset : public Asset
 {
-    struct Material
-    {
-
-    };
-
     ModelAsset() : Asset(Type::Model) {};
-    ModelAsset(
-        std::vector<MeshPtr> meshes,
-        std::vector<std::shared_ptr<Material>> materials = {}
-    ) : Asset(Type::Model), meshes(meshes), materials(materials) {}
+    ModelAsset(std::vector<MeshPtr> meshes) : Asset(Type::Model), meshes(meshes) {}
     
     std::vector<MeshPtr> meshes;
-    std::vector<std::shared_ptr<Material>> materials;
 };
+
+using ModelAssetPtr = std::shared_ptr<ModelAsset>;
 
 }

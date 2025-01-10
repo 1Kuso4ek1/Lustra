@@ -78,7 +78,9 @@ void SceneTestApp::Run()
 void SceneTestApp::SetupAssetManager()
 {
     dev::AssetManager::Get().SetAssetsDirectory("../resources/");
+
     dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
+    dev::AssetManager::Get().AddLoader<dev::MaterialAsset, dev::MaterialLoader>("materials");
     dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
 }
 
@@ -96,6 +98,12 @@ void SceneTestApp::LoadTextures()
 
     metal = dev::AssetManager::Get().Load<dev::TextureAsset>("Metall_ak-47_Base_Color.png", true);
     wood = dev::AssetManager::Get().Load<dev::TextureAsset>("Wood_ak-47_Base_Color.png", true);
+
+    ak47Metal = dev::AssetManager::Get().Load<dev::MaterialAsset>("ak47Metal", true);
+    ak47Wood = dev::AssetManager::Get().Load<dev::MaterialAsset>("ak47Wood", true);
+
+    ak47Metal->albedo = metal;
+    ak47Wood->albedo = wood;
 }
 
 void SceneTestApp::CreateEntities()
@@ -114,8 +122,8 @@ void SceneTestApp::CreateRifleEntity()
 
     rifle.AddComponent<dev::NameComponent>().name = "Rifle";
     rifle.AddComponent<dev::TransformComponent>().rotation = { -90.0f, 180.0f, 0.0f };
-    rifle.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true)->meshes;
-    rifle.AddComponent<dev::MeshRendererComponent>().materials = { wood, metal };
+    rifle.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true);
+    rifle.AddComponent<dev::MeshRendererComponent>().materials = { ak47Wood, ak47Metal };
     rifle.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
     
     auto& script = rifle.AddComponent<dev::ScriptComponent>();
@@ -231,7 +239,7 @@ void SceneTestApp::CreateSkyEntity()
     sky = scene.CreateEntity();
 
     sky.AddComponent<dev::NameComponent>().name = "Sky";
-    sky.AddComponent<dev::MeshComponent>().meshes = dev::AssetManager::Get().Load<dev::ModelAsset>("cube")->meshes;
+    sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube");
 
     sky.AddComponent<dev::ProceduralSkyComponent>();
 }
@@ -271,7 +279,7 @@ void SceneTestApp::DrawImGui()
     DrawSceneTree();
     DrawPropertiesWindow();
     DrawImGuizmoControls();
-    DrawTextureViewer();
+    DrawAssetBrowser();
     DrawViewport();
 
     dev::ImGuiManager::Get().Render();
@@ -402,25 +410,11 @@ void SceneTestApp::DrawImGuizmo()
         ImGuizmo::Enable(false);
 }
 
-void SceneTestApp::DrawTextureViewer()
+void SceneTestApp::DrawAssetBrowser()
 {
-    ImGui::Begin("Textures");
+    ImGui::Begin("Assets");
 
-    auto& assets = dev::AssetManager::Get().GetAssets();
-
-    for(auto const& [path, asset] : assets)
-    {
-        auto textureAsset = std::dynamic_pointer_cast<dev::TextureAsset>(asset);
-
-        if(textureAsset)
-        {
-            ImGui::PushID(path.string().c_str());
-
-            ImGui::Image(textureAsset->nativeHandle, ImVec2(128, 128));
-
-            ImGui::PopID();
-        }
-    }
+    // TODO ...
 
     ImGui::End();
 }
@@ -440,7 +434,7 @@ void SceneTestApp::DrawViewport()
     auto size = window->InnerRect.GetSize();
     if((size.x != viewportRenderTarget->GetResolution().width || 
         size.y != viewportRenderTarget->GetResolution().height) &&
-        eventTimer.GetElapsedSeconds() > 0.2f)
+        eventTimer.GetElapsedSeconds() > 0.1f)
     {
         dev::EventManager::Get().Dispatch(
             std::make_unique<dev::WindowResizeEvent>(

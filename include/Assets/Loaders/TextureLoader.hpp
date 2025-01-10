@@ -10,7 +10,7 @@ namespace dev
 class TextureLoader : public AssetLoader, public Singleton<TextureLoader>
 {
 public:
-    std::shared_ptr<Asset> Load(const std::filesystem::path& path) override;
+    AssetPtr Load(const std::filesystem::path& path) override;
 
 private:
     void LoadDefaultData();

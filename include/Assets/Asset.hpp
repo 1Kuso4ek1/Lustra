@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 namespace dev
 {
@@ -9,6 +10,7 @@ struct Asset
     {
         Unknown,
         Texture,
+        Material,
         Model
     };
 
@@ -17,5 +19,7 @@ struct Asset
 
     Type type = Type::Unknown;
 };
+
+using AssetPtr = std::shared_ptr<Asset>;
 
 }

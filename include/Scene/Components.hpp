@@ -4,6 +4,8 @@
 #include <Camera.hpp>
 #include <PostProcessing.hpp>
 #include <TextureAsset.hpp>
+#include <MaterialAsset.hpp>
+#include <ModelAsset.hpp>
 
 #include <entt/entt.hpp>
 
@@ -44,14 +46,14 @@ struct MeshComponent : public ComponentBase
 {
     MeshComponent() : ComponentBase("MeshComponent") {}
 
-    std::vector<MeshPtr> meshes;
+    ModelAssetPtr model;
 };
 
 struct MeshRendererComponent : public ComponentBase
 {
     MeshRendererComponent() : ComponentBase("MeshRendererComponent") {}
 
-    std::vector<std::shared_ptr<TextureAsset>> materials;
+    std::vector<MaterialAssetPtr> materials;
 };
 
 struct PipelineComponent : public ComponentBase

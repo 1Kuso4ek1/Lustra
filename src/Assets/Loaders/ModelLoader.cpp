@@ -3,7 +3,7 @@
 namespace dev
 {
 
-std::shared_ptr<Asset> ModelLoader::Load(const std::filesystem::path& path)
+AssetPtr ModelLoader::Load(const std::filesystem::path& path)
 {
     if(!plane)
         LoadDefaultData();
@@ -60,8 +60,16 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::shared_pt
     for(uint32_t i = 0; i < node->mNumMeshes; i++)
         modelAsset->meshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
 
+    for(unsigned int i = 0; i < scene->mNumMaterials; i++)
+        ProcessMaterial(scene->mMaterials[i], modelAsset);
+
     for(uint32_t i = 0; i < node->mNumChildren; i++)
         ProcessNode(node->mChildren[i], scene, modelAsset);
+}
+
+void ModelLoader::ProcessMaterial(aiMaterial* material, std::shared_ptr<ModelAsset> modelAsset)
+{
+    // TODO ...
 }
 
 MeshPtr ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)

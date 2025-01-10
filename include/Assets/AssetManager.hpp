@@ -14,7 +14,7 @@ namespace dev
 class AssetManager : public Singleton<AssetManager>
 {
 public:
-    using AssetStorage = std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>>;
+    using AssetStorage = std::unordered_map<std::filesystem::path, AssetPtr>;
 
     template<class T>
     std::shared_ptr<T> Load(const std::filesystem::path& path, bool relativeToAssetsDir = false)
@@ -78,6 +78,24 @@ public:
     AssetStorage& GetAssets()
     {
         return assets;
+    }
+
+    template<class T>
+    void Write(std::shared_ptr<T> asset, const std::filesystem::path& path, bool relativeToAssetsDir = false)
+    {
+        auto assetPath = path;
+
+        if(relativeToAssetsDir)
+        {
+            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+
+            if(relativeAssetPath != assetsRelativePaths.end())
+                assetPath = assetsDirectory / relativeAssetPath->second / path;
+            else
+                assetPath = assetsDirectory / path;
+        }
+
+        assets[assetPath] = asset;
     }
 
     void SetAssetsDirectory(const std::filesystem::path& path)

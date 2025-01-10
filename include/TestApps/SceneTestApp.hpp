@@ -15,6 +15,7 @@
 #include <ComponentsUI.hpp>
 
 #include <TextureLoader.hpp>
+#include <MaterialLoader.hpp>
 #include <ModelLoader.hpp>
 #include <AssetManager.hpp>
 
@@ -51,7 +52,7 @@ private:
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();
     void DrawImGuizmo();
-    void DrawTextureViewer();
+    void DrawAssetBrowser();
     void DrawViewport();
 
     void Draw();
@@ -86,5 +87,6 @@ private:
     LLGL::Texture* viewportAttachment{};
     LLGL::RenderTarget* viewportRenderTarget{};
 
-    std::shared_ptr<dev::TextureAsset> texture, metal, wood;
+    dev::TextureAssetPtr texture, metal, wood;
+    dev::MaterialAssetPtr ak47Metal, ak47Wood;
 };

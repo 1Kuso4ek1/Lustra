@@ -197,10 +197,10 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 
 void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline, LLGL::RenderTarget* renderTarget)
 {
-    for(size_t i = 0; i < mesh.meshes.size(); i++)
+    for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
         //auto material = TextureManager::Get().GetDefaultTexture();
-        auto material = AssetManager::Get().Load<TextureAsset>("");
+        auto material = AssetManager::Get().Load<MaterialAsset>("");
 
         if(meshRenderer.materials.size() > i)
             material = meshRenderer.materials[i];
@@ -208,16 +208,16 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
         Renderer::Get().RenderPass(
             [&](auto commandBuffer)
             {
-                mesh.meshes[i]->BindBuffers(commandBuffer);
+                mesh.model->meshes[i]->BindBuffers(commandBuffer);
             },
             {
                 { 0, Renderer::Get().GetMatricesBuffer() },
-                { 1, material->texture },
-                { 2, material->sampler }
+                { 1, material->albedo.texture->texture },
+                { 2, material->albedo.texture->sampler }
             },
             [&](auto commandBuffer)
             {
-                mesh.meshes[i]->Draw(commandBuffer);
+                mesh.model->meshes[i]->Draw(commandBuffer);
             },
             pipeline.pipeline,
             renderer->GetPrimaryRenderTarget()
@@ -230,7 +230,7 @@ void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent s
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            mesh.meshes[0]->BindBuffers(commandBuffer);
+            mesh.model->meshes[0]->BindBuffers(commandBuffer);
         },
         {
             { 0, Renderer::Get().GetMatricesBuffer() }
@@ -239,7 +239,7 @@ void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent s
         {
             sky.setUniforms(commandBuffer);
             
-            mesh.meshes[0]->Draw(commandBuffer);
+            mesh.model->meshes[0]->Draw(commandBuffer);
         },
         sky.pipeline,
         renderTarget

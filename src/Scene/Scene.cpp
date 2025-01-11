@@ -199,7 +199,6 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
 {
     for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
-        //auto material = TextureManager::Get().GetDefaultTexture();
         auto material = AssetManager::Get().Load<MaterialAsset>("");
 
         if(meshRenderer.materials.size() > i)

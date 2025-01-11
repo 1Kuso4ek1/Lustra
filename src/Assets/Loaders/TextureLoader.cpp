@@ -97,6 +97,10 @@ void TextureLoader::LoadDefaultData()
 
     defaultTextureAsset = std::make_shared<TextureAsset>(defaultTexture);
     defaultTextureAsset->sampler = anisotropySampler;
+
+    LLGL::OpenGL::ResourceNativeHandle nativeHandle;
+    defaultTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
+    defaultTextureAsset->nativeHandle = nativeHandle.id;
 }
 
 }

@@ -19,6 +19,59 @@ inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
         component.scale = glm::vec3(1.0f);
 }
 
+inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entity)
+{
+    float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
+    int cols = std::max(1, (int)(regionWidth / 128.0f));
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+
+    ImGui::Columns(cols, nullptr, false);
+
+    for(size_t i = 0; i < component.materials.size(); i++)
+    {
+        ImGui::PushID(i);
+
+        ImGui::ImageButton("##", component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+
+        if(ImGui::BeginDragDropTarget())
+        {
+            auto payload = ImGui::AcceptDragDropPayload("MATERIAL");
+
+            if(payload)
+                component.materials[i] = *(MaterialAssetPtr*)payload->Data;
+
+            ImGui::EndDragDropTarget();
+        }
+
+        if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+        {
+            dev::MaterialAssetPtr* payload = &component.materials[i];
+            
+            ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
+            ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(64,64));
+            ImGui::Text("Material");
+
+            ImGui::EndDragDropSource();
+        }
+
+        ImGui::NextColumn();
+
+        ImGui::PopID();
+    }
+
+    ImGui::NextColumn();
+
+    ImGui::Columns(1);
+
+    ImGui::PopStyleVar();
+
+    ImGui::Separator();
+
+    if(ImGui::Button("Add Material"))
+        component.materials.push_back(component.materials.back());
+}
+
 inline void DrawComponentUI(CameraComponent& component, entt::entity entity)
 {
     if(ImGui::DragFloat("FOV", &component.camera.fov, 0.05f, 1.0f, 179.0f))
@@ -70,15 +123,19 @@ void DrawEntityUI(entt::registry& registry, entt::entity entity)
 
     auto draw = [&]<typename Component>(Component* component)
     {
-        ImGui::PushID((uint64_t)entity);
+        ImGui::PushID((entt::id_type)entity);
 
         if constexpr (HasComponentUI<Component>::value)
             if(ImGui::CollapsingHeader(component->componentName.data()))
             {
                 DrawComponentUI(*component, entity);
                 
+                ImGui::PushID(component->componentName.data());
+
                 if(ImGui::Button("Remove"))
                     registry.remove<Component>(entity);
+
+                ImGui::PopID();
             }
 
         ImGui::PopID();

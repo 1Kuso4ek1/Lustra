@@ -3,6 +3,7 @@
 #include <ImGuiManager.hpp>
 #include <Camera.hpp>
 #include <PostProcessing.hpp>
+#include <AssetManager.hpp>
 #include <TextureAsset.hpp>
 #include <MaterialAsset.hpp>
 #include <ModelAsset.hpp>
@@ -51,7 +52,10 @@ struct MeshComponent : public ComponentBase
 
 struct MeshRendererComponent : public ComponentBase
 {
-    MeshRendererComponent() : ComponentBase("MeshRendererComponent") {}
+    MeshRendererComponent() : ComponentBase("MeshRendererComponent")
+    {
+        materials.push_back(AssetManager::Get().Load<MaterialAsset>(""));
+    }
 
     std::vector<MaterialAssetPtr> materials;
 };

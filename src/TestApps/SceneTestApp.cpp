@@ -104,6 +104,20 @@ void SceneTestApp::LoadTextures()
 
     ak47Metal->albedo = metal;
     ak47Wood->albedo = wood;
+
+    fileIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/file.png", true);
+    folderIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/folder.png", true);
+    textureIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/texture.png", true);
+    materialIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/material.png", true);
+    modelIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/model.png", true);
+
+    assetIcons = 
+    {
+        { dev::Asset::Type::Texture, textureIcon },
+        { dev::Asset::Type::Material, materialIcon },
+        { dev::Asset::Type::Model, modelIcon },
+        { dev::Asset::Type::Unknown, fileIcon }
+    };
 }
 
 void SceneTestApp::CreateEntities()
@@ -244,6 +258,21 @@ void SceneTestApp::CreateSkyEntity()
     sky.AddComponent<dev::ProceduralSkyComponent>();
 }
 
+void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)
+{
+    auto entity = scene.CreateEntity();
+
+    entity.AddComponent<dev::NameComponent>().name = "Model";
+    entity.AddComponent<dev::TransformComponent>();
+    entity.AddComponent<dev::MeshComponent>().model = model;
+    entity.AddComponent<dev::MeshRendererComponent>();
+    entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+
+    selectedEntity = entity;
+
+    list.push_back(entity);
+}
+
 void SceneTestApp::CreateRenderTarget(const LLGL::Extent2D& resolution)
 {
     LLGL::TextureDescriptor colorAttachmentDesc =
@@ -272,8 +301,6 @@ void SceneTestApp::DrawImGui()
 
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
-    ImGui::ShowDemoWindow();
-
     ImGui::ShowMetricsWindow();
 
     DrawSceneTree();
@@ -293,7 +320,7 @@ void SceneTestApp::DrawSceneTree()
     {
         std::string name = (entity.HasComponent<dev::NameComponent>() ? entity.GetComponent<dev::NameComponent>().name : "Entity");
 
-        ImGui::PushID((uint64_t)entity);
+        ImGui::PushID((entt::id_type)(entt::entity)entity);
 
         if(ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
         {
@@ -316,10 +343,12 @@ void SceneTestApp::DrawPropertiesWindow()
 {
     ImGui::Begin("Properties");
 
+    // Needs more validation
     if(selectedEntity)
     {
         dev::DrawEntityUI<dev::NameComponent,
                           dev::TransformComponent,
+                          dev::MeshRendererComponent,
                           dev::CameraComponent,
                           dev::LightComponent,
                           dev::ACESTonemappingComponent,
@@ -381,8 +410,6 @@ void SceneTestApp::DrawImGuizmo()
                 ImGui::GetWindowWidth(),
                 ImGui::GetWindowHeight()
             );
-            
-            //ImGuizmo::SetRect(0, 0, window->GetContentSize().width, window->GetContentSize().height);
 
             ImGuizmo::Manipulate(
                 glm::value_ptr(viewMatrix),
@@ -394,13 +421,6 @@ void SceneTestApp::DrawImGuizmo()
                 dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr
             );
 
-            /* ImGuizmo::DrawGrid(
-                glm::value_ptr(viewMatrix),
-                glm::value_ptr(projectionMatrix),
-                glm::value_ptr(glm::mat4(1.0)),
-                10.0f
-            ); */
-
             selectedEntity.GetComponent<dev::TransformComponent>().SetTransform(modelMatrix);
 
             ImGuizmo::Enable(true);
@@ -410,11 +430,159 @@ void SceneTestApp::DrawImGuizmo()
         ImGuizmo::Enable(false);
 }
 
+// Kinda messy, clean it up
 void SceneTestApp::DrawAssetBrowser()
 {
+    auto assetsPath = dev::AssetManager::Get().GetAssetsDirectory();
+    auto selectedAssetPath = assetsPath;
+
+    static auto currentDirectory = assetsPath;
+    static std::string filter;
+    
+    auto assets = dev::AssetManager::Get().GetAssets();
+
     ImGui::Begin("Assets");
 
-    // TODO ...
+    float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
+    int cols = std::max(1, (int)(regionWidth / 128.0f));
+
+    ImGui::Text("%s", currentDirectory.c_str());
+
+    ImGui::SameLine();
+    
+    if(ImGui::Button(".."))
+        currentDirectory = currentDirectory.parent_path();
+
+    ImGui::Separator();
+
+    ImGui::InputText("Filter", &filter);
+
+    ImGui::Separator();
+
+    ImGui::Columns(cols, nullptr, false);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+
+    for(const auto& entry : std::filesystem::directory_iterator(currentDirectory))
+    {
+        ImGui::PushID(entry.path().c_str());
+
+        if(entry.is_directory())
+        {
+            if(filter.empty() || entry.path().filename().string().find(filter) != std::string::npos)
+            {
+                if(ImGui::ImageButton("##Directory", folderIcon->nativeHandle, ImVec2(128.0f, 128.0f)))
+                    currentDirectory = entry.path();
+
+                ImGui::Text("%s", entry.path().filename().string().c_str());
+
+                ImGui::NextColumn();
+            }
+        }
+        else
+        {
+            if(filter.empty() || entry.path().filename().string().find(filter) != std::string::npos)
+            {
+                auto it = assets.find(entry.path());
+                if(it != assets.end())
+                {
+                    switch(it->second->type)
+                    {
+                        case dev::Asset::Type::Texture:
+                        {
+                            auto texture = std::dynamic_pointer_cast<dev::TextureAsset>(it->second);
+                            
+                            if(ImGui::ImageButton("##Asset", texture->nativeHandle, ImVec2(128.0f, 128.0f)))
+                                break;
+
+                            break;
+                        }
+
+                        case dev::Asset::Type::Material:
+                        {
+                            auto material = std::dynamic_pointer_cast<dev::MaterialAsset>(it->second);
+                            
+                            ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+
+                            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                            {
+                                dev::MaterialAssetPtr* payload = &material;
+                                
+                                ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
+                                ImGui::Image(material->albedo.texture->nativeHandle, ImVec2(64,64));
+                                ImGui::Text("Material: %s", entry.path().filename().string().c_str());
+
+                                ImGui::EndDragDropSource();
+                            }
+
+                            break;
+                        }
+
+                        case dev::Asset::Type::Model:
+                        {
+                            auto model = std::dynamic_pointer_cast<dev::ModelAsset>(it->second);
+                            
+                            ImGui::ImageButton("##Asset", modelIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+                            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                            {
+                                dev::ModelAssetPtr* payload = &model;
+                                
+                                ImGui::SetDragDropPayload("MODEL", payload, 8);    
+                                ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
+                                ImGui::Text("Model: %s", entry.path().filename().string().c_str());
+
+                                ImGui::EndDragDropSource();
+                            }
+
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    auto assetType = dev::GetAssetType(entry.path().extension().string());
+
+                    if(ImGui::ImageButton("##Asset", assetIcons[assetType]->nativeHandle, ImVec2(128.0f, 128.0f)))
+                       selectedAssetPath = entry.path();
+
+                    if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                    {
+                        switch(assetType)
+                        {
+                            case dev::Asset::Type::Texture:
+                                dev::AssetManager::Get().Load<dev::TextureAsset>(entry.path());
+                                break;
+
+                            case dev::Asset::Type::Material:
+                                dev::AssetManager::Get().Load<dev::MaterialAsset>(entry.path());
+                                break;
+
+                            case dev::Asset::Type::Model:
+                                dev::AssetManager::Get().Load<dev::ModelAsset>(entry.path());
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                ImGui::Text("%s", entry.path().filename().string().c_str());
+
+                ImGui::NextColumn();
+            }
+        }
+
+        ImGui::PopID();
+    }
+
+    ImGui::Columns(1);
+
+    ImGui::PopStyleVar();
 
     ImGui::End();
 }
@@ -446,6 +614,16 @@ void SceneTestApp::DrawViewport()
     }
 
     ImGui::Image(nativeViewportAttachment, window->InnerRect.GetSize());
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("MODEL");
+
+        if(payload)
+            CreateModelEntity(*(dev::ModelAssetPtr*)payload->Data);
+
+        ImGui::EndDragDropTarget();
+    }
 
     DrawImGuizmo();
 

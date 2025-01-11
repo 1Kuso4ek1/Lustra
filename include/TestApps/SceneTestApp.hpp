@@ -44,6 +44,8 @@ private:
     void CreateLight1Entity();
     void CreateSkyEntity();
 
+    void CreateModelEntity(dev::ModelAssetPtr model);
+
     void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetSwapChain()->GetResolution());
 
     void DrawImGui();
@@ -87,6 +89,8 @@ private:
     LLGL::Texture* viewportAttachment{};
     LLGL::RenderTarget* viewportRenderTarget{};
 
-    dev::TextureAssetPtr texture, metal, wood;
+    dev::TextureAssetPtr texture, metal, wood, fileIcon, folderIcon, textureIcon, materialIcon, modelIcon;
     dev::MaterialAssetPtr ak47Metal, ak47Wood;
+
+    std::unordered_map<dev::Asset::Type, dev::TextureAssetPtr> assetIcons;
 };

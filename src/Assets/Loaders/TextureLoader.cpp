@@ -11,7 +11,7 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
     if(!defaultTexture)
         LoadDefaultData();
 
-    if(path.empty())
+    if(path.filename() == "default")
         return defaultTextureAsset; // Just the default texture
 
     auto textureAsset = std::make_shared<TextureAsset>(defaultTexture);

@@ -4,6 +4,7 @@
 #include <EventManager.hpp>
 #include <TextureAsset.hpp>
 #include <AssetManager.hpp>
+#include <ModelAsset.hpp>
 
 namespace dev
 {

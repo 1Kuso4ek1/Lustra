@@ -11,8 +11,7 @@ PostProcessing::PostProcessing(
     bool registerEvent
 )
 {
-    rect = std::make_shared<Mesh>();
-    rect->CreatePlane();
+    rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
     if(newRenderTarget)
     {

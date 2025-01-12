@@ -199,7 +199,7 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
 {
     for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
-        auto material = AssetManager::Get().Load<MaterialAsset>("");
+        auto material = AssetManager::Get().Load<MaterialAsset>("default", true);
 
         if(meshRenderer.materials.size() > i)
             material = meshRenderer.materials[i];
@@ -216,6 +216,8 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
             },
             [&](auto commandBuffer)
             {
+                material->SetUniforms(commandBuffer);
+
                 mesh.model->meshes[i]->Draw(commandBuffer);
             },
             pipeline.pipeline,
@@ -286,7 +288,7 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
     postProcessing.postProcessing->Apply(
         {
             { 0, postProcessing.postProcessing->GetFrame() },
-            { 1, AssetManager::Get().Load<TextureAsset>("")->sampler }
+            { 1, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         postProcessing.setUniforms,
         renderTarget

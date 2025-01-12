@@ -1,6 +1,10 @@
 #version 450 core
 
-uniform sampler2D albedo;
+uniform int albedoType;
+
+uniform sampler2D albedoTexture;
+
+uniform vec4 albedoValue;
 
 in vec3 mPosition;
 in vec3 mNormal;
@@ -13,6 +17,11 @@ layout(location = 2) out vec4 gNormal;
 void main()
 {
 	gPosition = vec4(mPosition, 1.0f);
-	gAlbedo = texture(albedo, coord);
+
+	if(albedoType == 0)
+		gAlbedo = albedoValue;
+	else
+		gAlbedo = texture(albedoTexture, coord);
+
 	gNormal = vec4(mNormal, 1.0f);
 }

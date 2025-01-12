@@ -54,7 +54,7 @@ struct MeshRendererComponent : public ComponentBase
 {
     MeshRendererComponent() : ComponentBase("MeshRendererComponent")
     {
-        materials.push_back(AssetManager::Get().Load<MaterialAsset>(""));
+        materials.push_back(AssetManager::Get().Load<MaterialAsset>("default", true));
     }
 
     std::vector<MaterialAssetPtr> materials;

@@ -32,7 +32,25 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
     {
         ImGui::PushID(i);
 
-        ImGui::ImageButton("##", component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+        if(component.materials[i]->albedo.type == dev::MaterialAsset::Property::Type::Texture)
+            ImGui::ImageButton("##Asset", component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+        else
+        {
+            ImVec4 color = ImVec4(
+                component.materials[i]->albedo.value.x,
+                component.materials[i]->albedo.value.y,
+                component.materials[i]->albedo.value.z,
+                component.materials[i]->albedo.value.w
+            );
+            
+            ImGui::PushStyleColor(ImGuiCol_Button, color);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+            
+            ImGui::Button("##Asset", ImVec2(128.0f, 128.0f));
+            
+            ImGui::PopStyleColor(3); 
+        }
 
         if(ImGui::BeginDragDropTarget())
         {

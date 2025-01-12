@@ -14,7 +14,7 @@ namespace dev
 class AssetManager : public Singleton<AssetManager>
 {
 public:
-    using AssetStorage = std::unordered_map<std::filesystem::path, AssetPtr>;
+    using AssetStorage = std::unordered_map<std::filesystem::path, std::pair<std::type_index, AssetPtr>>;
 
     template<class T>
     std::shared_ptr<T> Load(const std::filesystem::path& path, bool relativeToAssetsDir = false)
@@ -35,21 +35,11 @@ public:
 
         if(it != assets.end())
         {
-            auto asset = *(it->second);
-
-            if(typeid(T) == typeid(asset))
-            {
-                LLGL::Log::Printf(
-                    LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
-                    "Asset %s already loaded.\n",
-                    assetPath.string().c_str()
-                );
-
-                return std::static_pointer_cast<T>(it->second);
-            }
+            if(typeid(T) == it->second.first)
+                return std::static_pointer_cast<T>(it->second.second);
         }
 
-        auto& loader = loaders[std::type_index(typeid(T))];
+        auto loader = loaders[std::type_index(typeid(T))];
 
         if(!loader)
         {
@@ -57,6 +47,7 @@ public:
                 LLGL::Log::ColorFlags::StdError,
                 "No loader found for asset type %s\n", typeid(T).name()
             );
+
             return nullptr;
         }
 
@@ -65,7 +56,7 @@ public:
         if(!asset)
             return nullptr;
 
-        assets[assetPath] = asset;
+        assets.emplace(assetPath, std::pair(std::type_index(typeid(T)), asset));
 
         return std::static_pointer_cast<T>(asset);
     }

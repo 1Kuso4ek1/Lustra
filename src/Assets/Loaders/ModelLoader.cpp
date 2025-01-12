@@ -14,9 +14,9 @@ AssetPtr ModelLoader::Load(const std::filesystem::path& path)
         path.string().c_str()
     );
 
-    if(path == "plane")
+    if(path.filename() == "plane")
         return std::make_shared<ModelAsset>(ModelAsset({ plane }));
-    if(path == "cube")
+    if(path.filename() == "cube")
         return std::make_shared<ModelAsset>(ModelAsset({ cube }));
 
     auto flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights;

@@ -1,6 +1,8 @@
 #pragma once
 #include <TextureAsset.hpp>
 
+#include <LLGL/CommandBuffer.h>
+
 #include <glm/glm.hpp>
 
 namespace dev
@@ -11,8 +13,6 @@ struct MaterialAsset : public Asset
     struct Property
     {
         enum class Type { Color, Texture };
-
-        Type type = Type::Color;
 
         Property& operator=(const glm::vec4& value)
         {
@@ -30,11 +30,21 @@ struct MaterialAsset : public Asset
             return *this;
         }
 
+        Type type = Type::Color;
+
         glm::vec4 value{ 1.0f };
         TextureAssetPtr texture;
     };
 
     MaterialAsset() : Asset(Type::Material) {}
+
+    void SetUniforms(LLGL::CommandBuffer* commandBuffer)
+    {
+        commandBuffer->SetUniforms(0, &albedo.type, sizeof(albedo.type));
+
+        if(albedo.type == Property::Type::Color)
+            commandBuffer->SetUniforms(1, &albedo.value, sizeof(albedo.value));
+    }
 
     Property albedo;
     Property normal;

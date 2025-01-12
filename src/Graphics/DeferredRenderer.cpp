@@ -40,8 +40,7 @@ DeferredRenderer::DeferredRenderer(
     gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal }, gBufferDepth);
     //gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
 
-    rect = std::make_shared<Mesh>();
-    rect->CreatePlane();
+    rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
     rectPipeline = Renderer::Get().CreatePipelineState(
         LLGL::PipelineLayoutDescriptor
@@ -90,7 +89,7 @@ void DeferredRenderer::Draw(
             { 1, gBufferAlbedo },
             { 2, gBufferNormal },
             { 3, resources.at(3) },
-            { 4, AssetManager::Get().Load<TextureAsset>("")->sampler }
+            { 4, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {

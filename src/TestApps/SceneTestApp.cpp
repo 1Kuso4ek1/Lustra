@@ -253,7 +253,7 @@ void SceneTestApp::CreateSkyEntity()
     sky = scene.CreateEntity();
 
     sky.AddComponent<dev::NameComponent>().name = "Sky";
-    sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube");
+    sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
 
     sky.AddComponent<dev::ProceduralSkyComponent>();
 }
@@ -450,7 +450,7 @@ void SceneTestApp::DrawAssetBrowser()
 
     ImGui::SameLine();
     
-    if(ImGui::Button(".."))
+    if(ImGui::Button("..") && currentDirectory.has_parent_path())
         currentDirectory = currentDirectory.parent_path();
 
     ImGui::Separator();
@@ -485,91 +485,9 @@ void SceneTestApp::DrawAssetBrowser()
             {
                 auto it = assets.find(entry.path());
                 if(it != assets.end())
-                {
-                    switch(it->second->type)
-                    {
-                        case dev::Asset::Type::Texture:
-                        {
-                            auto texture = std::dynamic_pointer_cast<dev::TextureAsset>(it->second);
-                            
-                            if(ImGui::ImageButton("##Asset", texture->nativeHandle, ImVec2(128.0f, 128.0f)))
-                                break;
-
-                            break;
-                        }
-
-                        case dev::Asset::Type::Material:
-                        {
-                            auto material = std::dynamic_pointer_cast<dev::MaterialAsset>(it->second);
-                            
-                            ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
-
-                            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                            {
-                                dev::MaterialAssetPtr* payload = &material;
-                                
-                                ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
-                                ImGui::Image(material->albedo.texture->nativeHandle, ImVec2(64,64));
-                                ImGui::Text("Material: %s", entry.path().filename().string().c_str());
-
-                                ImGui::EndDragDropSource();
-                            }
-
-                            break;
-                        }
-
-                        case dev::Asset::Type::Model:
-                        {
-                            auto model = std::dynamic_pointer_cast<dev::ModelAsset>(it->second);
-                            
-                            ImGui::ImageButton("##Asset", modelIcon->nativeHandle, ImVec2(128.0f, 128.0f));
-
-                            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                            {
-                                dev::ModelAssetPtr* payload = &model;
-                                
-                                ImGui::SetDragDropPayload("MODEL", payload, 8);    
-                                ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
-                                ImGui::Text("Model: %s", entry.path().filename().string().c_str());
-
-                                ImGui::EndDragDropSource();
-                            }
-
-                            break;
-                        }
-
-                        default:
-                            break;
-                    }
-                }
+                    DrawAsset(entry.path(), it->second.second);
                 else
-                {
-                    auto assetType = dev::GetAssetType(entry.path().extension().string());
-
-                    if(ImGui::ImageButton("##Asset", assetIcons[assetType]->nativeHandle, ImVec2(128.0f, 128.0f)))
-                       selectedAssetPath = entry.path();
-
-                    if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-                    {
-                        switch(assetType)
-                        {
-                            case dev::Asset::Type::Texture:
-                                dev::AssetManager::Get().Load<dev::TextureAsset>(entry.path());
-                                break;
-
-                            case dev::Asset::Type::Material:
-                                dev::AssetManager::Get().Load<dev::MaterialAsset>(entry.path());
-                                break;
-
-                            case dev::Asset::Type::Model:
-                                dev::AssetManager::Get().Load<dev::ModelAsset>(entry.path());
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-                }
+                    DrawUnloadedAsset(entry.path());
 
                 ImGui::Text("%s", entry.path().filename().string().c_str());
 
@@ -580,11 +498,110 @@ void SceneTestApp::DrawAssetBrowser()
         ImGui::PopID();
     }
 
-    ImGui::Columns(1);
+    ImGui::Columns();
 
     ImGui::PopStyleVar();
 
     ImGui::End();
+}
+
+void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
+{
+    switch(asset->type)
+    {
+        case dev::Asset::Type::Texture:
+        {
+            auto texture = std::dynamic_pointer_cast<dev::TextureAsset>(asset);
+            
+            ImGui::ImageButton("##Asset", texture->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            break;
+        }
+
+        case dev::Asset::Type::Material:
+        {
+            auto material = std::dynamic_pointer_cast<dev::MaterialAsset>(asset);
+            
+            if(material->albedo.type == dev::MaterialAsset::Property::Type::Texture)
+                ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+            else
+            {
+                ImVec4 color = ImVec4(material->albedo.value.x, material->albedo.value.y, material->albedo.value.z, material->albedo.value.w);
+                
+                ImGui::PushStyleColor(ImGuiCol_Button, color);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+                
+                ImGui::Button("##Asset", ImVec2(128.0f, 128.0f));
+                
+                ImGui::PopStyleColor(3); 
+            }
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                dev::MaterialAssetPtr* payload = &material;
+                
+                ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
+                ImGui::Image(material->albedo.texture->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Material: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
+        case dev::Asset::Type::Model:
+        {
+            auto model = std::dynamic_pointer_cast<dev::ModelAsset>(asset);
+            
+            ImGui::ImageButton("##Asset", modelIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                dev::ModelAssetPtr* payload = &model;
+                
+                ImGui::SetDragDropPayload("MODEL", payload, 8);    
+                ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Model: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
+{
+    auto assetType = dev::GetAssetType(entry.extension().string());
+
+    ImGui::ImageButton("##Asset", assetIcons[assetType]->nativeHandle, ImVec2(128.0f, 128.0f));
+
+    if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+    {
+        switch(assetType)
+        {
+            case dev::Asset::Type::Texture:
+                dev::AssetManager::Get().Load<dev::TextureAsset>(entry);
+                break;
+
+            case dev::Asset::Type::Material:
+                dev::AssetManager::Get().Load<dev::MaterialAsset>(entry);
+                break;
+
+            case dev::Asset::Type::Model:
+                dev::AssetManager::Get().Load<dev::ModelAsset>(entry);
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 void SceneTestApp::DrawViewport()

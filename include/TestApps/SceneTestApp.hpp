@@ -54,7 +54,11 @@ private:
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();
     void DrawImGuizmo();
+
     void DrawAssetBrowser();
+    void DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset);
+    void DrawUnloadedAsset(const std::filesystem::path& entry);
+    
     void DrawViewport();
 
     void Draw();

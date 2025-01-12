@@ -2,6 +2,8 @@
 #include <Renderer.hpp>
 #include <Mesh.hpp>
 #include <EventManager.hpp>
+#include <AssetManager.hpp>
+#include <ModelAsset.hpp>
 
 namespace dev
 {

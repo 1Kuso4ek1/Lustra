@@ -14,7 +14,8 @@ private:
     void LoadDefaultData();
 
 private:
-    std::shared_ptr<MaterialAsset> defaultMaterial;
+    TextureAssetPtr defaultTexture;
+    MaterialAssetPtr defaultMaterial;
 };
 
 }

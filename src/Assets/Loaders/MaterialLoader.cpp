@@ -16,14 +16,18 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
 
     std::ofstream file(path.string());
 
-    return std::make_shared<MaterialAsset>();
+    auto material = std::make_shared<MaterialAsset>();
+
+    material->albedo.texture = defaultTexture;
+    material->albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    return material;
 }
 
 void MaterialLoader::LoadDefaultData()
 {
+    defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true);
     defaultMaterial = std::make_shared<MaterialAsset>();
-
-    auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true);
 
     defaultMaterial->albedo.texture = defaultTexture;
     defaultMaterial->albedo = { 1.0f, 1.0f, 1.0f, 1.0f };

@@ -178,7 +178,7 @@ void SceneTestApp::CreateCameraEntity()
 
         static glm::vec3 movement = glm::vec3(0.0f);
 
-        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right))
+        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right) && canMoveCamera)
         {
             dev::Mouse::SetCursorVisible(false);
 
@@ -307,6 +307,13 @@ void SceneTestApp::DrawImGui()
     DrawPropertiesWindow();
     DrawImGuizmoControls();
     DrawAssetBrowser();
+
+    if(selectedAsset)
+    {
+        if(selectedAsset->type == dev::Asset::Type::Material)
+            DrawMaterialEditor(std::static_pointer_cast<dev::MaterialAsset>(selectedAsset));
+    }
+
     DrawViewport();
 
     dev::ImGuiManager::Get().Render();
@@ -430,6 +437,28 @@ void SceneTestApp::DrawImGuizmo()
         ImGuizmo::Enable(false);
 }
 
+void SceneTestApp::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size)
+{
+    if(material->albedo.type == dev::MaterialAsset::Property::Type::Texture)
+    {
+        if(ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, size))
+            selectedAsset = material;
+    }
+    else
+    {
+        ImVec4 color = ImVec4(material->albedo.value.x, material->albedo.value.y, material->albedo.value.z, material->albedo.value.w);
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+        
+        if(ImGui::Button("##Asset", size))
+            selectedAsset = material;
+
+        ImGui::PopStyleColor(3); 
+    }
+}
+
 // Kinda messy, clean it up
 void SceneTestApp::DrawAssetBrowser()
 {
@@ -502,6 +531,8 @@ void SceneTestApp::DrawAssetBrowser()
 
     ImGui::PopStyleVar();
 
+    DrawCreateAssetMenu(currentDirectory);
+
     ImGui::End();
 }
 
@@ -515,6 +546,17 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
             
             ImGui::ImageButton("##Asset", texture->nativeHandle, ImVec2(128.0f, 128.0f));
 
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                dev::TextureAssetPtr* payload = &texture;
+                
+                ImGui::SetDragDropPayload("TEXTURE", payload, 8);    
+                ImGui::Image(texture->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Texture: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
             break;
         }
 
@@ -522,27 +564,14 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
         {
             auto material = std::dynamic_pointer_cast<dev::MaterialAsset>(asset);
             
-            if(material->albedo.type == dev::MaterialAsset::Property::Type::Texture)
-                ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
-            else
-            {
-                ImVec4 color = ImVec4(material->albedo.value.x, material->albedo.value.y, material->albedo.value.z, material->albedo.value.w);
-                
-                ImGui::PushStyleColor(ImGuiCol_Button, color);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
-                
-                ImGui::Button("##Asset", ImVec2(128.0f, 128.0f));
-                
-                ImGui::PopStyleColor(3); 
-            }
+            DrawMaterialPreview(material, { 128.0f, 128.0f });
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 dev::MaterialAssetPtr* payload = &material;
                 
                 ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
-                ImGui::Image(material->albedo.texture->nativeHandle, ImVec2(64,64));
+                DrawMaterialPreview(material, { 64.0f, 64.0f });
                 ImGui::Text("Material: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -604,6 +633,92 @@ void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
     }
 }
 
+void SceneTestApp::DrawCreateAssetMenu(const std::filesystem::path& currentDirectory)
+{
+    static std::string newMaterialName = "material";
+    static int uniqueId = 0;
+
+    static bool active = false;
+
+    if(ImGui::BeginPopupContextWindow("Create asset"))
+    {
+        if(ImGui::MenuItem("Create material"))
+            active = true;
+
+        ImGui::EndPopup();
+    }
+
+    if(active)
+        ImGui::OpenPopup("Create material");
+
+    if(ImGui::BeginPopupModal("Create material", &active, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::InputText("Material name", &newMaterialName);
+
+        if(ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            auto newMaterial = dev::AssetManager::Get().Load<dev::MaterialAsset>(currentDirectory / newMaterialName);
+            
+            newMaterialName = "material" + std::to_string(uniqueId++);
+
+            ImGui::CloseCurrentPopup();
+
+            active = false;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+
+            active = false;
+        }
+        
+        ImGui::EndPopup();
+    }
+}
+
+void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
+{
+    ImGui::Begin("Material Editor");
+    
+    ImGui::Text("Albedo:");
+
+    if(material->albedo.type == dev::MaterialAsset::Property::Type::Color)
+    {
+        ImGui::ColorEdit4("##AlbedoColor", &material->albedo.value.x);
+
+        if(ImGui::Button("Set Texture"))
+            material->albedo.type = dev::MaterialAsset::Property::Type::Texture;
+    }
+    else
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+
+        ImGui::ImageButton("##AlbedoTexture", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+
+        ImGui::PopStyleVar();
+        
+        if(ImGui::BeginDragDropTarget())
+        {
+            auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
+            
+            if(payload)
+                material->albedo.texture = *(dev::TextureAssetPtr*)payload->Data;
+
+            ImGui::EndDragDropTarget();
+        }
+
+        if(ImGui::Button("Set Color"))
+            material->albedo.type = dev::MaterialAsset::Property::Type::Color;
+    }
+
+    ImGui::Separator();
+
+    ImGui::End();
+}
+
 void SceneTestApp::DrawViewport()
 {
     static dev::Timer eventTimer;
@@ -641,6 +756,8 @@ void SceneTestApp::DrawViewport()
 
         ImGui::EndDragDropTarget();
     }
+
+    canMoveCamera = ImGui::IsWindowHovered();
 
     DrawImGuizmo();
 

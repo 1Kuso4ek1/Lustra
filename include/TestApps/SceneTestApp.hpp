@@ -55,9 +55,15 @@ private:
     void DrawImGuizmoControls();
     void DrawImGuizmo();
 
+    void DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size);
+
     void DrawAssetBrowser();
     void DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset);
     void DrawUnloadedAsset(const std::filesystem::path& entry);
+
+    void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
+
+    void DrawMaterialEditor(dev::MaterialAssetPtr material);
     
     void DrawViewport();
 
@@ -70,6 +76,8 @@ private:
 private:
     ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
     float snap[3] = { 1.0f, 1.0f, 1.0f };
+
+    bool canMoveCamera = false;
 
     dev::Entity rifle, camera, postProcessing, light, light1, sky, selectedEntity;
 
@@ -92,6 +100,8 @@ private:
 
     LLGL::Texture* viewportAttachment{};
     LLGL::RenderTarget* viewportRenderTarget{};
+
+    dev::AssetPtr selectedAsset;
 
     dev::TextureAssetPtr texture, metal, wood, fileIcon, folderIcon, textureIcon, materialIcon, modelIcon;
     dev::MaterialAssetPtr ak47Metal, ak47Wood;

@@ -1,6 +1,6 @@
 // https://github.com/shff/opengl_sky
 
-#version 450 core
+#version 460 core
 
 in vec3 vertex;
 in vec3 sun;

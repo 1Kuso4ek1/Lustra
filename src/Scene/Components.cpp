@@ -104,4 +104,147 @@ ProceduralSkyComponent::ProceduralSkyComponent()
     };
 }
 
+HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
+    : ComponentBase("HDRISkyComponent"), environmentMap(hdri)
+{
+    SetupConvertPipeline();
+    SetupSkyPipeline();
+
+    CreateCubemap(resolution);
+    CreateRenderTargets(resolution);
+
+    Convert();
+}
+
+void HDRISkyComponent::SetupConvertPipeline()
+{
+    pipelineConvert = Renderer::Get().CreatePipelineState(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
+                { "hdri", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/HDRIConvert.frag"),
+            .depth = LLGL::DepthDescriptor
+            {
+                .testEnabled = true,
+                .writeEnabled = false,
+                .compareOp = LLGL::CompareOp::LessEqual
+            },
+            .rasterizer = LLGL::RasterizerDescriptor
+            {
+                .cullMode = LLGL::CullMode::Disabled,
+                .frontCCW = true
+            }
+        }
+    );
+}
+
+void HDRISkyComponent::SetupSkyPipeline()
+{
+    pipelineSky = Renderer::Get().CreatePipelineState(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
+                { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/HDRISky.frag"),
+            .depth = LLGL::DepthDescriptor
+            {
+                .testEnabled = true,
+                .writeEnabled = false,
+                .compareOp = LLGL::CompareOp::LessEqual
+            },
+            .rasterizer = LLGL::RasterizerDescriptor
+            {
+                .cullMode = LLGL::CullMode::Disabled,
+                .frontCCW = true
+            }
+        }
+    );
+}
+
+void HDRISkyComponent::CreateCubemap(const LLGL::Extent2D& resolution)
+{
+    cubeMap = Renderer::Get().CreateTexture(
+        LLGL::TextureDescriptor
+        {
+            .type = LLGL::TextureType::TextureCubeArray,
+            .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
+            .format = LLGL::Format::RGBA16Float,
+            .extent = { resolution.width, resolution.height, 1 },
+            .arrayLayers = 6,
+            .mipLevels = 1
+        }
+    );
+}
+
+void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
+{
+    for(int i = 0; i < 6; i++)
+    {
+        renderTargets[i] = Renderer::Get().CreateRenderTarget(
+            { resolution.width, resolution.height },
+            { LLGL::AttachmentDescriptor(cubeMap, 0, i) }
+        );
+    }
+}
+
+void HDRISkyComponent::Convert()
+{
+    auto matrices = Renderer::Get().GetMatrices();
+
+    matrices->PushMatrix();
+
+    matrices->GetModel() = glm::mat4(1.0f);
+    matrices->GetProjection() = projection;
+
+    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
+    
+    for(int i = 0; i < 6; i++)
+    {
+        matrices->GetView() = views[i];
+
+        Renderer::Get().Begin();
+
+        Renderer::Get().RenderPass(
+            [&](auto commandBuffer)
+            {
+                cube->meshes[0]->BindBuffers(commandBuffer);
+            },
+            {
+                { 0, Renderer::Get().GetMatricesBuffer() },
+                { 1, environmentMap->texture },
+                { 2, environmentMap->sampler }
+            },
+            [&](auto commandBuffer)
+            {
+                cube->meshes[0]->Draw(commandBuffer);
+            },
+            pipelineConvert,
+            renderTargets[i]
+        );
+
+        Renderer::Get().End();
+        
+        Renderer::Get().Submit();
+    }
+
+    matrices->PopMatrix();
+}
+
 }

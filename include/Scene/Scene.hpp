@@ -52,6 +52,11 @@ private:
         ProceduralSkyComponent sky,
         LLGL::RenderTarget* renderTarget
     );
+    void HDRISkyRenderPass(
+        MeshComponent mesh,
+        HDRISkyComponent sky,
+        LLGL::RenderTarget* renderTarget
+    );
 
     void RenderResult(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 

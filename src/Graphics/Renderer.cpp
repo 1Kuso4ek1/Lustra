@@ -175,7 +175,7 @@ LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDes
     return renderSystem->CreateSampler(samplerDesc);
 }
 
-LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::Texture*>& colorAttachments, LLGL::Texture* depthTexture)
+LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::AttachmentDescriptor>& colorAttachments, LLGL::Texture* depthTexture)
 {
     LLGL::RenderTargetDescriptor renderTargetDesc;
     renderTargetDesc.resolution = resolution;

@@ -1,4 +1,4 @@
-#version 450 core
+#version 460 core
 
 const int maxLights = 128;
 

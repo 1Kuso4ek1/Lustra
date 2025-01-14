@@ -108,19 +108,10 @@ LLGL::Display* Window::FindResidentDisplay() const
 
 GLFWwindow* Window::CreateWindow()
 {
-    glfwWindowHint(GLFW_SAMPLES, samples);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-
     auto window = glfwCreateWindow(size.width, size.height, title.data(), fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
     if(!window)
         throw std::runtime_error("Failed to create GLFW window");
-
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(0);
 
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 

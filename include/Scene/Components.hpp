@@ -119,7 +119,39 @@ struct ProceduralSkyComponent : public ComponentBase
 
 struct HDRISkyComponent : public ComponentBase
 {
-    HDRISkyComponent() : ComponentBase("HDRISkyComponent") {}
+public:
+    HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
+
+    TextureAssetPtr environmentMap;
+
+    LLGL::PipelineState* pipelineSky;
+
+    LLGL::Texture* cubeMap;
+
+private:
+    void SetupConvertPipeline();
+    void SetupSkyPipeline();
+
+    void CreateCubemap(const LLGL::Extent2D& resolution);
+    void CreateRenderTargets(const LLGL::Extent2D& resolution);
+
+    void Convert();
+
+    LLGL::PipelineState* pipelineConvert;
+
+    std::array<LLGL::RenderTarget*, 6> renderTargets;
+
+    std::array<glm::mat4, 6> views =
+    {
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+    };
+
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
 };
 
 }

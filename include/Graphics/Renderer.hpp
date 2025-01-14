@@ -43,7 +43,7 @@ public: // Public methods
     LLGL::Shader* CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes = {});
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
     LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);
-    LLGL::RenderTarget* CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::Texture*>& colorAttachments, LLGL::Texture* depthTexture = nullptr);
+    LLGL::RenderTarget* CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::AttachmentDescriptor>& colorAttachments, LLGL::Texture* depthTexture = nullptr);
 
     LLGL::PipelineState* CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader);
     LLGL::PipelineState* CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc);

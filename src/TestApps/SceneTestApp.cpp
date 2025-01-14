@@ -57,6 +57,7 @@ void SceneTestApp::Run()
     {
         LLGL::Surface::ProcessEvents();
         
+        // Make events (AssetLoaded)
         dev::Multithreading::Get().Update();
 
         scene.Update(deltaTimeTimer.GetElapsedSeconds());
@@ -84,6 +85,7 @@ void SceneTestApp::SetupAssetManager()
     dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
 }
 
+// TODO: Make ShaderAsset
 void SceneTestApp::LoadShaders()
 {
     vertexShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
@@ -251,11 +253,15 @@ void SceneTestApp::CreateLight1Entity()
 void SceneTestApp::CreateSkyEntity()
 {
     sky = scene.CreateEntity();
-
+    
     sky.AddComponent<dev::NameComponent>().name = "Sky";
     sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
 
-    sky.AddComponent<dev::ProceduralSkyComponent>();
+    //sky.AddComponent<dev::ProceduralSkyComponent>();
+    sky.AddComponent<dev::HDRISkyComponent>(
+        dev::AssetManager::Get().Load<dev::TextureAsset>("hdri/meadow_2_1k.hdr", true),
+        LLGL::Extent2D{ 1024, 1024 }
+    );
 }
 
 void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)
@@ -350,7 +356,6 @@ void SceneTestApp::DrawPropertiesWindow()
 {
     ImGui::Begin("Properties");
 
-    // Needs more validation
     if(selectedEntity)
     {
         dev::DrawEntityUI<dev::NameComponent,
@@ -370,6 +375,8 @@ void SceneTestApp::DrawPropertiesWindow()
                 list.erase(it);
 
             scene.RemoveEntity(selectedEntity);
+
+            selectedEntity = { entt::null, &scene };
         }
     }
     else

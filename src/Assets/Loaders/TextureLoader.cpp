@@ -23,7 +23,7 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
         path.string().c_str()
     );
 
-    auto load = [textureAsset, path]()
+    auto loadUint = [textureAsset, path]()
     {
         int width, height, channels;
         unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
@@ -31,9 +31,31 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
         if(data)
         {
             textureAsset->imageView.data = data;
-            textureAsset->imageView.dataSize = width * height * 4 * 8;
+            textureAsset->imageView.dataSize = width * height * 4 * sizeof(unsigned char);
             
             textureAsset->textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
+        }
+        else
+            LLGL::Log::Errorf(
+                LLGL::Log::ColorFlags::StdError,
+                "Failed to load texture: %s\n", path.string().c_str()
+            );
+    };
+
+    auto loadFloat = [textureAsset, path]()
+    {
+        int width, height, channels;
+        float* data = stbi_loadf(path.string().c_str(), &width, &height, &channels, 3);
+
+        if(data)
+        {
+            textureAsset->imageView.data = data;
+            textureAsset->imageView.dataSize = width * height * 3;
+            textureAsset->imageView.dataType = LLGL::DataType::Float32;
+            textureAsset->imageView.format = LLGL::ImageFormat::RGB;
+            
+            textureAsset->textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
+            textureAsset->textureDesc.format = LLGL::Format::RGB16Float;
         }
         else
             LLGL::Log::Errorf(
@@ -62,14 +84,16 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
         stbi_image_free((void*)textureAsset->imageView.data);
     };
 
-    if(true) // Add a "separateThread" parameter
+    // Adapt hdr for the multithreaded loading
+    if(path.extension() != ".hdr") // Add a "separateThread" parameter
     {
-        Multithreading::Get().AddJob(load);
+        Multithreading::Get().AddJob(loadUint);
         Multithreading::Get().AddMainThreadJob(create);
     }
     else
     {
-        load();
+        loadFloat();
+        //loadUint();
         create();
     }
 

@@ -173,14 +173,14 @@ void Scene::RenderMeshes()
 
 void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 {
-    auto hdriSkyView = registry.view<MeshComponent, MeshRendererComponent, PipelineComponent, HDRISkyComponent>();
+    auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>();
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
-        auto [mesh, meshRenderer, pipeline] = 
-            hdriSkyView.get<MeshComponent, MeshRendererComponent, PipelineComponent>(*hdriSkyView.begin());
+        auto [mesh, sky] = 
+            hdriSkyView.get<MeshComponent, HDRISkyComponent>(*hdriSkyView.begin());
 
-        MeshRenderPass(mesh, meshRenderer, pipeline, renderTarget);
+        HDRISkyRenderPass(mesh, sky, renderTarget);
 
         return;
     }
@@ -243,6 +243,27 @@ void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent s
             mesh.model->meshes[0]->Draw(commandBuffer);
         },
         sky.pipeline,
+        renderTarget
+    );
+}
+
+void Scene::HDRISkyRenderPass(MeshComponent mesh, HDRISkyComponent sky, LLGL::RenderTarget* renderTarget)
+{
+    Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            mesh.model->meshes[0]->BindBuffers(commandBuffer);
+        },
+        {
+            { 0, Renderer::Get().GetMatricesBuffer() },
+            { 1, sky.cubeMap },
+            { 2, sky.environmentMap->sampler }
+        },
+        [&](auto commandBuffer)
+        {
+            mesh.model->meshes[0]->Draw(commandBuffer);
+        },
+        sky.pipelineSky,
         renderTarget
     );
 }

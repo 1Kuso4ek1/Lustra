@@ -24,8 +24,10 @@ private:
     void LoadDefaultData();
 
 private:
-    void ProcessNode(aiNode* node, const aiScene* scene, std::shared_ptr<ModelAsset> modelAsset);
-    void ProcessMaterial(aiMaterial* material, std::shared_ptr<ModelAsset> modelAsset);
+    void ImportModel(const std::filesystem::path& path, ModelAssetPtr modelAsset);
+
+    void ProcessNode(aiNode* node, const aiScene* scene, ModelAssetPtr modelAsset);
+    void ProcessMaterial(aiMaterial* material, ModelAssetPtr modelAsset);
     
     MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene);
 

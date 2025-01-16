@@ -1,4 +1,6 @@
 #include <ModelLoader.hpp>
+#include <Multithreading.hpp>
+#include <EventManager.hpp>
 
 namespace dev
 {
@@ -19,33 +21,37 @@ AssetPtr ModelLoader::Load(const std::filesystem::path& path)
     if(path.filename() == "cube")
         return std::make_shared<ModelAsset>(ModelAsset({ cube }));
 
-    auto flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights;
-    
-    Assimp::Importer importer;
-    importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
-	
-    auto scene = importer.ReadFile(path.string(), flags);
-	
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    auto modelAsset = std::make_shared<ModelAsset>(ModelAsset({ cube }));
+
+    auto load = [path, modelAsset, this]()
     {
-        LLGL::Log::Errorf(
-            LLGL::Log::ColorFlags::StdError,
-            "Failed to load model: %s\n", importer.GetErrorString()
-        );
+        ImportModel(path, modelAsset);
+    };
 
-        return nullptr;
+    auto create = [modelAsset]()
+    {
+        modelAsset->meshes = modelAsset->temporaryMeshes;
+        modelAsset->temporaryMeshes.clear();
+
+        for(auto& mesh : modelAsset->meshes)
+            mesh->SetupBuffers();
+
+        modelAsset->loaded = true;
+
+        EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(modelAsset));
+    };
+
+    if(true) // Add a "separateThread" parameter
+    {
+        Multithreading::Get().AddJob(load);
+        Multithreading::Get().AddMainThreadJob(create);
     }
-
-    auto modelAsset = std::make_shared<ModelAsset>();
-
-    ProcessNode(scene->mRootNode, scene, modelAsset);
-    
-    LLGL::Log::Printf(
-        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
-        "Model \"%s\" loaded.\n",
-        path.string().c_str()
-    );
-    
+    else
+    {
+        load();
+        create();
+    }
+   
     return modelAsset;
 }
 
@@ -55,10 +61,41 @@ void ModelLoader::LoadDefaultData()
     (cube = std::make_shared<Mesh>())->CreateCube();
 }
 
+void ModelLoader::ImportModel(const std::filesystem::path& path, ModelAssetPtr modelAsset)
+{
+    auto flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights;
+
+    Assimp::Importer importer;
+    importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
+
+    auto scene = importer.ReadFile(path.string(), flags);
+
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        LLGL::Log::Errorf(
+            LLGL::Log::ColorFlags::StdError,
+            "Failed to load model: %s\n", importer.GetErrorString()
+        );
+
+        return;
+    }
+
+    modelAsset->meshes.reserve(scene->mNumMeshes);
+    modelAsset->temporaryMeshes.reserve(scene->mNumMeshes);
+
+    ProcessNode(scene->mRootNode, scene, modelAsset);
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
+        "Model \"%s\" loaded.\n",
+        path.string().c_str()
+    );
+}
+
 void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::shared_ptr<ModelAsset> modelAsset)
 {
     for(uint32_t i = 0; i < node->mNumMeshes; i++)
-        modelAsset->meshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
+        modelAsset->temporaryMeshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
 
     for(unsigned int i = 0; i < scene->mNumMaterials; i++)
         ProcessMaterial(scene->mMaterials[i], modelAsset);
@@ -100,7 +137,7 @@ MeshPtr ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
             indices.push_back(face.mIndices[j]);
     }
     
-    return std::make_shared<Mesh>(vertices, indices);    
+    return std::make_shared<Mesh>(vertices, indices, false);
 }
 
 }

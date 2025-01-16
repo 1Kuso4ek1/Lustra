@@ -1,4 +1,5 @@
 #include <TextureLoader.hpp>
+#include <EventManager.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -79,21 +80,27 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
                 "Texture \"%s\" loaded.\n",
                 path.string().c_str()
             );
+
+            textureAsset->loaded = true;
+
+            EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(textureAsset));
         }
 
         stbi_image_free((void*)textureAsset->imageView.data);
     };
 
-    // Adapt hdr for the multithreaded loading
-    if(path.extension() != ".hdr") // Add a "separateThread" parameter
+    if(true) // Add a "separateThread" parameter
     {
-        Multithreading::Get().AddJob(loadUint);
+        Multithreading::Get().AddJob(path.extension() == ".hdr" ? std::function<void()>(loadFloat) : loadUint);
         Multithreading::Get().AddMainThreadJob(create);
     }
     else
     {
-        loadFloat();
-        //loadUint();
+        if(path.extension() == ".hdr")
+            loadFloat();
+        else
+            loadUint();
+
         create();
     }
 

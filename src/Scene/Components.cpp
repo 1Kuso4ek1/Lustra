@@ -107,13 +107,27 @@ ProceduralSkyComponent::ProceduralSkyComponent()
 HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
     : ComponentBase("HDRISkyComponent"), environmentMap(hdri)
 {
+    EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+
     SetupConvertPipeline();
     SetupSkyPipeline();
 
     CreateCubemap(resolution);
     CreateRenderTargets(resolution);
 
-    Convert();
+    if(hdri->loaded)
+        Convert();
+}
+
+void HDRISkyComponent::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::AssetLoaded)
+    {
+        auto assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
+
+        if(assetLoadedEvent.GetAsset() == environmentMap)
+            Convert();
+    }
 }
 
 void HDRISkyComponent::SetupConvertPipeline()

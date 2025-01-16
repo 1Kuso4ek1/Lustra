@@ -1,5 +1,6 @@
 #include <MaterialLoader.hpp>
 #include <AssetManager.hpp>
+#include <EventManager.hpp>
 
 #include <fstream>
 
@@ -20,6 +21,10 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
 
     material->albedo.texture = defaultTexture;
     material->albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    material->loaded = true;
+
+    EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(material));
 
     return material;
 }

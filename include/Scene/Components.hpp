@@ -117,15 +117,16 @@ struct ProceduralSkyComponent : public ComponentBase
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
-struct HDRISkyComponent : public ComponentBase
+struct HDRISkyComponent : public ComponentBase, EventListener
 {
 public:
     HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
 
+    void OnEvent(Event& event) override;
+
     TextureAssetPtr environmentMap;
 
     LLGL::PipelineState* pipelineSky;
-
     LLGL::Texture* cubeMap;
 
 private:

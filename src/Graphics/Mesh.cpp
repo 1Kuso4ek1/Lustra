@@ -3,10 +3,11 @@
 namespace dev
 {
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, bool setupBuffers)
             : vertices(vertices), indices(indices)
 {
-    SetupBuffers();
+    if(setupBuffers)
+        SetupBuffers();
 }
 
 void Mesh::SetupBuffers()

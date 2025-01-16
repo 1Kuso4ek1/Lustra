@@ -1,4 +1,6 @@
 #pragma once
+#include <Asset.hpp>
+
 #include <LLGL/Types.h>
 
 namespace dev
@@ -9,7 +11,7 @@ class Event
 public:
     enum class Type
     {
-        None, WindowResize
+        Undefined, WindowResize, AssetLoaded
     };
 
     virtual ~Event() = default;
@@ -24,7 +26,7 @@ protected:
     Event(Type type) : type(type) {}
 
 private:
-    Type type = Type::None;
+    Type type = Event::Type::Undefined;
 
     bool handled = false;
 };
@@ -38,6 +40,17 @@ public:
 
 private:
     LLGL::Extent2D size;
+};
+
+class AssetLoadedEvent : public Event
+{
+public:
+    AssetLoadedEvent(AssetPtr asset) : Event(Type::AssetLoaded), asset(asset) {}
+
+    AssetPtr GetAsset() const { return asset; }
+
+private:
+    AssetPtr asset;
 };
 
 }

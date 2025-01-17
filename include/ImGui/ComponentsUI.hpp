@@ -33,7 +33,7 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
         ImGui::PushID(i);
 
         if(component.materials[i]->albedo.type == dev::MaterialAsset::Property::Type::Texture)
-            ImGui::ImageButton("##Asset", component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
         else
         {
             ImVec4 color = ImVec4(
@@ -120,6 +120,33 @@ inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity enti
     ImGui::DragFloat("Time", &component.time, 0.1f, 0.0f, 1000.0f);
     ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
     ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
+}
+
+inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
+{
+    ImGui::Text("Environment Map:");
+    ImGui::Image(component.environmentMap->nativeHandle, ImVec2(128.0f, 128.0f));
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
+        
+        if(payload)
+        {
+            component.environmentMap = *(TextureAssetPtr*)payload->Data;
+            component.SetResolution(component.resolution);
+        }
+
+        ImGui::EndDragDropTarget();
+    }
+
+    uint32_t min = 1, max = 8192;
+
+    if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 1.0f, &min, &max))
+        component.resolution.height = component.resolution.width;
+
+    if(ImGui::Button("Convert"))
+        component.SetResolution(component.resolution);
 }
 
 // Jesus Christ what is that

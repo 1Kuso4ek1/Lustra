@@ -105,7 +105,7 @@ ProceduralSkyComponent::ProceduralSkyComponent()
 }
 
 HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
-    : ComponentBase("HDRISkyComponent"), environmentMap(hdri)
+    : ComponentBase("HDRISkyComponent"), environmentMap(hdri), resolution(resolution)
 {
     EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
 
@@ -128,6 +128,22 @@ void HDRISkyComponent::OnEvent(Event& event)
         if(assetLoadedEvent.GetAsset() == environmentMap)
             Convert();
     }
+}
+
+void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
+{
+    if(cubeMap)
+        Renderer::Get().Release(cubeMap);
+
+    for(auto& renderTarget : renderTargets)
+        if(renderTarget)
+            Renderer::Get().Release(renderTarget);
+
+    CreateCubemap(resolution);
+    CreateRenderTargets(resolution);
+
+    if(environmentMap->loaded)
+        Convert();
 }
 
 void HDRISkyComponent::SetupConvertPipeline()
@@ -218,6 +234,7 @@ void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
     }
 }
 
+// The last face is problematic
 void HDRISkyComponent::Convert()
 {
     auto matrices = Renderer::Get().GetMatrices();

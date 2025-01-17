@@ -122,12 +122,18 @@ struct HDRISkyComponent : public ComponentBase, EventListener
 public:
     HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
 
+    void Convert();
+
     void OnEvent(Event& event) override;
+
+    void SetResolution(const LLGL::Extent2D& resolution);
 
     TextureAssetPtr environmentMap;
 
     LLGL::PipelineState* pipelineSky;
     LLGL::Texture* cubeMap;
+
+    LLGL::Extent2D resolution;
 
 private:
     void SetupConvertPipeline();
@@ -135,8 +141,6 @@ private:
 
     void CreateCubemap(const LLGL::Extent2D& resolution);
     void CreateRenderTargets(const LLGL::Extent2D& resolution);
-
-    void Convert();
 
     LLGL::PipelineState* pipelineConvert;
 

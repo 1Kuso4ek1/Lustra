@@ -74,11 +74,13 @@ void Renderer::End()
     commandBuffer->End();
 }
 
-void Renderer::RenderPass(std::function<void(LLGL::CommandBuffer*)> setupBuffers,
-                          const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-                          std::function<void(LLGL::CommandBuffer*)> draw,
-                          LLGL::PipelineState* pipeline,
-                          LLGL::RenderTarget* renderTarget)
+void Renderer::RenderPass(
+    std::function<void(LLGL::CommandBuffer*)> setupBuffers,
+    const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+    std::function<void(LLGL::CommandBuffer*)> draw,
+    LLGL::PipelineState* pipeline,
+    LLGL::RenderTarget* renderTarget
+)
 {
     setupBuffers(commandBuffer);
 

@@ -26,9 +26,9 @@ SceneTestApp::SceneTestApp()
 
     scene.SetRenderer(deferredRenderer);
 
-    CreateEntities();
-
     CreateRenderTarget();
+
+    CreateEntities();
 
     list = { rifle, camera, postProcessing, light, light1, sky };
 }
@@ -364,7 +364,8 @@ void SceneTestApp::DrawPropertiesWindow()
                           dev::CameraComponent,
                           dev::LightComponent,
                           dev::ACESTonemappingComponent,
-                          dev::ProceduralSkyComponent>(scene.GetRegistry(), selectedEntity);
+                          dev::ProceduralSkyComponent,
+                          dev::HDRISkyComponent>(scene.GetRegistry(), selectedEntity);
 
         ImGui::Separator();
             

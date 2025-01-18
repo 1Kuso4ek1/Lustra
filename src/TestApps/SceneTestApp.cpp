@@ -281,6 +281,12 @@ void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)
 
 void SceneTestApp::CreateRenderTarget(const LLGL::Extent2D& resolution)
 {
+    if(viewportRenderTarget)
+    {
+        dev::Renderer::Get().Release(viewportAttachment);
+        dev::Renderer::Get().Release(viewportRenderTarget);
+    }
+
     LLGL::TextureDescriptor colorAttachmentDesc =
     {
         .type = LLGL::TextureType::Texture2D,
@@ -742,13 +748,16 @@ void SceneTestApp::DrawViewport()
     auto size = window->InnerRect.GetSize();
     if((size.x != viewportRenderTarget->GetResolution().width || 
         size.y != viewportRenderTarget->GetResolution().height) &&
-        eventTimer.GetElapsedSeconds() > 0.1f)
+        eventTimer.GetElapsedSeconds() > 0.02f)
     {
-        dev::EventManager::Get().Dispatch(
-            std::make_unique<dev::WindowResizeEvent>(
-                LLGL::Extent2D{ (uint32_t)size.x, (uint32_t)size.y }
-            )
-        );
+        dev::Multithreading::Get().AddMainThreadJob([size]()
+        {
+            dev::EventManager::Get().Dispatch(
+                std::make_unique<dev::WindowResizeEvent>(
+                    LLGL::Extent2D{ (uint32_t)size.x, (uint32_t)size.y }
+                )
+            );
+        });
 
         eventTimer.Reset();
     }

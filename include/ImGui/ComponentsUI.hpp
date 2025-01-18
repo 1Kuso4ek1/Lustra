@@ -134,7 +134,8 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
         if(payload)
         {
             component.environmentMap = *(TextureAssetPtr*)payload->Data;
-            component.SetResolution(component.resolution);
+
+            dev::Multithreading::Get().AddMainThreadJob([&]() { component.Convert(); });
         }
 
         ImGui::EndDragDropTarget();

@@ -1,4 +1,5 @@
 #include <Components.hpp>
+
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace dev
@@ -135,7 +136,7 @@ void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
     if(cubeMap)
         Renderer::Get().Release(cubeMap);
 
-    for(auto& renderTarget : renderTargets)
+    for(auto renderTarget : renderTargets)
         if(renderTarget)
             Renderer::Get().Release(renderTarget);
 
@@ -143,7 +144,7 @@ void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
     CreateRenderTargets(resolution);
 
     if(environmentMap->loaded)
-        Convert();
+        dev::Multithreading::Get().AddMainThreadJob([&]() { Convert(); });
 }
 
 void HDRISkyComponent::SetupConvertPipeline()
@@ -236,7 +237,7 @@ void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
 
 // The last face is problematic
 void HDRISkyComponent::Convert()
-{
+{    
     auto matrices = Renderer::Get().GetMatrices();
 
     matrices->PushMatrix();

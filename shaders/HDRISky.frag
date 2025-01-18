@@ -10,6 +10,6 @@ void main()
 {
     vec3 coords = normalize(vertex);
 
-    fragColor = vec4(texture(skybox, vec4(coords, 0.0)).rgb, 1.0);
+    fragColor = vec4(textureLod(skybox, vec4(coords, 0.0), 8.0).rgb, 1.0);
 }
 

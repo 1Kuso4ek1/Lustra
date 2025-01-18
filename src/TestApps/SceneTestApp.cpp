@@ -197,13 +197,15 @@ void SceneTestApp::CreateCameraEntity()
             if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
                 input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 
+            float lerpSpeed = glm::clamp(deltaTime * 5.0f, 0.0f, 1.0f);
+
             if(glm::length(input) > 0.1f)
             {
-                speed = lerp(speed, 3.0f, 0.01f);
+                speed = lerp(speed, 3.0f, lerpSpeed);
                 movement = input;
             }
             else
-                speed = lerp(speed, 0.0f, 0.01f);
+                speed = lerp(speed, 0.0f, lerpSpeed);
 
             if(speed > 0.0f)
                 transform.position += glm::normalize(movement) * deltaTime * speed;
@@ -228,7 +230,7 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing = scene.CreateEntity();
 
     postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
-    postProcessing.AddComponent<dev::ACESTonemappingComponent>(LLGL::Extent2D{ 1280, 720 }, false);
+    postProcessing.AddComponent<dev::ACESTonemappingComponent>(LLGL::Extent2D{ 1280, 720 });
 }
 
 void SceneTestApp::CreateLightEntity()
@@ -787,29 +789,11 @@ void SceneTestApp::Draw()
 {
     scene.Draw(viewportRenderTarget);
 
-    ClearScreen();
+    dev::Renderer::Get().ClearRenderTarget();
 
     DrawImGui();
 
     dev::Renderer::Get().Present();
-}
-
-void SceneTestApp::ClearScreen()
-{
-    dev::Renderer::Get().Begin();
-
-    dev::Renderer::Get().RenderPass(
-        [](auto){}, {}, 
-        [](auto commandBuffer)
-        {
-            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
-        },
-        nullptr
-    );
-
-    dev::Renderer::Get().End();
-
-    dev::Renderer::Get().Submit();
 }
 
 void SceneTestApp::OnEvent(dev::Event& event)

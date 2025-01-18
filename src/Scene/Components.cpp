@@ -27,6 +27,78 @@ glm::mat4 TransformComponent::GetTransform() const
             * glm::scale(glm::mat4(1.0f), scale);
 }
 
+LightComponent::LightComponent()
+    : ComponentBase("LightComponent")
+{
+    projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+
+    resolution = { 2048, 2048 };
+}
+
+void LightComponent::SetupShadowMap(const LLGL::Extent2D& resolution)
+{
+    if(depth)
+    {
+        Renderer::Get().Release(depth);
+        Renderer::Get().Release(renderTarget);
+    }
+
+    CreateDepth(resolution);
+    CreateRenderTarget(resolution);
+
+    if(!shadowMapPipeline)
+        CreatePipeline();
+}
+
+void LightComponent::CreateDepth(const LLGL::Extent2D& resolution)
+{
+    LLGL::TextureDescriptor depthDesc =
+    {
+        .type = LLGL::TextureType::Texture2D,
+        .bindFlags = LLGL::BindFlags::DepthStencilAttachment,
+        .format = LLGL::Format::D32Float,
+        .extent = { resolution.width, resolution.height, 1 },
+        .mipLevels = 1,
+        .samples = 1
+    };
+
+    depth = Renderer::Get().CreateTexture(depthDesc);
+}
+
+void LightComponent::CreateRenderTarget(const LLGL::Extent2D& resolution)
+{
+    renderTarget = Renderer::Get().CreateRenderTarget(resolution, {}, depth);
+}
+
+void LightComponent::CreatePipeline()
+{
+    shadowMapPipeline = Renderer::Get().CreatePipelineState(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/depth.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/depth.frag"),
+            .depth = LLGL::DepthDescriptor
+            {
+                .testEnabled = true,
+                .writeEnabled = true,
+                //.compareOp = LLGL::CompareOp::LessEqual
+            },
+            .rasterizer = LLGL::RasterizerDescriptor
+            {
+                .cullMode = LLGL::CullMode::Back,
+                .frontCCW = true
+            }
+        }
+    );
+}
+
 ACESTonemappingComponent::ACESTonemappingComponent(
     const LLGL::Extent2D& resolution,
     bool registerEvent
@@ -218,10 +290,11 @@ void HDRISkyComponent::CreateCubemap(const LLGL::Extent2D& resolution)
             .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
             .format = LLGL::Format::RGBA16Float,
             .extent = { resolution.width, resolution.height, 1 },
-            .arrayLayers = 6,
-            .mipLevels = 1
+            .arrayLayers = 6
         }
     );
+
+    // LLGL::NumMipLevels(resolution.width, resolution.height);
 }
 
 void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
@@ -235,7 +308,6 @@ void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
     }
 }
 
-// The last face is problematic
 void HDRISkyComponent::Convert()
 {    
     auto matrices = Renderer::Get().GetMatrices();
@@ -275,6 +347,8 @@ void HDRISkyComponent::Convert()
         
         Renderer::Get().Submit();
     }
+
+    Renderer::Get().GenerateMips(cubeMap);
 
     matrices->PopMatrix();
 }

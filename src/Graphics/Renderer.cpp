@@ -118,6 +118,43 @@ void Renderer::Present()
     swapChain->Present();
 }
 
+void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget)
+{
+    dev::Renderer::Get().Begin();
+
+    dev::Renderer::Get().RenderPass(
+        [](auto){}, {}, 
+        [](auto commandBuffer)
+        {
+            commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
+        },
+        nullptr,
+        renderTarget
+    );
+
+    dev::Renderer::Get().End();
+
+    dev::Renderer::Get().Submit();
+}
+
+void Renderer::GenerateMips(LLGL::Texture* texture)
+{
+    Renderer::Get().Begin();
+
+    Renderer::Get().RenderPass(
+        [&](auto) {}, {},
+        [&](auto commandBuffer)
+        {
+            commandBuffer->GenerateMips(*texture);
+        },
+        nullptr
+    );
+
+    Renderer::Get().End();
+
+    Renderer::Get().Submit();
+}
+
 void Renderer::Release(LLGL::Texture* texture)
 {
     renderSystem->Release(*texture);

@@ -40,6 +40,8 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     SetupCamera();
     SetupLights();
 
+    RenderToShadowMap();
+
     Renderer::Get().Begin();
 
     UpdateLightsBuffer();
@@ -89,7 +91,7 @@ void Scene::UpdateLightsBuffer()
         [&](auto commandBuffer)
         {
             commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
-        }, {}, [](auto){}, nullptr
+        }, {}, [](auto) {}, nullptr
     );
 }
 
@@ -145,7 +147,7 @@ void Scene::SetupLights()
 void Scene::RenderMeshes()
 {
     auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
-
+    
     for(auto entity : view)
     {
         auto [transform, mesh, meshRenderer, pipeline] = 
@@ -160,15 +162,52 @@ void Scene::RenderMeshes()
     }
 
     if(view.begin() == view.end())
-        Renderer::Get().RenderPass(
-            [](auto){}, {}, 
-            [](auto commandBuffer)
+        dev::Renderer::Get().ClearRenderTarget(renderer->GetPrimaryRenderTarget());
+}
+
+void Scene::RenderToShadowMap()
+{
+    Renderer::Get().Begin();
+
+    auto meshesView = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
+    auto lightsView = registry.view<LightComponent, TransformComponent>();
+
+    auto camView = Renderer::Get().GetMatrices()->GetView();
+    auto camProj = Renderer::Get().GetMatrices()->GetProjection();
+
+    for(auto light : lightsView)
+    {
+        auto [lightComponent, lightTransform] = 
+                lightsView.get<LightComponent, TransformComponent>(light);
+
+        if(lightComponent.shadowMap && lightComponent.renderTarget)
+        {
+            auto delta = glm::quat(glm::radians(lightTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+
+            Renderer::Get().GetMatrices()->GetView() = glm::lookAt(lightTransform.position, lightTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
+            Renderer::Get().GetMatrices()->GetProjection() = lightComponent.projection;
+
+            for(auto mesh : meshesView)
             {
-                commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
-            },
-            nullptr,
-            renderer->GetPrimaryRenderTarget()
-        );
+                auto [transform, meshComp, meshRenderer, pipeline] =
+                        meshesView.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(mesh);
+
+                Renderer::Get().GetMatrices()->PushMatrix();
+                Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
+
+                ShadowRenderPass(lightComponent, meshComp);
+
+                Renderer::Get().GetMatrices()->PopMatrix();
+            }
+        }
+    }
+
+    Renderer::Get().GetMatrices()->GetView() = camView;
+    Renderer::Get().GetMatrices()->GetProjection() = camProj;
+
+    Renderer::Get().End();
+
+    Renderer::Get().Submit();
 }
 
 void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
@@ -222,6 +261,26 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
             },
             pipeline.pipeline,
             renderer->GetPrimaryRenderTarget()
+        );
+    }
+}
+
+void Scene::ShadowRenderPass(LightComponent light, MeshComponent mesh)
+{
+    for(size_t i = 0; i < mesh.model->meshes.size(); i++)
+    {
+        Renderer::Get().RenderPass(
+            [&](auto commandBuffer)
+            {
+                mesh.model->meshes[i]->BindBuffers(commandBuffer);
+            },
+            { { 0, Renderer::Get().GetMatricesBuffer() } },
+            [&](auto commandBuffer)
+            {
+                mesh.model->meshes[i]->Draw(commandBuffer);
+            },
+            light.shadowMapPipeline,
+            light.renderTarget
         );
     }
 }

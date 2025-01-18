@@ -39,6 +39,7 @@ private:
     void SetupLights();
 
     void RenderMeshes();
+    void RenderToShadowMap();
     void RenderSky(LLGL::RenderTarget* renderTarget);
 
     void MeshRenderPass(
@@ -46,6 +47,10 @@ private:
         MeshRendererComponent meshRenderer,
         PipelineComponent pipeline,
         LLGL::RenderTarget* renderTarget
+    );
+    void ShadowRenderPass(
+        LightComponent light,
+        MeshComponent mesh
     );
     void ProceduralSkyRenderPass(
         MeshComponent mesh,

@@ -69,8 +69,6 @@ private:
 
     void Draw();
 
-    void ClearScreen();
-
     void OnEvent(dev::Event& event) override;
 
 private:

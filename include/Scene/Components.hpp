@@ -64,7 +64,7 @@ struct PipelineComponent : public ComponentBase
 {
     PipelineComponent() : ComponentBase("PipelineComponent") {}
 
-    LLGL::PipelineState* pipeline;
+    LLGL::PipelineState* pipeline{};
 };
 
 struct CameraComponent : public ComponentBase
@@ -76,11 +76,32 @@ struct CameraComponent : public ComponentBase
 
 struct LightComponent : public ComponentBase
 {
-    LightComponent() : ComponentBase("LightComponent") {}
+public:
+    LightComponent();
+
+    void SetupShadowMap(const LLGL::Extent2D& resolution);
 
     glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 
-    float intensity = 1.0f, cutoff = 0.0f, outerCutoff = 0.0f;
+    float intensity = 1.0f;
+    float cutoff = 0.0f, outerCutoff = 0.0f;
+    float bias = 0.00001f;
+
+    bool shadowMap = false;
+
+    LLGL::Extent2D resolution;
+
+    LLGL::Texture* depth{};
+    LLGL::RenderTarget* renderTarget{};
+    LLGL::PipelineState* shadowMapPipeline{};
+
+    // Make it a single light space matrix
+    glm::mat4 projection;
+
+private:
+    void CreateDepth(const LLGL::Extent2D& resolution);
+    void CreateRenderTarget(const LLGL::Extent2D& resolution);
+    void CreatePipeline();
 };
 
 struct ScriptComponent : public ComponentBase
@@ -112,7 +133,7 @@ struct ProceduralSkyComponent : public ComponentBase
     float time = 40.0f, cirrus = 0.0f, cumulus = 0.0f;
 
     // Maybe it will be better to pass pipeline as a separate component?
-    LLGL::PipelineState* pipeline;
+    LLGL::PipelineState* pipeline{};
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
@@ -130,8 +151,8 @@ public:
 
     TextureAssetPtr environmentMap;
 
-    LLGL::PipelineState* pipelineSky;
-    LLGL::Texture* cubeMap;
+    LLGL::PipelineState* pipelineSky{};
+    LLGL::Texture* cubeMap{};
 
     LLGL::Extent2D resolution;
 
@@ -142,6 +163,7 @@ private:
     void CreateCubemap(const LLGL::Extent2D& resolution);
     void CreateRenderTargets(const LLGL::Extent2D& resolution);
 
+private:
     LLGL::PipelineState* pipelineConvert;
 
     std::array<LLGL::RenderTarget*, 6> renderTargets;

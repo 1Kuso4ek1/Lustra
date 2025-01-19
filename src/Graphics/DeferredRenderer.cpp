@@ -45,11 +45,16 @@ DeferredRenderer::DeferredRenderer(
 
     gBufferPosition = Renderer::Get().CreateTexture(colorAttachmentDesc);
     gBufferAlbedo = Renderer::Get().CreateTexture(colorAttachmentDesc);
+    
+    colorAttachmentDesc.format = LLGL::Format::RGB16Float;
+
     gBufferNormal = Renderer::Get().CreateTexture(colorAttachmentDesc);
+    gBufferCombined = Renderer::Get().CreateTexture(colorAttachmentDesc);
+    gBufferEmission = Renderer::Get().CreateTexture(colorAttachmentDesc);
 
     gBufferDepth = Renderer::Get().CreateTexture(depthAttachmentDesc);
 
-    gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal }, gBufferDepth);
+    gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal, gBufferCombined, gBufferEmission }, gBufferDepth);
     //gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
 
     rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];

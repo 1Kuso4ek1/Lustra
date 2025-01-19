@@ -306,7 +306,12 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
             {
                 { 0, Renderer::Get().GetMatricesBuffer() },
                 { 1, material->albedo.texture->texture },
-                { 2, material->albedo.texture->sampler }
+                { 2, material->normal.texture->texture },
+                { 3, material->metallic.texture->texture },
+                { 4, material->roughness.texture->texture },
+                { 5, material->ao.texture->texture },
+                { 6, material->emission.texture->texture },
+                { 7, material->albedo.texture->sampler }
             },
             [&](auto commandBuffer)
             {

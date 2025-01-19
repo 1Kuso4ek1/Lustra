@@ -700,19 +700,45 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
     ImGui::Begin("Material Editor");
     
     ImGui::Text("Albedo:");
+    DrawMaterialProperty(material->albedo, 1);
 
-    if(material->albedo.type == dev::MaterialAsset::Property::Type::Color)
+    ImGui::Text("Normal:");
+    DrawMaterialProperty(material->normal, 2);
+
+    ImGui::Text("Metallic:");
+    DrawMaterialProperty(material->metallic, 3);
+
+    ImGui::Text("Roughness:");
+    DrawMaterialProperty(material->roughness, 4);
+
+    ImGui::Text("Ambient occlusion:");
+    DrawMaterialProperty(material->ao, 5);
+
+    ImGui::Text("Emission:");
+    DrawMaterialProperty(material->emission, 6);
+
+    ImGui::Text("Emission strength:");
+    ImGui::DragFloat("##EmissionStrength", &material->emissionStrength, 0.01f, 0.0f, 100.0f);
+
+    ImGui::End();
+}
+
+void SceneTestApp::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id)
+{
+    ImGui::PushID(id);
+
+    if(property.type == dev::MaterialAsset::Property::Type::Color)
     {
-        ImGui::ColorEdit4("##AlbedoColor", &material->albedo.value.x);
+        ImGui::ColorEdit4("##Color", &property.value.x);
 
         if(ImGui::Button("Set Texture"))
-            material->albedo.type = dev::MaterialAsset::Property::Type::Texture;
+            property.type = dev::MaterialAsset::Property::Type::Texture;
     }
     else
     {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
-        ImGui::ImageButton("##AlbedoTexture", material->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
+        ImGui::Image(property.texture->nativeHandle, ImVec2(128.0f, 128.0f));
 
         ImGui::PopStyleVar();
         
@@ -721,18 +747,18 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
             auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
             
             if(payload)
-                material->albedo.texture = *(dev::TextureAssetPtr*)payload->Data;
+                property.texture = *(dev::TextureAssetPtr*)payload->Data;
 
             ImGui::EndDragDropTarget();
         }
 
         if(ImGui::Button("Set Color"))
-            material->albedo.type = dev::MaterialAsset::Property::Type::Color;
+            property.type = dev::MaterialAsset::Property::Type::Color;
     }
 
-    ImGui::Separator();
+    ImGui::PopID();
 
-    ImGui::End();
+    ImGui::Separator();
 }
 
 void SceneTestApp::DrawViewport()

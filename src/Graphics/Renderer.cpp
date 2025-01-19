@@ -238,13 +238,27 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     {
         { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
         { "albedoTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+        { "normalTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
+        { "metallicTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
+        { "roughnessTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 },
+        { "aoTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 6 },
+        { "emissionTexture", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 7 },
         { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
     };
 
     layoutDesc.uniforms =
     {
         { "albedoType", LLGL::UniformType::Int1 },
-        { "albedoValue", LLGL::UniformType::Float4 }
+        { "albedoValue", LLGL::UniformType::Float4 },
+        { "normalType", LLGL::UniformType::Int1 },
+        { "metallicType", LLGL::UniformType::Int1 },
+        { "metallicValue", LLGL::UniformType::Float1 },
+        { "roughnessType", LLGL::UniformType::Int1 },
+        { "roughnessValue", LLGL::UniformType::Float1 },
+        { "aoType", LLGL::UniformType::Int1 },
+        { "emissionType", LLGL::UniformType::Int1 },
+        { "emissionValue", LLGL::UniformType::Float3 },
+        { "emissionStrength", LLGL::UniformType::Float1 }
     };
 
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);

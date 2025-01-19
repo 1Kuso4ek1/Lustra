@@ -132,6 +132,8 @@ void TextureLoader::LoadDefaultData()
     LLGL::OpenGL::ResourceNativeHandle nativeHandle;
     defaultTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
     defaultTextureAsset->nativeHandle = nativeHandle.id;
+
+    defaultTextureAsset->loaded = true;
 }
 
 }

@@ -41,9 +41,25 @@ struct MaterialAsset : public Asset
     void SetUniforms(LLGL::CommandBuffer* commandBuffer)
     {
         commandBuffer->SetUniforms(0, &albedo.type, sizeof(albedo.type));
+        commandBuffer->SetUniforms(2, &normal.type, sizeof(normal.type));
+        commandBuffer->SetUniforms(3, &metallic.type, sizeof(metallic.type));
+        commandBuffer->SetUniforms(5, &roughness.type, sizeof(roughness.type));
+        commandBuffer->SetUniforms(7, &ao.type, sizeof(ao.type));
+        commandBuffer->SetUniforms(8, &emission.type, sizeof(emission.type));
 
         if(albedo.type == Property::Type::Color)
             commandBuffer->SetUniforms(1, &albedo.value, sizeof(albedo.value));
+
+        if(metallic.type == Property::Type::Color)
+            commandBuffer->SetUniforms(4, &metallic.value.x, sizeof(metallic.value.x));
+
+        if(roughness.type == Property::Type::Color)
+            commandBuffer->SetUniforms(6, &roughness.value.x, sizeof(roughness.value.x));
+
+        if(emission.type == Property::Type::Color)
+            commandBuffer->SetUniforms(9, &emission.value, sizeof(emission.value) - sizeof(emission.value.x));
+
+        commandBuffer->SetUniforms(10, &emissionStrength, sizeof(emissionStrength));
     }
 
     Property albedo;
@@ -52,6 +68,8 @@ struct MaterialAsset : public Asset
     Property roughness;
     Property ao;
     Property emission;
+
+    float emissionStrength = 1.0f;
 };
 
 using MaterialAssetPtr = std::shared_ptr<MaterialAsset>;

@@ -64,6 +64,7 @@ private:
     void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
 
     void DrawMaterialEditor(dev::MaterialAssetPtr material);
+    void DrawMaterialProperty(dev::MaterialAsset::Property& property, int id);
     
     void DrawViewport();
 

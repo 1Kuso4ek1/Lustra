@@ -32,6 +32,8 @@ private:
     LLGL::Texture* gBufferPosition;
     LLGL::Texture* gBufferAlbedo;
     LLGL::Texture* gBufferNormal;
+    LLGL::Texture* gBufferCombined;
+    LLGL::Texture* gBufferEmission;
     LLGL::Texture* gBufferDepth;
 
     LLGL::RenderTarget* gBuffer;

@@ -39,6 +39,8 @@ uniform int numShadows;
 uniform sampler2D gPosition;
 uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
+uniform sampler2D gCombined;
+uniform sampler2D gEmission;
 
 in vec2 coord;
 

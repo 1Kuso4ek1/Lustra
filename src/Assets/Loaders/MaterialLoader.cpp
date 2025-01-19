@@ -20,7 +20,12 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
     auto material = std::make_shared<MaterialAsset>();
 
     material->albedo.texture = defaultTexture;
-    material->albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+    material->albedo.texture = defaultTexture;
+    material->normal.texture = defaultTexture;
+    material->metallic.texture = defaultTexture;
+    material->roughness.texture = defaultTexture;
+    material->ao.texture = defaultTexture;
+    material->emission.texture = defaultTexture;
 
     material->loaded = true;
 
@@ -35,7 +40,13 @@ void MaterialLoader::LoadDefaultData()
     defaultMaterial = std::make_shared<MaterialAsset>();
 
     defaultMaterial->albedo.texture = defaultTexture;
-    defaultMaterial->albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+    defaultMaterial->normal.texture = defaultTexture;
+    defaultMaterial->metallic.texture = defaultTexture;
+    defaultMaterial->roughness.texture = defaultTexture;
+    defaultMaterial->ao.texture = defaultTexture;
+    defaultMaterial->emission.texture = defaultTexture;
+    
+    defaultMaterial->loaded = true;
 }
 
 }

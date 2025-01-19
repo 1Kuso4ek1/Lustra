@@ -33,10 +33,13 @@ public:
 
 private:
     void SetupLightsBuffer();
+    void SetupShadowsBuffer();
     void UpdateLightsBuffer();
+    void UpdateShadowsBuffer();
 
     void SetupCamera();
     void SetupLights();
+    void SetupShadows();
 
     void RenderMeshes();
     void RenderToShadowMap();
@@ -83,9 +86,20 @@ private:
         float intensity, cutoff, outerCutoff;
     };
 
+    struct Shadow
+    {
+        glm::mat4 lightSpaceMatrix;
+
+        float bias __attribute__ ((aligned(16)));
+    };
+
     std::vector<Light> lights;
+    std::vector<Shadow> shadows;
+    
+    std::array<LLGL::Texture*, 4> shadowSamplers;
 
     LLGL::Buffer* lightsBuffer{};
+    LLGL::Buffer* shadowsBuffer{};
 
 private:
     std::shared_ptr<RendererBase> renderer;

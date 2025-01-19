@@ -1,6 +1,7 @@
 #version 460 core
 
 const int maxLights = 128;
+const int maxShadows = 4;
 
 struct Light
 {
@@ -11,14 +12,29 @@ struct Light
     float intensity, cutoff, outerCutoff;
 };
 
+struct Shadow
+{
+    mat4 lightSpaceMatrix;
+
+    float bias;
+};
+
 layout(std140) uniform lightBuffer
 {
     Light lights[maxLights];
 };
 
+layout(std140) uniform shadowBuffer
+{
+    Shadow shadows[maxShadows];
+};
+
+uniform sampler2DShadow shadowMaps[maxShadows];
+
 uniform vec3 cameraPosition;
 
 uniform int numLights;
+uniform int numShadows;
 
 uniform sampler2D gPosition;
 uniform sampler2D gAlbedo;
@@ -32,18 +48,44 @@ float ambientStrength = 0.1;
 float specularStrength = 5.0;
 float shininess = 256.0;
 
+float CalculateShadows(vec4 position)
+{
+    float ret = 0.0;
+
+    for(int i = 0; i < numShadows; i++)
+    {
+        vec4 lightSpacePosition = shadows[i].lightSpaceMatrix * position;
+
+        vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+        projCoords = projCoords * vec3(0.5, -0.5, 0.5) + 0.5;
+
+        if(projCoords.z > 1.0)
+            continue;
+        
+        projCoords.z -= shadows[i].bias;
+
+        // float tmp = 1.0 - textureProj(shadowMaps[i], lightSpacePosition, shadows[i].bias);
+        float tmp = 1.0 - texture(shadowMaps[i], projCoords);
+        
+        if(ret < tmp)
+            ret = tmp;
+    }
+
+    return ret;
+}
+
 void main()
 {
     vec4 posSample = texture(gPosition, coord);
-    if(posSample.w <= 0.001f)
+    if(posSample.w <= 0.001)
         discard;
 
     vec3 worldPosition = posSample.xyz;
     vec3 albedo = texture(gAlbedo, coord).rgb;
     vec3 normal = normalize(texture(gNormal, coord).xyz);
 
-    vec3 totalDiffuse = vec3(0.0);
     vec3 totalAmbient = vec3(0.0);
+    vec3 totalDiffuse = vec3(0.0);
     vec3 totalSpecular = vec3(0.0);
 
     vec3 viewDir = normalize(cameraPosition - worldPosition);
@@ -71,7 +113,9 @@ void main()
         totalSpecular += spec * lights[i].color * lights[i].intensity * specularStrength;
     }
 
-    vec3 finalColor = (totalAmbient + totalDiffuse + totalSpecular) * albedo;
+    float shadow = CalculateShadows(vec4(worldPosition, 1.0));
+
+    vec3 finalColor = (totalAmbient + (1.0 - shadow) * (totalDiffuse + totalSpecular)) * albedo;
 
     fragColor = vec4(finalColor, 1.0);
 }

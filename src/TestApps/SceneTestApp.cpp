@@ -89,7 +89,7 @@ void SceneTestApp::SetupAssetManager()
 void SceneTestApp::LoadShaders()
 {
     vertexShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
-    fragmentShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/fragment.frag");
+    fragmentShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/deferred.frag");
 
     pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
 }

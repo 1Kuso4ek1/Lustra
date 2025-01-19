@@ -55,7 +55,7 @@ void LightComponent::CreateDepth(const LLGL::Extent2D& resolution)
     LLGL::TextureDescriptor depthDesc =
     {
         .type = LLGL::TextureType::Texture2D,
-        .bindFlags = LLGL::BindFlags::DepthStencilAttachment,
+        .bindFlags = LLGL::BindFlags::DepthStencilAttachment | LLGL::BindFlags::Sampled,
         .format = LLGL::Format::D32Float,
         .extent = { resolution.width, resolution.height, 1 },
         .mipLevels = 1,
@@ -82,18 +82,32 @@ void LightComponent::CreatePipeline()
         },
         LLGL::GraphicsPipelineDescriptor
         {
+            .renderPass = renderTarget->GetRenderPass(),
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/depth.vert"),
             .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/depth.frag"),
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
-                .writeEnabled = true,
-                //.compareOp = LLGL::CompareOp::LessEqual
+                .writeEnabled = true
             },
             .rasterizer = LLGL::RasterizerDescriptor
             {
                 .cullMode = LLGL::CullMode::Back,
-                .frontCCW = true
+                .depthBias =
+                {
+                    .constantFactor = 4.0f,
+                    .slopeFactor = 1.5f
+                },
+                .frontCCW = true,
+            },
+            .blend =
+            {
+                .targets =
+                {
+                    {
+                        .colorMask = 0x0
+                    }
+                }
             }
         }
     );

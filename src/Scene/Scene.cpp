@@ -19,6 +19,9 @@ void Scene::Start()
     if(!lightsBuffer)
         SetupLightsBuffer();
 
+    if(!shadowsBuffer)
+        SetupShadowsBuffer();
+
     registry.view<ScriptComponent>().each([](auto& script)
     {
         if(script.start)
@@ -37,14 +40,16 @@ void Scene::Update(float deltaTime)
 
 void Scene::Draw(LLGL::RenderTarget* renderTarget)
 {
+    RenderToShadowMap();
+
     SetupCamera();
     SetupLights();
-
-    RenderToShadowMap();
+    SetupShadows();
 
     Renderer::Get().Begin();
 
     UpdateLightsBuffer();
+    UpdateShadowsBuffer();
 
     RenderMeshes();
     
@@ -85,12 +90,33 @@ void Scene::SetupLightsBuffer()
     lights.reserve(maxLights);
 }
 
+void Scene::SetupShadowsBuffer()
+{
+    static const uint64_t maxShadows = 4;
+
+    LLGL::BufferDescriptor shadowBufferDesc = LLGL::ConstantBufferDesc(maxShadows * sizeof(Shadow));
+
+    shadowsBuffer = Renderer::Get().CreateBuffer(shadowBufferDesc);
+
+    shadows.reserve(maxShadows);
+}
+
 void Scene::UpdateLightsBuffer()
 {
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
             commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
+        }, {}, [](auto) {}, nullptr
+    );
+}
+
+void Scene::UpdateShadowsBuffer()
+{
+    Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            commandBuffer->UpdateBuffer(*shadowsBuffer, 0, shadows.data(), shadows.size() * sizeof(Shadow));
         }, {}, [](auto) {}, nullptr
     );
 }
@@ -144,6 +170,41 @@ void Scene::SetupLights()
     }
 }
 
+void Scene::SetupShadows()
+{
+    shadows.clear();
+
+    // Fill shadowSamplers with default texture
+    std::fill(
+        shadowSamplers.begin(),
+        shadowSamplers.end(),
+        AssetManager::Get().Load<TextureAsset>("default", true)->texture
+    );
+
+    auto lightsView = registry.view<LightComponent, TransformComponent>();
+
+    for(auto entity : lightsView)
+    {
+        auto [light, transform] =
+            lightsView.get<LightComponent, TransformComponent>(entity);
+
+        if(light.shadowMap)
+        {
+            auto delta = glm::quat(glm::radians(transform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+        
+            shadows.push_back(
+                {
+                    light.projection *
+                    glm::lookAt(transform.position, transform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f)),
+                    light.bias
+                }
+            );
+
+            shadowSamplers[shadows.size() - 1] = light.depth;
+        }
+    }
+}
+
 void Scene::RenderMeshes()
 {
     auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
@@ -172,9 +233,6 @@ void Scene::RenderToShadowMap()
     auto meshesView = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
     auto lightsView = registry.view<LightComponent, TransformComponent>();
 
-    auto camView = Renderer::Get().GetMatrices()->GetView();
-    auto camProj = Renderer::Get().GetMatrices()->GetProjection();
-
     for(auto light : lightsView)
     {
         auto [lightComponent, lightTransform] = 
@@ -201,9 +259,6 @@ void Scene::RenderToShadowMap()
             }
         }
     }
-
-    Renderer::Get().GetMatrices()->GetView() = camView;
-    Renderer::Get().GetMatrices()->GetProjection() = camProj;
 
     Renderer::Get().End();
 
@@ -332,8 +387,11 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     static auto uniforms = [&](auto commandBuffer)
     {
         auto numLights = lights.size();
+        auto numShadows = shadows.size();
+
         commandBuffer->SetUniforms(0, &numLights, sizeof(numLights));
-        commandBuffer->SetUniforms(1, &cameraPosition, sizeof(cameraPosition));
+        commandBuffer->SetUniforms(1, &numShadows, sizeof(numShadows));
+        commandBuffer->SetUniforms(2, &cameraPosition, sizeof(cameraPosition));
     };
 
     Renderer::Get().Begin();
@@ -341,7 +399,15 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     RenderSky(renderTarget);
 
     renderer->Draw(
-        { { 3, lightsBuffer } },
+        {
+            { 3, lightsBuffer },
+            { 4, shadowsBuffer },
+
+            { 5, shadowSamplers[0] },
+            { 6, shadowSamplers[1] },
+            { 7, shadowSamplers[2] },
+            { 8, shadowSamplers[3] }
+        },
         uniforms,
         renderTarget
     );

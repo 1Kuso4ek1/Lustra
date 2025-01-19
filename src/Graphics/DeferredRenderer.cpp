@@ -31,6 +31,18 @@ DeferredRenderer::DeferredRenderer(
         .samples = 1
     };
 
+    LLGL::SamplerDescriptor shadowSamplerDesc
+    {
+        .addressModeU      = LLGL::SamplerAddressMode::Border,
+        .addressModeV      = LLGL::SamplerAddressMode::Border,
+        .addressModeW      = LLGL::SamplerAddressMode::Border,
+
+        .mipMapEnabled     = false,
+        .compareEnabled    = true,
+        
+        .borderColor = { 1.0f, 1.0f, 1.0f, 1.0f },
+    };
+
     gBufferPosition = Renderer::Get().CreateTexture(colorAttachmentDesc);
     gBufferAlbedo = Renderer::Get().CreateTexture(colorAttachmentDesc);
     gBufferNormal = Renderer::Get().CreateTexture(colorAttachmentDesc);
@@ -51,13 +63,30 @@ DeferredRenderer::DeferredRenderer(
                 { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
                 { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
                 { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 4 },
+                { "shadowBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 5 },
+                { "shadowMaps[0]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 6 },
+                { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 7 },
+                { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 8 },
+                { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
             },
-            .uniforms = 
+            .staticSamplers =
+            {
+                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 10, shadowSamplerDesc }
+            },
+            .uniforms =
             {
                 { "numLights", LLGL::UniformType::Int1 },
+                { "numShadows", LLGL::UniformType::Int1 },
                 { "cameraPosition", LLGL::UniformType::Float3 }
-            }            
+            },
+            .combinedTextureSamplers =
+            {
+                { "shadowMaps[0]", "shadowMaps[0]", "shadowMapSampler", 6 },
+                { "shadowMaps[1]", "shadowMaps[1]", "shadowMapSampler", 7 },
+                { "shadowMaps[2]", "shadowMaps[2]", "shadowMapSampler", 8 },
+                { "shadowMaps[3]", "shadowMaps[3]", "shadowMapSampler", 9 },
+            }
         },
         LLGL::GraphicsPipelineDescriptor
         {
@@ -89,7 +118,12 @@ void DeferredRenderer::Draw(
             { 1, gBufferAlbedo },
             { 2, gBufferNormal },
             { 3, resources.at(3) },
-            { 4, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 4, resources.at(4) },
+            { 5, resources.at(5) },
+            { 6, resources.at(6) },
+            { 7, resources.at(7) },
+            { 8, resources.at(8) },
+            { 9, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {

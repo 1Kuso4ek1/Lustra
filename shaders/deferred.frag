@@ -35,7 +35,7 @@ void main()
 {
 	float metallic = metallicValue;
 	float roughness = roughnessValue;
-	float ao = 0.0;
+	float ao = 1.0;
 
 	gPosition = vec4(mPosition, 1.0);
 

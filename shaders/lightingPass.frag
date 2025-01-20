@@ -1,7 +1,11 @@
 #version 460 core
 
+const float PI = 3.14159265359;
+
 const int maxLights = 128;
 const int maxShadows = 4;
+
+const vec3 F0 = vec3(0.04);
 
 struct Light
 {
@@ -50,30 +54,117 @@ float ambientStrength = 0.1;
 float specularStrength = 5.0;
 float shininess = 256.0;
 
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+	
+    float num = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+	
+    return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r * r) / 8.0;
+
+    float num = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return num / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), 0.0);
+
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+	
+    return ggx1 * ggx2;
+}
+
+float CalculateShadow(int index, vec4 position)
+{
+    vec4 lightSpacePosition = shadows[index].lightSpaceMatrix * position;
+
+    vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+    projCoords = projCoords * vec3(0.5, -0.5, 0.5) + 0.5;
+
+    if(projCoords.z > 1.0)
+        return 0.0;
+    
+    projCoords.z -= shadows[index].bias;
+
+    return 1.0 - texture(shadowMaps[index], projCoords);
+}
+
 float CalculateShadows(vec4 position)
 {
     float ret = 0.0;
 
     for(int i = 0; i < numShadows; i++)
     {
-        vec4 lightSpacePosition = shadows[i].lightSpaceMatrix * position;
-
-        vec3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
-        projCoords = projCoords * vec3(0.5, -0.5, 0.5) + 0.5;
-
-        if(projCoords.z > 1.0)
-            continue;
-        
-        projCoords.z -= shadows[i].bias;
-
-        // float tmp = 1.0 - textureProj(shadowMaps[i], lightSpacePosition, shadows[i].bias);
-        float tmp = 1.0 - texture(shadowMaps[i], projCoords);
+        float tmp = CalculateShadow(i, position);
         
         if(ret < tmp)
             ret = tmp;
     }
 
     return ret;
+}
+
+vec3 CalculateLight(int index, vec3 V, vec3 worldPosition, vec3 N, vec3 albedo, float metallic, float roughness)
+{
+    vec3 L = normalize(lights[index].position - worldPosition);
+    vec3 H = normalize(V + L);
+    vec3 F = FresnelSchlick(max(dot(H, V), 0.0), mix(F0, albedo, metallic));
+
+    float dist = length(lights[index].position - worldPosition);
+    float attenuation = 1.0 / (dist * dist);
+
+    vec3 radiance = lights[index].color * lights[index].intensity/*  * attenuation */;
+
+    float NDF = DistributionGGX(N, H, roughness);       
+    float G = GeometrySmith(N, V, L, roughness);       
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+
+    vec3 specular = numerator / denominator;  
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);        
+    
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+vec3 CalculateLights(vec3 worldPosition, vec3 N, vec3 albedo, float metallic, float roughness)
+{
+    vec3 V = normalize(cameraPosition - worldPosition);
+
+    vec3 totalLighting = vec3(0.0);
+    for(int i = 0; i < numLights; i++)
+    {
+        totalLighting += CalculateLight(i, V, worldPosition, N, albedo, metallic, roughness);
+    }
+
+    return totalLighting;
 }
 
 void main()
@@ -85,39 +176,18 @@ void main()
     vec3 worldPosition = posSample.xyz;
     vec3 albedo = texture(gAlbedo, coord).rgb;
     vec3 normal = normalize(texture(gNormal, coord).xyz);
+    vec3 combined = texture(gCombined, coord).rgb;
 
-    vec3 totalAmbient = vec3(0.0);
-    vec3 totalDiffuse = vec3(0.0);
-    vec3 totalSpecular = vec3(0.0);
+    float metallic = combined.r;
+    float roughness = combined.g;
+    float ao = combined.b;
 
-    vec3 viewDir = normalize(cameraPosition - worldPosition);
-
-    for(int i = 0; i < numLights; i++)
-    {
-        float theta = dot(normalize(lights[i].position - worldPosition), normalize(-lights[i].direction));
-        float intensityMultiplier = 1.0;
-
-        if(lights[i].cutoff != 1.0)
-            intensityMultiplier = clamp((theta - lights[i].outerCutoff) / (lights[i].cutoff - lights[i].outerCutoff), 0.0, 1.0);
-        if(theta < lights[i].cutoff && intensityMultiplier <= 0.0)
-            intensityMultiplier = 0.0;
-
-        vec3 lightDir = normalize(lights[i].position - worldPosition);
-        vec3 halfDir = normalize(lightDir + viewDir);
-
-        vec3 diffuse = max(dot(normal, lightDir), 0.0) * lights[i].color * lights[i].intensity * intensityMultiplier;
-        totalDiffuse += diffuse;
-
-        vec3 ambient = ambientStrength * lights[i].color;
-        totalAmbient += ambient;
-        
-        float spec = pow(max(dot(normal, halfDir), 0.0), shininess);
-        totalSpecular += spec * lights[i].color * lights[i].intensity * specularStrength;
-    }
+    vec3 lighting = CalculateLights(worldPosition, normal, albedo, metallic, roughness);
 
     float shadow = CalculateShadows(vec4(worldPosition, 1.0));
 
-    vec3 finalColor = (totalAmbient + (1.0 - shadow) * (totalDiffuse + totalSpecular)) * albedo;
+    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 finalColor = (ambient + lighting) * (1.0 - shadow);
 
     fragColor = vec4(finalColor, 1.0);
 }

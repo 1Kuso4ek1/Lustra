@@ -405,13 +405,13 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     renderer->Draw(
         {
-            { 3, lightsBuffer },
-            { 4, shadowsBuffer },
+            { 5, lightsBuffer },
+            { 6, shadowsBuffer },
 
-            { 5, shadowSamplers[0] },
-            { 6, shadowSamplers[1] },
-            { 7, shadowSamplers[2] },
-            { 8, shadowSamplers[3] }
+            { 7, shadowSamplers[0] },
+            { 8, shadowSamplers[1] },
+            { 9, shadowSamplers[2] },
+            { 10, shadowSamplers[3] }
         },
         uniforms,
         renderTarget

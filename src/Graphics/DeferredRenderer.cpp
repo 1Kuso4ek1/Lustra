@@ -67,17 +67,19 @@ DeferredRenderer::DeferredRenderer(
                 { "gPosition", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
                 { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
                 { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
-                { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 4 },
-                { "shadowBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 5 },
-                { "shadowMaps[0]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 6 },
-                { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 7 },
-                { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 8 },
-                { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
+                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
+                { "gEmission", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 },
+                { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 6 },
+                { "shadowBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 7 },
+                { "shadowMaps[0]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 8 },
+                { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
+                { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 10 },
+                { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 11 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
             },
             .staticSamplers =
             {
-                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 10, shadowSamplerDesc }
+                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 12, shadowSamplerDesc }
             },
             .uniforms =
             {
@@ -87,10 +89,10 @@ DeferredRenderer::DeferredRenderer(
             },
             .combinedTextureSamplers =
             {
-                { "shadowMaps[0]", "shadowMaps[0]", "shadowMapSampler", 6 },
-                { "shadowMaps[1]", "shadowMaps[1]", "shadowMapSampler", 7 },
-                { "shadowMaps[2]", "shadowMaps[2]", "shadowMapSampler", 8 },
-                { "shadowMaps[3]", "shadowMaps[3]", "shadowMapSampler", 9 },
+                { "shadowMaps[0]", "shadowMaps[0]", "shadowMapSampler", 8 },
+                { "shadowMaps[1]", "shadowMaps[1]", "shadowMapSampler", 9 },
+                { "shadowMaps[2]", "shadowMaps[2]", "shadowMapSampler", 10 },
+                { "shadowMaps[3]", "shadowMaps[3]", "shadowMapSampler", 11 },
             }
         },
         LLGL::GraphicsPipelineDescriptor
@@ -122,13 +124,15 @@ void DeferredRenderer::Draw(
             { 0, gBufferPosition },
             { 1, gBufferAlbedo },
             { 2, gBufferNormal },
-            { 3, resources.at(3) },
-            { 4, resources.at(4) },
+            { 3, gBufferCombined },
+            { 4, gBufferEmission },
             { 5, resources.at(5) },
             { 6, resources.at(6) },
             { 7, resources.at(7) },
             { 8, resources.at(8) },
-            { 9, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 9, resources.at(9) },
+            { 10, resources.at(10) },
+            { 11, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {
@@ -177,11 +181,16 @@ void DeferredRenderer::OnEvent(Event& event)
 
         gBufferPosition = Renderer::Get().CreateTexture(colorAttachmentDesc);
         gBufferAlbedo = Renderer::Get().CreateTexture(colorAttachmentDesc);
+        
+        colorAttachmentDesc.format = LLGL::Format::RGB16Float;
+
         gBufferNormal = Renderer::Get().CreateTexture(colorAttachmentDesc);
+        gBufferCombined = Renderer::Get().CreateTexture(colorAttachmentDesc);
+        gBufferEmission = Renderer::Get().CreateTexture(colorAttachmentDesc);
 
         gBufferDepth = Renderer::Get().CreateTexture(depthAttachmentDesc);
 
-        gBuffer = Renderer::Get().CreateRenderTarget(size, { gBufferPosition, gBufferAlbedo, gBufferNormal }, gBufferDepth);
+        gBuffer = Renderer::Get().CreateRenderTarget(size, { gBufferPosition, gBufferAlbedo, gBufferNormal, gBufferCombined, gBufferEmission }, gBufferDepth);
     }
 }
 

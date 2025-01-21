@@ -197,13 +197,15 @@ HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent
     EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
 
     SetupConvertPipeline();
+    SetupIrradiancePipeline();
     SetupSkyPipeline();
 
-    CreateCubemap(resolution);
-    CreateRenderTargets(resolution);
+    CreateCubemaps(resolution);
+    CreateRenderTargets(resolution, cubeMap);
 
     if(hdri->loaded)
-        Convert();
+        //RenderCubeMap(cubeMap, pipelineConvert);
+        Build();
 }
 
 void HDRISkyComponent::OnEvent(Event& event)
@@ -213,24 +215,100 @@ void HDRISkyComponent::OnEvent(Event& event)
         auto assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
 
         if(assetLoadedEvent.GetAsset() == environmentMap)
-            Convert();
+            //RenderCubeMap(cubeMap, pipelineConvert);
+            Build();
     }
 }
 
 void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
 {
-    if(cubeMap)
-        Renderer::Get().Release(cubeMap);
+    ReleaseCubeMaps();
+    ReleaseRenderTargets();
 
-    for(auto renderTarget : renderTargets)
-        if(renderTarget)
-            Renderer::Get().Release(renderTarget);
-
-    CreateCubemap(resolution);
-    CreateRenderTargets(resolution);
-
+    CreateCubemaps(resolution);
+    
     if(environmentMap->loaded)
-        dev::Multithreading::Get().AddMainThreadJob([&]() { Convert(); });
+        dev::Multithreading::Get().AddMainThreadJob([&]() { Build(); /* RenderCubeMap(cubeMap, pipelineConvert); */ });
+}
+
+void HDRISkyComponent::Build()
+{
+    CreateRenderTargets(resolution, cubeMap);
+
+    RenderCubeMap(
+        {
+            { 1, environmentMap->texture },
+            { 2, environmentMap->sampler }
+        },
+        cubeMap,
+        pipelineConvert
+    );
+
+    ReleaseRenderTargets();
+    CreateRenderTargets({ 32, 32 }, irradiance);
+
+    RenderCubeMap(
+        {
+            { 1, cubeMap },
+            { 2, environmentMap->sampler }
+        },
+        irradiance,
+        pipelineIrradiance
+    );
+
+    ReleaseRenderTargets();
+
+    //RenderCubeMap(irradiance, pipelineIrradiance);
+    //RenderCubeMap(prefiltered, pipelinePrefiltered);
+}
+
+void HDRISkyComponent::RenderCubeMap(
+    const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+    LLGL::Texture* cubeMap,
+    LLGL::PipelineState* pipeline
+)
+{    
+    auto matrices = Renderer::Get().GetMatrices();
+
+    matrices->PushMatrix();
+
+    matrices->GetModel() = glm::mat4(1.0f);
+    matrices->GetProjection() = projection;
+
+    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
+    
+    for(int i = 0; i < 6; i++)
+    {
+        matrices->GetView() = views[i];
+
+        Renderer::Get().Begin();
+
+        Renderer::Get().RenderPass(
+            [&](auto commandBuffer)
+            {
+                cube->meshes[0]->BindBuffers(commandBuffer);
+            },
+            {
+                { 0, Renderer::Get().GetMatricesBuffer() },
+                { 1, resources.at(1) },
+                { 2, resources.at(2) }
+            },
+            [&](auto commandBuffer)
+            {
+                cube->meshes[0]->Draw(commandBuffer);
+            },
+            pipeline,
+            renderTargets[i]
+        );
+
+        Renderer::Get().End();
+        
+        Renderer::Get().Submit();
+    }
+
+    Renderer::Get().GenerateMips(cubeMap);
+
+    matrices->PopMatrix();
 }
 
 void HDRISkyComponent::SetupConvertPipeline()
@@ -249,6 +327,37 @@ void HDRISkyComponent::SetupConvertPipeline()
         {
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
             .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/HDRIConvert.frag"),
+            .depth = LLGL::DepthDescriptor
+            {
+                .testEnabled = true,
+                .writeEnabled = false,
+                .compareOp = LLGL::CompareOp::LessEqual
+            },
+            .rasterizer = LLGL::RasterizerDescriptor
+            {
+                .cullMode = LLGL::CullMode::Disabled,
+                .frontCCW = true
+            }
+        }
+    );
+}
+
+void HDRISkyComponent::SetupIrradiancePipeline()
+{
+    pipelineIrradiance = Renderer::Get().CreatePipelineState(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
+                { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/irradiance.frag"),
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
@@ -295,23 +404,27 @@ void HDRISkyComponent::SetupSkyPipeline()
     );
 }
 
-void HDRISkyComponent::CreateCubemap(const LLGL::Extent2D& resolution)
+void HDRISkyComponent::CreateCubemaps(const LLGL::Extent2D& resolution)
 {
-    cubeMap = Renderer::Get().CreateTexture(
-        LLGL::TextureDescriptor
-        {
-            .type = LLGL::TextureType::TextureCubeArray,
-            .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
-            .format = LLGL::Format::RGBA16Float,
-            .extent = { resolution.width, resolution.height, 1 },
-            .arrayLayers = 6
-        }
-    );
+    LLGL::TextureDescriptor textureDesc
+    {
+        .type = LLGL::TextureType::TextureCubeArray,
+        .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
+        .format = LLGL::Format::RGBA16Float,
+        .extent = { resolution.width, resolution.height, 1 },
+        .arrayLayers = 6
+    };
+
+    cubeMap = Renderer::Get().CreateTexture(textureDesc);
+
+    textureDesc.extent = { 32, 32, 1 };
+
+    irradiance = Renderer::Get().CreateTexture(textureDesc);
 
     // LLGL::NumMipLevels(resolution.width, resolution.height);
 }
 
-void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
+void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap)
 {
     for(int i = 0; i < 6; i++)
     {
@@ -322,49 +435,22 @@ void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution)
     }
 }
 
-void HDRISkyComponent::Convert()
-{    
-    auto matrices = Renderer::Get().GetMatrices();
-
-    matrices->PushMatrix();
-
-    matrices->GetModel() = glm::mat4(1.0f);
-    matrices->GetProjection() = projection;
-
-    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
-    
-    for(int i = 0; i < 6; i++)
+void HDRISkyComponent::ReleaseCubeMaps()
+{
+    if(cubeMap)
     {
-        matrices->GetView() = views[i];
-
-        Renderer::Get().Begin();
-
-        Renderer::Get().RenderPass(
-            [&](auto commandBuffer)
-            {
-                cube->meshes[0]->BindBuffers(commandBuffer);
-            },
-            {
-                { 0, Renderer::Get().GetMatricesBuffer() },
-                { 1, environmentMap->texture },
-                { 2, environmentMap->sampler }
-            },
-            [&](auto commandBuffer)
-            {
-                cube->meshes[0]->Draw(commandBuffer);
-            },
-            pipelineConvert,
-            renderTargets[i]
-        );
-
-        Renderer::Get().End();
-        
-        Renderer::Get().Submit();
+        Renderer::Get().Release(cubeMap);
+        Renderer::Get().Release(irradiance);
+        Renderer::Get().Release(prefiltered);
     }
-
-    Renderer::Get().GenerateMips(cubeMap);
-
-    matrices->PopMatrix();
 }
+
+void HDRISkyComponent::ReleaseRenderTargets()
+{
+    for(auto renderTarget : renderTargets)
+        if(renderTarget)
+            Renderer::Get().Release(renderTarget);
+}
+
 
 }

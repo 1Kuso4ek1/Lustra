@@ -143,7 +143,7 @@ struct HDRISkyComponent : public ComponentBase, EventListener
 public:
     HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
 
-    void Convert();
+    void Build();
 
     void OnEvent(Event& event) override;
 
@@ -152,19 +152,36 @@ public:
     TextureAssetPtr environmentMap;
 
     LLGL::PipelineState* pipelineSky{};
+
+    // Make it something like PBRStack component idk
     LLGL::Texture* cubeMap{};
+    LLGL::Texture* irradiance{};
+    LLGL::Texture* prefiltered{};
+    ////////////////////////////////////////////////
 
     LLGL::Extent2D resolution;
 
 private:
+    void RenderCubeMap(
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+        LLGL::Texture* cubeMap,
+        LLGL::PipelineState* pipeline
+    );
+
     void SetupConvertPipeline();
+    void SetupIrradiancePipeline();
     void SetupSkyPipeline();
 
-    void CreateCubemap(const LLGL::Extent2D& resolution);
-    void CreateRenderTargets(const LLGL::Extent2D& resolution);
+    void CreateCubemaps(const LLGL::Extent2D& resolution);
+    void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap);
+
+    void ReleaseCubeMaps();
+    void ReleaseRenderTargets();
 
 private:
     LLGL::PipelineState* pipelineConvert;
+    LLGL::PipelineState* pipelineIrradiance;
+    LLGL::PipelineState* pipelinePrefiltered;
 
     std::array<LLGL::RenderTarget*, 6> renderTargets;
 

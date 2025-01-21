@@ -706,10 +706,10 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
     DrawMaterialProperty(material->normal, 2);
 
     ImGui::Text("Metallic:");
-    DrawMaterialProperty(material->metallic, 3);
+    DrawMaterialProperty(material->metallic, 3, true);
 
     ImGui::Text("Roughness:");
-    DrawMaterialProperty(material->roughness, 4);
+    DrawMaterialProperty(material->roughness, 4, true);
 
     ImGui::Text("Ambient occlusion:");
     DrawMaterialProperty(material->ao, 5);
@@ -723,13 +723,16 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
     ImGui::End();
 }
 
-void SceneTestApp::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id)
+void SceneTestApp::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent)
 {
     ImGui::PushID(id);
 
     if(property.type == dev::MaterialAsset::Property::Type::Color)
     {
-        ImGui::ColorEdit4("##Color", &property.value.x);
+        if(singleComponent)
+            ImGui::DragFloat("##Value", &property.value.x, 0.01f, 0.0f, 1.0f);
+        else
+            ImGui::ColorEdit4("##Color", &property.value.x);
 
         if(ImGui::Button("Set Texture"))
             property.type = dev::MaterialAsset::Property::Type::Texture;

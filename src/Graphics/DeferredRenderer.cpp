@@ -75,11 +75,12 @@ DeferredRenderer::DeferredRenderer(
                 { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
                 { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 10 },
                 { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 11 },
+                { "irradiance", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 12 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
             },
             .staticSamplers =
             {
-                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 12, shadowSamplerDesc }
+                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 13, shadowSamplerDesc }
             },
             .uniforms =
             {
@@ -132,7 +133,8 @@ void DeferredRenderer::Draw(
             { 8, resources.at(8) },
             { 9, resources.at(9) },
             { 10, resources.at(10) },
-            { 11, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 11, resources.at(11) },
+            { 12, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {

@@ -27,6 +27,9 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
     material->ao.texture = defaultTexture;
     material->emission.texture = defaultTexture;
 
+    material->metallic = glm::vec4(0.0f);
+    material->emission = glm::vec4(0.0f);
+
     material->loaded = true;
 
     EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(material));
@@ -45,6 +48,9 @@ void MaterialLoader::LoadDefaultData()
     defaultMaterial->roughness.texture = defaultTexture;
     defaultMaterial->ao.texture = defaultTexture;
     defaultMaterial->emission.texture = defaultTexture;
+
+    defaultMaterial->metallic = glm::vec4(0.0f);
+    defaultMaterial->emission = glm::vec4(0.0f);
     
     defaultMaterial->loaded = true;
 }

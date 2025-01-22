@@ -2,6 +2,8 @@
 
 const float PI = 3.14159265359;
 
+const float maxReflectionLod = 8;
+
 const int maxLights = 128;
 const int maxShadows = 4;
 
@@ -41,12 +43,15 @@ uniform int numLights;
 uniform int numShadows;
 
 uniform samplerCubeArray irradiance;
+uniform samplerCubeArray prefiltered;
 
 uniform sampler2D gPosition;
 uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
 uniform sampler2D gCombined;
 uniform sampler2D gEmission;
+
+uniform sampler2D brdf;
 
 in vec2 coord;
 
@@ -134,29 +139,37 @@ float CalculateShadows(vec4 position)
 
 vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, float metallic, float roughness)
 {
+    float theta = dot(normalize(lights[index].position - worldPosition), normalize(-lights[index].direction));
+    float intensity = 1.0;
+    
+    if(lights[index].cutoff != 1.0)
+        intensity = clamp((theta - lights[index].outerCutoff) / (lights[index].cutoff - lights[index].outerCutoff), 0.0, 1.0);
+    
+    if(theta < lights[index].cutoff && intensity <= 0.0)
+        return vec3(0.0);
+
     vec3 L = normalize(lights[index].position - worldPosition);
     vec3 H = normalize(V + L);
-    vec3 F = FresnelSchlick(max(dot(H, V), 0.0), mix(F0, albedo, metallic));
+    vec3 F = FresnelSchlickRoughness(max(dot(H, V), 0.0), mix(F0, albedo, metallic), roughness);
 
     float dist = length(lights[index].position - worldPosition);
     float attenuation = 1.0 / (dist * dist);
 
     vec3 radiance = lights[index].color * lights[index].intensity/*  * attenuation */;
 
-    float NDF = DistributionGGX(N, H, roughness);       
-    float G = GeometrySmith(N, V, L, roughness);       
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
 
     vec3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    float denominator = 4.0 * NdotV * NdotL + 0.0001;
 
-    vec3 specular = numerator / denominator;  
+    vec3 specular = numerator / denominator;
 
     vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    
-    kD *= 1.0 - metallic;
-
-    float NdotL = max(dot(N, L), 0.0);        
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
     
     return (kD * albedo / PI + specular) * radiance * NdotL;
 }
@@ -182,26 +195,34 @@ void main()
     vec3 albedo = /* pow( */texture(gAlbedo, coord).rgb/* , vec3(2.2)) */; // ???
     vec3 normal = normalize(texture(gNormal, coord).xyz);
     vec3 combined = texture(gCombined, coord).rgb;
+    vec3 emission = texture(gEmission, coord).rgb;
 
     float metallic = combined.r;
     float roughness = combined.g;
     float ao = combined.b;
 
     vec3 V = normalize(cameraPosition - worldPosition);
+    vec3 R = reflect(-V, normal);
 
     vec3 lighting = CalculateLights(worldPosition, V, normal, albedo, metallic, roughness);
 
     float shadow = CalculateShadows(vec4(worldPosition, 1.0));
 
+    vec3 F = FresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
+
+    vec3 kS = F;
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
     
-    vec3 kS = FresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
-    vec3 kD = 1.0 - kS;
-    vec3 irr = texture(irradiance, vec4(normal, 0.0)).rgb;
-    vec3 diffuse = irr * albedo;
-    vec3 ambient = (kD * diffuse) * ao;
+    vec3 irradiance = texture(irradiance, vec4(normal, 0.0)).rgb;
+    vec3 diffuse = irradiance * albedo;
+    
+    vec3 prefilteredColor = textureLod(prefiltered, vec4(R, 0.0), roughness * maxReflectionLod).rgb;
+    vec2 envBRDF = texture(brdf, vec2(max(dot(normal, V), 0.0), max(roughness, 0.001))).rg;
+    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+    
+    vec3 ambient = (kD * diffuse + specular) * ao;
 
-
-    vec3 finalColor = (ambient + lighting) * (1.0 - shadow);
+    vec3 finalColor = (ambient + lighting) * ao * (1.0 - shadow) + emission;
 
     fragColor = vec4(finalColor, 1.0);
 }

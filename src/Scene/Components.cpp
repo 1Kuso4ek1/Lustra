@@ -198,13 +198,13 @@ HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent
 
     SetupConvertPipeline();
     SetupIrradiancePipeline();
+    SetupPrefilteredPipeline();
     SetupSkyPipeline();
 
     CreateCubemaps(resolution);
     CreateRenderTargets(resolution, cubeMap);
 
     if(hdri->loaded)
-        //RenderCubeMap(cubeMap, pipelineConvert);
         Build();
 }
 
@@ -215,7 +215,6 @@ void HDRISkyComponent::OnEvent(Event& event)
         auto assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
 
         if(assetLoadedEvent.GetAsset() == environmentMap)
-            //RenderCubeMap(cubeMap, pipelineConvert);
             Build();
     }
 }
@@ -228,7 +227,7 @@ void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
     CreateCubemaps(resolution);
     
     if(environmentMap->loaded)
-        dev::Multithreading::Get().AddMainThreadJob([&]() { Build(); /* RenderCubeMap(cubeMap, pipelineConvert); */ });
+        dev::Multithreading::Get().AddMainThreadJob([&]() { Build(); });
 }
 
 void HDRISkyComponent::Build()
@@ -257,9 +256,16 @@ void HDRISkyComponent::Build()
     );
 
     ReleaseRenderTargets();
+    CreateRenderTargets({ 1024, 1024 }, prefiltered);
 
-    //RenderCubeMap(irradiance, pipelineIrradiance);
-    //RenderCubeMap(prefiltered, pipelinePrefiltered);
+    RenderCubeMapMips(
+        {
+            { 1, cubeMap },
+            { 2, environmentMap->sampler }
+        },
+        prefiltered,
+        pipelinePrefiltered
+    );
 }
 
 void HDRISkyComponent::RenderCubeMap(
@@ -311,6 +317,78 @@ void HDRISkyComponent::RenderCubeMap(
     matrices->PopMatrix();
 }
 
+void HDRISkyComponent::RenderCubeMapMips(
+    const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+    LLGL::Texture* cubeMap,
+    LLGL::PipelineState* pipeline
+)
+{
+    auto matrices = Renderer::Get().GetMatrices();
+
+    matrices->PushMatrix();
+
+    matrices->GetModel() = glm::mat4(1.0f);
+    matrices->GetProjection() = projection;
+
+    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
+
+    auto initialResolution = renderTargets[0]->GetResolution();
+
+    auto mipsNum = 
+        LLGL::NumMipLevels(
+            initialResolution.width,
+            initialResolution.height
+        );
+
+    for(int i = 0; i < mipsNum; i++)
+    {
+        for(int j = 0; j < 6; j++)
+        {
+            matrices->GetView() = views[j];
+
+            Renderer::Get().Begin();
+
+            Renderer::Get().RenderPass(
+                [&](auto commandBuffer)
+                {
+                    cube->meshes[0]->BindBuffers(commandBuffer);
+                },
+                {
+                    { 0, Renderer::Get().GetMatricesBuffer() },
+                    { 1, resources.at(1) },
+                    { 2, resources.at(2) }
+                },
+                [&](auto commandBuffer)
+                {
+                    float roughness = (float)i / (float)(mipsNum - 1);
+
+                    commandBuffer->SetUniforms(0, &roughness, sizeof(roughness));
+
+                    cube->meshes[0]->Draw(commandBuffer);
+                },
+                pipeline,
+                renderTargets[j]
+            );
+
+            Renderer::Get().End();
+
+            Renderer::Get().Submit();
+        }
+
+        ReleaseRenderTargets();
+        CreateRenderTargets(
+            {
+                initialResolution.width / (int)std::pow(2, i),
+                initialResolution.height / (int)std::pow(2, i)
+            },
+            prefiltered,
+            i
+        );
+    }
+
+    matrices->PopMatrix();
+}
+
 void HDRISkyComponent::SetupConvertPipeline()
 {
     pipelineConvert = Renderer::Get().CreatePipelineState(
@@ -335,7 +413,7 @@ void HDRISkyComponent::SetupConvertPipeline()
             },
             .rasterizer = LLGL::RasterizerDescriptor
             {
-                .cullMode = LLGL::CullMode::Disabled,
+                .cullMode = LLGL::CullMode::Front,
                 .frontCCW = true
             }
         }
@@ -366,7 +444,42 @@ void HDRISkyComponent::SetupIrradiancePipeline()
             },
             .rasterizer = LLGL::RasterizerDescriptor
             {
-                .cullMode = LLGL::CullMode::Disabled,
+                .cullMode = LLGL::CullMode::Front,
+                .frontCCW = true
+            }
+        }
+    );
+}
+
+void HDRISkyComponent::SetupPrefilteredPipeline()
+{
+    pipelinePrefiltered = Renderer::Get().CreatePipelineState(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
+                { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
+            },
+            .uniforms = 
+            {
+                { "roughness", LLGL::UniformType::Float1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/prefilter.frag"),
+            .depth = LLGL::DepthDescriptor
+            {
+                .testEnabled = true,
+                .writeEnabled = false,
+                .compareOp = LLGL::CompareOp::LessEqual
+            },
+            .rasterizer = LLGL::RasterizerDescriptor
+            {
+                .cullMode = LLGL::CullMode::Front,
                 .frontCCW = true
             }
         }
@@ -410,27 +523,32 @@ void HDRISkyComponent::CreateCubemaps(const LLGL::Extent2D& resolution)
     {
         .type = LLGL::TextureType::TextureCubeArray,
         .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
-        .format = LLGL::Format::RGBA16Float,
+        .format = LLGL::Format::RGB16Float,
         .extent = { resolution.width, resolution.height, 1 },
         .arrayLayers = 6
     };
 
     cubeMap = Renderer::Get().CreateTexture(textureDesc);
+    Renderer::Get().GenerateMips(cubeMap);
 
-    textureDesc.extent = { 32, 32, 1 };
-
+    textureDesc.extent = { 32, 32, 1 }; // resolution.width / 64
     irradiance = Renderer::Get().CreateTexture(textureDesc);
+
+    textureDesc.extent = { 1024, 1024, 1 }; // resolution.width / 2
+    prefiltered = Renderer::Get().CreateTexture(textureDesc);
+    Renderer::Get().GenerateMips(prefiltered);
+    
 
     // LLGL::NumMipLevels(resolution.width, resolution.height);
 }
 
-void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap)
+void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel)
 {
     for(int i = 0; i < 6; i++)
     {
         renderTargets[i] = Renderer::Get().CreateRenderTarget(
             { resolution.width, resolution.height },
-            { LLGL::AttachmentDescriptor(cubeMap, 0, i) }
+            { LLGL::AttachmentDescriptor(cubeMap, mipLevel, i) }
         );
     }
 }

@@ -168,12 +168,19 @@ private:
         LLGL::PipelineState* pipeline
     );
 
+    void RenderCubeMapMips(
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+        LLGL::Texture* cubeMap,
+        LLGL::PipelineState* pipeline
+    );
+
     void SetupConvertPipeline();
     void SetupIrradiancePipeline();
+    void SetupPrefilteredPipeline();
     void SetupSkyPipeline();
 
     void CreateCubemaps(const LLGL::Extent2D& resolution);
-    void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap);
+    void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel = 0);
 
     void ReleaseCubeMaps();
     void ReleaseRenderTargets();

@@ -403,7 +403,10 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     RenderSky(renderTarget);
 
-    LLGL::Texture* irradiance = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
+    auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
+    auto irradiance = defaultTexture;
+    auto prefiltered = defaultTexture;
+    auto brdf = AssetManager::Get().Load<TextureAsset>("pbr/brdf.png", true)->texture;
 
     // Very bad, obviously
     auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>();
@@ -411,6 +414,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
         irradiance = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin()).irradiance;
+        prefiltered = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin()).prefiltered;
     }
 
     renderer->Draw(
@@ -423,7 +427,9 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
             { 9, shadowSamplers[2] },
             { 10, shadowSamplers[3] },
 
-            { 11, irradiance }
+            { 11, irradiance },
+            { 12, prefiltered },
+            { 13, brdf }
         },
         uniforms,
         renderTarget

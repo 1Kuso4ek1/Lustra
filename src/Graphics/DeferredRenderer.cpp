@@ -33,12 +33,12 @@ DeferredRenderer::DeferredRenderer(
 
     LLGL::SamplerDescriptor shadowSamplerDesc
     {
-        .addressModeU      = LLGL::SamplerAddressMode::Border,
-        .addressModeV      = LLGL::SamplerAddressMode::Border,
-        .addressModeW      = LLGL::SamplerAddressMode::Border,
+        .addressModeU = LLGL::SamplerAddressMode::Border,
+        .addressModeV = LLGL::SamplerAddressMode::Border,
+        .addressModeW = LLGL::SamplerAddressMode::Border,
 
-        .mipMapEnabled     = false,
-        .compareEnabled    = true,
+        .mipMapEnabled = false,
+        .compareEnabled = true,
         
         .borderColor = { 1.0f, 1.0f, 1.0f, 1.0f },
     };
@@ -76,11 +76,13 @@ DeferredRenderer::DeferredRenderer(
                 { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 10 },
                 { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 11 },
                 { "irradiance", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 12 },
+                { "prefiltered", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 13 },
+                { "brdf", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 14 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
             },
             .staticSamplers =
             {
-                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 13, shadowSamplerDesc }
+                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 15, shadowSamplerDesc }
             },
             .uniforms =
             {
@@ -134,7 +136,9 @@ void DeferredRenderer::Draw(
             { 9, resources.at(9) },
             { 10, resources.at(10) },
             { 11, resources.at(11) },
-            { 12, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 12, resources.at(12) },
+            { 13, resources.at(13) },
+            { 14, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {

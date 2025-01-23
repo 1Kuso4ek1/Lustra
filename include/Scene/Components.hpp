@@ -157,6 +157,7 @@ public:
     LLGL::Texture* cubeMap{};
     LLGL::Texture* irradiance{};
     LLGL::Texture* prefiltered{};
+    LLGL::Texture* brdf{};
     ////////////////////////////////////////////////
 
     LLGL::Extent2D resolution;
@@ -174,21 +175,30 @@ private:
         LLGL::PipelineState* pipeline
     );
 
+    void RenderBRDF();
+
     void SetupConvertPipeline();
     void SetupIrradiancePipeline();
     void SetupPrefilteredPipeline();
+    void SetupBRDFPipeline();
     void SetupSkyPipeline();
 
     void CreateCubemaps(const LLGL::Extent2D& resolution);
     void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel = 0);
 
+    void CreateBRDFTexture(const LLGL::Extent2D& resolution);
+    void CreateBRDFRenderTarget(const LLGL::Extent2D& resolution);
+
     void ReleaseCubeMaps();
     void ReleaseRenderTargets();
 
 private:
-    LLGL::PipelineState* pipelineConvert;
-    LLGL::PipelineState* pipelineIrradiance;
-    LLGL::PipelineState* pipelinePrefiltered;
+    LLGL::PipelineState* pipelineConvert{};
+    LLGL::PipelineState* pipelineIrradiance{};
+    LLGL::PipelineState* pipelinePrefiltered{};
+    LLGL::PipelineState* pipelineBRDF{};
+
+    LLGL::RenderTarget* brdfRenderTarget{};
 
     std::array<LLGL::RenderTarget*, 6> renderTargets;
 

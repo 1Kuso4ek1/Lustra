@@ -406,15 +406,18 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
     auto irradiance = defaultTexture;
     auto prefiltered = defaultTexture;
-    auto brdf = AssetManager::Get().Load<TextureAsset>("pbr/brdf.png", true)->texture;
+    auto brdf = defaultTexture;
 
     // Very bad, obviously
     auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>();
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
-        irradiance = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin()).irradiance;
-        prefiltered = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin()).prefiltered;
+        auto sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
+
+        irradiance = sky.irradiance;
+        prefiltered = sky.prefiltered;
+        brdf = sky.brdf;
     }
 
     renderer->Draw(

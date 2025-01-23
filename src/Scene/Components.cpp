@@ -199,10 +199,16 @@ HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent
     SetupConvertPipeline();
     SetupIrradiancePipeline();
     SetupPrefilteredPipeline();
+    SetupBRDFPipeline();
     SetupSkyPipeline();
 
     CreateCubemaps(resolution);
     CreateRenderTargets(resolution, cubeMap);
+    
+    CreateBRDFTexture({ 512, 512 });
+    CreateBRDFRenderTarget({ 512, 512 });
+
+    RenderBRDF();
 
     if(hdri->loaded)
         Build();
@@ -281,7 +287,7 @@ void HDRISkyComponent::RenderCubeMap(
     matrices->GetModel() = glm::mat4(1.0f);
     matrices->GetProjection() = projection;
 
-    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
+    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true)->meshes[0];
     
     for(int i = 0; i < 6; i++)
     {
@@ -292,7 +298,7 @@ void HDRISkyComponent::RenderCubeMap(
         Renderer::Get().RenderPass(
             [&](auto commandBuffer)
             {
-                cube->meshes[0]->BindBuffers(commandBuffer);
+                cube->BindBuffers(commandBuffer);
             },
             {
                 { 0, Renderer::Get().GetMatricesBuffer() },
@@ -301,7 +307,7 @@ void HDRISkyComponent::RenderCubeMap(
             },
             [&](auto commandBuffer)
             {
-                cube->meshes[0]->Draw(commandBuffer);
+                cube->Draw(commandBuffer);
             },
             pipeline,
             renderTargets[i]
@@ -330,7 +336,7 @@ void HDRISkyComponent::RenderCubeMapMips(
     matrices->GetModel() = glm::mat4(1.0f);
     matrices->GetProjection() = projection;
 
-    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true);
+    auto cube = AssetManager::Get().Load<ModelAsset>("cube", true)->meshes[0];
 
     auto initialResolution = renderTargets[0]->GetResolution();
 
@@ -351,7 +357,7 @@ void HDRISkyComponent::RenderCubeMapMips(
             Renderer::Get().RenderPass(
                 [&](auto commandBuffer)
                 {
-                    cube->meshes[0]->BindBuffers(commandBuffer);
+                    cube->BindBuffers(commandBuffer);
                 },
                 {
                     { 0, Renderer::Get().GetMatricesBuffer() },
@@ -364,7 +370,7 @@ void HDRISkyComponent::RenderCubeMapMips(
 
                     commandBuffer->SetUniforms(0, &roughness, sizeof(roughness));
 
-                    cube->meshes[0]->Draw(commandBuffer);
+                    cube->Draw(commandBuffer);
                 },
                 pipeline,
                 renderTargets[j]
@@ -387,6 +393,31 @@ void HDRISkyComponent::RenderCubeMapMips(
     }
 
     matrices->PopMatrix();
+}
+
+void HDRISkyComponent::RenderBRDF()
+{
+    auto plane = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
+
+    Renderer::Get().Begin();
+
+    Renderer::Get().RenderPass(
+        [&](auto commandBuffer)
+        {
+            plane->BindBuffers(commandBuffer, false);
+        },
+        {},
+        [&](auto commandBuffer)
+        {
+            plane->Draw(commandBuffer);
+        },
+        pipelineBRDF,
+        brdfRenderTarget
+    );
+
+    Renderer::Get().End();
+
+    Renderer::Get().Submit();
 }
 
 void HDRISkyComponent::SetupConvertPipeline()
@@ -486,6 +517,17 @@ void HDRISkyComponent::SetupPrefilteredPipeline()
     );
 }
 
+void HDRISkyComponent::SetupBRDFPipeline()
+{
+    pipelineBRDF = Renderer::Get().CreatePipelineState({},
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/BRDF.frag"),
+            .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
+        }
+    );
+}
+
 void HDRISkyComponent::SetupSkyPipeline()
 {
     pipelineSky = Renderer::Get().CreatePipelineState(
@@ -547,10 +589,29 @@ void HDRISkyComponent::CreateRenderTargets(const LLGL::Extent2D& resolution, LLG
     for(int i = 0; i < 6; i++)
     {
         renderTargets[i] = Renderer::Get().CreateRenderTarget(
-            { resolution.width, resolution.height },
+            resolution,
             { LLGL::AttachmentDescriptor(cubeMap, mipLevel, i) }
         );
     }
+}
+
+void HDRISkyComponent::CreateBRDFTexture(const LLGL::Extent2D& resolution)
+{
+    LLGL::TextureDescriptor textureDesc
+    {
+        .type = LLGL::TextureType::Texture2D,
+        .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
+        .format = LLGL::Format::RG16Float,
+        .extent = { resolution.width, resolution.height, 1 },
+        .mipLevels = 1
+    };
+
+    brdf = Renderer::Get().CreateTexture(textureDesc);
+}
+
+void HDRISkyComponent::CreateBRDFRenderTarget(const LLGL::Extent2D& resolution)
+{
+    brdfRenderTarget = Renderer::Get().CreateRenderTarget(resolution, { brdf });
 }
 
 void HDRISkyComponent::ReleaseCubeMaps()

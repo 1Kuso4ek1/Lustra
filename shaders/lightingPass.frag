@@ -2,7 +2,7 @@
 
 const float PI = 3.14159265359;
 
-const float maxReflectionLod = 8;
+const float maxReflectionLod = 8.0;
 
 const int maxLights = 128;
 const int maxShadows = 4;
@@ -202,13 +202,15 @@ void main()
     float ao = combined.b;
 
     vec3 V = normalize(cameraPosition - worldPosition);
-    vec3 R = reflect(-V, normal);
+    vec3 R = reflect(vec3(-V.x, -V.y, V.z), normal);
+
+    float NdotV = clamp(dot(normal, V), 0.0, 0.99);
 
     vec3 lighting = CalculateLights(worldPosition, V, normal, albedo, metallic, roughness);
 
     float shadow = CalculateShadows(vec4(worldPosition, 1.0));
 
-    vec3 F = FresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
+    vec3 F = FresnelSchlickRoughness(NdotV, mix(F0, albedo, metallic), roughness);
 
     vec3 kS = F;
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
@@ -217,12 +219,12 @@ void main()
     vec3 diffuse = irradiance * albedo;
     
     vec3 prefilteredColor = textureLod(prefiltered, vec4(R, 0.0), roughness * maxReflectionLod).rgb;
-    vec2 envBRDF = texture(brdf, vec2(max(dot(normal, V), 0.0), max(roughness, 0.001))).rg;
+    vec2 envBRDF = texture(brdf, vec2(NdotV, roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     
     vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 finalColor = (ambient + lighting) * ao * (1.0 - shadow) + emission;
+    vec3 finalColor = (ambient + lighting) * (1.0 - shadow) + emission + (ambient / 5.0) * shadow;
 
     fragColor = vec4(finalColor, 1.0);
 }

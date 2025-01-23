@@ -3,10 +3,7 @@
 const float PI = 3.14159265359;
 const uint sampleCount = 128u;
 
-uniform samplerCubeArray skybox;
-uniform float roughness;
-
-in vec3 vertex;
+in vec2 coord;
 
 out vec4 fragColor;
 
@@ -44,54 +41,72 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
     vec3 bitangent = cross(N, tangent);
 
     vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
-    
+
     return normalize(sampleVec);
 }
 
-float DistributionGGX(float NdotH, float roughness)
+float GeometrySchlickGGX(float NdotV, float roughness)
 {
-    float denom = PI * pow(pow(NdotH, 2.0) * (pow(roughness, 4.0) - 1.0) + 1.0, 2.0);
-    
-    return pow(roughness, 4.0) / denom;
+    float a = roughness;
+    float k = (a * a) / 2.0;
+
+    float nom = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+
+    return nom / denom;
 }
 
-void main()
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-    vec3 N = normalize(vertex);
-    vec3 R = N;
-    vec3 V = R;
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
 
-    float resolution = float(textureSize(skybox, 0).x);
+    return ggx1 * ggx2;
+}
 
-    float totalWeight = 0.0;
-    vec3 prefilteredColor = vec3(0.0);
+vec2 IntegrateBRDF(float NdotV, float roughness)
+{
+    vec3 V = vec3(
+        sqrt(1.0 - NdotV * NdotV),
+        0.0,
+        NdotV
+    );
 
-    for(uint i = 0u; i < sampleCount; i++)
+    float A = 0.0;
+    float B = 0.0;
+
+    vec3 N = vec3(0.0, 0.0, 1.0);
+
+    for(uint i = 0u; i < sampleCount; ++i)
     {
         vec2 Xi = Hammersley(i, sampleCount);
         vec3 H = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
 
-        float NdotH = dot(N, H);
-        float HdotV = dot(H, V);
+        float NdotL = max(L.z, 0.0);
+        float NdotH = max(H.z, 0.0);
+        float VdotH = max(dot(V, H), 0.0);
 
-        float D = DistributionGGX(NdotH, roughness);
-        float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001; 
-
-        float saTexel = 4.0 * PI / (6.0 * resolution * resolution);
-        float saSample = 1.0 / (float(sampleCount) * pdf + 0.0001);
-
-        float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
-
-        float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0)
         {
-            prefilteredColor += textureLod(skybox, vec4(L, 0.0), mipLevel).rgb * NdotL;
-            totalWeight += NdotL;
+            float G = GeometrySmith(N, V, L, roughness);
+            float G_Vis = (G * VdotH) / (NdotH * NdotV);
+            float Fc = pow(1.0 - VdotH, 5.0);
+
+            A += (1.0 - Fc) * G_Vis;
+            B += Fc * G_Vis;
         }
     }
 
-    prefilteredColor = prefilteredColor / totalWeight;
+    A /= float(sampleCount);
+    B /= float(sampleCount);
+    
+    return vec2(A, B);
+}
 
-    fragColor = vec4(prefilteredColor, 1.0);
+void main() 
+{
+    fragColor = vec4(IntegrateBRDF(coord.x, coord.y), 0.0, 1.0);
 }

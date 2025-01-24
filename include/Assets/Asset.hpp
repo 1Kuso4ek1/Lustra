@@ -12,7 +12,8 @@ struct Asset
         Unknown,
         Texture,
         Material,
-        Model
+        Model,
+        Environment
     };
 
     Asset(Type type) : type(type) {}

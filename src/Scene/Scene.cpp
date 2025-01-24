@@ -375,7 +375,7 @@ void Scene::HDRISkyRenderPass(MeshComponent mesh, HDRISkyComponent sky, LLGL::Re
         },
         {
             { 0, Renderer::Get().GetMatricesBuffer() },
-            { 1, sky.cubeMap },
+            { 1, sky.asset->cubeMap },
             { 2, sky.environmentMap->sampler }
         },
         [&](auto commandBuffer)
@@ -415,9 +415,9 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     {
         auto sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
 
-        irradiance = sky.irradiance;
-        prefiltered = sky.prefiltered;
-        brdf = sky.brdf;
+        irradiance = sky.asset->irradiance;
+        prefiltered = sky.asset->prefiltered;
+        brdf = sky.asset->brdf;
     }
 
     renderer->Draw(

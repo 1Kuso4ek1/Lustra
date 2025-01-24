@@ -3,6 +3,7 @@
 #include <ImGuiManager.hpp>
 #include <Camera.hpp>
 #include <PostProcessing.hpp>
+#include <PBRManager.hpp>
 #include <AssetManager.hpp>
 #include <TextureAsset.hpp>
 #include <MaterialAsset.hpp>
@@ -144,75 +145,18 @@ public:
     HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
 
     void Build();
-
     void OnEvent(Event& event) override;
-
     void SetResolution(const LLGL::Extent2D& resolution);
 
     TextureAssetPtr environmentMap;
-
-    LLGL::PipelineState* pipelineSky{};
-
-    // Make it something like PBRStack component idk
-    LLGL::Texture* cubeMap{};
-    LLGL::Texture* irradiance{};
-    LLGL::Texture* prefiltered{};
-    LLGL::Texture* brdf{};
-    ////////////////////////////////////////////////
+    EnvironmentAssetPtr asset;
 
     LLGL::Extent2D resolution;
+    LLGL::PipelineState* pipelineSky{};
 
 private:
-    void RenderCubeMap(
-        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-        LLGL::Texture* cubeMap,
-        LLGL::PipelineState* pipeline
-    );
-
-    void RenderCubeMapMips(
-        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-        LLGL::Texture* cubeMap,
-        LLGL::PipelineState* pipeline
-    );
-
-    void RenderBRDF();
-
-    void SetupConvertPipeline();
-    void SetupIrradiancePipeline();
-    void SetupPrefilteredPipeline();
-    void SetupBRDFPipeline();
     void SetupSkyPipeline();
-
-    void CreateCubemaps(const LLGL::Extent2D& resolution);
-    void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel = 0);
-
-    void CreateBRDFTexture(const LLGL::Extent2D& resolution);
-    void CreateBRDFRenderTarget(const LLGL::Extent2D& resolution);
-
-    void ReleaseCubeMaps();
-    void ReleaseRenderTargets();
-
-private:
-    LLGL::PipelineState* pipelineConvert{};
-    LLGL::PipelineState* pipelineIrradiance{};
-    LLGL::PipelineState* pipelinePrefiltered{};
-    LLGL::PipelineState* pipelineBRDF{};
-
-    LLGL::RenderTarget* brdfRenderTarget{};
-
-    std::array<LLGL::RenderTarget*, 6> renderTargets;
-
-    std::array<glm::mat4, 6> views =
-    {
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
-        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
-    };
-
-    glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+    void DefaultTextures();
 };
 
 }

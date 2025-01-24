@@ -1,7 +1,7 @@
 #version 460 core
 
 const float PI = 3.14159265359;
-const uint sampleCount = 128u;
+const uint sampleCount = 64u;
 
 in vec2 coord;
 

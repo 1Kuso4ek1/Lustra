@@ -1,0 +1,84 @@
+#pragma once
+#include <Renderer.hpp>
+#include <EventManager.hpp>
+#include <TextureAsset.hpp>
+#include <EnvironmentAsset.hpp>
+#include <ModelAsset.hpp>
+#include <AssetManager.hpp>
+
+namespace dev
+{
+
+// Needs some improvements
+class PBRManager : public Singleton<PBRManager>
+{
+public:
+    EnvironmentAssetPtr Build(
+        const LLGL::Extent2D& resolution,
+        TextureAssetPtr environmentMap,
+        EnvironmentAssetPtr environmentAsset = nullptr
+    );
+
+private: // Singleton-related
+    PBRManager();
+
+    friend class Singleton<PBRManager>;
+
+private:
+    void RenderCubeMap(
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+        LLGL::Texture* cubeMap,
+        LLGL::PipelineState* pipeline
+    );
+
+    void RenderCubeMapMips(
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+        LLGL::Texture* cubeMap,
+        LLGL::PipelineState* pipeline
+    );
+
+    void RenderBRDF();
+
+    void SetupConvertPipeline();
+    void SetupIrradiancePipeline();
+    void SetupPrefilteredPipeline();
+    void SetupBRDFPipeline();
+
+    void CreateCubemaps(const LLGL::Extent2D& resolution);
+    void CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel = 0);
+
+    void CreateBRDFTexture(const LLGL::Extent2D& resolution);
+    void CreateBRDFRenderTarget(const LLGL::Extent2D& resolution);
+
+    void ReleaseCubeMaps();
+    void ReleaseRenderTargets();
+
+private:
+    LLGL::Texture* cubeMap{};
+    LLGL::Texture* irradiance{};
+    LLGL::Texture* prefiltered{};
+    LLGL::Texture* brdf{};
+
+    LLGL::PipelineState* pipelineConvert{};
+    LLGL::PipelineState* pipelineIrradiance{};
+    LLGL::PipelineState* pipelinePrefiltered{};
+    LLGL::PipelineState* pipelineBRDF{};
+
+    LLGL::RenderTarget* brdfRenderTarget{};
+
+    std::array<LLGL::RenderTarget*, 6> renderTargets;
+
+    std::array<glm::mat4, 6> views =
+    {
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
+        glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+    };
+
+    glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+};
+
+}

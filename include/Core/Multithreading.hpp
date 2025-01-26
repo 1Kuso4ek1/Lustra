@@ -21,8 +21,6 @@ public:
     size_t GetJobsNum() const;
 
 private:
-    /* std::vector<std::future<void>> jobs;
-    std::vector<std::function<void()>> mainThread; */
     using ManagedJob = std::pair<std::future<void>, std::function<void()>>;
 
     std::vector<ManagedJob> jobs;

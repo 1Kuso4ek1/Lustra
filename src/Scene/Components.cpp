@@ -98,7 +98,7 @@ void LightComponent::CreatePipeline()
                     .constantFactor = 4.0f,
                     .slopeFactor = 1.5f
                 },
-                .frontCCW = true,
+                .frontCCW = true
             },
             .blend =
             {
@@ -113,27 +113,30 @@ void LightComponent::CreatePipeline()
     );
 }
 
-ACESTonemappingComponent::ACESTonemappingComponent(
+TonemapComponent::TonemapComponent(
     const LLGL::Extent2D& resolution,
     bool registerEvent
-) : ComponentBase("ACESTonemappingComponent")
+) : ComponentBase("TonemapComponent")
 {
     postProcessing = std::make_shared<PostProcessing>(
         LLGL::PipelineLayoutDescriptor
         {
             .bindings =
             {
-                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
+                { "bloom", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 }
             },
             .uniforms
             {
-                { "exposure", LLGL::UniformType::Float1 }
+                { "algorithm", LLGL::UniformType::Int1 },
+                { "exposure", LLGL::UniformType::Float1 },
+                { "bloomStrength", LLGL::UniformType::Float1 }
             }
         },
         LLGL::GraphicsPipelineDescriptor
         {
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/ACES.frag")
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/tonemap.frag")
         },
         resolution,
         true,
@@ -142,8 +145,98 @@ ACESTonemappingComponent::ACESTonemappingComponent(
 
     setUniforms = [&](auto commandBuffer)
     {
-        commandBuffer->SetUniforms(0, &exposure, sizeof(exposure));
+        commandBuffer->SetUniforms(0, &algorithm, sizeof(algorithm));
+        commandBuffer->SetUniforms(1, &exposure, sizeof(exposure));
     };
+}
+
+BloomComponent::BloomComponent(const LLGL::Extent2D& resolution) : ComponentBase("BloomComponent")
+{
+    LLGL::Extent2D scaledResolution = { resolution.width / 8, resolution.height / 8 };
+
+    LLGL::PipelineLayoutDescriptor pingPongLayout = 
+    {
+        .bindings =
+        {
+            { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
+            { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
+        },
+        .uniforms =
+        {
+            { "horizontal", LLGL::UniformType::Bool1 },
+        }
+    };
+
+    LLGL::GraphicsPipelineDescriptor pingPongGraphics = 
+    {
+        .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+        .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/blur.frag")
+    };
+
+    thresholdPass = std::make_shared<PostProcessing>(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
+            },
+            .uniforms =
+            {
+                { "threshold", LLGL::UniformType::Float1 },
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/threshold.frag")
+        },
+        scaledResolution,
+        true,
+        false
+    );
+
+    pingPong[0] = std::make_shared<PostProcessing>(
+        pingPongLayout,
+        pingPongGraphics,
+        scaledResolution,
+        true,
+        false
+    );
+
+    pingPong[1] = std::make_shared<PostProcessing>(
+        pingPongLayout,
+        pingPongGraphics,
+        scaledResolution,
+        true,
+        false
+    );
+
+    sampler = Renderer::Get().CreateSampler(
+        {
+            .addressModeU = LLGL::SamplerAddressMode::Clamp,
+            .addressModeV = LLGL::SamplerAddressMode::Clamp,
+            .addressModeW = LLGL::SamplerAddressMode::Clamp
+        }
+    );
+
+    setThresholdUniforms = [&](auto commandBuffer)
+    {
+        commandBuffer->SetUniforms(0, &threshold, sizeof(threshold));
+    };
+}
+
+void BloomComponent::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+        WindowResizeEvent newEvent({ resizeEvent->GetSize().width / 8, resizeEvent->GetSize().height / 8 });
+
+        thresholdPass->OnEvent(newEvent);
+        pingPong[0]->OnEvent(newEvent);
+        pingPong[1]->OnEvent(newEvent);
+    }
 }
 
 ProceduralSkyComponent::ProceduralSkyComponent()

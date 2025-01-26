@@ -468,25 +468,83 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
 void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
 {
-    auto acesView = registry.view<ACESTonemappingComponent>();
-
-    if(acesView->begin() == acesView->end())
+    auto tonemapView = registry.view<TonemapComponent>();
+    
+    if(tonemapView->begin() == tonemapView->end())
     {
         RenderResult(renderTarget);
         return;
     }
 
-    auto postProcessing = *acesView->begin();
+    auto toneMapping = *tonemapView->begin();
+    
+    RenderResult(toneMapping.postProcessing->GetRenderTarget());
 
-    RenderResult(postProcessing.postProcessing->GetRenderTarget());
-
-    postProcessing.postProcessing->Apply(
+    auto bloomResult = ApplyBloom(toneMapping.postProcessing->GetFrame());
+    
+    toneMapping.postProcessing->Apply(
         {
-            { 0, postProcessing.postProcessing->GetFrame() }
+            { 0, toneMapping.postProcessing->GetFrame() },
+            { 1, bloomResult.first }
         },
-        postProcessing.setUniforms,
+        [&](auto commandBuffer)
+        {
+            toneMapping.setUniforms(commandBuffer);
+            
+            commandBuffer->SetUniforms(2, &bloomResult.second, sizeof(float));
+        },
         renderTarget
     );
+}
+
+std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
+{
+    auto bloomView = registry.view<BloomComponent>();
+
+    if(bloomView->begin() == bloomView->end())
+        return { AssetManager::Get().Load<TextureAsset>("empty", true)->texture, 0.0f };
+
+    auto bloom = *bloomView->begin();
+
+    bloom.thresholdPass->Apply(
+        {
+            { 0, frame }
+        },
+        bloom.setThresholdUniforms,
+        bloom.thresholdPass->GetRenderTarget()
+    );
+    
+    int horizontal = 1;
+
+    auto setPingPongUniforms = [&](auto commandBuffer)
+    {
+        commandBuffer->SetUniforms(0, &horizontal, sizeof(int));
+    };
+
+    bloom.pingPong[1]->Apply(
+        {
+            { 0, bloom.thresholdPass->GetFrame() },
+            { 1, bloom.sampler }
+        },
+        setPingPongUniforms,
+        bloom.pingPong[1]->GetRenderTarget()
+    );
+
+    for(int i = 0; i < 9; i++)
+    {
+        horizontal = !horizontal;
+
+        bloom.pingPong[i % 2]->Apply(
+            {
+                { 0, bloom.pingPong[(i + 1) % 2]->GetFrame() },
+                { 1, bloom.sampler }
+            },
+            setPingPongUniforms,
+            bloom.pingPong[i % 2]->GetRenderTarget()
+        );
+    }
+
+    return { bloom.pingPong[0]->GetFrame(), bloom.strength };
 }
     
 }

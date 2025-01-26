@@ -229,7 +229,8 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing = scene.CreateEntity();
 
     postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
-    postProcessing.AddComponent<dev::ACESTonemappingComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 }).threshold = 0.0f;
 }
 
 void SceneTestApp::CreateLightEntity()
@@ -370,7 +371,8 @@ void SceneTestApp::DrawPropertiesWindow()
                           dev::MeshRendererComponent,
                           dev::CameraComponent,
                           dev::LightComponent,
-                          dev::ACESTonemappingComponent,
+                          dev::TonemapComponent,
+                          dev::BloomComponent,
                           dev::ProceduralSkyComponent,
                           dev::HDRISkyComponent>(scene.GetRegistry(), selectedEntity);
 

@@ -71,6 +71,8 @@ private:
     void RenderResult(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
     void ApplyPostProcessing(LLGL::RenderTarget* renderTarget);
+    
+    std::pair<LLGL::Texture*, float> ApplyBloom(LLGL::Texture* frame);
 
 private:
     glm::vec3 cameraPosition; // Only for shaders

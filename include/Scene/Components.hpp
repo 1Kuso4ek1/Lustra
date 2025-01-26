@@ -113,18 +113,36 @@ struct ScriptComponent : public ComponentBase
     std::function<void(Entity self, float)> update;
 };
 
-struct ACESTonemappingComponent : public ComponentBase
+struct TonemapComponent : public ComponentBase
 {
-    ACESTonemappingComponent(
+    TonemapComponent(
         const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
         bool registerEvent = true
     );
 
+    int algorithm = 0;
     float exposure = 1.0f;
 
     std::shared_ptr<PostProcessing> postProcessing;
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
+};
+
+struct BloomComponent : public ComponentBase, public EventListener
+{
+    BloomComponent(const LLGL::Extent2D& resolution);
+
+    void OnEvent(Event& event) override;
+
+    float threshold = 1.0f, strength = 0.3f;
+
+    LLGL::Sampler* sampler;
+
+    std::shared_ptr<PostProcessing> thresholdPass;
+
+    std::array<std::shared_ptr<PostProcessing>, 2> pingPong;
+
+    std::function<void(LLGL::CommandBuffer*)> setThresholdUniforms;
 };
 
 struct ProceduralSkyComponent : public ComponentBase
@@ -139,7 +157,7 @@ struct ProceduralSkyComponent : public ComponentBase
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
-struct HDRISkyComponent : public ComponentBase, EventListener
+struct HDRISkyComponent : public ComponentBase, public EventListener
 {
 public:
     HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);

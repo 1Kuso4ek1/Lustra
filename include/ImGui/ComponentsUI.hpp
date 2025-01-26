@@ -119,9 +119,26 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
         component.SetupShadowMap(component.resolution);
 }
 
-inline void DrawComponentUI(ACESTonemappingComponent& component, entt::entity entity)
+inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
 {
+    static const std::vector<const char*> algorithms =
+    {
+        "ACES",
+        "ACES Film",
+        "Reinhard",
+        "Uncharted 2",
+        "Filmic",
+        "Lottes"
+    };
+
     ImGui::DragFloat("Exposure", &component.exposure, 0.05f, 0.0f, 100.0f);
+    ImGui::Combo("Algorithm", &component.algorithm, algorithms.data(), algorithms.size());
+}
+
+inline void DrawComponentUI(BloomComponent& component, entt::entity entity)
+{
+    ImGui::DragFloat("Threshold", &component.threshold, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Strength", &component.strength, 0.01f, 0.0f, 10.0f);
 }
 
 inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity entity)

@@ -17,9 +17,10 @@ private:
 
 private:
     LLGL::Texture* defaultTexture{};
+    LLGL::Texture* emptyTexture{};
     LLGL::Sampler* anisotropySampler{};
 
-    std::shared_ptr<TextureAsset> defaultTextureAsset;
+    std::shared_ptr<TextureAsset> defaultTextureAsset, emptyTextureAsset;
 };
 
 }

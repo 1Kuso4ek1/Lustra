@@ -120,9 +120,9 @@ void Renderer::Present()
 
 void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget)
 {
-    dev::Renderer::Get().Begin();
+    Get().Begin();
 
-    dev::Renderer::Get().RenderPass(
+    Get().RenderPass(
         [](auto){}, {}, 
         [](auto commandBuffer)
         {
@@ -132,27 +132,26 @@ void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget)
         renderTarget
     );
 
-    dev::Renderer::Get().End();
+    Get().End();
 
-    dev::Renderer::Get().Submit();
+    Get().Submit();
 }
 
 void Renderer::GenerateMips(LLGL::Texture* texture)
 {
-    Renderer::Get().Begin();
+    Begin();
 
-    Renderer::Get().RenderPass(
-        [&](auto) {}, {},
-        [&](auto commandBuffer)
+    RenderPass(
+        [&](auto)
         {
             commandBuffer->GenerateMips(*texture);
-        },
+        }, {}, [&](auto) {},
         nullptr
     );
 
-    Renderer::Get().End();
+    End();
 
-    Renderer::Get().Submit();
+    Submit();
 }
 
 void Renderer::Release(LLGL::Texture* texture)

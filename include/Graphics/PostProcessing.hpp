@@ -21,9 +21,11 @@ public:
 
     void OnEvent(Event& event) override;
 
-    LLGL::Texture* Apply(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-                         std::function<void(LLGL::CommandBuffer*)> setUniforms,
-                         LLGL::RenderTarget* renderTarget = nullptr);
+    LLGL::Texture* Apply(
+        const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+        std::function<void(LLGL::CommandBuffer*)> setUniforms,
+        LLGL::RenderTarget* renderTarget = nullptr
+    );
 
     LLGL::Texture* GetFrame();
     LLGL::RenderTarget* GetRenderTarget();

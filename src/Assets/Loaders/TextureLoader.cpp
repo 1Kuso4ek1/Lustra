@@ -14,6 +14,8 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
 
     if(path.filename() == "default")
         return defaultTextureAsset; // Just the default texture
+    else if(path.filename() == "empty")
+        return emptyTextureAsset; // 0 0 0 255
 
     auto textureAsset = std::make_shared<TextureAsset>(defaultTexture);
     textureAsset->sampler = anisotropySampler;
@@ -116,6 +118,7 @@ void TextureLoader::LoadDefaultData()
     textureDesc.extent = { 1, 1, 1 };
     
     unsigned char defaultData[] = { 255, 20, 147, 255 };
+    unsigned char emptyData[] = { 0, 0, 0, 255 };
 
     LLGL::ImageView imageView;
     imageView.dataSize = 4;
@@ -133,6 +136,18 @@ void TextureLoader::LoadDefaultData()
     defaultTextureAsset->nativeHandle = nativeHandle.id;
 
     defaultTextureAsset->loaded = true;
+
+    imageView.data = emptyData;
+
+    emptyTexture = Renderer::Get().CreateTexture(textureDesc, &imageView);
+
+    emptyTextureAsset = std::make_shared<TextureAsset>(emptyTexture);
+    emptyTextureAsset->sampler = anisotropySampler;
+
+    emptyTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
+    emptyTextureAsset->nativeHandle = nativeHandle.id;
+
+    emptyTextureAsset->loaded = true;
 }
 
 }

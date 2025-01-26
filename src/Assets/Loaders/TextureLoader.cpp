@@ -91,8 +91,7 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
 
     if(true) // Add a "separateThread" parameter
     {
-        Multithreading::Get().AddJob(path.extension() == ".hdr" ? std::function<void()>(loadFloat) : loadUint);
-        Multithreading::Get().AddMainThreadJob(create);
+        Multithreading::Get().AddJob({ path.extension() == ".hdr" ? std::function<void()>(loadFloat) : loadUint, create });
     }
     else
     {

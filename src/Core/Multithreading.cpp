@@ -5,33 +5,29 @@ namespace dev
 
 void Multithreading::Update()
 {
-    if(jobs.empty())
-        for(size_t i = 0; i < mainThread.size(); i++)
-        {
-            mainThread[i]();
-            mainThread.erase(mainThread.begin() + i);
-        }
-
     for(size_t i = 0; i < jobs.size(); i++)
     {
-        if(jobs[i].wait_for(0ms) == std::future_status::ready)
+        if(!jobs[i].first.valid())
+        {
+            if(jobs[i].second)
+                jobs[i].second();
+
             jobs.erase(jobs.begin() + i);
+        }
+        else if(jobs[i].first.wait_for(0ms) == std::future_status::ready)
+        {
+            jobs[i].second();
+
+            jobs.erase(jobs.begin() + i);
+        }
     }
 }
 
-void Multithreading::AddJob(std::future<void>&& future)
+void Multithreading::AddJob(const Job& job)
 {
-    jobs.emplace_back(std::move(future));
-}
-
-void Multithreading::AddJob(std::function<void()> job)
-{
-    jobs.emplace_back(std::async(std::launch::async, job));
-}
-
-void Multithreading::AddMainThreadJob(std::function<void()> job)
-{
-    mainThread.push_back(job);
+    auto task = job.first ? std::async(std::launch::async, job.first) : std::future<void>();
+    
+    jobs.emplace_back(std::make_pair(std::move(task), job.second));
 }
 
 size_t Multithreading::GetJobsNum() const

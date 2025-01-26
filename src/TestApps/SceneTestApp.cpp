@@ -57,7 +57,6 @@ void SceneTestApp::Run()
     {
         LLGL::Surface::ProcessEvents();
         
-        // Make events (AssetLoaded)
         dev::Multithreading::Get().Update();
 
         scene.Update(deltaTimeTimer.GetElapsedSeconds());
@@ -376,7 +375,7 @@ void SceneTestApp::DrawPropertiesWindow()
                           dev::HDRISkyComponent>(scene.GetRegistry(), selectedEntity);
 
         ImGui::Separator();
-            
+
         if(ImGui::Button("Remove entity"))
         {
             auto it = std::find(list.begin(), list.end(), (entt::entity)selectedEntity);
@@ -781,14 +780,14 @@ void SceneTestApp::DrawViewport()
         size.y != viewportRenderTarget->GetResolution().height) &&
         eventTimer.GetElapsedSeconds() > 0.02f)
     {
-        dev::Multithreading::Get().AddMainThreadJob([size]()
+        dev::Multithreading::Get().AddJob({ {}, [size]()
         {
             dev::EventManager::Get().Dispatch(
                 std::make_unique<dev::WindowResizeEvent>(
                     LLGL::Extent2D{ (uint32_t)size.x, (uint32_t)size.y }
                 )
             );
-        });
+        } });
 
         eventTimer.Reset();
     }

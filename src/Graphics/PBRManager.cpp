@@ -324,8 +324,7 @@ void PBRManager::SetupBRDFPipeline()
     pipelineBRDF = Renderer::Get().CreatePipelineState({},
         {
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/BRDF.frag"),
-            .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/BRDF.frag")
         }
     );
 }

@@ -17,10 +17,11 @@ void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
 void Scene::Start()
 {
     if(!lightsBuffer)
+    {
         SetupLightsBuffer();
-
-    if(!shadowsBuffer)
         SetupShadowsBuffer();
+        // SetupCombinePostProcessing();
+    }
 
     registry.view<ScriptComponent>().each([](auto& script)
     {
@@ -203,6 +204,28 @@ void Scene::SetupShadows()
             shadowSamplers[shadows.size() - 1] = light.depth;
         }
     }
+}
+
+// ???
+void Scene::SetupCombinePostProcessing()
+{
+    combinePost = std::make_shared<PostProcessing>(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/combinePost.frag")
+        },
+        Renderer::Get().GetSwapChain()->GetResolution(),
+        true,
+        true
+    );
 }
 
 void Scene::RenderMeshes()
@@ -459,8 +482,7 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
 
     postProcessing.postProcessing->Apply(
         {
-            { 0, postProcessing.postProcessing->GetFrame() },
-            { 1, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 0, postProcessing.postProcessing->GetFrame() }
         },
         postProcessing.setUniforms,
         renderTarget

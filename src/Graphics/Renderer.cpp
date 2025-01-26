@@ -275,7 +275,6 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     pipelineStateDesc.fragmentShader = fragmentShader;
     pipelineStateDesc.pipelineLayout = pipelineLayout;
     pipelineStateDesc.renderPass = swapChain->GetRenderPass();
-    pipelineStateDesc.primitiveTopology = LLGL::PrimitiveTopology::TriangleList;
 
     pipelineStateDesc.depth.testEnabled = true;
     pipelineStateDesc.depth.writeEnabled = true;

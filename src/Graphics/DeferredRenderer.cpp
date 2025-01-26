@@ -101,8 +101,7 @@ DeferredRenderer::DeferredRenderer(
         LLGL::GraphicsPipelineDescriptor
         {
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/lightingPass.frag"),
-            .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/lightingPass.frag")
         }
     );
 }

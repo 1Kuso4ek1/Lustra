@@ -144,7 +144,7 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
         {
             component.environmentMap = *(TextureAssetPtr*)payload->Data;
 
-            dev::Multithreading::Get().AddMainThreadJob([&]() { component.Build(); });
+            Multithreading::Get().AddJob({ {}, [&]() { component.Build(); } });
         }
 
         ImGui::EndDragDropTarget();
@@ -152,11 +152,11 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
 
     uint32_t min = 128, max = 8192;
 
-    if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 1.0f, &min, &max))
+    if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
         component.resolution.height = component.resolution.width;
 
     if(ImGui::Button("Convert"))
-        component.SetResolution(component.resolution);
+        Multithreading::Get().AddJob({ {}, [&]() { component.Build(); } });
 }
 
 // Jesus Christ what is that

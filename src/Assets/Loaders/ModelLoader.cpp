@@ -43,8 +43,7 @@ AssetPtr ModelLoader::Load(const std::filesystem::path& path)
 
     if(true) // Add a "separateThread" parameter
     {
-        Multithreading::Get().AddJob(load);
-        Multithreading::Get().AddMainThreadJob(create);
+        Multithreading::Get().AddJob({ load, create });
     }
     else
     {

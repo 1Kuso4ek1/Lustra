@@ -123,8 +123,7 @@ ACESTonemappingComponent::ACESTonemappingComponent(
         {
             .bindings =
             {
-                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
             },
             .uniforms
             {
@@ -134,8 +133,7 @@ ACESTonemappingComponent::ACESTonemappingComponent(
         LLGL::GraphicsPipelineDescriptor
         {
             .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/ACES.frag"),
-            .primitiveTopology = LLGL::PrimitiveTopology::TriangleList
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/ACES.frag")
         },
         resolution,
         true,
@@ -219,14 +217,6 @@ void HDRISkyComponent::OnEvent(Event& event)
     }
 }
 
-void HDRISkyComponent::SetResolution(const LLGL::Extent2D& resolution)
-{
-    this->resolution = resolution;
-
-    if(environmentMap->loaded)
-        dev::Multithreading::Get().AddMainThreadJob([&]() { Build(); });
-}
-
 void HDRISkyComponent::Build()
 {
     if(asset)
@@ -252,8 +242,7 @@ void HDRISkyComponent::SetupSkyPipeline()
             .bindings =
             {
                 { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::VertexStage, 1 },
-                { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
-                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
+                { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 }
             }
         },
         LLGL::GraphicsPipelineDescriptor

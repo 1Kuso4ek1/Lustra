@@ -146,7 +146,6 @@ public:
 
     void Build();
     void OnEvent(Event& event) override;
-    void SetResolution(const LLGL::Extent2D& resolution);
 
     TextureAssetPtr environmentMap;
     EnvironmentAssetPtr asset;

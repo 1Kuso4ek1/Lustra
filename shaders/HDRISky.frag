@@ -12,4 +12,3 @@ void main()
 
     fragColor = vec4(texture(skybox, vec4(coords, 0.0)).rgb, 1.0);
 }
-

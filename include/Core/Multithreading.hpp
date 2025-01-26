@@ -12,18 +12,20 @@ namespace dev
 class Multithreading : public Singleton<Multithreading>
 {
 public:
+    using Job = std::pair<std::function<void()>, std::function<void()>>;
+
     void Update();
 
-    void AddJob(std::future<void>&& future);
-    void AddJob(std::function<void()> job);
-
-    void AddMainThreadJob(std::function<void()> job);
+    void AddJob(const Job& job);
 
     size_t GetJobsNum() const;
 
 private:
-    std::vector<std::future<void>> jobs;
-    std::vector<std::function<void()>> mainThread;
+    /* std::vector<std::future<void>> jobs;
+    std::vector<std::function<void()>> mainThread; */
+    using ManagedJob = std::pair<std::future<void>, std::function<void()>>;
+
+    std::vector<ManagedJob> jobs;
 };
 
 }

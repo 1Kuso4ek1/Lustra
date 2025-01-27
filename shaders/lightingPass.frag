@@ -192,7 +192,7 @@ void main()
         discard;
 
     vec3 worldPosition = posSample.xyz;
-    vec3 albedo = /* pow( */texture(gAlbedo, coord).rgb/* , vec3(2.2)) */; // ???
+    vec3 albedo = texture(gAlbedo, coord).rgb;
     vec3 normal = normalize(texture(gNormal, coord).xyz);
     vec3 combined = texture(gCombined, coord).rgb;
     vec3 emission = texture(gEmission, coord).rgb;
@@ -202,7 +202,7 @@ void main()
     float ao = combined.b;
 
     vec3 V = normalize(cameraPosition - worldPosition);
-    vec3 R = reflect(vec3(-V.x, -V.y, V.z), normal);
+    vec3 R = reflect(-V, normal) * vec3(1.0, 1.0, -1.0);
 
     float NdotV = clamp(dot(normal, V), 0.0, 0.99);
 

@@ -108,7 +108,10 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     ImGui::DragFloat("Intensity", &component.intensity, 0.05f, 0.0f, 100.0f);
     ImGui::DragFloat("Cutoff", &component.cutoff, 0.05f, 0.0f, 360.0f);
     ImGui::DragFloat("Outer Cutoff", &component.outerCutoff, 0.05f, 0.0f, 360.0f);
-    ImGui::Checkbox("Shadow map", &component.shadowMap);
+    
+    if(ImGui::Checkbox("Shadow map", &component.shadowMap))
+        if(!component.renderTarget)
+            component.SetupShadowMap(component.resolution);
     
     uint32_t min = 128, max = 8192;
 

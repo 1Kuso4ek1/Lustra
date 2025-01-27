@@ -118,11 +118,12 @@ void Renderer::Present()
     swapChain->Present();
 }
 
-void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget)
+void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget, bool begin)
 {
-    Get().Begin();
+    if(begin)
+        Begin();
 
-    Get().RenderPass(
+    RenderPass(
         [](auto){}, {}, 
         [](auto commandBuffer)
         {
@@ -132,9 +133,12 @@ void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget)
         renderTarget
     );
 
-    Get().End();
+    if(begin)
+    {
+        End();
 
-    Get().Submit();
+        Submit();
+    }
 }
 
 void Renderer::GenerateMips(LLGL::Texture* texture)

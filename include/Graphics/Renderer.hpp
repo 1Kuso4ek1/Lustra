@@ -32,7 +32,7 @@ public: // Public methods
     void Submit();
     void Present();
 
-    void ClearRenderTarget(LLGL::RenderTarget* renderTarget = nullptr);
+    void ClearRenderTarget(LLGL::RenderTarget* renderTarget = nullptr, bool begin = true);
 
     void GenerateMips(LLGL::Texture* texture);
 

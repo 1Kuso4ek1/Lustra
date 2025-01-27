@@ -41,8 +41,6 @@ private:
     void SetupLights();
     void SetupShadows();
 
-    void SetupCombinePostProcessing();
-
     void RenderMeshes();
     void RenderToShadowMap();
     void RenderSky(LLGL::RenderTarget* renderTarget);
@@ -107,7 +105,6 @@ private:
 
 private:
     std::shared_ptr<RendererBase> renderer;
-    std::shared_ptr<PostProcessing> combinePost;
 
 private:
     entt::registry registry;

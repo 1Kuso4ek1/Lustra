@@ -20,7 +20,6 @@ void Scene::Start()
     {
         SetupLightsBuffer();
         SetupShadowsBuffer();
-        // SetupCombinePostProcessing();
     }
 
     registry.view<ScriptComponent>().each([](auto& script)
@@ -175,11 +174,11 @@ void Scene::SetupShadows()
 {
     shadows.clear();
 
-    // Fill shadowSamplers with default texture
+    // Fill shadowSamplers with an empty texture
     std::fill(
         shadowSamplers.begin(),
         shadowSamplers.end(),
-        AssetManager::Get().Load<TextureAsset>("default", true)->texture
+        AssetManager::Get().Load<TextureAsset>("empty", true)->texture
     );
 
     auto lightsView = registry.view<LightComponent, TransformComponent>();
@@ -204,28 +203,6 @@ void Scene::SetupShadows()
             shadowSamplers[shadows.size() - 1] = light.depth;
         }
     }
-}
-
-// ???
-void Scene::SetupCombinePostProcessing()
-{
-    combinePost = std::make_shared<PostProcessing>(
-        LLGL::PipelineLayoutDescriptor
-        {
-            .bindings =
-            {
-                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
-            }
-        },
-        LLGL::GraphicsPipelineDescriptor
-        {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/combinePost.frag")
-        },
-        Renderer::Get().GetSwapChain()->GetResolution(),
-        true,
-        true
-    );
 }
 
 void Scene::RenderMeshes()
@@ -263,6 +240,8 @@ void Scene::RenderToShadowMap()
 
         if(lightComponent.shadowMap && lightComponent.renderTarget)
         {
+            Renderer::Get().ClearRenderTarget(lightComponent.renderTarget, false);
+
             auto delta = glm::quat(glm::radians(lightTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
 
             Renderer::Get().GetMatrices()->GetView() = glm::lookAt(lightTransform.position, lightTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));

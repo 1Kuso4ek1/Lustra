@@ -142,6 +142,18 @@ inline void DrawComponentUI(BloomComponent& component, entt::entity entity)
 {
     ImGui::DragFloat("Threshold", &component.threshold, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Strength", &component.strength, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Resolution Scale##Bloom", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
+
+    if(ImGui::Button("Update##Bloom"))
+        component.SetupPostProcessing();
+}
+
+inline void DrawComponentUI(GTAOComponent& component, entt::entity entity)
+{
+    ImGui::DragFloat("Resolution Scale##GTAO", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
+
+    if(ImGui::Button("Update##GTAO"))
+        component.SetupPostProcessing();
 }
 
 inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity entity)

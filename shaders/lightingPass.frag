@@ -51,6 +51,7 @@ uniform sampler2D gNormal;
 uniform sampler2D gCombined;
 uniform sampler2D gEmission;
 
+uniform sampler2D gtao;
 uniform sampler2D brdf;
 
 in vec2 coord;
@@ -199,7 +200,7 @@ void main()
 
     float metallic = combined.r;
     float roughness = combined.g;
-    float ao = combined.b;
+    float ao = combined.b * clamp(1.0 - texture(gtao, coord).r, 0.0, 1.0);
 
     vec3 V = normalize(cameraPosition - worldPosition);
     vec3 R = reflect(-V, normal) * vec3(1.0, 1.0, -1.0);
@@ -222,9 +223,9 @@ void main()
     vec2 envBRDF = texture(brdf, vec2(NdotV, roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
     
-    vec3 ambient = (kD * diffuse + specular) * ao;
+    vec3 ambient = (kD * diffuse + specular);
 
-    vec3 finalColor = (ambient + lighting) * (1.0 - shadow) + emission + (ambient / 5.0) * shadow;
+    vec3 finalColor = ((ambient + lighting) * (1.0 - shadow) + emission + (ambient / 5.0) * shadow) * ao;
 
     fragColor = vec4(finalColor, 1.0);
 }

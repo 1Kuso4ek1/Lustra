@@ -22,12 +22,12 @@ float Timer::GetElapsedSeconds()
     return duration.count();
 }
 
-long Timer::GetElapsedMilliseconds()
+float Timer::GetElapsedMilliseconds()
 {
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    return duration.count();
+    return float(duration.count()) / 1000.0f;
 }
 
 ScopedTimer::ScopedTimer(std::string_view name) : name(name) {}
@@ -36,7 +36,7 @@ ScopedTimer::~ScopedTimer()
 {
     LLGL::Log::Printf(
         LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue, 
-        "%s took %d ms\n", name.data(), timer.GetElapsedMilliseconds()
+        "%s took %.3f ms\n", name.data(), timer.GetElapsedMilliseconds()
     );
 }
 

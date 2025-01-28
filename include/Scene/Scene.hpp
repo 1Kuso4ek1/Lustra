@@ -71,8 +71,11 @@ private:
     void ApplyPostProcessing(LLGL::RenderTarget* renderTarget);
     
     std::pair<LLGL::Texture*, float> ApplyBloom(LLGL::Texture* frame);
+    LLGL::Texture* ApplyGTAO();
 
 private:
+    Camera* cam{};
+
     glm::vec3 cameraPosition; // Only for shaders
 
 private:

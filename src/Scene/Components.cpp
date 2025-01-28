@@ -150,9 +150,14 @@ TonemapComponent::TonemapComponent(
     };
 }
 
-BloomComponent::BloomComponent(const LLGL::Extent2D& resolution) : ComponentBase("BloomComponent")
+BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
+    : ComponentBase("BloomComponent"), resolution(resolution)
 {
-    LLGL::Extent2D scaledResolution = { resolution.width / 8, resolution.height / 8 };
+    LLGL::Extent2D scaledResolution =
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
 
     LLGL::PipelineLayoutDescriptor pingPongLayout = 
     {
@@ -225,17 +230,109 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution) : ComponentBase
     };
 }
 
+void BloomComponent::SetupPostProcessing()
+{
+    LLGL::Extent2D scaledResolution = 
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
+
+    WindowResizeEvent newEvent(scaledResolution);
+
+    thresholdPass->OnEvent(newEvent);
+    pingPong[0]->OnEvent(newEvent);
+    pingPong[1]->OnEvent(newEvent);
+}
+
 void BloomComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
         auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
-        WindowResizeEvent newEvent({ resizeEvent->GetSize().width / 8, resizeEvent->GetSize().height / 8 });
+        resolution = resizeEvent->GetSize();
 
-        thresholdPass->OnEvent(newEvent);
-        pingPong[0]->OnEvent(newEvent);
-        pingPong[1]->OnEvent(newEvent);
+        SetupPostProcessing();
+    }
+}
+
+GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
+    : ComponentBase("GTAOComponent"), resolution(resolution)
+{
+    LLGL::Extent2D scaledResolution = 
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
+
+    gtao = std::make_shared<PostProcessing>(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "gDepth", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
+            },
+            .uniforms =
+            {
+                { "far", LLGL::UniformType::Float1 },
+                { "near", LLGL::UniformType::Float1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/GTAO.frag")
+        },
+        scaledResolution,
+        true,
+        false,
+        LLGL::Format::R16Float
+    );
+
+    boxBlur = std::make_shared<PostProcessing>(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/boxBlur.frag")
+        },
+        scaledResolution,
+        true,
+        false,
+        LLGL::Format::R16Float
+    );
+}
+
+void GTAOComponent::SetupPostProcessing()
+{
+    LLGL::Extent2D scaledResolution = 
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
+
+    WindowResizeEvent newEvent(scaledResolution);
+
+    gtao->OnEvent(newEvent);
+    boxBlur->OnEvent(newEvent);
+}
+
+void GTAOComponent::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+        resolution = resizeEvent->GetSize();
+
+        SetupPostProcessing();
     }
 }
 

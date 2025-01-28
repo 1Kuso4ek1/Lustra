@@ -78,6 +78,7 @@ DeferredRenderer::DeferredRenderer(
                 { "irradiance", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 12 },
                 { "prefiltered", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 13 },
                 { "brdf", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 14 },
+                { "gtao", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 15 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
             },
             .staticSamplers =
@@ -137,7 +138,8 @@ void DeferredRenderer::Draw(
             { 11, resources.at(11) },
             { 12, resources.at(12) },
             { 13, resources.at(13) },
-            { 14, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
+            { 14, resources.at(14) },
+            { 15, AssetManager::Get().Load<TextureAsset>("default", true)->sampler }
         },
         [&](auto commandBuffer)
         {
@@ -202,6 +204,11 @@ void DeferredRenderer::OnEvent(Event& event)
 LLGL::RenderTarget* DeferredRenderer::GetPrimaryRenderTarget()
 {
     return gBuffer;
+}
+
+LLGL::Texture* DeferredRenderer::GetDepth()
+{
+    return gBufferDepth;
 }
 
 }

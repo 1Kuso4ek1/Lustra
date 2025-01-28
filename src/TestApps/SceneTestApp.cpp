@@ -230,7 +230,8 @@ void SceneTestApp::CreatePostProcessingEntity()
 
     postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
     postProcessing.AddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
-    postProcessing.AddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 }).threshold = 0.0f;
+    postProcessing.AddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<dev::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
 }
 
 void SceneTestApp::CreateLightEntity()
@@ -366,15 +367,18 @@ void SceneTestApp::DrawPropertiesWindow()
 
     if(selectedEntity)
     {
-        dev::DrawEntityUI<dev::NameComponent,
-                          dev::TransformComponent,
-                          dev::MeshRendererComponent,
-                          dev::CameraComponent,
-                          dev::LightComponent,
-                          dev::TonemapComponent,
-                          dev::BloomComponent,
-                          dev::ProceduralSkyComponent,
-                          dev::HDRISkyComponent>(scene.GetRegistry(), selectedEntity);
+        dev::DrawEntityUI<
+            dev::NameComponent,
+            dev::TransformComponent,
+            dev::MeshRendererComponent,
+            dev::CameraComponent,
+            dev::LightComponent,
+            dev::TonemapComponent,
+            dev::BloomComponent,
+            dev::GTAOComponent,
+            dev::ProceduralSkyComponent,
+            dev::HDRISkyComponent
+        >(scene.GetRegistry(), selectedEntity);
 
         ImGui::Separator();
 

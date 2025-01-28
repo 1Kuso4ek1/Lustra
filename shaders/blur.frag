@@ -8,7 +8,7 @@ in vec2 coord;
 
 out vec4 fragColor;
 
-uniform float weights[5] = float[](0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+const float weights[5] = float[](0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 void main()
 {

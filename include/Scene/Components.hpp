@@ -123,7 +123,7 @@ struct TonemapComponent : public ComponentBase
     int algorithm = 0;
     float exposure = 1.0f;
 
-    std::shared_ptr<PostProcessing> postProcessing;
+    PostProcessingPtr postProcessing;
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
@@ -132,17 +132,34 @@ struct BloomComponent : public ComponentBase, public EventListener
 {
     BloomComponent(const LLGL::Extent2D& resolution);
 
+    void SetupPostProcessing();
     void OnEvent(Event& event) override;
 
-    float threshold = 1.0f, strength = 0.3f;
+    float threshold = 1.0f, strength = 0.3f, resolutionScale = 8.0f;
+
+    LLGL::Extent2D resolution;
 
     LLGL::Sampler* sampler;
 
-    std::shared_ptr<PostProcessing> thresholdPass;
+    PostProcessingPtr thresholdPass;
 
-    std::array<std::shared_ptr<PostProcessing>, 2> pingPong;
+    std::array<PostProcessingPtr, 2> pingPong;
 
     std::function<void(LLGL::CommandBuffer*)> setThresholdUniforms;
+};
+
+struct GTAOComponent : public ComponentBase, public EventListener
+{
+    GTAOComponent(const LLGL::Extent2D& resolution);
+
+    void SetupPostProcessing();
+    void OnEvent(Event& event) override;
+
+    float resolutionScale = 4.0f;
+
+    LLGL::Extent2D resolution;
+
+    PostProcessingPtr gtao, boxBlur;
 };
 
 struct ProceduralSkyComponent : public ComponentBase

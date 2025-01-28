@@ -17,6 +17,7 @@ public:
     ) {};
 
     virtual LLGL::RenderTarget* GetPrimaryRenderTarget();
+    virtual LLGL::Texture* GetDepth();
 };
 
 }

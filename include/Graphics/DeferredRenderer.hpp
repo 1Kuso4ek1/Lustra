@@ -27,6 +27,7 @@ public:
     void OnEvent(Event& event) override;
 
     LLGL::RenderTarget* GetPrimaryRenderTarget() override;
+    LLGL::Texture* GetDepth() override;
 
 private:
     LLGL::Texture* gBufferPosition;

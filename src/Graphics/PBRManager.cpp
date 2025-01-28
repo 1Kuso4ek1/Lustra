@@ -50,7 +50,7 @@ EnvironmentAssetPtr PBRManager::Build(
     );
 
     ReleaseRenderTargets();
-    CreateRenderTargets(resolution, prefiltered);
+    CreateRenderTargets({ resolution.width / 6, resolution.height / 6 }, prefiltered);
 
     RenderCubeMapMips(
         {
@@ -81,7 +81,9 @@ void PBRManager::RenderCubeMap(
     LLGL::Texture* cubeMap,
     LLGL::PipelineState* pipeline
 )
-{    
+{
+    ScopedTimer timer("RenderCubeMap");
+
     auto matrices = Renderer::Get().GetMatrices();
 
     matrices->PushMatrix();
@@ -131,6 +133,8 @@ void PBRManager::RenderCubeMapMips(
     LLGL::PipelineState* pipeline
 )
 {
+    ScopedTimer timer("RenderCubeMapMips");
+    
     auto matrices = Renderer::Get().GetMatrices();
 
     matrices->PushMatrix();
@@ -171,6 +175,7 @@ void PBRManager::RenderCubeMapMips(
                     float roughness = (float)i / (float)(mipsNum - 1);
 
                     commandBuffer->SetUniforms(0, &roughness, sizeof(roughness));
+                    commandBuffer->SetUniforms(1, &i, sizeof(i));
 
                     cube->Draw(commandBuffer);
                 },
@@ -183,14 +188,19 @@ void PBRManager::RenderCubeMapMips(
             Renderer::Get().Submit();
         }
 
+        if(i == mipsNum - 1)
+            break;
+
+        int mipLevel = i + 1;
+
         ReleaseRenderTargets();
         CreateRenderTargets(
             {
-                initialResolution.width / (int)std::pow(2, i),
-                initialResolution.height / (int)std::pow(2, i)
+                initialResolution.width / (int)std::pow(2, mipLevel),
+                initialResolution.height / (int)std::pow(2, mipLevel)
             },
             prefiltered,
-            i
+            mipLevel
         );
     }
 
@@ -199,6 +209,8 @@ void PBRManager::RenderCubeMapMips(
 
 void PBRManager::RenderBRDF()
 {
+    ScopedTimer timer("RenderBRDF");
+
     auto plane = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
     Renderer::Get().Begin();
@@ -297,7 +309,8 @@ void PBRManager::SetupPrefilteredPipeline()
             },
             .uniforms = 
             {
-                { "roughness", LLGL::UniformType::Float1 }
+                { "roughness", LLGL::UniformType::Float1 },
+                { "mip", LLGL::UniformType::Int1 }
             }
         },
         LLGL::GraphicsPipelineDescriptor
@@ -346,12 +359,9 @@ void PBRManager::CreateCubemaps(const LLGL::Extent2D& resolution)
     textureDesc.extent = { resolution.width / 32, resolution.height / 32, 1 };
     irradiance = Renderer::Get().CreateTexture(textureDesc);
 
-    textureDesc.extent = { resolution.width, resolution.height, 1 };
+    textureDesc.extent = { resolution.width / 6, resolution.height / 6, 1 };
     prefiltered = Renderer::Get().CreateTexture(textureDesc);
     Renderer::Get().GenerateMips(prefiltered);
-    
-
-    // LLGL::NumMipLevels(resolution.width, resolution.height);
 }
 
 void PBRManager::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel)

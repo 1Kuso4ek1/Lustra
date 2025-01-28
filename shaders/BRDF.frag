@@ -1,7 +1,14 @@
 #version 460 core
 
 const float PI = 3.14159265359;
-const uint sampleCount = 64u;
+const uint sampleCount = 16u;
+
+const float HammersleyPrecomputed[29] = float[]
+(
+    0, 0.5,	0.25, 0.75,	0.125, 0.625, 0.375, 0.875, 0.0625,	0.5625,	0.3125,
+	0.8125,	0.1875,	0.6875,	0.4375,	0.9375,	0.03125, 0.53125, 0.28125, 0.78125,
+	0.15625, 0.65625, 0.40625, 0.90625,	0.09375, 0.59375, 0.34375, 0.84375,	0.21875
+);
 
 in vec2 coord;
 
@@ -81,7 +88,7 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
 
     for(uint i = 0u; i < sampleCount; ++i)
     {
-        vec2 Xi = Hammersley(i, sampleCount);
+        vec2 Xi = vec2(float(i) / float(sampleCount), HammersleyPrecomputed[i]);//Hammersley(i, sampleCount);
         vec3 H = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
 

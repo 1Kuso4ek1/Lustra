@@ -8,7 +8,8 @@ PostProcessing::PostProcessing(
     LLGL::GraphicsPipelineDescriptor pipelineDesc,
     const LLGL::Extent2D& resolution,
     bool newRenderTarget,
-    bool registerEvent
+    bool registerEvent,
+    const LLGL::Format& format
 )
 {
     rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
@@ -18,11 +19,11 @@ PostProcessing::PostProcessing(
         if(registerEvent)
             EventManager::Get().AddListener(Event::Type::WindowResize, this);
 
-        LLGL::TextureDescriptor frameDesc =
+        frameDesc =
         {
             .type = LLGL::TextureType::Texture2D,
             .bindFlags = LLGL::BindFlags::ColorAttachment,
-            .format = LLGL::Format::RGBA16Float,
+            .format = format,
             .extent = { resolution.width, resolution.height, 1 },
             .mipLevels = 1,
             .samples = 1
@@ -51,24 +52,18 @@ void PostProcessing::OnEvent(Event& event)
         Renderer::Get().Release(frame);
         Renderer::Get().Release(renderTarget);
 
-        LLGL::TextureDescriptor frameDesc =
-        {
-            .type = LLGL::TextureType::Texture2D,
-            .bindFlags = LLGL::BindFlags::ColorAttachment,
-            .format = LLGL::Format::RGBA16Float,
-            .extent = { size.width, size.height, 1 },
-            .mipLevels = 1,
-            .samples = 1
-        };
+        frameDesc.extent = { size.width, size.height, 1 };
 
         frame = Renderer::Get().CreateTexture(frameDesc);
         renderTarget = Renderer::Get().CreateRenderTarget(size, { frame });
     }
 }
 
-LLGL::Texture* PostProcessing::Apply(const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-                                     std::function<void(LLGL::CommandBuffer*)> setUniforms,
-                                     LLGL::RenderTarget* renderTarget)
+LLGL::Texture* PostProcessing::Apply(
+    const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
+    std::function<void(LLGL::CommandBuffer*)> setUniforms,
+    LLGL::RenderTarget* renderTarget
+)
 {
     if(!renderTarget && !this->renderTarget)
         return frame;

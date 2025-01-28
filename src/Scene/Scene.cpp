@@ -125,8 +125,9 @@ void Scene::SetupCamera()
 {
     auto cameraView = registry.view<TransformComponent, CameraComponent>();
 
-    Camera* cam{};
     TransformComponent cameraTransform;
+
+    cam = nullptr;
 
     for(auto entity : cameraView)
     {
@@ -401,6 +402,8 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
         commandBuffer->SetUniforms(2, &cameraPosition, sizeof(cameraPosition));
     };
 
+    auto gtaoResult = ApplyGTAO();
+
     Renderer::Get().Begin();
 
     RenderSky(renderTarget);
@@ -434,7 +437,8 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
             { 11, irradiance },
             { 12, prefiltered },
-            { 13, brdf }
+            { 13, brdf },
+            { 14, gtaoResult }
         },
         uniforms,
         renderTarget
@@ -524,6 +528,46 @@ std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
     }
 
     return { bloom.pingPong[0]->GetFrame(), bloom.strength };
+}
+
+LLGL::Texture* Scene::ApplyGTAO()
+{
+    auto gtaoView = registry.view<GTAOComponent>();
+
+    if(gtaoView->begin() == gtaoView->end())
+        return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;
+
+    auto gtao = *gtaoView->begin();
+
+    auto depth = renderer->GetDepth();
+
+    Renderer::Get().GenerateMips(depth);
+
+    gtao.gtao->Apply(
+        {
+            { 0, depth }
+        },
+        [&](auto commandBuffer)
+        {
+            if(cam)
+            {
+                float far = cam->GetFar();
+                float near = cam->GetNear();
+
+                commandBuffer->SetUniforms(0, &far, sizeof(far));
+                commandBuffer->SetUniforms(1, &near, sizeof(near));
+            }
+        }
+    );
+
+    gtao.boxBlur->Apply(
+        {
+            { 0, gtao.gtao->GetFrame() }
+        },
+        [&](auto) {}
+    );
+
+    return gtao.boxBlur->GetFrame();
 }
     
 }

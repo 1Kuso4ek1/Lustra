@@ -144,6 +144,8 @@ inline void DrawComponentUI(BloomComponent& component, entt::entity entity)
     ImGui::DragFloat("Strength", &component.strength, 0.01f, 0.0f, 10.0f);
     ImGui::DragFloat("Resolution Scale##Bloom", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
 
+    ImGui::Separator();
+
     if(ImGui::Button("Update##Bloom"))
         component.SetupPostProcessing();
 }
@@ -151,6 +153,15 @@ inline void DrawComponentUI(BloomComponent& component, entt::entity entity)
 inline void DrawComponentUI(GTAOComponent& component, entt::entity entity)
 {
     ImGui::DragFloat("Resolution Scale##GTAO", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
+    
+    ImGui::DragInt("Samples", &component.samples, 1, 1, 1024);
+    ImGui::DragFloat("Limit", &component.limit, 0.1f, 0.0f, 1000.0f);
+    ImGui::DragFloat("Radius", &component.radius, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Falloff", &component.falloff, 0.1f, 0.0f, 100.0f);
+    ImGui::DragFloat("Thickness Mix", &component.thicknessMix, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Max Stride", &component.maxStride, 0.1f, 0.0f, 100.0f);
+
+    ImGui::Separator();
 
     if(ImGui::Button("Update##GTAO"))
         component.SetupPostProcessing();

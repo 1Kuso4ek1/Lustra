@@ -157,6 +157,14 @@ struct GTAOComponent : public ComponentBase, public EventListener
 
     float resolutionScale = 4.0f;
 
+    int samples = 4.0f;
+    
+    float limit = 100.0f;
+    float radius = 8.0f;
+    float falloff = 1.5f;
+    float thicknessMix = 0.2f;
+    float maxStride = 8.0f;
+
     LLGL::Extent2D resolution;
 
     PostProcessingPtr gtao, boxBlur;

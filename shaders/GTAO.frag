@@ -17,6 +17,13 @@ uniform sampler2D gDepth;
 uniform float far;
 uniform float near;
 
+uniform int samples = 4;
+uniform float limit = 100;
+uniform float radius = 4.0;
+uniform float falloff = 7.5;
+uniform float thicknessMix = 0.2;
+uniform float maxStride = 8;
+
 // Used to get vector from camera to pixel
 float aspect = 1.0;
 
@@ -72,13 +79,6 @@ vec3 GetCameraVec(vec2 uv)
 	return vec3(uv.x * -2.0 + 1.0, uv.y * 2.0 * aspect - aspect, 1.0);
 }
 
-#define SSAO_LIMIT 100
-#define SSAO_SAMPLES 4
-#define SSAO_RADIUS 4.0
-#define SSAO_FALLOFF 7.5
-#define SSAO_THICKNESSMIX 0.2
-#define SSAO_MAX_STRIDE 8
-
 void SliceSample(vec2 texCoordsBase, vec2 aoDir, int i, float targetMip, vec3 ray, vec3 v, inout float closest)
 {
 	vec2 uv = texCoordsBase + aoDir * i;
@@ -88,11 +88,11 @@ void SliceSample(vec2 texCoordsBase, vec2 aoDir, int i, float targetMip, vec3 ra
 	// Cosine of the horizon angle of the current sample
 	float current = dot(v, normalize(p));
 	// Linear falloff for samples that are too far away from current pixel
-	float falloff = clamp((SSAO_RADIUS - length(p)) / SSAO_FALLOFF, 0.0, 1.0);
+	float falloff = clamp((radius - length(p)) / falloff, 0.0, 1.0);
 	if(current > closest)
 		closest = mix(closest, current, falloff);
 	// Helps avoid overdarkening from thin objects
-	closest = mix(closest, current, SSAO_THICKNESSMIX * falloff);
+	closest = mix(closest, current, thicknessMix * falloff);
 }
 
 void main()
@@ -131,7 +131,7 @@ void main()
 	
 	// Calculate the distance between samples (direction vector scale) so that the world space AO radius remains constant but also clamp to avoid cache trashing
 	// texelSize = vec2(1.0 / sreenWidth, 1.0 / screenHeight)
-	float stride = min((1.0 / length(ray)) * SSAO_LIMIT, SSAO_MAX_STRIDE);
+	float stride = min((1.0 / length(ray)) * limit, maxStride);
 	vec2 dirMult = texelSize.xy * stride;
 	// Get the view vector (normalized vector from pixel to camera)
 	vec3 v = normalize(-ray);
@@ -162,11 +162,11 @@ void main()
 	float targetMip = floor(clamp(pow(stride, 1.3) * mipScale, minMip, maxMip));
 	
 	// Find horizons of the slice
-	for(int i = -1; i >= -SSAO_SAMPLES; i--)
+	for(int i = -1; i >= -samples; i--)
 	{
 		SliceSample(texCoordsBase, aoDir, i, targetMip, ray, v, c1);
 	}
-	for(int i = 1; i <= SSAO_SAMPLES; i++)
+	for(int i = 1; i <= samples; i++)
 	{
 		SliceSample(texCoordsBase, aoDir, i, targetMip, ray, v, c2);
 	}

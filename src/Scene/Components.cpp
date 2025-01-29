@@ -276,7 +276,13 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
             .uniforms =
             {
                 { "far", LLGL::UniformType::Float1 },
-                { "near", LLGL::UniformType::Float1 }
+                { "near", LLGL::UniformType::Float1 },
+                { "samples", LLGL::UniformType::Int1 },
+                { "limit", LLGL::UniformType::Float1 },
+                { "radius", LLGL::UniformType::Float1 },
+                { "falloff", LLGL::UniformType::Float1 },
+                { "thicknessMix", LLGL::UniformType::Float1 },
+                { "maxStride", LLGL::UniformType::Float1 }
             }
         },
         LLGL::GraphicsPipelineDescriptor

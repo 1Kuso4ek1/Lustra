@@ -557,6 +557,13 @@ LLGL::Texture* Scene::ApplyGTAO()
                 commandBuffer->SetUniforms(0, &far, sizeof(far));
                 commandBuffer->SetUniforms(1, &near, sizeof(near));
             }
+
+            commandBuffer->SetUniforms(2, &gtao.samples, sizeof(gtao.samples));
+            commandBuffer->SetUniforms(3, &gtao.limit, sizeof(gtao.limit));
+            commandBuffer->SetUniforms(4, &gtao.radius, sizeof(gtao.radius));
+            commandBuffer->SetUniforms(5, &gtao.falloff, sizeof(gtao.falloff));
+            commandBuffer->SetUniforms(6, &gtao.thicknessMix, sizeof(gtao.thicknessMix));
+            commandBuffer->SetUniforms(7, &gtao.maxStride, sizeof(gtao.maxStride));
         }
     );
 

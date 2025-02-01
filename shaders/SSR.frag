@@ -44,7 +44,7 @@ void BinarySearch(vec3 dir, vec3 pos)
     for(int i = 0; i < maxBinarySearchSteps; i++)
     {
         uv = UV(pos);
-        if(any(greaterThan(abs(uv), vec2(1.0))) || any(lessThan(abs(uv), vec2(0.0))))
+        if(any(greaterThan(uv, vec2(1.0))) || any(lessThan(uv, vec2(0.0))))
             break;
  
         float depth = ViewPosFromDepth(uv).z;
@@ -69,7 +69,7 @@ vec3 SSR(vec3 dir, vec3 pos)
         pos += dir;
  
         uv = UV(pos);
-        if(any(greaterThan(abs(uv), vec2(1.0))) || any(lessThan(abs(uv), vec2(0.0))))
+        if(any(greaterThan(uv, vec2(1.0))) || any(lessThan(uv, vec2(0.0))))
             return vec3(0.0);
  
         float depth = ViewPosFromDepth(uv).z;

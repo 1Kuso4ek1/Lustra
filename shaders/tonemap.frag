@@ -121,18 +121,29 @@ void main()
 
     color.rgb += bloomColor.rgb * bloomStrength;
 
-    // change to "ssrEnabled" (let the postprocessing functions return nullptr textures)
-    if(true)
+    if(length(textureLod(ssr, coord, 5.0).rgb) > 0.0)
     {
         vec3 combined = texture(gCombined, coord).rgb;
-        vec3 albedo = texture(gAlbedo, coord).rgb;
 
         float lod = 8.0 * combined.y;
 
-        vec3 f0 = mix(vec3(0.04), albedo, combined.x);
+        vec4 ssrSample = textureLod(ssr, coord + sqrt(lod) * texelSize, lod);
 
-        vec4 ssr = textureLod(ssr, coord + sqrt(lod) * texelSize, lod);
-        color.rgb += f0 * ssr.rgb;
+        if(combined.x != 0.0 && combined.y < 0.9/*  && dot(ssrSample, vec3(0.2126, 0.7152, 0.0722)) > 0.1 */ /* && ssrSample.a > 0.7 */)
+        {
+            vec3 albedo = texture(gAlbedo, coord).rgb;
+
+            vec3 f0 = mix(vec3(0.04), albedo, combined.x);
+
+            float mixFactor = combined.x * (1.0 - combined.y);
+
+            float alphaMask = smoothstep(0.1, 0.9, ssrSample.a);
+            
+            vec2 edge = abs(coord * 2.0 - 1.0);
+            float edgeFade = 1.0 - smoothstep(0.7, 1.0, max(edge.x, edge.y));
+            
+            color.rgb = mix(color.rgb, f0 * ssrSample.rgb, mixFactor * alphaMask * edgeFade);
+        }
     }
     
     color.rgb = Apply(color.rgb * exposure);

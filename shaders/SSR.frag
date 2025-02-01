@@ -19,13 +19,13 @@ in vec2 coord;
 
 out vec4 fragColor;
 
-const float depthBias = 1.1;
+const float depthBias = 0.5;
 
 vec2 uv;
 
 vec3 ViewPosFromDepth(vec2 uv)
 {
-    vec4 clipPos = vec4(uv * 2.0 - 1.0, textureLod(depth, uv, 0.0).r * 2.0 - 1.0, 1.0);
+    vec4 clipPos = vec4(uv * 2.0 - 1.0, textureLod(depth, uv, 4.0).r * 2.0 - 1.0, 1.0);
     vec4 viewPos = inverse(projection) * clipPos;
 
     return viewPos.xyz / viewPos.w;
@@ -44,13 +44,13 @@ void BinarySearch(vec3 dir, vec3 pos)
     for(int i = 0; i < maxBinarySearchSteps; i++)
     {
         uv = UV(pos);
-        if(any(greaterThan(abs(uv), vec2(1.0))))
+        if(any(greaterThan(abs(uv), vec2(1.0))) || any(lessThan(abs(uv), vec2(0.0))))
             break;
  
         float depth = ViewPosFromDepth(uv).z;
         float delta = pos.z - depth;
 
-        if(abs(delta) < 0.1 && abs(depth) > depthBias)
+        if(abs(delta) < 0.01 && abs(depth) > depthBias)
             return;
 
         dir *= 0.5;
@@ -69,14 +69,14 @@ vec3 SSR(vec3 dir, vec3 pos)
         pos += dir;
  
         uv = UV(pos);
-        if(any(greaterThan(abs(uv), vec2(1.0))))
+        if(any(greaterThan(abs(uv), vec2(1.0))) || any(lessThan(abs(uv), vec2(0.0))))
             return vec3(0.0);
  
         float depth = ViewPosFromDepth(uv).z;
  
         float delta = pos.z - depth;
 
-        if((dir.z - delta) < 0.1)
+        if((dir.z - delta) < 1.1)
         {
             if(delta <= 0.0)
             {
@@ -113,8 +113,5 @@ void main()
     
     vec3 ssr = SSR((reflected * max(0.1, -pos.z)), pos);
 
-    vec2 d = smoothstep(0.3, 0.8, abs(vec2(0.5, 0.5) - uv));
-    float screenEdge = clamp(1.0 - (d.x + d.y), 0.0, 1.0);
-
-    fragColor = vec4(ssr * screenEdge, 1.0);
+    fragColor = vec4(ssr, length(ssr) > 0.0 ? 1.0 : 0.0);
 }

@@ -72,6 +72,7 @@ private:
     
     std::pair<LLGL::Texture*, float> ApplyBloom(LLGL::Texture* frame);
     LLGL::Texture* ApplyGTAO();
+    LLGL::Texture* ApplySSR(LLGL::Texture* frame);
 
 private:
     Camera* cam{};

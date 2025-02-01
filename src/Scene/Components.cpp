@@ -2,6 +2,8 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
+// Move everything into separate files...
+
 namespace dev
 {
 
@@ -124,7 +126,10 @@ TonemapComponent::TonemapComponent(
             .bindings =
             {
                 { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-                { "bloom", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 }
+                { "bloom", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "ssr", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
+                { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
+                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 }
             },
             .uniforms
             {
@@ -153,6 +158,8 @@ TonemapComponent::TonemapComponent(
 BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
     : ComponentBase("BloomComponent"), resolution(resolution)
 {
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
     LLGL::Extent2D scaledResolution =
     {
         (uint32_t)(resolution.width / resolutionScale),
@@ -230,6 +237,11 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
     };
 }
 
+BloomComponent::~BloomComponent()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+}
+
 void BloomComponent::SetupPostProcessing()
 {
     LLGL::Extent2D scaledResolution = 
@@ -260,6 +272,8 @@ void BloomComponent::OnEvent(Event& event)
 GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
     : ComponentBase("GTAOComponent"), resolution(resolution)
 {
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
     LLGL::Extent2D scaledResolution = 
     {
         (uint32_t)(resolution.width / resolutionScale),
@@ -293,6 +307,7 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
         scaledResolution,
         true,
         false,
+        false,
         LLGL::Format::R16Float
     );
 
@@ -312,8 +327,14 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
         scaledResolution,
         true,
         false,
+        false,
         LLGL::Format::R16Float
     );
+}
+
+GTAOComponent::~GTAOComponent()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
 }
 
 void GTAOComponent::SetupPostProcessing()
@@ -331,6 +352,77 @@ void GTAOComponent::SetupPostProcessing()
 }
 
 void GTAOComponent::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+        resolution = resizeEvent->GetSize();
+
+        SetupPostProcessing();
+    }
+}
+
+SSRComponent::SSRComponent(const LLGL::Extent2D& resolution)
+    : ComponentBase("SSRComponent"), resolution(resolution)
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
+    LLGL::Extent2D scaledResolution = 
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
+
+    ssr = std::make_shared<PostProcessing>(
+        LLGL::PipelineLayoutDescriptor
+        {
+            .bindings =
+            {
+                { "matrices", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 1 },
+                { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
+                { "depth", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
+                { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 }
+            },
+            .uniforms =
+            {
+                { "maxSteps", LLGL::UniformType::Int1 },
+                { "maxBinarySearchSteps", LLGL::UniformType::Int1 },
+                { "rayStep", LLGL::UniformType::Float1 }
+            }
+        },
+        LLGL::GraphicsPipelineDescriptor
+        {
+            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
+            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/SSR.frag")
+        },
+        scaledResolution,
+        true,
+        false,
+        true
+    );
+}
+
+SSRComponent::~SSRComponent()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+}
+
+void SSRComponent::SetupPostProcessing()
+{
+    LLGL::Extent2D scaledResolution = 
+    {
+        (uint32_t)(resolution.width / resolutionScale),
+        (uint32_t)(resolution.height / resolutionScale)
+    };
+
+    WindowResizeEvent newEvent(scaledResolution);
+
+    ssr->OnEvent(newEvent);
+}
+
+void SSRComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {

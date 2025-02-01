@@ -16,6 +16,7 @@ public:
         const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
         bool newRenderTarget = true,
         bool registerEvent = true,
+        bool mipMaps = false,
         const LLGL::Format& format = LLGL::Format::RGBA16Float
     );
     ~PostProcessing();
@@ -25,7 +26,8 @@ public:
     LLGL::Texture* Apply(
         const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
         std::function<void(LLGL::CommandBuffer*)> setUniforms,
-        LLGL::RenderTarget* renderTarget = nullptr
+        LLGL::RenderTarget* renderTarget = nullptr,
+        bool bindMatrices = false
     );
 
     LLGL::Texture* GetFrame();

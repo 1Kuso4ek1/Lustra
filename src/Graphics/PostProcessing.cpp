@@ -9,6 +9,7 @@ PostProcessing::PostProcessing(
     const LLGL::Extent2D& resolution,
     bool newRenderTarget,
     bool registerEvent,
+    bool mipMaps,
     const LLGL::Format& format
 )
 {
@@ -25,7 +26,7 @@ PostProcessing::PostProcessing(
             .bindFlags = LLGL::BindFlags::ColorAttachment,
             .format = format,
             .extent = { resolution.width, resolution.height, 1 },
-            .mipLevels = 1,
+            .mipLevels = (uint32_t)(mipMaps ? 0 : 1),
             .samples = 1
         };
 
@@ -62,7 +63,8 @@ void PostProcessing::OnEvent(Event& event)
 LLGL::Texture* PostProcessing::Apply(
     const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
     std::function<void(LLGL::CommandBuffer*)> setUniforms,
-    LLGL::RenderTarget* renderTarget
+    LLGL::RenderTarget* renderTarget,
+    bool bindMatrices
 )
 {
     if(!renderTarget && !this->renderTarget)
@@ -73,7 +75,10 @@ LLGL::Texture* PostProcessing::Apply(
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            rect->BindBuffers(commandBuffer, false);
+            rect->BindBuffers(commandBuffer, bindMatrices);
+
+            if(frameDesc.mipLevels == 0)
+                commandBuffer->GenerateMips(*frame);
         },
         resources,
         [&](auto commandBuffer)

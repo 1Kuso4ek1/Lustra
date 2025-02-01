@@ -2,6 +2,9 @@
 
 uniform sampler2D frame;
 uniform sampler2D bloom;
+uniform sampler2D ssr;
+uniform sampler2D gAlbedo;
+uniform sampler2D gCombined;
 
 in vec2 coord;
 
@@ -111,10 +114,26 @@ vec3 Apply(vec3 color)
 
 void main()
 {
+    vec2 texelSize = 1.0 / textureSize(frame, 0);
+
     vec4 color = texture(frame, coord);
     vec4 bloomColor = texture(bloom, coord);
-    
+
     color.rgb += bloomColor.rgb * bloomStrength;
+
+    // change to "ssrEnabled" (let the postprocessing functions return nullptr textures)
+    if(true)
+    {
+        vec3 combined = texture(gCombined, coord).rgb;
+        vec3 albedo = texture(gAlbedo, coord).rgb;
+
+        float lod = 8.0 * combined.y;
+
+        vec3 f0 = mix(vec3(0.04), albedo, combined.x);
+
+        vec4 ssr = textureLod(ssr, coord + sqrt(lod) * texelSize, lod);
+        color.rgb += f0 * ssr.rgb;
+    }
     
     color.rgb = Apply(color.rgb * exposure);
     color.rgb = pow(color.rgb, vec3(1.0 / 2.2));

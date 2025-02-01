@@ -463,12 +463,20 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
     
     RenderResult(toneMapping.postProcessing->GetRenderTarget());
 
+    // Problem: reflections don't affect bloom yet
+    auto ssrResult = ApplySSR(toneMapping.postProcessing->GetFrame());
     auto bloomResult = ApplyBloom(toneMapping.postProcessing->GetFrame());
+
+    // Needs some attention
+    auto deferredRenderer = static_pointer_cast<DeferredRenderer>(renderer);
     
     toneMapping.postProcessing->Apply(
         {
             { 0, toneMapping.postProcessing->GetFrame() },
-            { 1, bloomResult.first }
+            { 1, bloomResult.first },
+            { 2, ssrResult },
+            { 3, deferredRenderer->GetAlbedo() },
+            { 4, deferredRenderer->GetCombined() }
         },
         [&](auto commandBuffer)
         {
@@ -576,5 +584,44 @@ LLGL::Texture* Scene::ApplyGTAO()
 
     return gtao.boxBlur->GetFrame();
 }
-    
+
+LLGL::Texture* Scene::ApplySSR(LLGL::Texture* frame)
+{
+    auto ssrView = registry.view<SSRComponent>();
+
+    if(ssrView->begin() == ssrView->end())
+        return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;
+
+    auto ssr = *ssrView->begin();
+
+    // Needs some attention
+    auto deferredRenderer = static_pointer_cast<DeferredRenderer>(renderer);
+
+    auto gNormal = deferredRenderer->GetNormal();
+    auto gCombined = deferredRenderer->GetCombined();
+    auto depth = deferredRenderer->GetDepth();
+
+    ssr.ssr->Apply(
+        {
+            { 0, Renderer::Get().GetMatricesBuffer() },
+            { 1, gNormal },
+            { 2, gCombined },
+            { 3, depth },
+            { 4, frame }
+        },
+        [&](auto commandBuffer)
+        {
+            commandBuffer->SetUniforms(0, &ssr.maxSteps, sizeof(ssr.maxSteps));
+            commandBuffer->SetUniforms(1, &ssr.maxBinarySearchSteps, sizeof(ssr.maxBinarySearchSteps));
+            commandBuffer->SetUniforms(2, &ssr.rayStep, sizeof(ssr.rayStep));
+        },
+        nullptr,
+        true
+    );
+
+    Renderer::Get().GenerateMips(ssr.ssr->GetFrame());
+
+    return ssr.ssr->GetFrame();
+}
+
 }

@@ -167,6 +167,19 @@ inline void DrawComponentUI(GTAOComponent& component, entt::entity entity)
         component.SetupPostProcessing();
 }
 
+inline void DrawComponentUI(SSRComponent& component, entt::entity entity)
+{
+    ImGui::DragFloat("Resolution Scale##SSR", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
+    ImGui::DragInt("Max Steps", &component.maxSteps, 1, 1, 10000);
+    ImGui::DragInt("Max Binary Search Steps", &component.maxBinarySearchSteps, 1, 0, 1000);
+    ImGui::DragFloat("Ray Step", &component.rayStep, 0.001f, 0.0f, 1.0f);
+
+    ImGui::Separator();
+
+    if(ImGui::Button("Update##SSR"))
+        component.SetupPostProcessing();
+}
+
 inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity entity)
 {
     ImGui::DragFloat("Time", &component.time, 0.1f, 0.0f, 1000.0f);

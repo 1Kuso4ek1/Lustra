@@ -29,6 +29,12 @@ public:
     LLGL::RenderTarget* GetPrimaryRenderTarget() override;
     LLGL::Texture* GetDepth() override;
 
+    LLGL::Texture* GetPosition();
+    LLGL::Texture* GetAlbedo();
+    LLGL::Texture* GetNormal();
+    LLGL::Texture* GetCombined();
+    LLGL::Texture* GetEmission();
+
 private:
     LLGL::Texture* gBufferPosition;
     LLGL::Texture* gBufferAlbedo;

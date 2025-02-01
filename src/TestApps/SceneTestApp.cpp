@@ -232,6 +232,7 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing.AddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
     postProcessing.AddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
     postProcessing.AddComponent<dev::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<dev::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
 }
 
 void SceneTestApp::CreateLightEntity()
@@ -376,6 +377,7 @@ void SceneTestApp::DrawPropertiesWindow()
             dev::TonemapComponent,
             dev::BloomComponent,
             dev::GTAOComponent,
+            dev::SSRComponent,
             dev::ProceduralSkyComponent,
             dev::HDRISkyComponent
         >(scene.GetRegistry(), selectedEntity);

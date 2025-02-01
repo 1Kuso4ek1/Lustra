@@ -131,6 +131,7 @@ struct TonemapComponent : public ComponentBase
 struct BloomComponent : public ComponentBase, public EventListener
 {
     BloomComponent(const LLGL::Extent2D& resolution);
+    ~BloomComponent();
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
@@ -151,11 +152,12 @@ struct BloomComponent : public ComponentBase, public EventListener
 struct GTAOComponent : public ComponentBase, public EventListener
 {
     GTAOComponent(const LLGL::Extent2D& resolution);
+    ~GTAOComponent();
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
 
-    float resolutionScale = 4.0f;
+    float resolutionScale = 2.0f;
 
     int samples = 4.0f;
     
@@ -168,6 +170,26 @@ struct GTAOComponent : public ComponentBase, public EventListener
     LLGL::Extent2D resolution;
 
     PostProcessingPtr gtao, boxBlur;
+};
+
+struct SSRComponent : public ComponentBase, public EventListener
+{
+    SSRComponent(const LLGL::Extent2D& resolution);
+    ~SSRComponent();
+
+    void SetupPostProcessing();
+    void OnEvent(Event& event) override;
+
+    float resolutionScale = 1.0f;
+
+    int maxSteps = 100;
+    int maxBinarySearchSteps = 20;
+
+    float rayStep = 0.02;
+
+    LLGL::Extent2D resolution;
+
+    PostProcessingPtr ssr;
 };
 
 struct ProceduralSkyComponent : public ComponentBase

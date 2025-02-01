@@ -16,15 +16,15 @@ out vec2 coord;
 
 void main()
 {
-    mPosition = (model * vec4(position, 1.0f)).xyz;
-    mNormal = normalize(mat3(model) * normal).xyz;
+    mPosition = (model * vec4(position, 1.0)).xyz;
+    mNormal = normalize(mat3(model) * normal);
     coord = texCoord;
 
     vec3 tangent = cross(mNormal, vec3(0.5, 0.5, 0.5));
-    vec3 T = normalize(mat3(view * model) * tangent);
+    vec3 T = normalize(mat3(model) * tangent);
     vec3 N = mNormal;
     vec3 B = cross(N, T);
     TBN = mat3(T, B, N);
     
-	gl_Position = projection * view * model * vec4(position, 1.0f);
+	gl_Position = projection * view * model * vec4(position, 1.0);
 }

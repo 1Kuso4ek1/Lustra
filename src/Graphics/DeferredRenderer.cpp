@@ -211,4 +211,29 @@ LLGL::Texture* DeferredRenderer::GetDepth()
     return gBufferDepth;
 }
 
+LLGL::Texture* DeferredRenderer::GetPosition()
+{
+    return gBufferPosition;
+}
+
+LLGL::Texture* DeferredRenderer::GetAlbedo()
+{
+    return gBufferAlbedo;
+}
+
+LLGL::Texture* DeferredRenderer::GetNormal()
+{
+    return gBufferNormal;
+}
+
+LLGL::Texture* DeferredRenderer::GetCombined()
+{
+    return gBufferCombined;
+}
+
+LLGL::Texture* DeferredRenderer::GetEmission()
+{
+    return gBufferEmission;
+}
+
 }

@@ -185,6 +185,14 @@ inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity enti
     ImGui::DragFloat("Time", &component.time, 0.1f, 0.0f, 1000.0f);
     ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
     ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
+    
+    uint32_t min = 128, max = 8192;
+
+    if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
+        component.resolution.height = component.resolution.width;
+
+    if(ImGui::Button("Convert"))
+        Multithreading::Get().AddJob({ {}, [&]() { component.Build(); } });
 }
 
 inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)

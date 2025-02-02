@@ -183,7 +183,7 @@ struct SSRComponent : public ComponentBase, public EventListener
     float resolutionScale = 1.0f;
 
     int maxSteps = 100;
-    int maxBinarySearchSteps = 20;
+    int maxBinarySearchSteps = 5;
 
     float rayStep = 0.02;
 
@@ -194,14 +194,22 @@ struct SSRComponent : public ComponentBase, public EventListener
 
 struct ProceduralSkyComponent : public ComponentBase
 {
-    ProceduralSkyComponent();
+    ProceduralSkyComponent(const LLGL::Extent2D& resolution);
+
+    void Build();
 
     float time = 40.0f, cirrus = 0.0f, cumulus = 0.0f;
+    int flip = 0;
 
-    // Maybe it will be better to pass pipeline as a separate component?
-    LLGL::PipelineState* pipeline{};
+    EnvironmentAssetPtr asset;
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
+
+    LLGL::Extent2D resolution;
+    LLGL::PipelineState* pipeline{};
+
+private:
+    void DefaultTextures();
 };
 
 struct HDRISkyComponent : public ComponentBase, public EventListener

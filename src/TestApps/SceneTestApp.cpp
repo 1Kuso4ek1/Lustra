@@ -261,11 +261,11 @@ void SceneTestApp::CreateSkyEntity()
     sky.AddComponent<dev::NameComponent>().name = "Sky";
     sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
 
-    //sky.AddComponent<dev::ProceduralSkyComponent>();
-    sky.AddComponent<dev::HDRISkyComponent>(
+    sky.AddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
+    /* sky.AddComponent<dev::HDRISkyComponent>(
         dev::AssetManager::Get().Load<dev::TextureAsset>("hdri/meadow_2_1k.hdr", true),
         LLGL::Extent2D{ 1024, 1024 }
-    );
+    ); */
 }
 
 void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)

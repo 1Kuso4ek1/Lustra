@@ -19,7 +19,9 @@ PBRManager::PBRManager()
 EnvironmentAssetPtr PBRManager::Build(
     const LLGL::Extent2D& resolution,
     TextureAssetPtr environmentMap,
-    EnvironmentAssetPtr environmentAsset
+    EnvironmentAssetPtr environmentAsset,
+    LLGL::PipelineState* customConvertPipeline,
+    std::function<void(LLGL::CommandBuffer*)> setConvertUniforms
 )
 {
     if(!cubeMap || !environmentAsset || resolution != renderTargets[0]->GetResolution())
@@ -34,7 +36,8 @@ EnvironmentAssetPtr PBRManager::Build(
             { 2, environmentMap->sampler }
         },
         cubeMap,
-        pipelineConvert
+        customConvertPipeline ? customConvertPipeline : pipelineConvert,
+        setConvertUniforms
     );
 
     ReleaseRenderTargets();
@@ -79,7 +82,8 @@ EnvironmentAssetPtr PBRManager::Build(
 void PBRManager::RenderCubeMap(
     const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
     LLGL::Texture* cubeMap,
-    LLGL::PipelineState* pipeline
+    LLGL::PipelineState* pipeline,
+    std::function<void(LLGL::CommandBuffer*)> setUniforms
 )
 {
     ScopedTimer timer("RenderCubeMap");
@@ -111,6 +115,9 @@ void PBRManager::RenderCubeMap(
             },
             [&](auto commandBuffer)
             {
+                if(setUniforms)
+                    setUniforms(commandBuffer);
+
                 cube->Draw(commandBuffer);
             },
             pipeline,

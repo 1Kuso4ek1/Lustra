@@ -16,7 +16,9 @@ public:
     EnvironmentAssetPtr Build(
         const LLGL::Extent2D& resolution,
         TextureAssetPtr environmentMap,
-        EnvironmentAssetPtr environmentAsset = nullptr
+        EnvironmentAssetPtr environmentAsset = nullptr,
+        LLGL::PipelineState* customConvertPipeline = nullptr,
+        std::function<void(LLGL::CommandBuffer*)> setConvertUniforms = nullptr
     );
 
 private: // Singleton-related
@@ -28,7 +30,8 @@ private:
     void RenderCubeMap(
         const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
         LLGL::Texture* cubeMap,
-        LLGL::PipelineState* pipeline
+        LLGL::PipelineState* pipeline,
+        std::function<void(LLGL::CommandBuffer*)> setUniforms = nullptr
     );
 
     void RenderCubeMapMips(

@@ -224,7 +224,7 @@ void Scene::RenderMeshes()
     }
 
     if(view.begin() == view.end())
-        dev::Renderer::Get().ClearRenderTarget(renderer->GetPrimaryRenderTarget());
+        Renderer::Get().ClearRenderTarget(renderer->GetPrimaryRenderTarget());
 }
 
 void Scene::RenderToShadowMap()
@@ -414,11 +414,20 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     auto brdf = defaultTexture;
 
     // Very bad, obviously
-    auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>();
+    auto hdriSkyView = registry.view<HDRISkyComponent>();
+    auto proceduralSkyView = registry.view<ProceduralSkyComponent>();
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
         auto sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
+
+        irradiance = sky.asset->irradiance;
+        prefiltered = sky.asset->prefiltered;
+        brdf = sky.asset->brdf;
+    }
+    else if(proceduralSkyView.begin() != proceduralSkyView.end())
+    {
+        auto sky = proceduralSkyView.get<ProceduralSkyComponent>(*proceduralSkyView.begin());
 
         irradiance = sky.asset->irradiance;
         prefiltered = sky.asset->prefiltered;

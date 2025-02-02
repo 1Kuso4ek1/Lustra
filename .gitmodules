@@ -24,3 +24,6 @@
 [submodule "libraries/ImGuizmo"]
 	path = libraries/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "libraries/JoltPhysics"]
+	path = libraries/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git

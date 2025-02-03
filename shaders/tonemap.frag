@@ -14,6 +14,19 @@ uniform int algorithm;
 uniform float exposure;
 uniform float bloomStrength;
 
+uniform vec3 colorGrading;
+
+uniform float colorGradingIntensity;
+uniform float chromaticAberration;
+uniform float vignetteIntensity;
+uniform float vignetteRoundness;
+uniform float filmGrain;
+uniform float contrast;
+uniform float saturation;
+uniform float brightness;
+
+uniform float time;
+
 mat3 acesIn = mat3(0.59719, 0.07600, 0.02840,
                    0.35458, 0.90834, 0.13383,
                    0.04823, 0.01566, 0.83777);
@@ -21,6 +34,14 @@ mat3 acesIn = mat3(0.59719, 0.07600, 0.02840,
 mat3 acesOut = mat3(1.60475, -0.10208, -0.00327,
                     -0.53108,  1.10813, -0.07276,
                     -0.07367, -0.00605, 1.07602);
+
+float Hash(vec2 vec)
+{
+    vec3 v3 = fract(vec3(vec.xyx) * 0.1031);
+         v3 += dot(v3, v3.yzx + 33.33);
+
+    return fract((v3.x + v3.y) * v3.z);
+}
 
 vec3 ACES(vec3 color)
 {
@@ -97,7 +118,7 @@ vec3 Lottes(vec3 color)
     return color * (lFinal / l);
 }
 
-vec3 Apply(vec3 color)
+vec3 ApplyTonemap(vec3 color)
 {
     switch(algorithm)
     {
@@ -112,15 +133,8 @@ vec3 Apply(vec3 color)
     }
 }
 
-void main()
+vec3 ApplySSR(vec3 color, vec2 texelSize)
 {
-    vec2 texelSize = 1.0 / textureSize(frame, 0);
-
-    vec4 color = texture(frame, coord);
-    vec4 bloomColor = texture(bloom, coord);
-
-    color.rgb += bloomColor.rgb * bloomStrength;
-
     if(length(textureLod(ssr, coord, 5.0).rgb) > 0.0)
     {
         vec3 combined = texture(gCombined, coord).rgb;
@@ -142,11 +156,84 @@ void main()
             vec2 edge = abs(coord * 2.0 - 1.0);
             float edgeFade = 1.0 - smoothstep(0.7, 1.0, max(edge.x, edge.y));
             
-            color.rgb = mix(color.rgb, f0 * ssrSample.rgb, mixFactor * alphaMask * edgeFade);
+            color = mix(color, f0 * ssrSample.rgb, mixFactor * alphaMask * edgeFade);
         }
     }
+
+    return color;
+}
+
+vec3 ApplyColorGrading(vec3 color)
+{
+    float lumaA = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    float lumaB = dot(colorGrading, vec3(0.2126, 0.7152, 0.0722));
     
-    color.rgb = Apply(color.rgb * exposure);
+    vec3 mixed = mix(color, colorGrading, colorGradingIntensity);
+
+    color = mixed * (mix(lumaA, lumaB, colorGradingIntensity) / (dot(mixed, vec3(0.2126, 0.7152, 0.0722)) + 1e-5));
+
+    color *= brightness;
+
+    color = (color - 0.5) * contrast + 0.5;
+
+    float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+
+    return mix(vec3(luminance), color, saturation);
+}
+
+vec3 ApplyVignette(vec3 color)
+{
+    vec2 uv = (coord - 0.5) * 2.0;
+
+    float dist = length(uv);
+    float vignette = 1.0 - pow(dist * vignetteRoundness, 1.0 - vignetteIntensity);
+
+    return color * vignette;
+}
+
+vec3 ApplyChromaticAberration(vec3 color)
+{
+    if(chromaticAberration == 0.0)
+        return color;
+
+    vec2 center = vec2(0.5);
+    vec2 dir = normalize(coord - center);
+
+    float dist = length(coord - center);
+    float edgeMask = smoothstep(0.1 - 0.1, 0.1, dist);
+
+    vec2 offset = dir * chromaticAberration * edgeMask;
+
+    vec3 aberration = vec3(
+        texture(frame, coord + offset * 0.7).r,
+        texture(frame, coord - offset * 0.3).g,
+        texture(frame, coord - offset * 1.0).b
+    );
+
+    return mix(color, pow(aberration, vec3(1.5)), (1.0 - length(offset)) / 2.0);
+}
+
+vec3 ApplyFilmGrain(vec3 color)
+{
+    return color + (Hash(coord * vec2(312.24, 1030.057) * (time + 1.0)) * 2.0 - 1.0) * filmGrain;
+}
+
+void main()
+{
+    vec2 texelSize = 1.0 / textureSize(frame, 0);
+
+    vec4 color = texture(frame, coord);
+    vec4 bloomColor = texture(bloom, coord);
+
+    color.rgb += bloomColor.rgb * bloomStrength;
+    
+    color.rgb = ApplySSR(color.rgb, texelSize);
+    color.rgb = ApplyTonemap(color.rgb * exposure);
+    color.rgb = ApplyColorGrading(color.rgb);
+    color.rgb = ApplyChromaticAberration(color.rgb);
+    color.rgb = ApplyFilmGrain(color.rgb);
+    color.rgb = ApplyVignette(color.rgb);
+
     color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 
     fragColor = color;

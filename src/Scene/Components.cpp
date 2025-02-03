@@ -2,6 +2,8 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <chrono>
+
 // Move everything into separate files...
 
 namespace dev
@@ -135,7 +137,17 @@ TonemapComponent::TonemapComponent(
             {
                 { "algorithm", LLGL::UniformType::Int1 },
                 { "exposure", LLGL::UniformType::Float1 },
-                { "bloomStrength", LLGL::UniformType::Float1 }
+                { "bloomStrength", LLGL::UniformType::Float1 },
+                { "colorGrading", LLGL::UniformType::Float3 },
+                { "colorGradingIntensity", LLGL::UniformType::Float1 },
+                { "chromaticAberration", LLGL::UniformType::Float1 },
+                { "vignetteIntensity", LLGL::UniformType::Float1},
+                { "vignetteRoundness", LLGL::UniformType::Float1 },
+                { "filmGrain", LLGL::UniformType::Float1 },
+                { "contrast", LLGL::UniformType::Float1 },
+                { "saturation", LLGL::UniformType::Float1 },
+                { "brightness", LLGL::UniformType::Float1 },
+                { "time", LLGL::UniformType::Float1 }
             }
         },
         LLGL::GraphicsPipelineDescriptor
@@ -150,8 +162,24 @@ TonemapComponent::TonemapComponent(
 
     setUniforms = [&](auto commandBuffer)
     {
+        auto ns = std::chrono::steady_clock::now()
+              .time_since_epoch()
+              .count();
+
+        float time = (float)(ns % 1000000) / 1000000.0f;
+
         commandBuffer->SetUniforms(0, &algorithm, sizeof(algorithm));
         commandBuffer->SetUniforms(1, &exposure, sizeof(exposure));
+        commandBuffer->SetUniforms(3, &colorGrading, sizeof(colorGrading));
+        commandBuffer->SetUniforms(4, &colorGradingIntensity, sizeof(colorGradingIntensity));
+        commandBuffer->SetUniforms(5, &chromaticAberration, sizeof(chromaticAberration));
+        commandBuffer->SetUniforms(6, &vignetteIntensity, sizeof(vignetteIntensity));
+        commandBuffer->SetUniforms(7, &vignetteRoundness, sizeof(vignetteRoundness));
+        commandBuffer->SetUniforms(8, &filmGrain, sizeof(filmGrain));
+        commandBuffer->SetUniforms(9, &contrast, sizeof(contrast));
+        commandBuffer->SetUniforms(10, &saturation, sizeof(saturation));
+        commandBuffer->SetUniforms(11, &brightness, sizeof(brightness));
+        commandBuffer->SetUniforms(12, &time, sizeof(time));
     };
 }
 

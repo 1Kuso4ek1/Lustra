@@ -123,6 +123,17 @@ struct TonemapComponent : public ComponentBase
     int algorithm = 0;
     float exposure = 1.0f;
 
+    glm::vec3 colorGrading = { 0.0f, 0.0f, 0.0f };
+
+    float colorGradingIntensity = 0.0f;
+    float chromaticAberration = 0.0f;
+    float vignetteIntensity = 0.0f;
+    float vignetteRoundness = 0.0f;
+    float filmGrain = 0.0f;
+    float contrast = 1.0f;
+    float saturation = 1.0f;
+    float brightness = 1.0f;
+
     PostProcessingPtr postProcessing;
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;

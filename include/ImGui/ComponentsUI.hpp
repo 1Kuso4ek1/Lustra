@@ -136,6 +136,18 @@ inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
 
     ImGui::DragFloat("Exposure", &component.exposure, 0.05f, 0.0f, 100.0f);
     ImGui::Combo("Algorithm", &component.algorithm, algorithms.data(), algorithms.size());
+
+    ImGui::Separator();
+
+    ImGui::ColorEdit3("Color Grading", &component.colorGrading.x);
+    ImGui::DragFloat("Color Grading Intensity", &component.colorGradingIntensity, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Chromatic Aberration", &component.chromaticAberration, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Vignette Intensity", &component.vignetteIntensity, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Vignette Roundness", &component.vignetteRoundness, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Film Grain", &component.filmGrain, 0.01f, 0.0f, 10.0f);
+    ImGui::DragFloat("Contrast", &component.contrast, 0.01f, 0.0f, 5.0f);
+    ImGui::DragFloat("Saturation", &component.saturation, 0.01f, -5.0f, 5.0f);
+    ImGui::DragFloat("Brightness", &component.brightness, 0.01f, 0.0f, 5.0f);
 }
 
 inline void DrawComponentUI(BloomComponent& component, entt::entity entity)

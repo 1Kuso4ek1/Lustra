@@ -261,7 +261,8 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
         { "aoType", LLGL::UniformType::Int1 },
         { "emissionType", LLGL::UniformType::Int1 },
         { "emissionValue", LLGL::UniformType::Float3 },
-        { "emissionStrength", LLGL::UniformType::Float1 }
+        { "emissionStrength", LLGL::UniformType::Float1 },
+        { "uvScale", LLGL::UniformType::Float2 }
     };
 
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);

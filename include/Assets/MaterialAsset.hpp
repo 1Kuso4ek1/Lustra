@@ -60,6 +60,7 @@ struct MaterialAsset : public Asset
             commandBuffer->SetUniforms(9, &emission.value, sizeof(emission.value) - sizeof(emission.value.x));
 
         commandBuffer->SetUniforms(10, &emissionStrength, sizeof(emissionStrength));
+        commandBuffer->SetUniforms(11, &uvScale, sizeof(uvScale));
     }
 
     Property albedo;
@@ -70,6 +71,7 @@ struct MaterialAsset : public Asset
     Property emission;
 
     float emissionStrength = 1.0f;
+    glm::vec2 uvScale = { 1.0f, 1.0f };
 };
 
 using MaterialAssetPtr = std::shared_ptr<MaterialAsset>;

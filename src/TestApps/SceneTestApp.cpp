@@ -727,6 +727,10 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
     ImGui::Text("Emission strength:");
     ImGui::DragFloat("##EmissionStrength", &material->emissionStrength, 0.01f, 0.0f, 100.0f);
 
+    ImGui::Separator();
+    ImGui::Text("UV Scale:");
+    ImGui::DragFloat2("##UVScale", &material->uvScale.x, 0.01f, 0.0f, 100.0f);
+
     ImGui::End();
 }
 

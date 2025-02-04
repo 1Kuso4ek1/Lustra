@@ -141,7 +141,6 @@ inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
 
     ImGui::ColorEdit3("Color Grading", &component.colorGrading.x);
     ImGui::DragFloat("Color Grading Intensity", &component.colorGradingIntensity, 0.01f, 0.0f, 1.0f);
-    ImGui::DragFloat("Chromatic Aberration", &component.chromaticAberration, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Vignette Intensity", &component.vignetteIntensity, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Vignette Roundness", &component.vignetteRoundness, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("Film Grain", &component.filmGrain, 0.01f, 0.0f, 10.0f);

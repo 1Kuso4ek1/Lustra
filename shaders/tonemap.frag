@@ -17,7 +17,6 @@ uniform float bloomStrength;
 uniform vec3 colorGrading;
 
 uniform float colorGradingIntensity;
-uniform float chromaticAberration;
 uniform float vignetteIntensity;
 uniform float vignetteRoundness;
 uniform float filmGrain;
@@ -191,28 +190,6 @@ vec3 ApplyVignette(vec3 color)
     return color * vignette;
 }
 
-vec3 ApplyChromaticAberration(vec3 color)
-{
-    if(chromaticAberration == 0.0)
-        return color;
-
-    vec2 center = vec2(0.5);
-    vec2 dir = normalize(coord - center);
-
-    float dist = length(coord - center);
-    float edgeMask = smoothstep(0.1 - 0.1, 0.1, dist);
-
-    vec2 offset = dir * chromaticAberration * edgeMask;
-
-    vec3 aberration = vec3(
-        texture(frame, coord + offset * 0.7).r,
-        texture(frame, coord - offset * 0.3).g,
-        texture(frame, coord - offset * 1.0).b
-    );
-
-    return mix(color, pow(aberration, vec3(1.5)), (1.0 - length(offset)) / 2.0);
-}
-
 vec3 ApplyFilmGrain(vec3 color)
 {
     return color + (Hash(coord * vec2(312.24, 1030.057) * (time + 1.0)) * 2.0 - 1.0) * filmGrain;
@@ -230,7 +207,6 @@ void main()
     color.rgb = ApplySSR(color.rgb, texelSize);
     color.rgb = ApplyTonemap(color.rgb * exposure);
     color.rgb = ApplyColorGrading(color.rgb);
-    color.rgb = ApplyChromaticAberration(color.rgb);
     color.rgb = ApplyFilmGrain(color.rgb);
     color.rgb = ApplyVignette(color.rgb);
 

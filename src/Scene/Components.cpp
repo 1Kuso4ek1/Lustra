@@ -140,7 +140,6 @@ TonemapComponent::TonemapComponent(
                 { "bloomStrength", LLGL::UniformType::Float1 },
                 { "colorGrading", LLGL::UniformType::Float3 },
                 { "colorGradingIntensity", LLGL::UniformType::Float1 },
-                { "chromaticAberration", LLGL::UniformType::Float1 },
                 { "vignetteIntensity", LLGL::UniformType::Float1},
                 { "vignetteRoundness", LLGL::UniformType::Float1 },
                 { "filmGrain", LLGL::UniformType::Float1 },
@@ -172,14 +171,13 @@ TonemapComponent::TonemapComponent(
         commandBuffer->SetUniforms(1, &exposure, sizeof(exposure));
         commandBuffer->SetUniforms(3, &colorGrading, sizeof(colorGrading));
         commandBuffer->SetUniforms(4, &colorGradingIntensity, sizeof(colorGradingIntensity));
-        commandBuffer->SetUniforms(5, &chromaticAberration, sizeof(chromaticAberration));
-        commandBuffer->SetUniforms(6, &vignetteIntensity, sizeof(vignetteIntensity));
-        commandBuffer->SetUniforms(7, &vignetteRoundness, sizeof(vignetteRoundness));
-        commandBuffer->SetUniforms(8, &filmGrain, sizeof(filmGrain));
-        commandBuffer->SetUniforms(9, &contrast, sizeof(contrast));
-        commandBuffer->SetUniforms(10, &saturation, sizeof(saturation));
-        commandBuffer->SetUniforms(11, &brightness, sizeof(brightness));
-        commandBuffer->SetUniforms(12, &time, sizeof(time));
+        commandBuffer->SetUniforms(5, &vignetteIntensity, sizeof(vignetteIntensity));
+        commandBuffer->SetUniforms(6, &vignetteRoundness, sizeof(vignetteRoundness));
+        commandBuffer->SetUniforms(7, &filmGrain, sizeof(filmGrain));
+        commandBuffer->SetUniforms(8, &contrast, sizeof(contrast));
+        commandBuffer->SetUniforms(9, &saturation, sizeof(saturation));
+        commandBuffer->SetUniforms(10, &brightness, sizeof(brightness));
+        commandBuffer->SetUniforms(11, &time, sizeof(time));
     };
 }
 

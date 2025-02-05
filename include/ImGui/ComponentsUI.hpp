@@ -113,7 +113,7 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
         if(!component.renderTarget)
             component.SetupShadowMap(component.resolution);
     
-    uint32_t min = 128, max = 8192;
+    static const uint32_t min = 128, max = 8192;
 
     ImGui::DragScalarN("Resolution", ImGuiDataType_U32, &component.resolution.width, 2, 1.0f, &min, &max);
     ImGui::DragFloat("Bias", &component.bias, 0.0001f, 0.0f, 1.0f);
@@ -197,7 +197,7 @@ inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity enti
     ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
     ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
     
-    uint32_t min = 128, max = 8192;
+    static const uint32_t min = 128, max = 8192;
 
     if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
         component.resolution.height = component.resolution.width;
@@ -225,13 +225,40 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
         ImGui::EndDragDropTarget();
     }
 
-    uint32_t min = 128, max = 8192;
+    static const uint32_t min = 128, max = 8192;
 
     if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
         component.resolution.height = component.resolution.width;
 
     if(ImGui::Button("Convert"))
         Multithreading::Get().AddJob({ {}, [&]() { component.Build(); } });
+}
+
+inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
+{
+    bool isStatic = component.body->GetMotionType() == JPH::EMotionType::Static;
+    static glm::vec3 scale(1.0);
+
+    if(ImGui::Checkbox("Static", &isStatic))
+        PhysicsManager::Get().GetBodyInterface().SetMotionType(
+            component.body->GetID(),
+            isStatic ? JPH::EMotionType::Static : JPH::EMotionType::Dynamic,
+            JPH::EActivation::Activate
+        );
+
+    ImGui::DragFloat3("Scale", &scale.x, 0.05f);
+
+    if(ImGui::Button("Update"))
+    {
+        PhysicsManager::Get().GetBodyInterface().SetShape(
+            component.body->GetID(),
+            component.body->GetShape()->ScaleShape({ scale.x, scale.y, scale.z }).Get(),
+            true,
+            JPH::EActivation::Activate
+        );
+
+        scale = glm::vec3(1.0);
+    }
 }
 
 // Jesus Christ what is that

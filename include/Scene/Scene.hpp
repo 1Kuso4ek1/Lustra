@@ -25,6 +25,9 @@ public:
     void Update(float deltaTime);
     void Draw(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
+    void SetUpdatePhysics(bool updatePhysics);
+    void ToggleUpdatePhysics();
+
     void RemoveEntity(const Entity& entity);
 
     Entity CreateEntity();
@@ -73,6 +76,9 @@ private:
     std::pair<LLGL::Texture*, float> ApplyBloom(LLGL::Texture* frame);
     LLGL::Texture* ApplyGTAO();
     LLGL::Texture* ApplySSR(LLGL::Texture* frame);
+
+private:
+    bool updatePhysics = false;
 
 private:
     Camera* cam{};

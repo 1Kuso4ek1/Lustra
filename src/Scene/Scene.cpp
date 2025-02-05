@@ -36,6 +36,9 @@ void Scene::Update(float deltaTime)
         if(script.update)
             script.update(Entity{ entity, this }, deltaTime);
     });
+
+    if(updatePhysics)
+        PhysicsManager::Get().Update(deltaTime);
 }
 
 void Scene::Draw(LLGL::RenderTarget* renderTarget)
@@ -58,6 +61,16 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     Renderer::Get().Submit();
 
     ApplyPostProcessing(renderTarget);
+}
+
+void Scene::SetUpdatePhysics(bool updatePhysics)
+{
+    this->updatePhysics = updatePhysics;
+}
+
+void Scene::ToggleUpdatePhysics()
+{
+    updatePhysics = !updatePhysics;
 }
 
 void Scene::RemoveEntity(const Entity& entity)
@@ -214,6 +227,17 @@ void Scene::RenderMeshes()
     {
         auto [transform, mesh, meshRenderer, pipeline] = 
                 view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
+
+        if(registry.all_of<RigidBodyComponent>(entity))
+        {
+            auto body = registry.get<RigidBodyComponent>(entity).body;
+
+            auto position = body->GetPosition();
+            auto rotation = body->GetRotation().GetEulerAngles();
+
+            transform.position = { position.GetX(), position.GetY(), position.GetZ() };
+            transform.rotation = glm::degrees(glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ()));
+        }
 
         Renderer::Get().GetMatrices()->PushMatrix();
         Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();

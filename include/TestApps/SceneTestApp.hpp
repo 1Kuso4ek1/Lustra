@@ -44,7 +44,7 @@ private:
     void CreateLight1Entity();
     void CreateSkyEntity();
 
-    void CreateModelEntity(dev::ModelAssetPtr model);
+    void CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera = false);
 
     void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetSwapChain()->GetResolution());
 

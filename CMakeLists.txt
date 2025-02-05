@@ -35,11 +35,13 @@ set(
     include
     include/Assets
     include/Assets/Loaders
+    include/Components
     include/Core
     include/Events
     include/Graphics
     include/ImGui
     include/Input
+    include/Physics
     include/Scene
     include/TestApps
 )
@@ -55,6 +57,7 @@ set(
     libraries/LLGL/include
     libraries/entt/src
     libraries/assimp/include
+    libraries/JoltPhysics
 )
 
 set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
@@ -85,7 +88,7 @@ add_library(
 )
 
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})
-target_link_libraries(Engine assimp LLGL Threads::Threads stdc++fs glm glfw)
+target_link_libraries(Engine assimp LLGL Threads::Threads stdc++fs glm glfw Jolt)
 
 add_executable(
     LLGLTest

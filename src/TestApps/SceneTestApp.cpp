@@ -15,6 +15,8 @@ SceneTestApp::SceneTestApp()
 
     dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
 
+    dev::PhysicsManager::Get().Init();
+
     dev::EventManager::Get().AddListener(dev::Event::Type::WindowResize, this);
 
     SetupAssetManager();
@@ -268,7 +270,7 @@ void SceneTestApp::CreateSkyEntity()
     );
 }
 
-void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)
+void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
 {
     auto entity = scene.CreateEntity();
 
@@ -277,6 +279,29 @@ void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model)
     entity.AddComponent<dev::MeshComponent>().model = model;
     entity.AddComponent<dev::MeshRendererComponent>();
     entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+    
+    auto& rigidBody = entity.AddComponent<dev::RigidBodyComponent>();
+
+    auto& modelPos = entity.GetComponent<dev::TransformComponent>().position;
+
+    if(relativeToCamera)
+    {
+        auto& cameraPos = camera.GetComponent<dev::TransformComponent>().position;
+
+        auto cameraOrient = glm::quat(glm::radians(camera.GetComponent<dev::TransformComponent>().rotation));
+
+        modelPos = cameraPos + cameraOrient * glm::vec3(0.0f, 0.0f, -5.0f);
+    }
+
+    rigidBody.body = dev::PhysicsManager::Get().CreateBody(
+        JPH::BodyCreationSettings(
+            new JPH::BoxShapeSettings({ 1.0f, 1.0f, 1.0f }),
+            { modelPos.x, modelPos.y, modelPos.z },
+            { 0.0f, 0.0f, 0.0f, 1.0f },
+            JPH::EMotionType::Dynamic,
+            dev::Layers::moving
+        )
+    );
 
     selectedEntity = entity;
 
@@ -379,7 +404,8 @@ void SceneTestApp::DrawPropertiesWindow()
             dev::GTAOComponent,
             dev::SSRComponent,
             dev::ProceduralSkyComponent,
-            dev::HDRISkyComponent
+            dev::HDRISkyComponent,
+            dev::RigidBodyComponent
         >(scene.GetRegistry(), selectedEntity);
 
         ImGui::Separator();
@@ -430,7 +456,8 @@ void SceneTestApp::DrawImGuizmo()
             auto viewMatrix = dev::Renderer::Get().GetMatrices()->GetView();
             auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
 
-            auto modelMatrix = selectedEntity.GetComponent<dev::TransformComponent>().GetTransform();
+            auto& transform = selectedEntity.GetComponent<dev::TransformComponent>();
+            auto modelMatrix = transform.GetTransform();
 
             ImGuizmo::SetDrawlist();
             
@@ -451,7 +478,24 @@ void SceneTestApp::DrawImGuizmo()
                 dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr
             );
 
-            selectedEntity.GetComponent<dev::TransformComponent>().SetTransform(modelMatrix);
+            transform.SetTransform(modelMatrix);
+
+            if(selectedEntity.HasComponent<dev::RigidBodyComponent>())
+            {
+                auto body = selectedEntity.GetComponent<dev::RigidBodyComponent>().body;
+                auto bodyId = body->GetID();
+
+                auto pos = transform.position;
+                auto rot = glm::quat(glm::radians(transform.rotation));
+                auto scale = transform.scale;
+
+                dev::PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
+                    bodyId,
+                    { pos.x, pos.y, pos.z },
+                    { rot.x, rot.y, rot.z, rot.w },
+                    JPH::EActivation::Activate
+                );
+            }
 
             ImGuizmo::Enable(true);
         }
@@ -811,7 +855,7 @@ void SceneTestApp::DrawViewport()
         auto payload = ImGui::AcceptDragDropPayload("MODEL");
 
         if(payload)
-            CreateModelEntity(*(dev::ModelAssetPtr*)payload->Data);
+            CreateModelEntity(*(dev::ModelAssetPtr*)payload->Data, true);
 
         ImGui::EndDragDropTarget();
     }
@@ -827,6 +871,12 @@ void SceneTestApp::DrawViewport()
 
 void SceneTestApp::Draw()
 {
+    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) && keyboardTimer.GetElapsedSeconds() > 0.2f)
+    {
+        scene.ToggleUpdatePhysics();
+        keyboardTimer.Reset();
+    }
+
     scene.Draw(viewportRenderTarget);
 
     dev::Renderer::Get().ClearRenderTarget();

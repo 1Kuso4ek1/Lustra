@@ -100,6 +100,16 @@ void Mesh::Draw(LLGL::CommandBuffer* commandBuffer) const
     commandBuffer->DrawIndexed(indices.size(), 0);
 }
 
+std::vector<Vertex> Mesh::GetVertices() const
+{
+    return vertices;
+}
+
+std::vector<uint32_t> Mesh::GetIndices() const
+{
+    return indices;
+}
+
 void Mesh::CreateVertexBuffer()
 {
     LLGL::BufferDescriptor bufferDesc = LLGL::VertexBufferDesc(vertices.size() * sizeof(Vertex), vertexFormat);

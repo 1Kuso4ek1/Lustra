@@ -293,15 +293,19 @@ void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCa
         modelPos = cameraPos + cameraOrient * glm::vec3(0.0f, 0.0f, -5.0f);
     }
 
-    rigidBody.body = dev::PhysicsManager::Get().CreateBody(
+    auto settings =
         JPH::BodyCreationSettings(
-            new JPH::BoxShapeSettings({ 1.0f, 1.0f, 1.0f }),
+            new JPH::EmptyShapeSettings(),
             { modelPos.x, modelPos.y, modelPos.z },
             { 0.0f, 0.0f, 0.0f, 1.0f },
             JPH::EMotionType::Dynamic,
             dev::Layers::moving
-        )
-    );
+        );
+
+    settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+    settings.mMassPropertiesOverride.mMass = 1.0f;
+
+    rigidBody.body = dev::PhysicsManager::Get().CreateBody(settings);
 
     selectedEntity = entity;
 
@@ -463,9 +467,9 @@ void SceneTestApp::DrawImGuizmo()
             
             ImGuizmo::SetRect(
                 ImGui::GetWindowPos().x,
-                ImGui::GetWindowPos().y,
+                ImGui::GetWindowPos().y + ImGui::GetFrameHeight(),
                 ImGui::GetWindowWidth(),
-                ImGui::GetWindowHeight()
+                ImGui::GetWindowHeight() - ImGui::GetFrameHeight()
             );
 
             ImGuizmo::Manipulate(

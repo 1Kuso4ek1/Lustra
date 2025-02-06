@@ -26,6 +26,9 @@ public:
 
     void Draw(LLGL::CommandBuffer* commandBuffer) const;
 
+    std::vector<Vertex> GetVertices() const;
+    std::vector<uint32_t> GetIndices() const;
+
 private:
     void CreateVertexBuffer();
     void CreateIndexBuffer();

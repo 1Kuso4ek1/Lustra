@@ -63,7 +63,7 @@ struct GTAOComponent : public ComponentBase, public EventListener
     int samples = 4.0f;
     
     float limit = 100.0f;
-    float radius = 8.0f;
+    float radius = 2.0f;
     float falloff = 1.5f;
     float thicknessMix = 0.2f;
     float maxStride = 8.0f;

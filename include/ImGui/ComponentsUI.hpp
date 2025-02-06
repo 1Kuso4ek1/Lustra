@@ -236,26 +236,198 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
 
 inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 {
-    bool isStatic = component.body->GetMotionType() == JPH::EMotionType::Static;
     static glm::vec3 scale(1.0);
 
-    if(ImGui::Checkbox("Static", &isStatic))
+    int motionType = (int)component.body->GetMotionType();
+
+    static const std::vector<const char*> motionTypes =
+    {
+        "Static",
+        "Kinematic",
+        "Dynamic"
+    };
+
+    static const std::vector<const char*> shapeTypes =
+    {
+        "Empty",
+        "Box",
+        "Sphere",
+        "Capsule",
+        "Mesh"
+    };
+
+    static const std::unordered_map<JPH::EShapeSubType, size_t> shapeTypesToIndex =
+    {
+        { JPH::EShapeSubType::Empty, 0 },
+        { JPH::EShapeSubType::Box, 1 },
+        { JPH::EShapeSubType::Sphere, 2 },
+        { JPH::EShapeSubType::Capsule, 3 },
+        { JPH::EShapeSubType::Mesh, 4 }
+    };
+
+    static int shapeType = shapeTypesToIndex.at(component.body->GetShape()->GetSubType());
+
+    if(ImGui::Combo("Motion type", &motionType, motionTypes.data(), motionTypes.size()))
         PhysicsManager::Get().GetBodyInterface().SetMotionType(
             component.body->GetID(),
-            isStatic ? JPH::EMotionType::Static : JPH::EMotionType::Dynamic,
+            (JPH::EMotionType)motionType,
             JPH::EActivation::Activate
         );
 
-    ImGui::DragFloat3("Scale", &scale.x, 0.05f);
+    ImGui::Separator();
 
-    if(ImGui::Button("Update"))
+    if(ImGui::CollapsingHeader("Shape"))
     {
-        PhysicsManager::Get().GetBodyInterface().SetShape(
-            component.body->GetID(),
-            component.body->GetShape()->ScaleShape({ scale.x, scale.y, scale.z }).Get(),
-            true,
-            JPH::EActivation::Activate
-        );
+        ImGui::Indent();
+
+        static std::shared_ptr<JPH::ShapeSettings> settings;
+
+        if(ImGui::Combo("Shape type", &shapeType, shapeTypes.data(), shapeTypes.size()))
+            settings.reset();
+
+        switch(shapeType)
+        {
+            case 0:
+            {
+                static glm::vec3 centerOfMass(0.0f);
+
+                if(!settings)
+                    settings = std::make_shared<JPH::EmptyShapeSettings>();
+
+                ImGui::DragFloat3("Center of mass", &centerOfMass.x, 0.05f);
+
+                std::static_pointer_cast<JPH::EmptyShapeSettings>(settings)->
+                    mCenterOfMass = { centerOfMass.x, centerOfMass.y, centerOfMass.z };
+
+                break;
+            }
+
+            case 1:
+            {
+                static glm::vec3 halfExtent(1.0f);
+
+                if(!settings)
+                    settings = std::make_shared<JPH::BoxShapeSettings>();
+
+                ImGui::DragFloat3("Half Extent", &halfExtent.x, 0.05f);
+
+                std::static_pointer_cast<JPH::BoxShapeSettings>(settings)->
+                    mHalfExtent = { halfExtent.x, halfExtent.y, halfExtent.z };
+
+                break;
+            }
+
+            case 2:
+            {
+                static float radius(1.0f);
+
+                if(!settings)
+                    settings = std::make_shared<JPH::SphereShapeSettings>();
+
+                ImGui::DragFloat("Radius", &radius, 0.05f);
+
+                std::static_pointer_cast<JPH::SphereShapeSettings>(settings)->
+                    mRadius = radius;
+
+                break;
+            }
+
+            case 3:
+            {
+                static float radius(1.0f);
+                static float halfHeight(1.0f);
+
+                if(!settings)
+                    settings = std::make_shared<JPH::CapsuleShapeSettings>();
+
+                ImGui::DragFloat("Radius", &radius, 0.05f);
+                ImGui::DragFloat("Half Height", &halfHeight, 0.05f);
+
+                std::static_pointer_cast<JPH::CapsuleShapeSettings>(settings)->
+                    mRadius = radius;
+                std::static_pointer_cast<JPH::CapsuleShapeSettings>(settings)->
+                    mHalfHeightOfCylinder = halfHeight;
+
+                break;
+            }
+
+            case 4:
+            {
+                static ModelAssetPtr model;
+
+                ImGui::Button(model ? "Model##Model" : "(Empty)##Model", ImVec2(128.0f, 128.0f));
+
+                if(ImGui::BeginDragDropTarget())
+                {
+                    auto payload = ImGui::AcceptDragDropPayload("MODEL");
+
+                    if(payload)
+                    {
+                        model = *(dev::ModelAssetPtr*)payload->Data;
+
+                        JPH::TriangleList list;
+
+                        for(auto& mesh : model->meshes)
+                        {
+                            auto vertices = mesh->GetVertices();
+                            auto indices = mesh->GetIndices();
+
+                            list.reserve(list.size() + indices.size() / 3);
+
+                            for(size_t i = 0; i < indices.size(); i += 3)
+                            {
+                                auto pos0 = vertices[indices[i]].position;
+                                auto pos1 = vertices[indices[i + 1]].position;
+                                auto pos2 = vertices[indices[i + 2]].position;
+
+                                list.emplace_back(
+                                    JPH::Float3(pos0.x, pos0.y, pos0.z),
+                                    JPH::Float3(pos1.x, pos1.y, pos1.z),
+                                    JPH::Float3(pos2.x, pos2.y, pos2.z)
+                                );
+                            }
+                        }
+
+                        if(!settings)
+                            settings = std::make_shared<JPH::MeshShapeSettings>(list);
+                    }
+
+                    ImGui::EndDragDropTarget();
+                }
+
+                break;
+            }
+        }
+
+        ImGui::Separator();
+
+        if(ImGui::Button("Update shape") && settings)
+        {
+            auto body = component.body;
+            auto bodyId = body->GetID();
+
+            PhysicsManager::Get().GetBodyInterface().SetShape(
+                bodyId,
+                settings->Create().Get(),
+                false,
+                JPH::EActivation::Activate
+            );
+        }
+
+        ImGui::Unindent();
+    }
+
+    ImGui::DragFloat3("Scale##Shape", &scale.x, 0.05f);
+
+    if(ImGui::Button("Apply scale"))
+    {
+        if(scale != glm::vec3(1.0))
+            PhysicsManager::Get().GetBodyInterface().SetShape(
+                component.body->GetID(),
+                component.body->GetShape()->ScaleShape({ scale.x, scale.y, scale.z }).Get(),
+                false,
+                JPH::EActivation::Activate
+            );
 
         scale = glm::vec3(1.0);
     }

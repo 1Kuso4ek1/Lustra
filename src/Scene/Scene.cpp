@@ -23,10 +23,21 @@ void Scene::Start()
         SetupShadowsBuffer();
     }
 
-    registry.view<ScriptComponent>().each([](auto& script)
+    registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
         if(script.script)
-            ScriptManager::Get().ExecuteFunction(script.script, "void Start()");
+        {
+            Entity ent{ entity, this };
+
+            ScriptManager::Get().ExecuteFunction(
+                script.script,
+                "void Start(dev::Entity@)",
+                [&](auto context)
+                {
+                    context->SetArgAddress(0, (void*)(&ent));
+                }
+            );
+        }
 
         if(script.start)
             script.start();
@@ -37,6 +48,21 @@ void Scene::Update(float deltaTime)
 {
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
+        if(script.script)
+        {
+            Entity ent{ entity, this };
+
+            ScriptManager::Get().ExecuteFunction(
+                script.script,
+                "void Update(dev::Entity@, float)",
+                [&](auto context)
+                {
+                    context->SetArgAddress(0, (void*)(&ent));
+                    context->SetArgFloat(1, deltaTime);
+                }
+            );
+        }
+
         if(script.update)
             script.update(Entity{ entity, this }, deltaTime);
     });
@@ -85,8 +111,6 @@ void Scene::RemoveEntity(const Entity& entity)
 Entity Scene::CreateEntity()
 {
     Entity entity{ registry.create(), this };
-
-    entities[idCounter++] = entity;
 
     return entity;
 }

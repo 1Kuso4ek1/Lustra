@@ -31,7 +31,7 @@ public:
     void OnEvent(Event& event) override;
 
     glm::mat4 GetProjectionMatrix() const;
-    glm::vec2 GetViewportSize() const;
+    glm::vec2 GetViewport() const;
     
     float GetFov() const;
     float GetNear() const;

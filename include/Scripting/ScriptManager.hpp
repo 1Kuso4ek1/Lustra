@@ -13,7 +13,11 @@ public:
 
     void Build();
 
-    void ExecuteFunction(ScriptAssetPtr script, std::string_view declaration);
+    void ExecuteFunction(
+        ScriptAssetPtr script,
+        std::string_view declaration,
+        std::function<void(asIScriptContext*)> setArgs = nullptr
+    );
 
     void AddScript(ScriptAssetPtr script);
     void RemoveScript(ScriptAssetPtr script);
@@ -43,6 +47,7 @@ public:
     void AddTypeDestructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr);
     void AddTypeFactory(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr);
     void AddEnum(std::string_view name, std::vector<std::string_view> values);
+    void AddEnumValues(std::string_view name, std::unordered_map<std::string_view, int> values);
     
     void SetDefaultNamespace(std::string_view name);
 
@@ -52,10 +57,28 @@ private:
     friend class Singleton<ScriptManager>;
 
 private:
-    void RegisterLog();
+    void DiscardModules();
 
 private:
-    void DiscardModules();
+    void RegisterLog();
+    
+    void RegisterVec2();
+    void RegisterVec3();
+    void RegisterVec4();
+    void RegisterQuat();
+
+    void RegisterExtent2D();
+
+    void RegisterCamera();
+
+    void RegisterKeyboard();
+    void RegisterMouse();
+
+    void RegisterNameComponent();
+    void RegisterTransformComponent();
+    void RegisterCameraComponent();
+    void RegisterLightComponent();
+    void RegisterEntity();
 
 private:
     std::vector<ScriptAssetPtr> scripts;

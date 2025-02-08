@@ -12,6 +12,8 @@
 
 #include <LLGL/Log.h>
 
+#include <Scene.hpp>
+
 namespace dev
 {
 
@@ -25,7 +27,7 @@ inline void MessageCallback(const asSMessageInfo *msg, void *param)
     case asMSGTYPE_ERROR:
         LLGL::Log::Printf(
             LLGL::Log::ColorFlags::StdError,
-            "%s (%s, %s): %s",
+            "%s (%d, %d): %s\n",
             msg->section, msg->row, msg->col, msg->message
         );
         break;
@@ -33,7 +35,7 @@ inline void MessageCallback(const asSMessageInfo *msg, void *param)
     case asMSGTYPE_WARNING:
         LLGL::Log::Printf(
             LLGL::Log::ColorFlags::StdWarning,
-            "%s (%s, %s): %s",
+            "%s (%d, %d): %s\n",
             msg->section, msg->row, msg->col, msg->message
         );
         break;
@@ -41,7 +43,7 @@ inline void MessageCallback(const asSMessageInfo *msg, void *param)
     case asMSGTYPE_INFORMATION:
         LLGL::Log::Printf(
             LLGL::Log::ColorFlags::Blue,
-            "%s (%s, %s): %s",
+            "%s (%d, %d): %s\n",
             msg->section, msg->row, msg->col, msg->message
         );
         break;
@@ -66,6 +68,11 @@ inline T* TypeFactory() { return new T(); }
 inline void Write(const std::string& data)
 {
     LLGL::Log::Printf("%s", data.c_str());
+}
+
+inline Camera* GetCamera(CameraComponent* comp)
+{
+    return &(comp->camera);
 }
 
 }

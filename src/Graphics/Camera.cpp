@@ -69,7 +69,7 @@ glm::mat4 Camera::GetProjectionMatrix() const
     return projectionMatrix;
 }
 
-glm::vec2 Camera::GetViewportSize() const
+glm::vec2 Camera::GetViewport() const
 {
     return viewportSize;
 }

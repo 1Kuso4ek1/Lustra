@@ -17,7 +17,8 @@ TonemapComponent::TonemapComponent(
                 { "bloom", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
                 { "ssr", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
                 { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
-                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 }
+                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 },
+                { "lut", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 6 }
             },
             .uniforms
             {
@@ -65,6 +66,8 @@ TonemapComponent::TonemapComponent(
         commandBuffer->SetUniforms(10, &brightness, sizeof(brightness));
         commandBuffer->SetUniforms(11, &time, sizeof(time));
     };
+
+    lut = AssetManager::Get().Load<TextureAsset>("empty");
 }
 
 }

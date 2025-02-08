@@ -147,6 +147,21 @@ inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
     ImGui::DragFloat("Contrast", &component.contrast, 0.01f, 0.0f, 5.0f);
     ImGui::DragFloat("Saturation", &component.saturation, 0.01f, -5.0f, 5.0f);
     ImGui::DragFloat("Brightness", &component.brightness, 0.01f, 0.0f, 5.0f);
+
+    ImGui::Separator();
+
+    ImGui::Text("LUT:");
+    ImGui::Image(component.lut->nativeHandle, ImVec2(128.0f, 128.0f));
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
+        
+        if(payload)
+            component.lut = *(TextureAssetPtr*)payload->Data;
+
+        ImGui::EndDragDropTarget();
+    }
 }
 
 inline void DrawComponentUI(BloomComponent& component, entt::entity entity)

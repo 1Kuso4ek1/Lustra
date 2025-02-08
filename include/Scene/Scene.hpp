@@ -7,6 +7,28 @@
 #include <entt/entt.hpp>
 
 #include <unordered_map>
+/* #include <fstream>
+
+struct OutputArchive
+{
+    std::ostream& stream;
+
+    template<typename... Type>
+    void operator()(const Type&... value)
+    {
+        (stream.write(reinterpret_cast<const char*>(&value), sizeof(value)), ...);
+    }
+};
+
+inline void SaveSnapshot(const entt::registry& registry, const std::string& filename)
+{
+    std::ofstream file(filename, std::ios::binary);
+    OutputArchive archive{file};
+    
+    // Сохраняем только выбранные компоненты
+    entt::snapshot snapshot(registry);
+    snapshot.get<dev::NameComponent>(archive);
+} */
 
 namespace dev
 {

@@ -27,3 +27,6 @@
 [submodule "libraries/JoltPhysics"]
 	path = libraries/JoltPhysics
 	url = https://github.com/jrouwe/JoltPhysics.git
+[submodule "libraries/Angelscript"]
+	path = libraries/Angelscript
+	url = https://github.com/codecat/angelscript-mirror.git

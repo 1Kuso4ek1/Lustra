@@ -5,6 +5,7 @@ uniform sampler2D bloom;
 uniform sampler2D ssr;
 uniform sampler2D gAlbedo;
 uniform sampler2D gCombined;
+uniform sampler2D lut;
 
 in vec2 coord;
 
@@ -180,6 +181,29 @@ vec3 ApplyColorGrading(vec3 color)
     return mix(vec3(luminance), color, saturation);
 }
 
+vec3 ApplyLUT(vec3 color)
+{
+    if(texture(lut, vec2(0.1)).r == 0.0)
+        return color;
+
+    color = clamp(color, 0.0, 1.0) * 0.01; // This is a very strange way of fixing some of the issues...
+
+    vec2 lutTextureSize = textureSize(lut, 0);
+    vec4 lutSize = vec4(lutTextureSize, 1.0 / lutTextureSize);
+
+    vec3 scaledColor = color * (lutSize.y - 1.0);
+    float bFrac = fract(scaledColor.b);
+
+    vec2 texc = (0.5 + scaledColor.rg) * lutSize.zw;
+
+    texc.x += (scaledColor.b - bFrac) * lutSize.w;
+
+    vec3 color0 = texture(lut, texc).rgb;
+    vec3 color1 = texture(lut, vec2(texc.x + lutSize.w, texc.y)).rgb;
+
+    return mix(color0, color1, bFrac) * 100.0;
+}
+
 vec3 ApplyVignette(vec3 color)
 {
     vec2 uv = (coord - 0.5) * 2.0;
@@ -206,9 +230,10 @@ void main()
     
     color.rgb = ApplySSR(color.rgb, texelSize);
     color.rgb = ApplyTonemap(color.rgb * exposure);
-    color.rgb = ApplyColorGrading(color.rgb);
     color.rgb = ApplyFilmGrain(color.rgb);
     color.rgb = ApplyVignette(color.rgb);
+    color.rgb = ApplyColorGrading(color.rgb);
+    color.rgb = ApplyLUT(color.rgb);
 
     color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 

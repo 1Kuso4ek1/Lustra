@@ -24,6 +24,8 @@ struct TonemapComponent : public ComponentBase
     float saturation = 1.0f;
     float brightness = 1.0f;
 
+    TextureAssetPtr lut;
+
     PostProcessingPtr postProcessing;
 
     std::function<void(LLGL::CommandBuffer*)> setUniforms;

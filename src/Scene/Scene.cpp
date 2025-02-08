@@ -509,7 +509,8 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
             { 1, bloomResult.first },
             { 2, ssrResult },
             { 3, deferredRenderer->GetAlbedo() },
-            { 4, deferredRenderer->GetCombined() }
+            { 4, deferredRenderer->GetCombined() },
+            { 5, toneMapping.lut->texture }
         },
         [&](auto commandBuffer)
         {

@@ -43,6 +43,7 @@ set(
     include/Input
     include/Physics
     include/Scene
+    include/Scripting
     include/TestApps
 )
 
@@ -58,7 +59,23 @@ set(
     libraries/entt/src
     libraries/assimp/include
     libraries/JoltPhysics
+
+    libraries/Angelscript/sdk/angelscript/include
+    
+    libraries/Angelscript/sdk/add_on/scriptbuilder
+    libraries/Angelscript/sdk/add_on/scriptstdstring
+    libraries/Angelscript/sdk/add_on/scriptarray
+    libraries/Angelscript/sdk/add_on/autowrapper
+    libraries/Angelscript/sdk/add_on/scriptmath
+    libraries/Angelscript/sdk/add_on/datetime
+    libraries/Angelscript/sdk/add_on/scriptdictionary
+    libraries/Angelscript/sdk/add_on/scriptfile
 )
+
+set(ANGELSCRIPT_LIBRARY_NAME angelscript)
+if(APPLE)
+    set(ANGELSCRIPT_LIBRARY_NAME Angelscript)
+endif()
 
 set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
 
@@ -78,6 +95,18 @@ set(
     libraries/imgui/misc/cpp/imgui_stdlib.cpp
 )
 
+set(
+    ANGELSCRIPT_ADD_ON_SOURCES
+
+    libraries/Angelscript/sdk/add_on/scriptbuilder/scriptbuilder.cpp
+	libraries/Angelscript/sdk/add_on/scriptstdstring/scriptstdstring.cpp
+	libraries/Angelscript/sdk/add_on/scriptarray/scriptarray.cpp
+	libraries/Angelscript/sdk/add_on/scriptmath/scriptmath.cpp
+	libraries/Angelscript/sdk/add_on/datetime/datetime.cpp
+	libraries/Angelscript/sdk/add_on/scriptdictionary/scriptdictionary.cpp
+	libraries/Angelscript/sdk/add_on/scriptfile/scriptfile.cpp
+)
+
 add_library(
     Engine
 
@@ -85,10 +114,21 @@ add_library(
     ${IMGUI_SOURCES}
     ${IMGUI_BACKEND_SOURCES}
     ${IMGUIZMO_SOURCES}
+    ${ANGELSCRIPT_ADD_ON_SOURCES}
 )
 
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})
-target_link_libraries(Engine assimp LLGL Threads::Threads stdc++fs glm glfw Jolt)
+target_link_libraries(
+    Engine
+    assimp
+    LLGL
+    Threads::Threads
+    stdc++fs
+    glm
+    glfw
+    Jolt
+    ${ANGELSCRIPT_LIBRARY_NAME}
+)
 
 add_executable(
     LLGLTest
@@ -108,3 +148,4 @@ add_subdirectory(libraries/glm)
 add_subdirectory(libraries/LLGL)
 add_subdirectory(libraries/assimp)
 add_subdirectory(libraries/JoltPhysics/Build)
+add_subdirectory(libraries/Angelscript/sdk/angelscript/projects/cmake)

@@ -13,7 +13,8 @@ struct Asset
         Texture,
         Material,
         Model,
-        Environment
+        Environment,
+        Script
     };
 
     Asset(Type type) : type(type) {}

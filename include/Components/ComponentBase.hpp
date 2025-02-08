@@ -9,6 +9,7 @@
 #include <TextureAsset.hpp>
 #include <MaterialAsset.hpp>
 #include <ModelAsset.hpp>
+#include <ScriptAsset.hpp>
 
 #include <entt/entt.hpp>
 

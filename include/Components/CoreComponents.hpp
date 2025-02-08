@@ -89,6 +89,8 @@ struct ScriptComponent : public ComponentBase
 {
     ScriptComponent() : ComponentBase("ScriptComponent") {}
 
+    ScriptAssetPtr script;
+
     std::function<void()> start;
     std::function<void(Entity self, float)> update;
 };

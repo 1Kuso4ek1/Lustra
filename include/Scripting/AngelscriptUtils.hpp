@@ -12,6 +12,12 @@
 
 #include <LLGL/Log.h>
 
+namespace dev
+{
+
+namespace as
+{
+
 inline void MessageCallback(const asSMessageInfo *msg, void *param)
 {
     switch(msg->type)
@@ -40,4 +46,28 @@ inline void MessageCallback(const asSMessageInfo *msg, void *param)
         );
         break;
     }
+}
+
+template<class T>
+inline void MakeType(T* memory) { new(memory) T(); }
+
+template<class T>
+inline void CopyType(const T& other, T* memory) { new(memory) T(other); }
+
+template<class T>
+inline void DestroyType(T* memory) { memory->~T(); }
+
+template<class T>
+inline T& AssignType(const T& src, T* dst) { return *dst = src; }
+
+template<class T>
+inline T* TypeFactory() { return new T(); }
+
+inline void Write(const std::string& data)
+{
+    LLGL::Log::Printf("%s", data.c_str());
+}
+
+}
+
 }

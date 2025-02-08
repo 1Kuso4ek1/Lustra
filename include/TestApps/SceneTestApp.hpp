@@ -14,9 +14,12 @@
 #include <ImGuiManager.hpp>
 #include <ComponentsUI.hpp>
 
+#include <ScriptManager.hpp>
+
 #include <TextureLoader.hpp>
 #include <MaterialLoader.hpp>
 #include <ModelLoader.hpp>
+#include <ScriptLoader.hpp>
 #include <AssetManager.hpp>
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>

@@ -1,5 +1,6 @@
 #include <Scene.hpp>
 #include <Entity.hpp>
+#include <ScriptManager.hpp>
 
 namespace dev
 {
@@ -24,6 +25,9 @@ void Scene::Start()
 
     registry.view<ScriptComponent>().each([](auto& script)
     {
+        if(script.script)
+            ScriptManager::Get().ExecuteFunction(script.script, "void Start()");
+
         if(script.start)
             script.start();
     });

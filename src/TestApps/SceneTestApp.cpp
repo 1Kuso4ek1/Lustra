@@ -84,6 +84,7 @@ void SceneTestApp::SetupAssetManager()
     dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
     dev::AssetManager::Get().AddLoader<dev::MaterialAsset, dev::MaterialLoader>("materials");
     dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
+    dev::AssetManager::Get().AddLoader<dev::ScriptAsset, dev::ScriptLoader>("scripts");
 }
 
 // TODO: Make ShaderAsset
@@ -142,15 +143,13 @@ void SceneTestApp::CreateRifleEntity()
     rifle.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true);
     rifle.AddComponent<dev::MeshRendererComponent>().materials = { ak47Wood, ak47Metal };
     rifle.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
-    
-    auto& script = rifle.AddComponent<dev::ScriptComponent>();
 
-    script.start = []() {};
-    script.update = [](dev::Entity entity, float deltaTime)
-    {
-        if(entity.HasComponent<dev::TransformComponent>() && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Q))
-            entity.GetComponent<dev::TransformComponent>().rotation.y += 10.0f * deltaTime;
-    };
+    auto& component = rifle.AddComponent<dev::ScriptComponent>();
+    component.script = dev::AssetManager::Get().Load<dev::ScriptAsset>("test.as", true);
+
+    dev::ScriptManager::Get().AddScript(component.script);
+
+    dev::ScriptManager::Get().Build();
 }
 
 void SceneTestApp::CreateCameraEntity()
@@ -167,7 +166,6 @@ void SceneTestApp::CreateCameraEntity()
 
     auto& cameraScript = camera.AddComponent<dev::ScriptComponent>();
 
-    cameraScript.start = []() {};
     cameraScript.update = [&](dev::Entity entity, float deltaTime)
     {
         static auto lerp = [](float a, float b, float t)

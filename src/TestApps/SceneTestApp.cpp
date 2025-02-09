@@ -61,7 +61,11 @@ void SceneTestApp::Run()
         
         dev::Multithreading::Get().Update();
 
-        scene.Update(deltaTimeTimer.GetElapsedSeconds());
+        if(playing && !paused)
+            scene.Update(deltaTimeTimer.GetElapsedSeconds());
+        else
+            camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds());
+
         deltaTimeTimer.Reset();
 
         Draw();
@@ -114,12 +118,19 @@ void SceneTestApp::LoadTextures()
     textureIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/texture.png", true);
     materialIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/material.png", true);
     modelIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/model.png", true);
+    scriptIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/script.png", true);
+
+    playIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/play.png", true);
+    pauseIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/pause.png", true);
+    stopIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/stop.png", true);
+    buildIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/build.png", true);
 
     assetIcons = 
     {
         { dev::Asset::Type::Texture, textureIcon },
         { dev::Asset::Type::Material, materialIcon },
         { dev::Asset::Type::Model, modelIcon },
+        { dev::Asset::Type::Script, scriptIcon },
         { dev::Asset::Type::Unknown, fileIcon }
     };
 }
@@ -143,13 +154,7 @@ void SceneTestApp::CreateRifleEntity()
     rifle.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true);
     rifle.AddComponent<dev::MeshRendererComponent>().materials = { ak47Wood, ak47Metal };
     rifle.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
-
-    auto& component = rifle.AddComponent<dev::ScriptComponent>();
-    component.script = dev::AssetManager::Get().Load<dev::ScriptAsset>("test.as", true);
-
-    dev::ScriptManager::Get().AddScript(component.script);
-
-    dev::ScriptManager::Get().Build();
+    rifle.AddComponent<dev::ScriptComponent>();
 }
 
 void SceneTestApp::CreateCameraEntity()
@@ -168,11 +173,6 @@ void SceneTestApp::CreateCameraEntity()
 
     cameraScript.update = [&](dev::Entity entity, float deltaTime)
     {
-        static auto lerp = [](float a, float b, float t)
-        {
-            return a + t * (b - a);
-        };
-
         static auto& transform = entity.GetComponent<dev::TransformComponent>();
 
         static float speed = 0.0f;
@@ -200,11 +200,11 @@ void SceneTestApp::CreateCameraEntity()
 
             if(glm::length(input) > 0.1f)
             {
-                speed = lerp(speed, 3.0f, lerpSpeed);
+                speed = glm::mix(speed, 3.0f, lerpSpeed);
                 movement = input;
             }
             else
-                speed = lerp(speed, 0.0f, lerpSpeed);
+                speed = glm::mix(speed, 0.0f, lerpSpeed);
 
             if(speed > 0.0f)
                 transform.position += glm::normalize(movement) * deltaTime * speed;
@@ -349,6 +349,7 @@ void SceneTestApp::DrawImGui()
     DrawSceneTree();
     DrawPropertiesWindow();
     DrawImGuizmoControls();
+    DrawExecutionControl();
     DrawAssetBrowser();
 
     if(selectedAsset)
@@ -401,6 +402,7 @@ void SceneTestApp::DrawPropertiesWindow()
             dev::MeshRendererComponent,
             dev::CameraComponent,
             dev::LightComponent,
+            dev::ScriptComponent,
             dev::TonemapComponent,
             dev::BloomComponent,
             dev::GTAOComponent,
@@ -504,6 +506,75 @@ void SceneTestApp::DrawImGuizmo()
     }
     else
         ImGuizmo::Enable(false);
+}
+
+void SceneTestApp::DrawExecutionControl()
+{
+    ImGui::Begin("Execution Control");
+
+    if(playing || paused)
+    {
+        ImGui::BeginDisabled();
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+    }
+
+    if(ImGui::ImageButton("##Play", playIcon->nativeHandle, { 20, 20 }))
+    {
+        // Save scene state
+        if(!paused)
+            scene.Start();
+
+        playing = true;
+        paused = false;
+    }
+    else if(playing || paused)
+    {
+        ImGui::PopStyleVar();
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+
+    if(!playing || paused)
+    {
+        ImGui::BeginDisabled();
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+    }
+
+    if(ImGui::ImageButton("##Pause", pauseIcon->nativeHandle, { 20, 20 }))
+        paused = false;
+    else if(!playing || paused)
+    {
+        ImGui::PopStyleVar();
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+
+    if(!playing && !paused)
+    {
+        ImGui::BeginDisabled();
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+    }
+    
+    if(ImGui::ImageButton("##Stop", stopIcon->nativeHandle, { 20, 20 }))
+    {
+        playing = false;
+        paused = false;
+        // Restore scene state
+    }
+    else if(!playing && !paused)
+    {
+        ImGui::PopStyleVar();
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+
+    if(ImGui::ImageButton("##Build", buildIcon->nativeHandle, { 20, 20 }))
+        dev::ScriptManager::Get().Build();
+
+    ImGui::End();
 }
 
 void SceneTestApp::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size)
@@ -619,7 +690,7 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
             {
                 dev::TextureAssetPtr* payload = &texture;
                 
-                ImGui::SetDragDropPayload("TEXTURE", payload, 8);    
+                ImGui::SetDragDropPayload("TEXTURE", payload, 8);
                 ImGui::Image(texture->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Texture: %s", entry.filename().string().c_str());
 
@@ -639,7 +710,7 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
             {
                 dev::MaterialAssetPtr* payload = &material;
                 
-                ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
+                ImGui::SetDragDropPayload("MATERIAL", payload, 8);
                 DrawMaterialPreview(material, { 64.0f, 64.0f });
                 ImGui::Text("Material: %s", entry.filename().string().c_str());
 
@@ -659,9 +730,29 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
             {
                 dev::ModelAssetPtr* payload = &model;
                 
-                ImGui::SetDragDropPayload("MODEL", payload, 8);    
+                ImGui::SetDragDropPayload("MODEL", payload, 8);
                 ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Model: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
+        case dev::Asset::Type::Script:
+        {
+            auto script = std::dynamic_pointer_cast<dev::ScriptAsset>(asset);
+            
+            ImGui::ImageButton("##Asset", scriptIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                dev::ScriptAssetPtr* payload = &script;
+                
+                ImGui::SetDragDropPayload("SCRIPT", payload, 8);
+                ImGui::Image(scriptIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Script: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
             }
@@ -694,6 +785,10 @@ void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
 
             case dev::Asset::Type::Model:
                 dev::AssetManager::Get().Load<dev::ModelAsset>(entry);
+                break;
+
+            case dev::Asset::Type::Script:
+                dev::AssetManager::Get().Load<dev::ScriptAsset>(entry);
                 break;
 
             default:

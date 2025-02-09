@@ -75,6 +75,46 @@ inline Camera* GetCamera(CameraComponent* comp)
     return &(comp->camera);
 }
 
+inline void MakeExtent2D(uint32_t width, uint32_t height, LLGL::Extent2D* extent)
+{
+    new(extent) LLGL::Extent2D(width, height);
+}
+
+inline void MakeVec2(float x, float y, glm::vec2* vec)
+{
+    new(vec) glm::vec2(x, y);
+}
+
+inline void MakeVec2Scalar(float scalar, glm::vec2* vec)
+{
+    new(vec) glm::vec2(scalar);
+}
+
+inline void MakeVec3(float x, float y, float z, glm::vec3* vec)
+{
+    new(vec) glm::vec3(x, y, z);
+}
+
+inline void MakeVec3Scalar(float scalar, glm::vec3* vec)
+{
+    new(vec) glm::vec3(scalar);
+}
+
+inline void MakeVec4(float x, float y, float z, float w, glm::vec4* vec)
+{
+    new(vec) glm::vec4(x, y, z, w);
+}
+
+inline void MakeVec4Scalar(float scalar, glm::vec4* vec)
+{
+    new(vec) glm::vec4(scalar);
+}
+
+inline void MakeQuat(float x, float y, float z, float w, glm::quat* quat)
+{
+    new(quat) glm::quat(x, y, z, w);
+}
+
 }
 
 }

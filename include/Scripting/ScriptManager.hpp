@@ -22,6 +22,8 @@ public:
     void AddScript(ScriptAssetPtr script);
     void RemoveScript(ScriptAssetPtr script);
 
+    std::unordered_map<std::string_view, void*> GetGlobalVariables(ScriptAssetPtr script);
+
 public:
     void AddModule(std::string_view name);
 

@@ -1,10 +1,15 @@
-void Start(dev::Entity@ entity)
+void Start(Entity entity)
 {
     Log::Write(format("{}\n", entity.GetNameComponent().name));
 }
 
-void Update(dev::Entity@ entity, float deltaTime)
+void Update(Entity entity, float deltaTime)
 {
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::V))
+    if(Keyboard::IsKeyPressed(Keyboard::Key::V))
+    {
         Log::Write(format("deltaTime: {}\n", deltaTime));
+        Log::Write(format("{}\n", entity.GetNameComponent().name));
+    }
+
+    entity.GetTransformComponent().rotation.y += 5.0f * deltaTime;
 }

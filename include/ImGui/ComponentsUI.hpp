@@ -1,5 +1,7 @@
 #pragma once
 #include <Components.hpp>
+#include <ScriptManager.hpp>
+#include <Entity.hpp>
 
 namespace dev
 {
@@ -120,6 +122,94 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
 
     if(ImGui::Button("Setup Shadow Map"))
         component.SetupShadowMap(component.resolution);
+}
+
+inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
+{
+    ImGui::Button(
+        component.script ? component.script->path.filename().string().c_str() : "(Empty)##Script",
+        ImVec2(128.0f, 128.0f)
+    );
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("SCRIPT");
+
+        if(payload)
+        {
+            if(component.script)
+                ScriptManager::Get().RemoveScript(component.script);
+
+            component.script = *(dev::ScriptAssetPtr*)payload->Data;
+
+            ScriptManager::Get().AddScript(component.script);
+
+            ScriptManager::Get().Build();
+        }
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(component.script)
+    {
+        static std::vector<std::string> input;
+
+        auto variables = ScriptManager::Get().GetGlobalVariables(component.script);
+
+        input.resize(variables.size());
+
+        if(ImGui::BeginTable("MyTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+        {
+            ImGui::TableSetupColumn("Variable");
+            ImGui::TableSetupColumn("Value");
+            ImGui::TableHeadersRow();
+
+            ImGui::TableNextRow();
+
+            int id = 0;
+            for(auto& i : variables)
+            {
+                ImGui::PushID(id);
+
+                ImGui::TableNextColumn();
+                ImGui::Text("%s", i.first.data());
+
+                ImGui::TableNextColumn();
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::InputText("##input", &input[id]);
+
+                if(!input[id].empty() && input[id] != "(entity)")
+                {
+                    auto type = i.first.substr(0, i.first.find(' '));
+                    if(type == "int") *(int32_t*)(i.second) = std::stoi(input[id]);
+                    if(type == "int8") *(int8_t*)(i.second) = std::stoi(input[id]);
+                    if(type == "int16") *(int16_t*)(i.second) = std::stoi(input[id]);
+                    if(type == "int64") *(int64_t*)(i.second) = std::stoi(input[id]);
+                    if(type == "uint") *(uint32_t*)(i.second) = std::stoul(input[id]);
+                    if(type == "uint8") *(uint8_t*)(i.second) = std::stoul(input[id]);
+                    if(type == "uint16") *(uint16_t*)(i.second) = std::stoul(input[id]);
+                    if(type == "uint64") *(uint64_t*)(i.second) = std::stoul(input[id]);
+                    if(type == "float") *(float*)(i.second) = std::stof(input[id]);
+                    if(type == "double") *(double*)(i.second) = std::stod(input[id]);
+                    if(type == "bool") *(bool*)(i.second) = input[id] == "true" ? true : false;
+                    if(type == "string") *(std::string*)(i.second) = input[id];
+                }
+
+                ImGui::PopID();
+
+                ImGui::TableNextRow();
+
+                id++;
+            }
+
+            ImGui::EndTable();
+        }
+    }
+
+    ImGui::Separator();
+
+    if(ImGui::Button("Build"))
+        ScriptManager::Get().Build();
 }
 
 inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)

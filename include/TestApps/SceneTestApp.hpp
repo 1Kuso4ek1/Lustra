@@ -57,6 +57,7 @@ private:
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();
     void DrawImGuizmo();
+    void DrawExecutionControl();
 
     void DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size);
 
@@ -76,15 +77,21 @@ private:
     void OnEvent(dev::Event& event) override;
 
 private:
+    bool playing = false, paused = false;
+
+private:
     ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
     float snap[3] = { 1.0f, 1.0f, 1.0f };
 
+private:
     bool canMoveCamera = false;
 
+private:
     dev::Entity rifle, camera, postProcessing, light, light1, sky, selectedEntity;
 
     std::vector<dev::Entity> list;
 
+private:
     std::shared_ptr<dev::DeferredRenderer> deferredRenderer;
 
     dev::Scene scene;
@@ -93,6 +100,7 @@ private:
 
     dev::Timer deltaTimeTimer, keyboardTimer;
 
+private:
     LLGL::PipelineState* pipeline{};
 
     LLGL::Shader* vertexShader{};
@@ -103,9 +111,14 @@ private:
     LLGL::Texture* viewportAttachment{};
     LLGL::RenderTarget* viewportRenderTarget{};
 
+private:
     dev::AssetPtr selectedAsset;
 
-    dev::TextureAssetPtr texture, metal, wood, fileIcon, folderIcon, textureIcon, materialIcon, modelIcon;
+    dev::TextureAssetPtr texture, metal, wood,
+                         fileIcon, folderIcon, textureIcon,
+                         materialIcon, modelIcon, scriptIcon,
+                         playIcon, pauseIcon, stopIcon,
+                         buildIcon;
     dev::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<dev::Asset::Type, dev::TextureAssetPtr> assetIcons;

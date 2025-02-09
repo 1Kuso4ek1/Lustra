@@ -29,6 +29,7 @@ public:
     void RemoveEntity(const Entity& entity);
 
     Entity CreateEntity();
+    Entity GetEntity(entt::id_type id);
 
     entt::registry& GetRegistry();
 

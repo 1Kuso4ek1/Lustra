@@ -54,10 +54,10 @@ public:
         return entity;
     }
 
-    private:
-        entt::entity entity{ entt::null };
+private:
+    entt::entity entity{ entt::null };
 
-        Scene* scene{};
-    };
+    Scene* scene{};
+};
 
 }

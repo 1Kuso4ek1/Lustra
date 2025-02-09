@@ -23,11 +23,10 @@ ScriptManager::ScriptManager()
     RegisterScriptDateTime(engine);
     RegisterScriptFile(engine);
 
+    RegisterExtent2D();
+
     SetDefaultNamespace("Log");
     RegisterLog();
-
-    SetDefaultNamespace("");
-    RegisterExtent2D();
 
     SetDefaultNamespace("glm");
     RegisterVec2();
@@ -35,13 +34,13 @@ ScriptManager::ScriptManager()
     RegisterVec4();
     RegisterQuat();
 
-    SetDefaultNamespace("dev::Keyboard");
+    SetDefaultNamespace("Keyboard");
     RegisterKeyboard();
 
-    SetDefaultNamespace("dev::Mouse");
+    SetDefaultNamespace("Mouse");
     RegisterMouse();
 
-    SetDefaultNamespace("dev");
+    SetDefaultNamespace("");
     RegisterCamera();
 
     RegisterNameComponent();
@@ -49,12 +48,12 @@ ScriptManager::ScriptManager()
     RegisterCameraComponent();
     RegisterLightComponent();
     RegisterEntity();
-
-    SetDefaultNamespace("");
 }
 
 ScriptManager::~ScriptManager()
 {
+    DiscardModules();
+
     context->Release();
     engine->Release();
 }
@@ -115,6 +114,22 @@ void ScriptManager::RemoveScript(ScriptAssetPtr script)
 
         scripts.erase(it);
     }
+}
+
+std::unordered_map<std::string_view, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script)
+{
+    std::unordered_map<std::string_view, void*> variables;
+
+    auto module = engine->GetModule(script->path.stem().string().c_str());
+    auto count = module->GetGlobalVarCount();
+    
+    for(int i = 0; i < count; i++)
+    {
+        auto var = module->GetGlobalVarDeclaration(i);
+        variables[var] = module->GetAddressOfGlobalVar(i);
+    }
+    
+    return variables;
 }
 
 void ScriptManager::AddModule(std::string_view name)
@@ -214,6 +229,9 @@ void ScriptManager::RegisterVec2()
             { "float y", asOFFSET(glm::vec2, y) }
         }
     );
+
+    AddTypeConstructor("vec2", "void f(float)", WRAP_OBJ_LAST(as::MakeVec2Scalar));
+    AddTypeConstructor("vec2", "void f(float, float)", WRAP_OBJ_LAST(as::MakeVec2));
 }
 
 void ScriptManager::RegisterVec3()
@@ -225,6 +243,9 @@ void ScriptManager::RegisterVec3()
             { "float z", asOFFSET(glm::vec3, z) }
         }
     );
+
+    AddTypeConstructor("vec3", "void f(float)", WRAP_OBJ_LAST(as::MakeVec3Scalar));
+    AddTypeConstructor("vec3", "void f(float, float, float)", WRAP_OBJ_LAST(as::MakeVec3));
 }
 
 void ScriptManager::RegisterVec4()
@@ -237,6 +258,9 @@ void ScriptManager::RegisterVec4()
             { "float w", asOFFSET(glm::vec4, w) }
         }
     );
+
+    AddTypeConstructor("vec4", "void f(float)", WRAP_OBJ_LAST(as::MakeVec4Scalar));
+    AddTypeConstructor("vec4", "void f(float, float, float, float)", WRAP_OBJ_LAST(as::MakeVec4));
 }
 
 void ScriptManager::RegisterQuat()
@@ -249,6 +273,8 @@ void ScriptManager::RegisterQuat()
             { "float w", asOFFSET(glm::quat, w) }
         }
     );
+
+    AddTypeConstructor("quat", "void f(float, float, float, float)", WRAP_OBJ_LAST(as::MakeQuat));
 }
 
 void ScriptManager::RegisterExtent2D()
@@ -259,6 +285,8 @@ void ScriptManager::RegisterExtent2D()
             { "uint32 height", asOFFSET(LLGL::Extent2D, height) }
         }
     );
+
+    AddTypeConstructor("Extent2D", "void f(uint32, uint32)", WRAP_OBJ_LAST(as::MakeExtent2D));
 }
 
 void ScriptManager::RegisterCamera()
@@ -428,6 +456,7 @@ void ScriptManager::RegisterMouse()
     AddFunction("void SetPosition(const glm::vec2& in)", WRAP_FN(Mouse::SetPosition));
     AddFunction("bool IsButtonPressed(int)", WRAP_FN(Mouse::IsButtonPressed));
     AddFunction("bool IsButtonReleased(int)", WRAP_FN(Mouse::IsButtonReleased));
+    AddFunction("void SetCursorVisible(bool = true)", WRAP_FN(Mouse::SetCursorVisible));
 
     AddEnumValues("Button",
         {
@@ -492,13 +521,14 @@ void ScriptManager::RegisterLightComponent()
 void ScriptManager::RegisterEntity()
 {
     // It will be updated as soon as the Angelscript developer will write some docs on function templates
-    AddType("Entity", sizeof(Entity),
+    AddValueType("Entity", sizeof(Entity), asGetTypeTraits<Entity>() | asOBJ_POD,
         {
             { "NameComponent@ GetNameComponent()", WRAP_MFN(Entity, GetComponent<NameComponent>) },
             { "TransformComponent@ GetTransformComponent()", WRAP_MFN(Entity, GetComponent<TransformComponent>) },
             { "LightComponent@ GetLightComponent()", WRAP_MFN(Entity, GetComponent<LightComponent>) },
             { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) }
-        }, {}
+        },
+        {}
     );
 }
 

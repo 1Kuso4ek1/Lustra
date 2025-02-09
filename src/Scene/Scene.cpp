@@ -31,10 +31,10 @@ void Scene::Start()
 
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Start(dev::Entity@)",
+                "void Start(Entity)",
                 [&](auto context)
                 {
-                    context->SetArgAddress(0, (void*)(&ent));
+                    context->SetArgObject(0, (void*)(&ent));
                 }
             );
         }
@@ -54,10 +54,10 @@ void Scene::Update(float deltaTime)
 
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Update(dev::Entity@, float)",
+                "void Update(Entity, float)",
                 [&](auto context)
                 {
-                    context->SetArgAddress(0, (void*)(&ent));
+                    context->SetArgObject(0, (void*)(&ent));
                     context->SetArgFloat(1, deltaTime);
                 }
             );
@@ -113,6 +113,11 @@ Entity Scene::CreateEntity()
     Entity entity{ registry.create(), this };
 
     return entity;
+}
+
+Entity Scene::GetEntity(entt::id_type id)
+{
+    return { entt::entity(id), this };
 }
 
 entt::registry& Scene::GetRegistry()

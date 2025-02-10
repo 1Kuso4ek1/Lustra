@@ -65,17 +65,7 @@ void SceneTestApp::Run()
         if(playing && !paused)
             scene.Update(deltaTimeTimer.GetElapsedSeconds());
         else
-        {
-            dev::ScriptManager::Get().ExecuteFunction(
-                camera.GetComponent<dev::ScriptComponent>().script,
-                "void Update(Entity, float)",
-                [&](auto context)
-                {
-                    context->SetArgObject(0, (void*)(&camera));
-                    context->SetArgFloat(1, deltaTimeTimer.GetElapsedSeconds());
-                }
-            );
-        }
+            camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds());
 
         deltaTimeTimer.Reset();
 
@@ -180,11 +170,66 @@ void SceneTestApp::CreateCameraEntity()
     cameraComponent.camera.SetViewport(window->GetContentSize());
     cameraComponent.camera.SetPerspective();
 
-    auto& script = camera.AddComponent<dev::ScriptComponent>();
+    auto& cameraScript = camera.AddComponent<dev::ScriptComponent>();
+
+    // Just a reminder that this is possible ;)
+    /* auto& script = camera.AddComponent<dev::ScriptComponent>();
     script.script = dev::AssetManager::Get().Load<dev::ScriptAsset>("camera.as", true);
 
     dev::ScriptManager::Get().AddScript(script.script);
-    dev::ScriptManager::Get().Build();
+    dev::ScriptManager::Get().Build(); */
+
+    cameraScript.update = [&](dev::Entity entity, float deltaTime)
+    {
+        static auto& transform = entity.GetComponent<dev::TransformComponent>();
+
+        static float speed = 0.0f;
+
+        static glm::vec3 movement = glm::vec3(0.0f);
+
+        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right) && canMoveCamera)
+        {
+            dev::Mouse::SetCursorVisible(false);
+
+            auto rotation = glm::quat(glm::radians(transform.rotation));
+
+            glm::vec3 input = glm::vec3(0.0f);
+
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::W))
+                input -= rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S))
+                input += rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::A))
+                input -= rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
+                input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+
+            float lerpSpeed = glm::clamp(deltaTime * 5.0f, 0.0f, 1.0f);
+
+            if(glm::length(input) > 0.1f)
+            {
+                speed = glm::mix(speed, 3.0f, lerpSpeed);
+                movement = input;
+            }
+            else
+                speed = glm::mix(speed, 0.0f, lerpSpeed);
+
+            if(speed > 0.0f)
+                transform.position += glm::normalize(movement) * deltaTime * speed;
+
+            glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
+            glm::vec2 delta = center - dev::Mouse::GetPosition();
+
+            transform.rotation.x += delta.y / 100.0f;
+            transform.rotation.y += delta.x / 100.0f;
+
+            transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
+
+            dev::Mouse::SetPosition(center);
+        }
+        else
+            dev::Mouse::SetCursorVisible();
+    };
 }
 
 void SceneTestApp::CreatePostProcessingEntity()

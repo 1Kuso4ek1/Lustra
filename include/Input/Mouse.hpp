@@ -25,7 +25,7 @@ namespace Mouse
 
     void SetCursorVisible(bool visible = true);
 
-    void SetPosition(glm::vec2 pos);
+    void SetPosition(const glm::vec2& pos);
 
     bool IsButtonPressed(Button button);
     bool IsButtonReleased(Button button);

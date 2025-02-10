@@ -1,4 +1,5 @@
 #include <SceneTestApp.hpp>
+#include <fstream>
 
 SceneTestApp::SceneTestApp()
 {
@@ -64,7 +65,17 @@ void SceneTestApp::Run()
         if(playing && !paused)
             scene.Update(deltaTimeTimer.GetElapsedSeconds());
         else
-            camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds());
+        {
+            dev::ScriptManager::Get().ExecuteFunction(
+                camera.GetComponent<dev::ScriptComponent>().script,
+                "void Update(Entity, float)",
+                [&](auto context)
+                {
+                    context->SetArgObject(0, (void*)(&camera));
+                    context->SetArgFloat(1, deltaTimeTimer.GetElapsedSeconds());
+                }
+            );
+        }
 
         deltaTimeTimer.Reset();
 
@@ -169,59 +180,11 @@ void SceneTestApp::CreateCameraEntity()
     cameraComponent.camera.SetViewport(window->GetContentSize());
     cameraComponent.camera.SetPerspective();
 
-    auto& cameraScript = camera.AddComponent<dev::ScriptComponent>();
+    auto& script = camera.AddComponent<dev::ScriptComponent>();
+    script.script = dev::AssetManager::Get().Load<dev::ScriptAsset>("camera.as", true);
 
-    cameraScript.update = [&](dev::Entity entity, float deltaTime)
-    {
-        static auto& transform = entity.GetComponent<dev::TransformComponent>();
-
-        static float speed = 0.0f;
-
-        static glm::vec3 movement = glm::vec3(0.0f);
-
-        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right) && canMoveCamera)
-        {
-            dev::Mouse::SetCursorVisible(false);
-
-            auto rotation = glm::quat(glm::radians(transform.rotation));
-
-            glm::vec3 input = glm::vec3(0.0f);
-
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::W))
-                input -= rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S))
-                input += rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::A))
-                input -= rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
-                input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-
-            float lerpSpeed = glm::clamp(deltaTime * 5.0f, 0.0f, 1.0f);
-
-            if(glm::length(input) > 0.1f)
-            {
-                speed = glm::mix(speed, 3.0f, lerpSpeed);
-                movement = input;
-            }
-            else
-                speed = glm::mix(speed, 0.0f, lerpSpeed);
-
-            if(speed > 0.0f)
-                transform.position += glm::normalize(movement) * deltaTime * speed;
-
-            glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
-            glm::vec2 delta = center - dev::Mouse::GetPosition();
-
-            transform.rotation.x += delta.y / 100.0f;
-            transform.rotation.y += delta.x / 100.0f;
-
-            transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
-
-            dev::Mouse::SetPosition(center);
-        }
-        else
-            dev::Mouse::SetCursorVisible();
-    };
+    dev::ScriptManager::Get().AddScript(script.script);
+    dev::ScriptManager::Get().Build();
 }
 
 void SceneTestApp::CreatePostProcessingEntity()
@@ -799,21 +762,34 @@ void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
 
 void SceneTestApp::DrawCreateAssetMenu(const std::filesystem::path& currentDirectory)
 {
-    static std::string newMaterialName = "material";
-    static int uniqueId = 0;
-
-    static bool active = false;
+    static bool materialActive = false;
+    static bool scriptActive = false;
 
     if(ImGui::BeginPopupContextWindow("Create asset"))
     {
-        if(ImGui::MenuItem("Create material"))
-            active = true;
+        materialActive = ImGui::MenuItem("Create material");
+        scriptActive = ImGui::MenuItem("Create script");
 
         ImGui::EndPopup();
     }
 
-    if(active)
+    if(materialActive)
+    {
         ImGui::OpenPopup("Create material");
+        materialActive = DrawCreateMaterialMenu(currentDirectory);
+    }
+    else if(scriptActive)
+    {
+        ImGui::OpenPopup("Create script");
+        scriptActive = DrawCreateScriptMenu(currentDirectory);
+    }
+}
+
+bool SceneTestApp::DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory)
+{
+    static std::string newMaterialName = "material";
+    static int uniqueId = 0;
+    bool active = true;
 
     if(ImGui::BeginPopupModal("Create material", &active, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -841,6 +817,57 @@ void SceneTestApp::DrawCreateAssetMenu(const std::filesystem::path& currentDirec
         
         ImGui::EndPopup();
     }
+
+    return active;
+}
+
+bool SceneTestApp::DrawCreateScriptMenu(const std::filesystem::path& currentDirectory)
+{
+    static std::string newScriptName = "script.as";
+    static int uniqueId = 0;
+    bool active = true;
+
+    if(ImGui::BeginPopupModal("Create script", &active, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::InputText("Script name", &newScriptName);
+
+        if(ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            std::ofstream scriptFile(currentDirectory / newScriptName);
+            scriptFile << 
+                "void Start(Entity entity)\n"
+                "{\n"
+                "    \n"
+                "}\n\n"
+                "void Update(Entity entity, float deltaTime)\n"
+                "{\n"
+                "    \n"
+                "}\n";
+            scriptFile.close();
+            system(std::string("code " + currentDirectory.string() + "/" + newScriptName).c_str());
+
+            auto newScript = dev::AssetManager::Get().Load<dev::ScriptAsset>(currentDirectory / newScriptName);
+            
+            newScriptName = "script" + std::to_string(uniqueId++) + ".as";
+
+            ImGui::CloseCurrentPopup();
+
+            active = false;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Cancel", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+
+            active = false;
+        }
+        
+        ImGui::EndPopup();
+    }
+
+    return active;
 }
 
 void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)

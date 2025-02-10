@@ -1,6 +1,16 @@
 void Start(Entity entity)
 {
     Log::Write(format("{}\n", entity.GetNameComponent().name));
+
+    glm::vec2 vec(1.0f);
+
+    Log::Write(format("glm::vec2({}, {})\n", vec.x, vec.y));
+    
+    glm::vec2 anotherVec(2.0f);
+    glm::vec2 res = vec + anotherVec;
+    Log::Write(format("glm::vec2({}, {})\n", res.x, res.y));
+    res += vec;
+    Log::Write(format("glm::vec2({}, {})\n", res.x, res.y));
 }
 
 void Update(Entity entity, float deltaTime)
@@ -11,5 +21,5 @@ void Update(Entity entity, float deltaTime)
         Log::Write(format("{}\n", entity.GetNameComponent().name));
     }
 
-    entity.GetTransformComponent().rotation.y += 5.0f * deltaTime;
+    entity.GetTransformComponent().rotation.y += 50.0f * deltaTime;
 }

@@ -115,6 +115,101 @@ inline void MakeQuat(float x, float y, float z, float w, glm::quat* quat)
     new(quat) glm::quat(x, y, z, w);
 }
 
+inline void MakeQuatFromEuler(const glm::vec3& euler, glm::quat* quat)
+{
+    new(quat) glm::quat(euler);
+}
+
+inline glm::vec2 Vec2AddAssign(const glm::vec2& src, glm::vec2& dst)
+{
+    return dst += src;
+}
+
+inline glm::vec2 Vec2SubAssign(const glm::vec2& src, glm::vec2& dst)
+{
+    return dst -= src;
+}
+
+inline glm::vec2 Vec2MulAssign(const glm::vec2& src, glm::vec2& dst)
+{
+    return dst *= src;
+}
+
+inline glm::vec2 Vec2DivAssign(const glm::vec2& src, glm::vec2& dst)
+{
+    return dst /= src;
+}
+
+inline glm::vec2 Vec2MulAssignScalar(float src, glm::vec2* dst)
+{
+    return *dst *= src;
+}
+
+inline glm::vec2 Vec2DivAssignScalar(float src, glm::vec2* dst)
+{
+    return *dst /= src;
+}
+
+inline glm::vec3 Vec3AddAssign(const glm::vec3& src, glm::vec3* dst)
+{
+    return *dst += src;
+}
+
+inline glm::vec3 Vec3SubAssign(const glm::vec3& src, glm::vec3* dst)
+{
+    return *dst -= src;
+}
+
+inline glm::vec3 Vec3MulAssign(const glm::vec3& src, glm::vec3* dst)
+{
+    return *dst *= src;
+}
+
+inline glm::vec3 Vec3DivAssign(const glm::vec3& src, glm::vec3* dst)
+{
+    return *dst /= src;
+}
+
+inline glm::vec3 Vec3MulAssignScalar(float src, glm::vec3* dst)
+{
+    return *dst *= src;
+}
+
+inline glm::vec3 Vec3DivAssignScalar(float src, glm::vec3* dst)
+{
+    return *dst /= src;
+}
+
+inline glm::vec4 Vec4AddAssign(const glm::vec4& src, glm::vec4* dst)
+{
+    return *dst += src;
+}
+
+inline glm::vec4 Vec4SubAssign(const glm::vec4& src, glm::vec4* dst)
+{
+    return *dst -= src;
+}
+
+inline glm::vec4 Vec4MulAssign(const glm::vec4& src, glm::vec4* dst)
+{
+    return *dst *= src;
+}
+
+inline glm::vec4 Vec4DivAssign(const glm::vec4& src, glm::vec4* dst)
+{
+    return *dst /= src;
+}
+
+inline glm::vec4 Vec4MulAssignScalar(float src, glm::vec4* dst)
+{
+    return *dst *= src;
+}
+
+inline glm::vec4 Vec4DivAssignScalar(float src, glm::vec4* dst)
+{
+    return *dst /= src;
+}
+
 }
 
 }

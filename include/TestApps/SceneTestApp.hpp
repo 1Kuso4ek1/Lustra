@@ -66,6 +66,8 @@ private:
     void DrawUnloadedAsset(const std::filesystem::path& entry);
 
     void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
+    bool DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory);
+    bool DrawCreateScriptMenu(const std::filesystem::path& currentDirectory);
 
     void DrawMaterialEditor(dev::MaterialAssetPtr material);
     void DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent = false);

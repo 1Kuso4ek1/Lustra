@@ -29,10 +29,7 @@ ScriptManager::ScriptManager()
     RegisterLog();
 
     SetDefaultNamespace("glm");
-    RegisterVec2();
-    RegisterVec3();
-    RegisterVec4();
-    RegisterQuat();
+    RegisterGLM();
 
     SetDefaultNamespace("Keyboard");
     RegisterKeyboard();
@@ -116,9 +113,9 @@ void ScriptManager::RemoveScript(ScriptAssetPtr script)
     }
 }
 
-std::unordered_map<std::string_view, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script)
+std::unordered_map<std::string, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script)
 {
-    std::unordered_map<std::string_view, void*> variables;
+    std::unordered_map<std::string, void*> variables;
 
     auto module = engine->GetModule(script->path.stem().string().c_str());
     auto count = module->GetGlobalVarCount();
@@ -223,7 +220,21 @@ void ScriptManager::RegisterLog()
 
 void ScriptManager::RegisterVec2()
 {
-    AddValueType("vec2", sizeof(glm::vec2), asGetTypeTraits<glm::vec2>() | asOBJ_POD, {},
+    AddValueType("vec2", sizeof(glm::vec2), asGetTypeTraits<glm::vec2>() | asOBJ_POD,
+        {
+            { "vec2 opAdd(const vec2& in)", WRAP_OBJ_FIRST_PR(glm::operator+, (const glm::vec2&, const glm::vec2&), glm::vec2) },
+            { "vec2 opSub(const vec2& in)", WRAP_OBJ_FIRST_PR(glm::operator-, (const glm::vec2&, const glm::vec2&), glm::vec2) },
+            { "vec2 opMul(const vec2& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec2&, const glm::vec2&), glm::vec2) },
+            { "vec2 opDiv(const vec2& in)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec2&, const glm::vec2&), glm::vec2) },
+            { "vec2 opMul(float)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec2&, float), glm::vec2) },
+            { "vec2 opDiv(float)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec2&, float), glm::vec2) },
+            { "vec2 opAddAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2AddAssign) },
+            { "vec2 opSubAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2SubAssign) },
+            { "vec2 opMulAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2MulAssign) },
+            { "vec2 opDivAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2DivAssign) },
+            { "vec2 opMulAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2MulAssignScalar) },
+            { "vec2 opDivAssign(const vec2& in)", WRAP_OBJ_LAST(as::Vec2DivAssignScalar) }
+        },
         {
             { "float x", asOFFSET(glm::vec2, x) },
             { "float y", asOFFSET(glm::vec2, y) }
@@ -232,11 +243,29 @@ void ScriptManager::RegisterVec2()
 
     AddTypeConstructor("vec2", "void f(float)", WRAP_OBJ_LAST(as::MakeVec2Scalar));
     AddTypeConstructor("vec2", "void f(float, float)", WRAP_OBJ_LAST(as::MakeVec2));
+
+    AddFunction("float length(const vec2& in)", WRAP_FN_PR(glm::length, (const glm::vec2&), float));
+    AddFunction("vec2 normalize(const vec2& in)", WRAP_FN_PR(glm::normalize, (const glm::vec2&), glm::vec2));
+    AddFunction("float dot(const vec2& in, const vec2& in)", WRAP_FN_PR(glm::dot, (const glm::vec2&, const glm::vec2&), float));
 }
 
 void ScriptManager::RegisterVec3()
 {
-    AddValueType("vec3", sizeof(glm::vec3), asGetTypeTraits<glm::vec3>() | asOBJ_POD, {},
+    AddValueType("vec3", sizeof(glm::vec3), asGetTypeTraits<glm::vec3>() | asOBJ_POD,
+        {
+            { "vec3 opAdd(const vec3& in)", WRAP_OBJ_FIRST_PR(glm::operator+, (const glm::vec3&, const glm::vec3&), glm::vec3) },
+            { "vec3 opSub(const vec3& in)", WRAP_OBJ_FIRST_PR(glm::operator-, (const glm::vec3&, const glm::vec3&), glm::vec3) },
+            { "vec3 opMul(const vec3& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec3&, const glm::vec3&), glm::vec3) },
+            { "vec3 opDiv(const vec3& in)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec3&, const glm::vec3&), glm::vec3) },
+            { "vec3 opMul(float)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec3&, float), glm::vec3) },
+            { "vec3 opDiv(float)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec3&, float), glm::vec3) },
+            { "vec3 opAddAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3AddAssign) },
+            { "vec3 opSubAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3SubAssign) },
+            { "vec3 opMulAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3MulAssign) },
+            { "vec3 opDivAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3DivAssign) },
+            { "vec3 opMulAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3MulAssignScalar) },
+            { "vec3 opDivAssign(const vec3& in)", WRAP_OBJ_LAST(as::Vec3DivAssignScalar) }
+        },
         {
             { "float x", asOFFSET(glm::vec3, x) },
             { "float y", asOFFSET(glm::vec3, y) },
@@ -246,11 +275,32 @@ void ScriptManager::RegisterVec3()
 
     AddTypeConstructor("vec3", "void f(float)", WRAP_OBJ_LAST(as::MakeVec3Scalar));
     AddTypeConstructor("vec3", "void f(float, float, float)", WRAP_OBJ_LAST(as::MakeVec3));
+
+    AddFunction("float length(const vec3& in)", WRAP_FN_PR(glm::length, (const glm::vec3&), float));
+    AddFunction("vec3 normalize(const vec3& in)", WRAP_FN_PR(glm::normalize, (const glm::vec3&), glm::vec3));
+    AddFunction("float dot(const vec3& in, const vec3& in)", WRAP_FN_PR(glm::dot, (const glm::vec3&, const glm::vec3&), float));
+    AddFunction("vec3 cross(const vec3& in, const vec3& in)", WRAP_FN_PR(glm::cross, (const glm::vec3&, const glm::vec3&), glm::vec3));
+
+    AddFunction("vec3 reflect(const vec3& in, const vec3& in)", WRAP_FN_PR(glm::reflect, (const glm::vec3&, const glm::vec3&), glm::vec3));
 }
 
 void ScriptManager::RegisterVec4()
 {
-    AddValueType("vec4", sizeof(glm::vec4), asGetTypeTraits<glm::vec4>() | asOBJ_POD, {},
+    AddValueType("vec4", sizeof(glm::vec4), asGetTypeTraits<glm::vec4>() | asOBJ_POD,
+        {
+            { "vec4 opAdd(const vec4& in)", WRAP_OBJ_FIRST_PR(glm::operator+, (const glm::vec4&, const glm::vec4&), glm::vec4) },
+            { "vec4 opSub(const vec4& in)", WRAP_OBJ_FIRST_PR(glm::operator-, (const glm::vec4&, const glm::vec4&), glm::vec4) },
+            { "vec4 opMul(const vec4& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec4&, const glm::vec4&), glm::vec4) },
+            { "vec4 opDiv(const vec4& in)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec4&, const glm::vec4&), glm::vec4) },
+            { "vec4 opMul(float)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::vec4&, float), glm::vec4) },
+            { "vec4 opDiv(float)", WRAP_OBJ_FIRST_PR(glm::operator/, (const glm::vec4&, float), glm::vec4) },
+            { "vec4 opAddAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4AddAssign) },
+            { "vec4 opSubAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4SubAssign) },
+            { "vec4 opMulAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4MulAssign) },
+            { "vec4 opDivAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4DivAssign) },
+            { "vec4 opMulAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4MulAssignScalar) },
+            { "vec4 opDivAssign(const vec4& in)", WRAP_OBJ_LAST(as::Vec4DivAssignScalar) }
+        },
         {
             { "float x", asOFFSET(glm::vec4, x) },
             { "float y", asOFFSET(glm::vec4, y) },
@@ -261,11 +311,19 @@ void ScriptManager::RegisterVec4()
 
     AddTypeConstructor("vec4", "void f(float)", WRAP_OBJ_LAST(as::MakeVec4Scalar));
     AddTypeConstructor("vec4", "void f(float, float, float, float)", WRAP_OBJ_LAST(as::MakeVec4));
+
+    AddFunction("float length(const vec4& in)", WRAP_FN_PR(glm::length, (const glm::vec4&), float));
+    AddFunction("vec4 normalize(const vec4& in)", WRAP_FN_PR(glm::normalize, (const glm::vec4&), glm::vec4));
+    AddFunction("float dot(const vec4& in, const vec4& in)", WRAP_FN_PR(glm::dot, (const glm::vec4&, const glm::vec4&), float));
 }
 
 void ScriptManager::RegisterQuat()
 {
-    AddValueType("quat", sizeof(glm::quat), asGetTypeTraits<glm::quat>() | asOBJ_POD, {},
+    AddValueType("quat", sizeof(glm::quat), asGetTypeTraits<glm::quat>() | asOBJ_POD,
+        {
+            { "vec3 opMul(const vec3& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::quat&, const glm::vec3&), glm::vec3) },
+            { "quat opMul(const quat& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::quat&, const glm::quat&), glm::quat) }
+        },
         {
             { "float x", asOFFSET(glm::quat, x) },
             { "float y", asOFFSET(glm::quat, y) },
@@ -275,6 +333,49 @@ void ScriptManager::RegisterQuat()
     );
 
     AddTypeConstructor("quat", "void f(float, float, float, float)", WRAP_OBJ_LAST(as::MakeQuat));
+    AddTypeConstructor("quat", "void f(const vec3& in)", WRAP_OBJ_LAST(as::MakeQuatFromEuler));
+
+    AddFunction("vec3 rotate(const quat& in, const vec3& in)", WRAP_FN_PR(glm::rotate, (const glm::quat&, const glm::vec3&), glm::vec3));
+    AddFunction("quat normalize(const quat& in)", WRAP_FN_PR(glm::normalize, (const glm::quat&), glm::quat));
+
+    AddFunction("float length(const quat& in)", WRAP_FN_PR(glm::length, (const glm::quat&), float));
+    AddFunction("quat conjugate(const quat& in)", WRAP_FN_PR(glm::conjugate, (const glm::quat&), glm::quat));
+    AddFunction("quat inverse(const quat& in)", WRAP_FN_PR(glm::inverse, (const glm::quat&), glm::quat));
+    AddFunction("float dot(const quat& in, const quat& in)", WRAP_FN_PR(glm::dot, (const glm::quat&, const glm::quat&), float));
+}
+
+void ScriptManager::RegisterGLM()
+{
+    RegisterVec2();
+    RegisterVec3();
+    RegisterVec4();
+    RegisterQuat();
+
+    AddFunction("float radians(float)", WRAP_FN_PR(glm::radians, (float), float));
+    AddFunction("vec2 radians(const vec2& in)", WRAP_FN_PR(glm::radians, (const glm::vec2&), glm::vec2));
+    AddFunction("vec3 radians(const vec3& in)", WRAP_FN_PR(glm::radians, (const glm::vec3&), glm::vec3));
+    AddFunction("vec4 radians(const vec4& in)", WRAP_FN_PR(glm::radians, (const glm::vec4&), glm::vec4));
+
+    AddFunction("float degrees(float)", WRAP_FN_PR(glm::degrees, (float), float));
+    AddFunction("vec2 degrees(const vec2& in)", WRAP_FN_PR(glm::degrees, (const glm::vec2&), glm::vec2));
+    AddFunction("vec3 degrees(const vec3& in)", WRAP_FN_PR(glm::degrees, (const glm::vec3&), glm::vec3));
+    AddFunction("vec4 degrees(const vec4& in)", WRAP_FN_PR(glm::degrees, (const glm::vec4&), glm::vec4));
+
+    AddFunction("float mix(float, float, float)", WRAP_FN_PR(glm::mix, (float, float, float), float));
+    AddFunction("vec2 mix(const vec2& in, const vec2& in, float)", WRAP_FN_PR(glm::mix, (const glm::vec2&, const glm::vec2&, float), glm::vec2));
+    AddFunction("vec3 mix(const vec3& in, const vec3& in, float)", WRAP_FN_PR(glm::mix, (const glm::vec3&, const glm::vec3&, float), glm::vec3));
+    AddFunction("vec4 mix(const vec4& in, const vec4& in, float)", WRAP_FN_PR(glm::mix, (const glm::vec4&, const glm::vec4&, float), glm::vec4));
+
+    AddFunction("quat mix(const quat& in, const quat& in, float)", WRAP_FN_PR(glm::mix, (const glm::quat&, const glm::quat&, float), glm::quat));
+
+    AddFunction("float clamp(float, float, float)", WRAP_FN_PR(glm::clamp, (float, float, float), float));
+    AddFunction("vec2 clamp(const vec2& in, const vec2& in, const vec2& in)", WRAP_FN_PR(glm::clamp, (const glm::vec2&, const glm::vec2&, const glm::vec2&), glm::vec2));
+    AddFunction("vec3 clamp(const vec3& in, const vec3& in, const vec3& in)", WRAP_FN_PR(glm::clamp, (const glm::vec3&, const glm::vec3&, const glm::vec3&), glm::vec3));
+    AddFunction("vec4 clamp(const vec4& in, const vec4& in, const vec4& in)", WRAP_FN_PR(glm::clamp, (const glm::vec4&, const glm::vec4&, const glm::vec4&), glm::vec4));
+
+    AddFunction("float fract(float)", WRAP_FN_PR(glm::fract, (float), float));
+    AddFunction("vec2 fract(const vec2& in)", WRAP_FN_PR(glm::fract, (const glm::vec2&), glm::vec2));
+    AddFunction("vec3 fract(const vec3& in)", WRAP_FN_PR(glm::fract, (const glm::vec3&), glm::vec3));
 }
 
 void ScriptManager::RegisterExtent2D()

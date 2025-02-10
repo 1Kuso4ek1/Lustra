@@ -22,7 +22,7 @@ public:
     void AddScript(ScriptAssetPtr script);
     void RemoveScript(ScriptAssetPtr script);
 
-    std::unordered_map<std::string_view, void*> GetGlobalVariables(ScriptAssetPtr script);
+    std::unordered_map<std::string, void*> GetGlobalVariables(ScriptAssetPtr script);
 
 public:
     void AddModule(std::string_view name);
@@ -68,6 +68,7 @@ private:
     void RegisterVec3();
     void RegisterVec4();
     void RegisterQuat();
+    void RegisterGLM();
 
     void RegisterExtent2D();
 

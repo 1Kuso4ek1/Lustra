@@ -344,12 +344,31 @@ void ScriptManager::RegisterQuat()
     AddFunction("float dot(const quat& in, const quat& in)", WRAP_FN_PR(glm::dot, (const glm::quat&, const glm::quat&), float));
 }
 
+void ScriptManager::RegisterMat4()
+{
+    AddValueType("mat4", sizeof(glm::mat4), asGetTypeTraits<glm::mat4>() | asOBJ_POD,
+        {
+            { "vec4 opMul(const vec4& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::mat4&, const glm::vec4&), glm::vec4) },
+            { "mat4 opMul(const mat4& in)", WRAP_OBJ_FIRST_PR(glm::operator*, (const glm::mat4&, const glm::mat4&), glm::mat4) }
+        },
+        {}
+    );
+
+    AddTypeConstructor("mat4", "void f()", WRAP_OBJ_LAST(as::MakeType<glm::mat4>));
+
+    AddFunction("mat4 lookAt(const vec3& in, const vec3& in, const vec3& in)", WRAP_FN_PR(glm::lookAt, (const glm::vec3&, const glm::vec3&, const glm::vec3&), glm::mat4));
+
+    AddFunction("mat4 transpose(const mat4& in)", WRAP_FN_PR(glm::transpose, (const glm::mat4&), glm::mat4));
+    AddFunction("mat4 inverse(const mat4& in)", WRAP_FN_PR(glm::inverse, (const glm::mat4&), glm::mat4));
+}
+
 void ScriptManager::RegisterGLM()
 {
     RegisterVec2();
     RegisterVec3();
     RegisterVec4();
     RegisterQuat();
+    RegisterMat4();
 
     AddFunction("float radians(float)", WRAP_FN_PR(glm::radians, (float), float));
     AddFunction("vec2 radians(const vec2& in)", WRAP_FN_PR(glm::radians, (const glm::vec2&), glm::vec2));
@@ -585,7 +604,11 @@ void ScriptManager::RegisterNameComponent()
 
 void ScriptManager::RegisterTransformComponent()
 {
-    AddType("TransformComponent", sizeof(TransformComponent), {},
+    AddType("TransformComponent", sizeof(TransformComponent),
+        {
+            { "glm::mat4 GetTransform() const", WRAP_MFN(TransformComponent, GetTransform) },
+            { "void SetTransform(const glm::mat4& in)", WRAP_MFN(TransformComponent, SetTransform) }
+        },
         {
             { "glm::vec3 position", asOFFSET(TransformComponent, position) },
             { "glm::vec3 rotation", asOFFSET(TransformComponent, rotation) },

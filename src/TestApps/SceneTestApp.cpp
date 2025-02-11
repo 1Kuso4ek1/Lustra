@@ -1,6 +1,8 @@
 #include <SceneTestApp.hpp>
 #include <fstream>
 
+#include <glm/gtx/string_cast.hpp>
+
 SceneTestApp::SceneTestApp()
 {
     LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
@@ -373,29 +375,88 @@ void SceneTestApp::DrawImGui()
 
 void SceneTestApp::DrawSceneTree()
 {
+    const auto isRootNode = [](dev::Entity entity)
+    {
+        if(entity.HasComponent<dev::HierarchyComponent>())
+            return entity.GetComponent<dev::HierarchyComponent>().parent == entt::null;
+        
+        return true;
+    };
+
     ImGui::Begin("Scene");
 
-    for(auto entity : list)
+    for(auto& entity : list)
     {
-        std::string name = (entity.HasComponent<dev::NameComponent>() ? entity.GetComponent<dev::NameComponent>().name : "Entity");
-
-        ImGui::PushID((entt::id_type)(entt::entity)entity);
-
-        if(ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
-        {
-            if(ImGui::IsItemClicked())
-                selectedEntity = entity;
-
-            ImGui::TreePop();
-        }
-        
-        ImGui::PopID();
-
-        if(ImGui::IsItemClicked())
-            selectedEntity = entity;
+        if(isRootNode(entity))
+            DrawEntityNode(entity);
     }
     
     ImGui::End();
+}
+
+void SceneTestApp::DrawEntityNode(dev::Entity entity)
+{
+    bool hasChildren = false;
+    if(entity.HasComponent<dev::HierarchyComponent>())
+        hasChildren = !entity.GetComponent<dev::HierarchyComponent>().children.empty();
+
+    std::string name = entity.HasComponent<dev::NameComponent>() 
+                      ? entity.GetComponent<dev::NameComponent>().name 
+                      : "Entity";
+
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+    if(selectedEntity == entity)
+        flags |= ImGuiTreeNodeFlags_Selected;
+    if(!hasChildren)
+        flags |= ImGuiTreeNodeFlags_Leaf;
+
+    ImGui::PushID((int)(entt::entity)entity);
+    bool isOpen = ImGui::TreeNodeEx(name.c_str(), flags);
+
+    EntityNodeInteraction(entity, name);
+    
+    if(isOpen)
+    {
+        if(hasChildren)
+        {
+            auto& hierarchy = entity.GetComponent<dev::HierarchyComponent>();
+
+            for(auto& child : hierarchy.children)
+                DrawEntityNode(scene.GetEntity((entt::id_type)child));
+        }
+        ImGui::TreePop();
+    }
+    
+    ImGui::PopID();
+}
+
+void SceneTestApp::EntityNodeInteraction(dev::Entity entity, std::string_view name)
+{
+    if(ImGui::IsItemClicked())
+        selectedEntity = entity;
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
+        {
+            auto payloadEntity = *(dev::Entity*)payload->Data;
+            payloadEntity = scene.GetEntity((entt::id_type)(entt::entity)payloadEntity);
+
+            if(entity != payloadEntity)
+                scene.ReparentEntity(payloadEntity, entity);
+        }
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+    {
+        ImGui::Text("Entity: %s", name.data());
+
+        ImGui::SetDragDropPayload("ENTITY", &entity, 8);
+
+        ImGui::EndDragDropSource();
+    }
 }
 
 void SceneTestApp::DrawPropertiesWindow()
@@ -469,7 +530,8 @@ void SceneTestApp::DrawImGuizmo()
             auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
 
             auto& transform = selectedEntity.GetComponent<dev::TransformComponent>();
-            auto modelMatrix = transform.GetTransform();
+            auto modelMatrix = scene.GetFinalTransform(selectedEntity);
+            glm::mat4 deltaMatrix(1.0f);
 
             ImGuizmo::SetDrawlist();
             
@@ -480,17 +542,20 @@ void SceneTestApp::DrawImGuizmo()
                 ImGui::GetWindowHeight() - ImGui::GetFrameHeight()
             );
 
+            // Delta just skyrockets when trying to move an object with somewhat rotated parent...
             ImGuizmo::Manipulate(
                 glm::value_ptr(viewMatrix),
                 glm::value_ptr(projectionMatrix),
                 currentOperation,
                 ImGuizmo::MODE::WORLD,
                 glm::value_ptr(modelMatrix),
-                nullptr,
+                glm::value_ptr(deltaMatrix),
                 dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr
             );
 
-            transform.SetTransform(modelMatrix);
+            deltaMatrix[3] = glm::clamp(deltaMatrix[3], glm::vec4(-1.0f), glm::vec4(1.0f));
+
+            transform.SetTransform(deltaMatrix * transform.GetTransform());
 
             if(selectedEntity.HasComponent<dev::RigidBodyComponent>())
             {

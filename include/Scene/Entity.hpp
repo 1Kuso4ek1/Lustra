@@ -30,6 +30,15 @@ public:
         return scene->registry.get<T>(entity);
     }
 
+    template<class T, class... Args>
+    T& GetOrAddComponent(Args&&... args)
+    {
+        if(scene->registry.all_of<T>(entity))
+            return scene->registry.get<T>(entity);
+        else
+            return scene->registry.emplace<T>(entity, std::forward<Args>(args)...);
+    }
+
     template<class T>
     bool HasComponent() const
     {
@@ -42,6 +51,16 @@ public:
         this->scene = entity.scene;
 
         return *this;
+    }
+
+    bool operator==(const Entity& other) const
+    {
+        return entity == other.entity && scene == other.scene;
+    }
+
+    bool operator!=(const Entity& other) const
+    {
+        return !(*this == other);
     }
 
     operator bool() const

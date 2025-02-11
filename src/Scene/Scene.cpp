@@ -103,7 +103,41 @@ void Scene::ToggleUpdatePhysics()
     updatePhysics = !updatePhysics;
 }
 
-void Scene::RemoveEntity(const Entity& entity)
+void Scene::ReparentEntity(Entity child, Entity parent)
+{
+    if(child == parent || IsChildOf(child, parent))
+        return;
+
+    auto& childHierarchy = child.GetOrAddComponent<dev::HierarchyComponent>();
+    auto prevParent = Entity(childHierarchy.parent, this);
+
+    if(registry.valid(prevParent))
+    {
+        auto& prevParentHierarchy = prevParent.GetComponent<dev::HierarchyComponent>();
+
+        prevParentHierarchy.children.erase(
+            std::remove(prevParentHierarchy.children.begin(), 
+                        prevParentHierarchy.children.end(), child),
+            prevParentHierarchy.children.end()
+        );
+    }
+
+    childHierarchy.parent = parent;
+    if(registry.valid(parent))
+    {
+        auto& parentHierarchy = parent.GetOrAddComponent<dev::HierarchyComponent>();
+        parentHierarchy.children.push_back(child);
+
+        if(child.HasComponent<dev::TransformComponent>())
+        {
+            auto& childTransform = child.GetComponent<dev::TransformComponent>();
+            auto parentWorld = GetFinalTransform(parent);
+            childTransform.SetTransform(glm::inverse(parentWorld) * childTransform.GetTransform());
+        }
+    }
+}
+
+void Scene::RemoveEntity(Entity entity)
 {
     registry.destroy(entity);
 }
@@ -118,6 +152,48 @@ Entity Scene::CreateEntity()
 Entity Scene::GetEntity(entt::id_type id)
 {
     return { entt::entity(id), this };
+}
+
+bool Scene::IsChildOf(Entity child, Entity parent)
+{
+    if(!registry.valid(child) || !registry.valid(parent))
+        return false;
+
+    entt::entity current = child;
+
+    while(registry.all_of<HierarchyComponent>(current))
+    {
+        auto& hierarchy = registry.get<HierarchyComponent>(current);
+        current = hierarchy.parent;
+
+        if(current == parent)
+            return true;
+    }
+
+    return false;
+}
+
+glm::mat4 Scene::GetFinalTransform(entt::entity entity)
+{
+    entt::entity parent = entity;
+
+    glm::mat4 transformMatrix = registry.get<TransformComponent>(entity).GetTransform();
+
+    while(registry.all_of<HierarchyComponent>(parent))
+    {
+        auto& hierarchy = registry.get<HierarchyComponent>(parent);
+        parent = hierarchy.parent;
+
+        if(registry.valid(parent))
+        {
+            auto& parentTransform = registry.get<TransformComponent>(parent);
+            transformMatrix = parentTransform.GetTransform() * transformMatrix;
+        }
+        else
+            break;
+    }
+
+    return transformMatrix;
 }
 
 entt::registry& Scene::GetRegistry()
@@ -273,7 +349,7 @@ void Scene::RenderMeshes()
         }
 
         Renderer::Get().GetMatrices()->PushMatrix();
-        Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
+        Renderer::Get().GetMatrices()->GetModel() = GetFinalTransform(entity);
 
         MeshRenderPass(mesh, meshRenderer, pipeline, renderer->GetPrimaryRenderTarget());
 
@@ -311,7 +387,7 @@ void Scene::RenderToShadowMap()
                         meshesView.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(mesh);
 
                 Renderer::Get().GetMatrices()->PushMatrix();
-                Renderer::Get().GetMatrices()->GetModel() = transform.GetTransform();
+                Renderer::Get().GetMatrices()->GetModel() = GetFinalTransform(mesh);
 
                 ShadowRenderPass(lightComponent, meshComp);
 

@@ -48,6 +48,14 @@ struct PipelineComponent : public ComponentBase
     LLGL::PipelineState* pipeline{};
 };
 
+struct HierarchyComponent : public ComponentBase
+{
+    HierarchyComponent() : ComponentBase("HierarchyComponent") {}
+
+    entt::entity parent = entt::null;
+    std::vector<entt::entity> children;
+};
+
 struct CameraComponent : public ComponentBase
 {
     CameraComponent() : ComponentBase("CameraComponent") {}

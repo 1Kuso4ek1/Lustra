@@ -68,6 +68,7 @@ private:
     void RegisterVec3();
     void RegisterVec4();
     void RegisterQuat();
+    void RegisterMat4();
     void RegisterGLM();
 
     void RegisterExtent2D();

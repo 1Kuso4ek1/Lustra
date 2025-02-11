@@ -54,6 +54,9 @@ private:
     void DrawImGui();
 
     void DrawSceneTree();
+    void DrawEntityNode(dev::Entity entity);
+    void EntityNodeInteraction(dev::Entity entity, std::string_view name);
+
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();
     void DrawImGuizmo();

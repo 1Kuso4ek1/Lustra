@@ -26,10 +26,16 @@ public:
     void SetUpdatePhysics(bool updatePhysics);
     void ToggleUpdatePhysics();
 
-    void RemoveEntity(const Entity& entity);
+    void ReparentEntity(Entity child, Entity parent);
+
+    void RemoveEntity(Entity entity);
 
     Entity CreateEntity();
     Entity GetEntity(entt::id_type id);
+
+    bool IsChildOf(Entity child, Entity parent);
+
+    glm::mat4 GetFinalTransform(entt::entity entity);
 
     entt::registry& GetRegistry();
 

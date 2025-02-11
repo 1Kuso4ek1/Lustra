@@ -56,6 +56,8 @@ public:
         if(!asset)
             return nullptr;
 
+        asset->path = assetPath;
+
         assets.emplace(assetPath, std::pair(std::type_index(typeid(T)), asset));
 
         return std::static_pointer_cast<T>(asset);

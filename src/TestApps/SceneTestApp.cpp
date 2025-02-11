@@ -1,8 +1,6 @@
 #include <SceneTestApp.hpp>
 #include <fstream>
 
-#include <glm/gtx/string_cast.hpp>
-
 SceneTestApp::SceneTestApp()
 {
     LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
@@ -390,6 +388,40 @@ void SceneTestApp::DrawSceneTree()
         if(isRootNode(entity))
             DrawEntityNode(entity);
     }
+
+    if(ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered())
+        selectedEntity = { entt::null, &scene };
+
+    if(ImGui::BeginPopupContextWindow("Create entity"))
+    {
+        if(ImGui::MenuItem("Create Empty Entity"))
+        {
+            auto entity = scene.CreateEntity();
+
+            entity.AddComponent<dev::NameComponent>().name = "Empty";
+
+            selectedEntity = entity;
+
+            list.push_back(entity);
+        }
+
+        if(ImGui::MenuItem("Create Drawable Entity"))
+        {
+            auto entity = scene.CreateEntity();
+
+            entity.AddComponent<dev::NameComponent>().name = "Drawable";
+            entity.AddComponent<dev::TransformComponent>();
+            entity.AddComponent<dev::MeshComponent>();
+            entity.AddComponent<dev::MeshRendererComponent>();
+            entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+
+            selectedEntity = entity;
+
+            list.push_back(entity);
+        }
+
+        ImGui::EndPopup();
+    }
     
     ImGui::End();
 }
@@ -468,6 +500,7 @@ void SceneTestApp::DrawPropertiesWindow()
         dev::DrawEntityUI<
             dev::NameComponent,
             dev::TransformComponent,
+            dev::MeshComponent,
             dev::MeshRendererComponent,
             dev::CameraComponent,
             dev::LightComponent,
@@ -492,6 +525,53 @@ void SceneTestApp::DrawPropertiesWindow()
             scene.RemoveEntity(selectedEntity);
 
             selectedEntity = { entt::null, &scene };
+        }
+
+        if(ImGui::BeginPopupContextWindow("Add component"))
+        {
+            if(ImGui::MenuItem("Add NameComponent"))
+                selectedEntity.GetOrAddComponent<dev::NameComponent>();
+
+            if(ImGui::MenuItem("Add TransformComponent"))
+                selectedEntity.GetOrAddComponent<dev::TransformComponent>();
+            
+            if(ImGui::MenuItem("Add MeshComponent"))
+                selectedEntity.GetOrAddComponent<dev::MeshComponent>();
+            
+            if(ImGui::MenuItem("Add MeshRendererComponent"))
+                selectedEntity.GetOrAddComponent<dev::MeshRendererComponent>();
+            
+            if(ImGui::MenuItem("Add CameraComponent"))
+                selectedEntity.GetOrAddComponent<dev::CameraComponent>();
+            
+            if(ImGui::MenuItem("Add LightComponent"))
+                selectedEntity.GetOrAddComponent<dev::LightComponent>();
+            
+            if(ImGui::MenuItem("Add ScriptComponent"))
+                selectedEntity.GetOrAddComponent<dev::ScriptComponent>();
+            
+            if(ImGui::MenuItem("Add TonemapComponent"))
+                selectedEntity.GetOrAddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
+            
+            if(ImGui::MenuItem("Add BloomComponent"))
+                selectedEntity.GetOrAddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
+            
+            if(ImGui::MenuItem("Add GTAOComponent"))
+                selectedEntity.GetOrAddComponent<dev::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
+            
+            if(ImGui::MenuItem("Add SSRComponent"))
+                selectedEntity.GetOrAddComponent<dev::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
+            
+            if(ImGui::MenuItem("Add ProceduralSkyComponent"))
+                selectedEntity.GetOrAddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
+            
+            if(ImGui::MenuItem("Add HDRISkyComponent"))
+                selectedEntity.GetOrAddComponent<dev::HDRISkyComponent>(
+                    dev::AssetManager::Get().Load<dev::TextureAsset>("empty", true),
+                    LLGL::Extent2D{ 1024, 1024 }
+                );
+            
+            ImGui::EndPopup();
         }
     }
     else
@@ -530,7 +610,7 @@ void SceneTestApp::DrawImGuizmo()
             auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
 
             auto& transform = selectedEntity.GetComponent<dev::TransformComponent>();
-            auto modelMatrix = scene.GetFinalTransform(selectedEntity);
+            auto modelMatrix = scene.GetWorldTransform(selectedEntity);
             glm::mat4 deltaMatrix(1.0f);
 
             ImGuizmo::SetDrawlist();

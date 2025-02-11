@@ -35,7 +35,7 @@ public:
 
     bool IsChildOf(Entity child, Entity parent);
 
-    glm::mat4 GetFinalTransform(entt::entity entity);
+    glm::mat4 GetWorldTransform(entt::entity entity);
 
     entt::registry& GetRegistry();
 

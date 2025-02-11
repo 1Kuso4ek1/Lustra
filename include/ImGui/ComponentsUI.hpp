@@ -21,6 +21,21 @@ inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
         component.scale = glm::vec3(1.0f);
 }
 
+inline void DrawComponentUI(MeshComponent& component, entt::entity)
+{
+    ImGui::Button(component.model ? component.model->path.filename().string().c_str() : "(Empty)##MeshComponent", ImVec2(128.0f, 128.0f));
+    
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("MODEL");
+
+        if(payload)
+            component.model = *(ModelAssetPtr*)payload->Data;
+
+        ImGui::EndDragDropTarget();
+    }
+}
+
 inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entity)
 {
     float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
@@ -460,7 +475,7 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
             {
                 static ModelAssetPtr model;
 
-                ImGui::Button(model ? "Model##Model" : "(Empty)##Model", ImVec2(128.0f, 128.0f));
+                ImGui::Button(model ? model->path.filename().string().c_str() : "(Empty)##Model", ImVec2(128.0f, 128.0f));
 
                 if(ImGui::BeginDragDropTarget())
                 {

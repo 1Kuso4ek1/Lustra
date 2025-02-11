@@ -105,22 +105,36 @@ void Scene::ToggleUpdatePhysics()
 
 void Scene::ReparentEntity(Entity child, Entity parent)
 {
-    if(child == parent || IsChildOf(child, parent))
-        return;
+    static auto removeChild = [&](Entity child, Entity parent)
+    {
+        if(registry.valid(parent))
+        {
+            auto& prevParentHierarchy = parent.GetComponent<dev::HierarchyComponent>();
+
+            prevParentHierarchy.children.erase(
+                std::remove(prevParentHierarchy.children.begin(), 
+                            prevParentHierarchy.children.end(), child),
+                prevParentHierarchy.children.end()
+            );
+        }
+    };
 
     auto& childHierarchy = child.GetOrAddComponent<dev::HierarchyComponent>();
     auto prevParent = Entity(childHierarchy.parent, this);
 
-    if(registry.valid(prevParent))
+    if(prevParent == parent)
     {
-        auto& prevParentHierarchy = prevParent.GetComponent<dev::HierarchyComponent>();
+        childHierarchy.parent = entt::null;
 
-        prevParentHierarchy.children.erase(
-            std::remove(prevParentHierarchy.children.begin(), 
-                        prevParentHierarchy.children.end(), child),
-            prevParentHierarchy.children.end()
-        );
+        removeChild(child, prevParent);
+
+        return;
     }
+
+    if(child == parent || IsChildOf(child, parent))
+        return;
+
+    removeChild(child, prevParent);
 
     childHierarchy.parent = parent;
     if(registry.valid(parent))
@@ -131,7 +145,7 @@ void Scene::ReparentEntity(Entity child, Entity parent)
         if(child.HasComponent<dev::TransformComponent>())
         {
             auto& childTransform = child.GetComponent<dev::TransformComponent>();
-            auto parentWorld = GetFinalTransform(parent);
+            auto parentWorld = GetWorldTransform(parent);
             childTransform.SetTransform(glm::inverse(parentWorld) * childTransform.GetTransform());
         }
     }
@@ -173,9 +187,12 @@ bool Scene::IsChildOf(Entity child, Entity parent)
     return false;
 }
 
-glm::mat4 Scene::GetFinalTransform(entt::entity entity)
+glm::mat4 Scene::GetWorldTransform(entt::entity entity)
 {
     entt::entity parent = entity;
+
+    if(!registry.all_of<TransformComponent>(parent))
+        return glm::mat4(1.0f);
 
     glm::mat4 transformMatrix = registry.get<TransformComponent>(entity).GetTransform();
 
@@ -280,10 +297,16 @@ void Scene::SetupLights()
     {
         auto [light, transform] = lightsView.get<LightComponent, TransformComponent>(entity);
 
+        // Not a reference since we don't want to change the actual local transform...
+        auto localTransform = transform;
+
+        if(registry.all_of<HierarchyComponent>(entity))
+            localTransform.SetTransform(GetWorldTransform(entity));
+
         lights.push_back(
             {
-                transform.position,
-                glm::quat(glm::radians(transform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
+                localTransform.position,
+                glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
                 light.color,
                 light.intensity,
                 glm::cos(glm::radians(light.cutoff)),
@@ -313,12 +336,17 @@ void Scene::SetupShadows()
 
         if(light.shadowMap)
         {
-            auto delta = glm::quat(glm::radians(transform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+            auto localTransform = transform;
+
+            if(registry.all_of<HierarchyComponent>(entity))
+                localTransform.SetTransform(GetWorldTransform(entity));
+
+            auto delta = glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
         
             shadows.push_back(
                 {
                     light.projection *
-                    glm::lookAt(transform.position, transform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f)),
+                    glm::lookAt(localTransform.position, localTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f)),
                     light.bias
                 }
             );
@@ -349,7 +377,7 @@ void Scene::RenderMeshes()
         }
 
         Renderer::Get().GetMatrices()->PushMatrix();
-        Renderer::Get().GetMatrices()->GetModel() = GetFinalTransform(entity);
+        Renderer::Get().GetMatrices()->GetModel() = GetWorldTransform(entity);
 
         MeshRenderPass(mesh, meshRenderer, pipeline, renderer->GetPrimaryRenderTarget());
 
@@ -387,7 +415,7 @@ void Scene::RenderToShadowMap()
                         meshesView.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(mesh);
 
                 Renderer::Get().GetMatrices()->PushMatrix();
-                Renderer::Get().GetMatrices()->GetModel() = GetFinalTransform(mesh);
+                Renderer::Get().GetMatrices()->GetModel() = GetWorldTransform(mesh);
 
                 ShadowRenderPass(lightComponent, meshComp);
 
@@ -427,6 +455,9 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 
 void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline, LLGL::RenderTarget* renderTarget)
 {
+    if(!mesh.model)
+        return;
+    
     for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
         auto material = AssetManager::Get().Load<MaterialAsset>("default", true);

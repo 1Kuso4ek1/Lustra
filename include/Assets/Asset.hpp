@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
+#include <filesystem>
 
 namespace dev
 {
@@ -23,6 +24,8 @@ struct Asset
     Type type = Type::Unknown;
 
     bool loaded = false;
+
+    std::filesystem::path path;
 };
 
 using AssetPtr = std::shared_ptr<Asset>;

@@ -273,6 +273,15 @@ void Scene::SetupCamera()
         cam = &cameraView.get<CameraComponent>(entity).camera;
         cameraTransform = cameraView.get<TransformComponent>(entity);
 
+        if(registry.all_of<HierarchyComponent>(entity))
+        {
+            auto rotation = cameraTransform.rotation;
+
+            cameraTransform.SetTransform(GetWorldTransform(entity));
+
+            cameraTransform.rotation = rotation;
+        }
+
         cameraPosition = cameraTransform.position;
 
         break;
@@ -280,9 +289,20 @@ void Scene::SetupCamera()
 
     if(cam)
     {
-        auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::mat4 view(1.0f);
+
+        if(cam->IsFirstPerson())
+        {
+            auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+
+            view = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, cam->GetUp());
+        }
+        else
+            view = glm::lookAt(cameraTransform.position, cam->GetLookAt(), cam->GetUp());
+
+        cam->SetViewMatrix(view);
         
-        Renderer::Get().GetMatrices()->GetView() = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
+        Renderer::Get().GetMatrices()->GetView() = view;
         Renderer::Get().GetMatrices()->GetProjection() = cam->GetProjectionMatrix();
     }
 }
@@ -457,7 +477,7 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
 {
     if(!mesh.model)
         return;
-    
+
     for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
         auto material = AssetManager::Get().Load<MaterialAsset>("default", true);

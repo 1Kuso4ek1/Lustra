@@ -422,7 +422,14 @@ void ScriptManager::RegisterCamera()
             { "void SetFar(float)", WRAP_MFN(Camera, SetFar) },
 
             { "void SetFirstPerson(bool)", WRAP_MFN(Camera, SetFirstPerson) },
+            { "void SetUp(const glm::vec3& in)", WRAP_MFN(Camera, SetUp) },
+            { "void SetLookAt(const glm::vec3& in)", WRAP_MFN(Camera, SetLookAt) },
+            { "void SetViewMatrix(const glm::mat4& in)", WRAP_MFN(Camera, SetViewMatrix) },
 
+            { "glm::vec3 GetUp() const", WRAP_MFN(Camera, GetUp) },
+            { "glm::vec3 GetLookAt() const", WRAP_MFN(Camera, GetLookAt) },
+            { "glm::mat4 GetViewMatrix() const", WRAP_MFN(Camera, GetViewMatrix) },
+            { "glm::mat4 GetProjectionMatrix() const", WRAP_MFN(Camera, GetProjectionMatrix) },
             { "glm::vec2 GetViewport() const", WRAP_MFN(Camera, GetViewport) },
             
             { "float GetFov() const", WRAP_MFN(Camera, GetFov) },

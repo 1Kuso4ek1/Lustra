@@ -28,8 +28,16 @@ public:
 
     void SetFirstPerson(bool firstPerson);
 
+    void SetUp(const glm::vec3& up);
+
+    void SetLookAt(const glm::vec3& lookAtPos);
+    void SetViewMatrix(const glm::mat4& viewMatrix);
+
     void OnEvent(Event& event) override;
 
+    glm::vec3 GetUp() const;
+    glm::vec3 GetLookAt() const;
+    glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix() const;
     glm::vec2 GetViewport() const;
     
@@ -51,6 +59,11 @@ private:
     bool firstPerson = true;
 
 private:
+    glm::vec3 up{ 0.0f, 1.0f, 0.0f };
+
+    glm::vec3 lookAtPos;
+
+    glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
 
     glm::vec2 viewportSize;

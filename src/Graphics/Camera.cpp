@@ -54,6 +54,21 @@ void Camera::SetFirstPerson(bool firstPerson)
     this->firstPerson = firstPerson;
 }
 
+void Camera::SetUp(const glm::vec3& up)
+{
+    this->up = up;
+}
+
+void Camera::SetLookAt(const glm::vec3& lookAtPos)
+{
+    this->lookAtPos = lookAtPos;
+}
+
+void Camera::SetViewMatrix(const glm::mat4& viewMatrix)
+{
+    this->viewMatrix = viewMatrix;
+}
+
 void Camera::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
@@ -62,6 +77,21 @@ void Camera::OnEvent(Event& event)
 
         SetViewport(resizeEvent->GetSize());
     }
+}
+
+glm::vec3 Camera::GetUp() const
+{
+    return up;
+}
+
+glm::vec3 Camera::GetLookAt() const
+{
+    return lookAtPos;
+}
+
+glm::mat4 Camera::GetViewMatrix() const
+{
+    return viewMatrix;
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const

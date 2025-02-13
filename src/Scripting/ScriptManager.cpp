@@ -33,12 +33,16 @@ ScriptManager::ScriptManager()
 
     SetDefaultNamespace("JPH");
     RegisterBody();
+    RegisterRayCast();
 
     SetDefaultNamespace("Keyboard");
     RegisterKeyboard();
 
     SetDefaultNamespace("Mouse");
     RegisterMouse();
+    
+    SetDefaultNamespace("InputManager");
+    RegisterInputManager();
 
     SetDefaultNamespace("");
     RegisterCamera();
@@ -437,6 +441,19 @@ void ScriptManager::RegisterBody()
     );
 }
 
+void ScriptManager::RegisterRayCast()
+{
+    AddValueType("RayCastResult", sizeof(as::RayCastResult), asGetTypeTraits<as::RayCastResult>() | asOBJ_POD, {},
+        {
+            { "bool hit", asOFFSET(as::RayCastResult, hit) },
+            { "glm::vec3 hitPosition", asOFFSET(as::RayCastResult, hitPosition) },
+            { "Body@ body", asOFFSET(as::RayCastResult, body) }
+        }
+    );
+
+    AddFunction("RayCastResult CastRay(const glm::vec3& in, const glm::vec3& in)", WRAP_FN(as::CastRay));
+}
+
 void ScriptManager::RegisterExtent2D()
 {
     AddValueType("Extent2D", sizeof(LLGL::Extent2D), asGetTypeTraits<LLGL::Extent2D>() | asOBJ_POD, {},
@@ -641,6 +658,13 @@ void ScriptManager::RegisterMouse()
             { "Last", (int)(Mouse::Button::Last) }
         }
     );
+}
+
+void ScriptManager::RegisterInputManager()
+{
+    AddFunction("void MapKeyboardAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Keyboard::Key), void));
+    AddFunction("void MapMouseAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Mouse::Button), void));
+    AddFunction("bool IsActionPressed(const string& in)", WRAP_FN(as::IsActionPressed));
 }
 
 void ScriptManager::RegisterTimer()

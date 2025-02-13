@@ -21,6 +21,15 @@ namespace dev
 namespace as
 {
 
+struct RayCastResult
+{
+    bool hit = false;
+
+    glm::vec3 hitPosition{ 0.0f };
+
+    JPH::Body* body{};
+};
+
 inline void MessageCallback(const asSMessageInfo *msg, void *param)
 {
     switch(msg->type)
@@ -282,6 +291,40 @@ inline glm::vec3 GetAngularVelocity(JPH::Body* body)
 inline glm::mat4 GetWorldTransform(Entity entity, Scene* scene)
 {
     return scene->GetWorldTransform(entity);
+}
+
+inline RayCastResult CastRay(const glm::vec3& origin, const glm::vec3& direction)
+{
+    JPH::RayCastResult result;
+    RayCastResult ret;
+
+    JPH::RRayCast ray;
+    ray.mOrigin = { origin.x, origin.y, origin.z };
+    ray.mDirection = { direction.x, direction.y, direction.z };
+
+    if(PhysicsManager::Get().GetPhysicsSystem().GetNarrowPhaseQuery().CastRay(ray, result))
+    {
+        ret.hit = true;
+        ret.hitPosition = origin + direction * result.mFraction;
+        ret.body = PhysicsManager::Get().GetPhysicsSystem().GetBodyLockInterface().TryGetBody(result.mBodyID);
+    }
+
+    return ret;
+}
+
+inline void MapAction(const std::string& action, Keyboard::Key key)
+{
+    InputManager::Get().MapAction(action, key);
+}
+
+inline void MapAction(const std::string& action, Mouse::Button button)
+{
+    InputManager::Get().MapAction(action, button);
+}
+
+inline bool IsActionPressed(const std::string& action)
+{
+    return InputManager::Get().IsActionPressed(action);
 }
 
 }

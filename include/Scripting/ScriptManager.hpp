@@ -73,6 +73,7 @@ private:
     void RegisterGLM();
 
     void RegisterBody();
+    void RegisterRayCast();
 
     void RegisterExtent2D();
 
@@ -80,6 +81,7 @@ private:
 
     void RegisterKeyboard();
     void RegisterMouse();
+    void RegisterInputManager();
 
     void RegisterTimer();
 

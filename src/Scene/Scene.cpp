@@ -48,6 +48,8 @@ void Scene::Start()
 
 void Scene::Update(float deltaTime)
 {
+    InputManager::Get().Update();
+
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
         if(script.script)

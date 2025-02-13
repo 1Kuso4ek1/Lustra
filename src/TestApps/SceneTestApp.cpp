@@ -679,7 +679,7 @@ void SceneTestApp::DrawExecutionControl()
 {
     ImGui::Begin("Execution Control");
 
-    if(playing || paused)
+    if(playing && !paused)
     {
         ImGui::BeginDisabled();
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
@@ -694,7 +694,7 @@ void SceneTestApp::DrawExecutionControl()
         playing = true;
         paused = false;
     }
-    else if(playing || paused)
+    else if(playing && !paused)
     {
         ImGui::PopStyleVar();
         ImGui::EndDisabled();
@@ -709,7 +709,7 @@ void SceneTestApp::DrawExecutionControl()
     }
 
     if(ImGui::ImageButton("##Pause", pauseIcon->nativeHandle, { 20, 20 }))
-        paused = false;
+        paused = true;
     else if(!playing || paused)
     {
         ImGui::PopStyleVar();

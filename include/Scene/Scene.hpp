@@ -3,6 +3,7 @@
 #include <Renderer.hpp>
 #include <DeferredRenderer.hpp>
 #include <AssetManager.hpp>
+#include <InputManager.hpp>
 
 #include <entt/entt.hpp>
 

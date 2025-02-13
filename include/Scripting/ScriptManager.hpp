@@ -16,13 +16,14 @@ public:
     void ExecuteFunction(
         ScriptAssetPtr script,
         std::string_view declaration,
-        std::function<void(asIScriptContext*)> setArgs = nullptr
+        std::function<void(asIScriptContext*)> setArgs = nullptr,
+        uint32_t moduleIndex = 0
     );
 
     void AddScript(ScriptAssetPtr script);
     void RemoveScript(ScriptAssetPtr script);
 
-    std::unordered_map<std::string, void*> GetGlobalVariables(ScriptAssetPtr script);
+    std::unordered_map<std::string, void*> GetGlobalVariables(ScriptAssetPtr script, uint32_t moduleIndex = 0);
 
 public:
     void AddModule(std::string_view name);
@@ -71,6 +72,8 @@ private:
     void RegisterMat4();
     void RegisterGLM();
 
+    void RegisterBody();
+
     void RegisterExtent2D();
 
     void RegisterCamera();
@@ -82,6 +85,7 @@ private:
     void RegisterTransformComponent();
     void RegisterCameraComponent();
     void RegisterLightComponent();
+    void RegisterBodyComponent();
     void RegisterEntity();
 
 private:

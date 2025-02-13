@@ -210,6 +210,35 @@ inline glm::vec4 Vec4DivAssignScalar(float src, glm::vec4* dst)
     return *dst /= src;
 }
 
+inline glm::vec3 GetPosition(JPH::Body* body)
+{
+    auto pos = body->GetPosition();
+    
+    return { pos.GetX(), pos.GetY(), pos.GetZ() };
+}
+
+inline glm::quat GetRotation(JPH::Body* body)
+{
+    auto rot = body->GetRotation();
+
+    return { rot.GetX(), rot.GetY(), rot.GetZ(), rot.GetW() };
+}
+
+inline void SetPosition(const glm::vec3& pos, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetPosition(body->GetID(), { pos.x, pos.y, pos.z }, JPH::EActivation::Activate);
+}
+
+inline void SetRotation(const glm::quat& rot, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetRotation(body->GetID(), { rot.x, rot.y, rot.z, rot.w }, JPH::EActivation::Activate);
+}
+
+inline void SetPositionAndRotation(const glm::vec3& pos, const glm::quat& rot, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(body->GetID(), { pos.x, pos.y, pos.z }, { rot.x, rot.y, rot.z, rot.w }, JPH::EActivation::Activate);
+}
+
 }
 
 }

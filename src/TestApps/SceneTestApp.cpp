@@ -546,6 +546,18 @@ void SceneTestApp::DrawPropertiesWindow()
             
             if(ImGui::MenuItem("Add LightComponent"))
                 selectedEntity.GetOrAddComponent<dev::LightComponent>();
+
+            if(ImGui::MenuItem("Add RigidBodyComponent"))
+                selectedEntity.GetOrAddComponent<dev::RigidBodyComponent>().body = 
+                    dev::PhysicsManager::Get().CreateBody(
+                        JPH::BodyCreationSettings(
+                        new JPH::EmptyShapeSettings(),
+                        { 0.0f, 0.0f, 0.0f },
+                        { 0.0f, 0.0f, 0.0f, 1.0f },
+                        JPH::EMotionType::Dynamic,
+                        dev::Layers::moving
+                        )
+                    );
             
             if(ImGui::MenuItem("Add ScriptComponent"))
                 selectedEntity.GetOrAddComponent<dev::ScriptComponent>();

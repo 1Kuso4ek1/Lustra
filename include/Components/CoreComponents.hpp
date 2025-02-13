@@ -98,6 +98,7 @@ struct ScriptComponent : public ComponentBase
     ScriptComponent() : ComponentBase("ScriptComponent") {}
 
     ScriptAssetPtr script;
+    uint32_t moduleIndex = 0;
 
     std::function<void()> start;
     std::function<void(Entity self, float)> update;

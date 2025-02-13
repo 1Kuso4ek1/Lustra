@@ -156,6 +156,7 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
                 ScriptManager::Get().RemoveScript(component.script);
 
             component.script = *(dev::ScriptAssetPtr*)payload->Data;
+            component.moduleIndex = component.script->modulesCount++;
 
             ScriptManager::Get().AddScript(component.script);
 
@@ -169,7 +170,7 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
     {
         static std::vector<std::string> input;
 
-        auto variables = ScriptManager::Get().GetGlobalVariables(component.script);
+        auto variables = ScriptManager::Get().GetGlobalVariables(component.script, component.moduleIndex);
 
         input.resize(variables.size());
 

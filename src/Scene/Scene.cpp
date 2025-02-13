@@ -35,7 +35,8 @@ void Scene::Start()
                 [&](auto context)
                 {
                     context->SetArgObject(0, (void*)(&ent));
-                }
+                },
+                script.moduleIndex
             );
         }
 
@@ -59,7 +60,8 @@ void Scene::Update(float deltaTime)
                 {
                     context->SetArgObject(0, (void*)(&ent));
                     context->SetArgFloat(1, deltaTime);
-                }
+                },
+                script.moduleIndex
             );
         }
 

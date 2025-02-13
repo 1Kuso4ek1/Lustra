@@ -31,6 +31,9 @@ ScriptManager::ScriptManager()
     SetDefaultNamespace("glm");
     RegisterGLM();
 
+    SetDefaultNamespace("JPH");
+    RegisterBody();
+
     SetDefaultNamespace("Keyboard");
     RegisterKeyboard();
 
@@ -44,6 +47,7 @@ ScriptManager::ScriptManager()
     RegisterTransformComponent();
     RegisterCameraComponent();
     RegisterLightComponent();
+    RegisterBodyComponent();
     RegisterEntity();
 }
 
@@ -65,9 +69,12 @@ void ScriptManager::Build()
 
     for(auto i : scripts)
     {
-        builder.StartNewModule(engine, i->path.stem().string().c_str());
-        builder.AddSectionFromFile(i->path.string().c_str());
-        buildSucceded = (builder.BuildModule() >= 0);
+        for(int j = 0; j < i->modulesCount; j++)
+        {
+            builder.StartNewModule(engine, (i->path.stem().string() + std::to_string(j)).c_str());
+            builder.AddSectionFromFile(i->path.string().c_str());
+            buildSucceded = (builder.BuildModule() >= 0);
+        }
     }
 
     if(buildSucceded)
@@ -79,10 +86,11 @@ void ScriptManager::Build()
 void ScriptManager::ExecuteFunction(
     ScriptAssetPtr script,
     std::string_view declaration,
-    std::function<void(asIScriptContext*)> setArgs
+    std::function<void(asIScriptContext*)> setArgs,
+    uint32_t moduleIndex
 )
 {
-    auto module = engine->GetModule(script->path.stem().string().c_str());
+    auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
     auto func = module->GetFunctionByDecl(declaration.data());
 
     if(func)
@@ -98,7 +106,8 @@ void ScriptManager::ExecuteFunction(
 
 void ScriptManager::AddScript(ScriptAssetPtr script)
 {
-    scripts.push_back(script);
+    if(std::find(scripts.begin(), scripts.end(), script) == scripts.end())
+        scripts.push_back(script);
 }
 
 void ScriptManager::RemoveScript(ScriptAssetPtr script)
@@ -107,17 +116,18 @@ void ScriptManager::RemoveScript(ScriptAssetPtr script)
 
     if(it != scripts.end())
     {
-        engine->DiscardModule((*it)->path.stem().string().c_str());
+        for(int i = 0; i < (*it)->modulesCount; i++)
+            engine->DiscardModule(((*it)->path.stem().string() + std::to_string(i)).c_str());
 
         scripts.erase(it);
     }
 }
 
-std::unordered_map<std::string, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script)
+std::unordered_map<std::string, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script, uint32_t moduleIndex)
 {
     std::unordered_map<std::string, void*> variables;
 
-    auto module = engine->GetModule(script->path.stem().string().c_str());
+    auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
     auto count = module->GetGlobalVarCount();
     
     for(int i = 0; i < count; i++)
@@ -210,7 +220,8 @@ void ScriptManager::SetDefaultNamespace(std::string_view name)
 void ScriptManager::DiscardModules()
 {
     for(auto i : scripts)
-        engine->DiscardModule(i->path.stem().string().c_str());
+        for(int j = 0; j < i->modulesCount; j++)
+            engine->DiscardModule((i->path.stem().string() + std::to_string(j)).c_str());
 }
 
 void ScriptManager::RegisterLog()
@@ -338,6 +349,7 @@ void ScriptManager::RegisterQuat()
     AddFunction("vec3 rotate(const quat& in, const vec3& in)", WRAP_FN_PR(glm::rotate, (const glm::quat&, const glm::vec3&), glm::vec3));
     AddFunction("quat normalize(const quat& in)", WRAP_FN_PR(glm::normalize, (const glm::quat&), glm::quat));
 
+    AddFunction("vec3 eulerAngles(const quat& in)", WRAP_FN_PR(glm::eulerAngles, (const glm::quat&), glm::vec3));
     AddFunction("float length(const quat& in)", WRAP_FN_PR(glm::length, (const glm::quat&), float));
     AddFunction("quat conjugate(const quat& in)", WRAP_FN_PR(glm::conjugate, (const glm::quat&), glm::quat));
     AddFunction("quat inverse(const quat& in)", WRAP_FN_PR(glm::inverse, (const glm::quat&), glm::quat));
@@ -395,6 +407,22 @@ void ScriptManager::RegisterGLM()
     AddFunction("float fract(float)", WRAP_FN_PR(glm::fract, (float), float));
     AddFunction("vec2 fract(const vec2& in)", WRAP_FN_PR(glm::fract, (const glm::vec2&), glm::vec2));
     AddFunction("vec3 fract(const vec3& in)", WRAP_FN_PR(glm::fract, (const glm::vec3&), glm::vec3));
+}
+
+void ScriptManager::RegisterBody()
+{
+    AddValueType("BodyID", sizeof(JPH::BodyID), asGetTypeTraits<JPH::BodyID>() | asOBJ_POD, {}, {});
+
+    AddType("Body", sizeof(JPH::Body),
+        {
+            { "const BodyID& GetID() const", WRAP_MFN(JPH::Body, GetID) },
+            { "glm::vec3 GetPosition() const", WRAP_OBJ_LAST(as::GetPosition) },
+            { "glm::quat GetRotation() const", WRAP_OBJ_LAST(as::GetRotation) },
+            { "void SetPosition(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetPosition) },
+            { "void SetRotation(const glm::quat& in)", WRAP_OBJ_LAST(as::SetRotation) },
+            { "void SetPositionAndRotation(const glm::vec3& in, const glm::quat& in)", WRAP_OBJ_LAST(as::SetPositionAndRotation) }
+        }, {}
+    );
 }
 
 void ScriptManager::RegisterExtent2D()
@@ -649,6 +677,15 @@ void ScriptManager::RegisterLightComponent()
     );
 }
 
+void ScriptManager::RegisterBodyComponent()
+{
+    AddType("RigidBodyComponent", sizeof(RigidBodyComponent), {},
+        {
+            { "JPH::Body@ body", asOFFSET(RigidBodyComponent, body) }
+        }
+    );
+}
+
 void ScriptManager::RegisterEntity()
 {
     // It will be updated as soon as the Angelscript developer will write some docs on function templates
@@ -657,7 +694,8 @@ void ScriptManager::RegisterEntity()
             { "NameComponent@ GetNameComponent()", WRAP_MFN(Entity, GetComponent<NameComponent>) },
             { "TransformComponent@ GetTransformComponent()", WRAP_MFN(Entity, GetComponent<TransformComponent>) },
             { "LightComponent@ GetLightComponent()", WRAP_MFN(Entity, GetComponent<LightComponent>) },
-            { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) }
+            { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) },
+            { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) }
         },
         {}
     );

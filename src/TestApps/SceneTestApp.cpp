@@ -126,6 +126,8 @@ void SceneTestApp::LoadTextures()
     stopIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/stop.png", true);
     buildIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/build.png", true);
 
+    lightIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/light.png", true);
+
     assetIcons = 
     {
         { dev::Asset::Type::Texture, textureIcon },
@@ -1189,6 +1191,33 @@ void SceneTestApp::DrawViewport()
     canMoveCamera = ImGui::IsWindowHovered();
 
     DrawImGuizmo();
+
+    auto lights = scene.GetRegistry().view<dev::TransformComponent, dev::LightComponent>();
+
+    for(auto entity : lights)
+    {
+        auto[transform, light] = 
+            lights.get<dev::TransformComponent, dev::LightComponent>(entity);
+
+        auto screenPos = camera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
+
+        if(!glm::any(glm::isnan(screenPos)))
+        {
+            ImGui::PushID((int)entity);
+
+            ImGui::SetCursorPos({ screenPos.x - 32.0f, screenPos.y - 36.0f });
+
+            ImGui::Image(
+                lightIcon->nativeHandle,
+                { 64, 64 },
+                { 0, 0 },
+                { 1, 1 },
+                { light.color.x, light.color.y, light.color.z, 1.0f }
+            );
+
+            ImGui::PopID();
+        }
+    }
 
     ImGui::End();
 

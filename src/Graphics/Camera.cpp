@@ -79,6 +79,46 @@ void Camera::OnEvent(Event& event)
     }
 }
 
+glm::vec2 Camera::WorldToScreen(const glm::vec3& pos) const
+{
+    auto viewPos = viewMatrix * glm::vec4(pos, 1.0f);
+
+    // Not in front of the camera
+    if(viewPos.z > 0.0)
+        return { NAN, NAN };
+
+    auto clipPos = projectionMatrix * viewPos;
+
+    clipPos /= clipPos.w;
+
+    glm::vec2 res = {
+        (clipPos.x + 1.0f) * viewportSize.x / 2.0f,
+        (1.0f - clipPos.y) * viewportSize.y / 2.0f
+    };
+    
+    return (
+        glm::all(
+            glm::lessThanEqual(glm::abs(res), viewportSize)
+        ) ? res : glm::vec2(NAN, NAN)
+    );
+}
+
+glm::vec3 Camera::ScreenToWorld(const glm::vec2& pos) const
+{
+    auto clipPos = glm::vec4(
+        (pos.x / viewportSize.x) * 2.0f - 1.0f,
+        1.0f - (pos.y / viewportSize.y) * 2.0f,
+        0.0f,
+        1.0f
+    );
+
+    auto inv = glm::inverse(projectionMatrix * viewMatrix);
+
+    auto worldPos = inv * clipPos;
+
+    return worldPos / worldPos.w;
+}
+
 glm::vec3 Camera::GetUp() const
 {
     return up;

@@ -35,6 +35,9 @@ public:
 
     void OnEvent(Event& event) override;
 
+    glm::vec2 WorldToScreen(const glm::vec3& pos) const;
+    glm::vec3 ScreenToWorld(const glm::vec2& pos) const;
+
     glm::vec3 GetUp() const;
     glm::vec3 GetLookAt() const;
     glm::mat4 GetViewMatrix() const;

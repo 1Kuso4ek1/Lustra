@@ -123,7 +123,7 @@ private:
                          fileIcon, folderIcon, textureIcon,
                          materialIcon, modelIcon, scriptIcon,
                          playIcon, pauseIcon, stopIcon,
-                         buildIcon;
+                         buildIcon, lightIcon;
     dev::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<dev::Asset::Type, dev::TextureAssetPtr> assetIcons;

@@ -81,6 +81,8 @@ private:
     void RegisterKeyboard();
     void RegisterMouse();
 
+    void RegisterTimer();
+
     void RegisterNameComponent();
     void RegisterTransformComponent();
     void RegisterCameraComponent();

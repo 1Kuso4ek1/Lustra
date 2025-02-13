@@ -409,6 +409,9 @@ void ScriptManager::RegisterGLM()
     AddFunction("float fract(float)", WRAP_FN_PR(glm::fract, (float), float));
     AddFunction("vec2 fract(const vec2& in)", WRAP_FN_PR(glm::fract, (const glm::vec2&), glm::vec2));
     AddFunction("vec3 fract(const vec3& in)", WRAP_FN_PR(glm::fract, (const glm::vec3&), glm::vec3));
+
+    AddFunction("bool isnan(float)", WRAP_FN_PR(std::isnan, (float), bool));
+    AddFunction("bool isinf(float)", WRAP_FN_PR(std::isinf, (float), bool));
 }
 
 void ScriptManager::RegisterBody()
@@ -462,6 +465,9 @@ void ScriptManager::RegisterCamera()
             { "void SetUp(const glm::vec3& in)", WRAP_MFN(Camera, SetUp) },
             { "void SetLookAt(const glm::vec3& in)", WRAP_MFN(Camera, SetLookAt) },
             { "void SetViewMatrix(const glm::mat4& in)", WRAP_MFN(Camera, SetViewMatrix) },
+
+            { "glm::vec2 WorldToScreen(const glm::vec3& in) const", WRAP_MFN(Camera, WorldToScreen) },
+            { "glm::vec3 ScreenToWorld(const glm::vec2& in) const", WRAP_MFN(Camera, ScreenToWorld) },
 
             { "glm::vec3 GetUp() const", WRAP_MFN(Camera, GetUp) },
             { "glm::vec3 GetLookAt() const", WRAP_MFN(Camera, GetLookAt) },
@@ -634,6 +640,17 @@ void ScriptManager::RegisterMouse()
             { "MButton8", (int)(Mouse::Button::MButton8) },
             { "Last", (int)(Mouse::Button::Last) }
         }
+    );
+}
+
+void ScriptManager::RegisterTimer()
+{
+    AddValueType("Timer", sizeof(Timer), asGetTypeTraits<Timer>() | asOBJ_POD,
+        {
+            { "void Reset()", WRAP_MFN(Timer, Reset) },
+            { "float GetElapsedSeconds()", WRAP_MFN(Timer, GetElapsedSeconds) },
+            { "float GetElapsedMilliseconds()", WRAP_MFN(Timer, GetElapsedMilliseconds) }
+        }, {}
     );
 }
 

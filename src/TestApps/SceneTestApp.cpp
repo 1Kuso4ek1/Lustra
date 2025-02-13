@@ -1037,11 +1037,11 @@ bool SceneTestApp::DrawCreateScriptMenu(const std::filesystem::path& currentDire
         {
             std::ofstream scriptFile(currentDirectory / newScriptName);
             scriptFile << 
-                "void Start(Entity entity)\n"
+                "void Start(Scene@ scene, Entity entity)\n"
                 "{\n"
                 "    \n"
                 "}\n\n"
-                "void Update(Entity entity, float deltaTime)\n"
+                "void Update(Scene@ scene, Entity entity, float deltaTime)\n"
                 "{\n"
                 "    \n"
                 "}\n";

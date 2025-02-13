@@ -13,6 +13,7 @@
 #include <LLGL/Log.h>
 
 #include <Scene.hpp>
+#include <Entity.hpp>
 
 namespace dev
 {
@@ -237,6 +238,50 @@ inline void SetRotation(const glm::quat& rot, JPH::Body* body)
 inline void SetPositionAndRotation(const glm::vec3& pos, const glm::quat& rot, JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(body->GetID(), { pos.x, pos.y, pos.z }, { rot.x, rot.y, rot.z, rot.w }, JPH::EActivation::Activate);
+}
+
+inline void AddForce(const glm::vec3& force, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().AddForce(body->GetID(), { force.x, force.y, force.z });
+}
+
+inline void AddTorque(const glm::vec3& torque, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().AddTorque(body->GetID(), { torque.x, torque.y, torque.z });
+}
+
+inline void AddImpulse(const glm::vec3& impulse, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().AddImpulse(body->GetID(), { impulse.x, impulse.y, impulse.z });
+}
+
+inline void SetLinearVelocity(const glm::vec3& velocity, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetLinearVelocity(body->GetID(), { velocity.x, velocity.y, velocity.z });
+}
+
+inline void SetAngularVelocity(const glm::vec3& velocity, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetAngularVelocity(body->GetID(), { velocity.x, velocity.y, velocity.z });
+}
+
+inline glm::vec3 GetLinearVelocity(JPH::Body* body)
+{
+    auto vel = body->GetLinearVelocity();
+    
+    return { vel.GetX(), vel.GetY(), vel.GetZ() };
+}
+
+inline glm::vec3 GetAngularVelocity(JPH::Body* body)
+{
+    auto vel = body->GetAngularVelocity();
+
+    return { vel.GetX(), vel.GetY(), vel.GetZ() };
+}
+
+inline glm::mat4 GetWorldTransform(Entity entity, Scene* scene)
+{
+    return scene->GetWorldTransform(entity);
 }
 
 }

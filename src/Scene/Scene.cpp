@@ -31,10 +31,11 @@ void Scene::Start()
 
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Start(Entity)",
+                "void Start(Scene@, Entity)",
                 [&](auto context)
                 {
-                    context->SetArgObject(0, (void*)(&ent));
+                    context->SetArgAddress(0, (void*)(this));
+                    context->SetArgObject(1, (void*)(&ent));
                 },
                 script.moduleIndex
             );
@@ -55,11 +56,12 @@ void Scene::Update(float deltaTime)
 
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Update(Entity, float)",
+                "void Update(Scene@, Entity, float)",
                 [&](auto context)
                 {
-                    context->SetArgObject(0, (void*)(&ent));
-                    context->SetArgFloat(1, deltaTime);
+                    context->SetArgAddress(0, (void*)(this));
+                    context->SetArgObject(1, (void*)(&ent));
+                    context->SetArgFloat(2, deltaTime);
                 },
                 script.moduleIndex
             );
@@ -160,14 +162,25 @@ void Scene::RemoveEntity(Entity entity)
 
 Entity Scene::CreateEntity()
 {
-    Entity entity{ registry.create(), this };
-
-    return entity;
+    return { registry.create(), this };
 }
 
 Entity Scene::GetEntity(entt::id_type id)
 {
     return { entt::entity(id), this };
+}
+
+Entity Scene::GetEntity(const std::string& name)
+{
+    Entity ret{};
+
+    registry.view<NameComponent>().each([&](auto entity, auto& component)
+    {
+        if(component.name == name)
+            ret = { entity, this };
+    });
+
+    return ret;
 }
 
 bool Scene::IsChildOf(Entity child, Entity parent)

@@ -32,6 +32,7 @@ public:
 
     Entity CreateEntity();
     Entity GetEntity(entt::id_type id);
+    Entity GetEntity(const std::string& name); // Not using std::string_view since this function is used by Angelscript
 
     bool IsChildOf(Entity child, Entity parent);
 

@@ -49,6 +49,8 @@ ScriptManager::ScriptManager()
     RegisterLightComponent();
     RegisterBodyComponent();
     RegisterEntity();
+
+    RegisterScene();
 }
 
 ScriptManager::~ScriptManager()
@@ -420,7 +422,14 @@ void ScriptManager::RegisterBody()
             { "glm::quat GetRotation() const", WRAP_OBJ_LAST(as::GetRotation) },
             { "void SetPosition(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetPosition) },
             { "void SetRotation(const glm::quat& in)", WRAP_OBJ_LAST(as::SetRotation) },
-            { "void SetPositionAndRotation(const glm::vec3& in, const glm::quat& in)", WRAP_OBJ_LAST(as::SetPositionAndRotation) }
+            { "void SetPositionAndRotation(const glm::vec3& in, const glm::quat& in)", WRAP_OBJ_LAST(as::SetPositionAndRotation) },
+            { "void AddForce(const glm::vec3& in)", WRAP_OBJ_LAST(as::AddForce) },
+            { "void AddTorque(const glm::vec3& in)", WRAP_OBJ_LAST(as::AddTorque) },
+            { "void AddImpulse(const glm::vec3& in)", WRAP_OBJ_LAST(as::AddImpulse) },
+            { "void SetLinearVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetLinearVelocity) },
+            { "void SetAngularVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetAngularVelocity) },
+            { "glm::vec3 GetLinearVelocity() const", WRAP_OBJ_LAST(as::GetLinearVelocity) },
+            { "glm::vec3 GetAngularVelocity() const", WRAP_OBJ_LAST(as::GetAngularVelocity) }
         }, {}
     );
 }
@@ -698,6 +707,21 @@ void ScriptManager::RegisterEntity()
             { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) }
         },
         {}
+    );
+}
+
+void ScriptManager::RegisterScene()
+{
+    AddType("Scene", sizeof(Scene),
+        {
+            { "Entity CreateEntity()", WRAP_MFN(Scene, CreateEntity) },
+            { "void RemoveEntity(const Entity& in)", WRAP_MFN(Scene, RemoveEntity) },
+            { "void ReparentEntity(const Entity& in, const Entity& in)", WRAP_MFN(Scene, ReparentEntity) },
+            { "Entity GetEntity(uint32)", WRAP_MFN_PR(Scene, GetEntity, (entt::id_type), Entity) },
+            { "Entity GetEntity(const string& in)", WRAP_MFN_PR(Scene, GetEntity, (const std::string&), Entity) },
+            { "bool IsChildOf(const Entity& in, const Entity& in)", WRAP_MFN(Scene, IsChildOf) },
+            { "glm::mat4 GetWorldTransform(Entity)", WRAP_OBJ_LAST(as::GetWorldTransform) }
+        }, {}
     );
 }
 

@@ -88,6 +88,8 @@ private:
     void RegisterBodyComponent();
     void RegisterEntity();
 
+    void RegisterScene();
+
 private:
     std::vector<ScriptAssetPtr> scripts;
 

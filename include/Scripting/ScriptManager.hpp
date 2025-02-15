@@ -92,9 +92,20 @@ private:
 
     void RegisterNameComponent();
     void RegisterTransformComponent();
+    void RegisterMeshComponent();
+    void RegisterMeshRendererComponent();
     void RegisterCameraComponent();
     void RegisterLightComponent();
     void RegisterBodyComponent();
+
+    void RegisterProceduralSkyComponent();
+    void RegisterHDRISkyComponent();
+
+    void RegisterTonemapComponent();
+    void RegisterBloomComponent();
+    void RegisterGTAOComponent();
+    void RegisterSSRComponent();
+
     void RegisterEntity();
 
     void RegisterScene();

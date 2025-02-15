@@ -348,6 +348,11 @@ inline T* GetAssetPtr(std::shared_ptr<T>* asset)
     return asset->get();
 }
 
+inline MaterialAssetPtr MaterialListAt(uint64_t index, MeshRendererComponent* component)
+{
+    return component->materials[index];
+}
+
 }
 
 }

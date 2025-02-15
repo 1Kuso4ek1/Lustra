@@ -15,9 +15,10 @@ void Start(Scene@ scene, Entity entity)
     InputManager::MapKeyboardAction("Up", Keyboard::Key::Up);
     InputManager::MapKeyboardAction("Up", Keyboard::Key::W);
 
-    TextureAssetPtr asset = AssetManager::LoadTexture("default", true);
-    TextureAsset@ textureAsset = asset.get();
-    textureAsset.print();
+    auto@ material = entity.GetMeshRendererComponent();
+    material.at(0).get().albedo = glm::vec4(1.0, 0.0, 0.0, 1.0);
+
+    entity.GetMeshComponent().model = AssetManager::LoadModel("cube", true);
 }
 
 void Update(Scene@ scene, Entity entity, float deltaTime)

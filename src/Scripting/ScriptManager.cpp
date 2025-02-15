@@ -58,9 +58,20 @@ ScriptManager::ScriptManager()
 
     RegisterNameComponent();
     RegisterTransformComponent();
+    RegisterMeshComponent();
+    RegisterMeshRendererComponent();
     RegisterCameraComponent();
     RegisterLightComponent();
     RegisterBodyComponent();
+
+    RegisterProceduralSkyComponent();
+    RegisterHDRISkyComponent();
+
+    RegisterTonemapComponent();
+    RegisterBloomComponent();
+    RegisterGTAOComponent();
+    RegisterSSRComponent();
+
     RegisterEntity();
 
     RegisterScene();
@@ -682,7 +693,6 @@ void ScriptManager::RegisterTextureAsset()
 
     AddValueType("TextureAssetPtr", sizeof(TextureAssetPtr), asGetTypeTraits<TextureAssetPtr>() | asOBJ_POD,
         {
-            { "TextureAssetPtr& opAssign(const TextureAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<TextureAsset>) },
             { "TextureAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<TextureAsset>) }
         }, {}
     );
@@ -692,11 +702,35 @@ void ScriptManager::RegisterTextureAsset()
 
 void ScriptManager::RegisterMaterialAsset()
 {
-    AddType("MaterialAsset", sizeof(MaterialAsset), {}, {});
+    AddValueType("MaterialProperty", sizeof(MaterialAsset::Property), asGetTypeTraits<MaterialAsset::Property>() | asOBJ_POD,
+        {
+            { "MaterialProperty& opAssign(const glm::vec4& in)", WRAP_MFN_PR(MaterialAsset::Property, operator=, (const glm::vec4&), MaterialAsset::Property&) },
+            { "MaterialProperty& opAssign(const TextureAssetPtr& in)", WRAP_MFN_PR(MaterialAsset::Property, operator=, (const TextureAssetPtr&), MaterialAsset::Property&) },
+        },
+        {
+            { "int type", asOFFSET(MaterialAsset::Property, type) },
+            { "glm::vec4 value", asOFFSET(MaterialAsset::Property, value) },
+            { "TextureAssetPtr texture", asOFFSET(MaterialAsset::Property, texture) }
+        }
+    );
+
+    AddEnum("MaterialPropertyType", { "PropertyTexture", "PropertyColor" });
+
+    AddType("MaterialAsset", sizeof(MaterialAsset), {},
+        {
+            { "MaterialProperty albedo", asOFFSET(MaterialAsset, albedo) },
+            { "MaterialProperty normal", asOFFSET(MaterialAsset, normal) },
+            { "MaterialProperty metallic", asOFFSET(MaterialAsset, metallic) },
+            { "MaterialProperty roughness", asOFFSET(MaterialAsset, roughness) },
+            { "MaterialProperty ao", asOFFSET(MaterialAsset, ao) },
+            { "MaterialProperty emission", asOFFSET(MaterialAsset, emission) },
+            { "float emissionStrength", asOFFSET(MaterialAsset, emissionStrength) },
+            { "glm::vec2 uvScale", asOFFSET(MaterialAsset, uvScale) }
+        }
+    );
 
     AddValueType("MaterialAssetPtr", sizeof(MaterialAssetPtr), asGetTypeTraits<MaterialAssetPtr>() | asOBJ_POD,
         {
-            { "MaterialAssetPtr& opAssign(const MaterialAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<MaterialAsset>) },
             { "MaterialAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<MaterialAsset>) }
         }, {}
     );
@@ -710,7 +744,6 @@ void ScriptManager::RegisterModelAsset()
 
     AddValueType("ModelAssetPtr", sizeof(ModelAssetPtr), asGetTypeTraits<ModelAssetPtr>() | asOBJ_POD,
         {
-            { "ModelAssetPtr& opAssign(const ModelAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<ModelAsset>) },
             { "ModelAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ModelAsset>) }
         }, {}
     );
@@ -760,6 +793,24 @@ void ScriptManager::RegisterTransformComponent()
     );
 }
 
+void ScriptManager::RegisterMeshComponent()
+{
+    AddType("MeshComponent", sizeof(MeshComponent), {},
+        {
+            { "ModelAssetPtr model", asOFFSET(MeshComponent, model) }
+        }
+    );
+}
+
+void ScriptManager::RegisterMeshRendererComponent()
+{
+    AddType("MeshRendererComponent", sizeof(MeshRendererComponent),
+        {
+            { "MaterialAssetPtr at(uint64)", WRAP_OBJ_LAST(as::MaterialListAt) }
+        }, {}
+    );
+}
+
 void ScriptManager::RegisterCameraComponent()
 {
     AddType("CameraComponent", sizeof(CameraComponent),
@@ -794,16 +845,114 @@ void ScriptManager::RegisterBodyComponent()
     );
 }
 
+void ScriptManager::RegisterProceduralSkyComponent()
+{
+    AddType("ProceduralSkyComponent", sizeof(ProceduralSkyComponent),
+        {
+            { "void Build()", WRAP_MFN(ProceduralSkyComponent, Build) }
+        },
+        {
+            { "float time", asOFFSET(ProceduralSkyComponent, time) },
+            { "float cirrus", asOFFSET(ProceduralSkyComponent, cirrus) },
+            { "float cumulus", asOFFSET(ProceduralSkyComponent, cumulus) },
+            { "int flip", asOFFSET(ProceduralSkyComponent, flip) }
+        }
+    );
+}
+
+void ScriptManager::RegisterHDRISkyComponent()
+{
+    AddType("HDRISkyComponent", sizeof(HDRISkyComponent),
+        {
+            { "void Build()", WRAP_MFN(HDRISkyComponent, Build) }
+        },
+        {
+            { "TextureAssetPtr environmentMap", asOFFSET(HDRISkyComponent, environmentMap) },
+            { "Extent2D resolution", asOFFSET(HDRISkyComponent, resolution) }
+        }
+    );
+}
+
+void ScriptManager::RegisterTonemapComponent()
+{
+    AddType("TonemapComponent", sizeof(TonemapComponent), {},
+        {
+            { "int algorithm", asOFFSET(TonemapComponent, algorithm) },
+            { "float exposure", asOFFSET(TonemapComponent, exposure) },
+            { "glm::vec3 colorGrading", asOFFSET(TonemapComponent, colorGrading) },
+            { "float colorGradingIntensity", asOFFSET(TonemapComponent, colorGradingIntensity) },
+            { "float vignetteIntensity", asOFFSET(TonemapComponent, vignetteIntensity) },
+            { "float vignetteRoundness", asOFFSET(TonemapComponent, vignetteRoundness) },
+            { "float filmGrain", asOFFSET(TonemapComponent, filmGrain) },
+            { "float contrast", asOFFSET(TonemapComponent, contrast) },
+            { "float saturation", asOFFSET(TonemapComponent, saturation) },
+            { "float brightness", asOFFSET(TonemapComponent, brightness) },
+            { "TextureAssetPtr lut", asOFFSET(TonemapComponent, lut) }
+        }
+    );
+}
+
+void ScriptManager::RegisterBloomComponent()
+{
+    AddType("BloomComponent", sizeof(BloomComponent),
+        {
+            { "void SetupPostProcessing()", WRAP_MFN(BloomComponent, SetupPostProcessing) }
+        },
+        {
+            { "float threshold", asOFFSET(BloomComponent, threshold) },
+            { "float strength", asOFFSET(BloomComponent, strength) },
+            { "float resolutionScale", asOFFSET(BloomComponent, resolutionScale) }
+        }
+    );
+}
+
+void ScriptManager::RegisterGTAOComponent()
+{
+    AddType("GTAOComponent", sizeof(GTAOComponent),
+        {
+            { "void SetupPostProcessing()", WRAP_MFN(GTAOComponent, SetupPostProcessing) }
+        },
+        {
+            { "float resolutionScale", asOFFSET(GTAOComponent, resolutionScale) }
+        }
+    );
+}
+
+void ScriptManager::RegisterSSRComponent()
+{
+    AddType("SSRComponent", sizeof(SSRComponent),
+        {
+            { "void SetupPostProcessing()", WRAP_MFN(SSRComponent, SetupPostProcessing) }
+        },
+        {
+            { "float resolutionScale", asOFFSET(SSRComponent, resolutionScale) },
+            { "int maxSteps", asOFFSET(SSRComponent, maxSteps) },
+            { "int maxBinarySearchSteps", asOFFSET(SSRComponent, maxBinarySearchSteps) },
+            { "float rayStep", asOFFSET(SSRComponent, rayStep) }
+        }
+    );
+}
+
 void ScriptManager::RegisterEntity()
 {
-    // It will be updated as soon as the Angelscript developer will write some docs on function templates
+    // It will be updated as soon as the Angelscript developer writes some docs on function templates
     AddValueType("Entity", sizeof(Entity), asGetTypeTraits<Entity>() | asOBJ_POD,
         {
             { "NameComponent@ GetNameComponent()", WRAP_MFN(Entity, GetComponent<NameComponent>) },
             { "TransformComponent@ GetTransformComponent()", WRAP_MFN(Entity, GetComponent<TransformComponent>) },
+            { "MeshComponent@ GetMeshComponent()", WRAP_MFN(Entity, GetComponent<MeshComponent>) },
+            { "MeshRendererComponent@ GetMeshRendererComponent()", WRAP_MFN(Entity, GetComponent<MeshRendererComponent>) },
             { "LightComponent@ GetLightComponent()", WRAP_MFN(Entity, GetComponent<LightComponent>) },
             { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) },
-            { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) }
+            { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) },
+
+            { "ProceduralSkyComponent@ GetProceduralSkyComponent()", WRAP_MFN(Entity, GetComponent<ProceduralSkyComponent>) },
+            { "HDRISkyComponent@ GetHDRISkyComponent()", WRAP_MFN(Entity, GetComponent<HDRISkyComponent>) },
+
+            { "TonemapComponent@ GetTonemapComponent()", WRAP_MFN(Entity, GetComponent<TonemapComponent>) },
+            { "BloomComponent@ GetBloomComponent()", WRAP_MFN(Entity, GetComponent<BloomComponent>) },
+            { "GTAOComponent@ GetGTAOComponent()", WRAP_MFN(Entity, GetComponent<GTAOComponent>) },
+            { "SSRComponent@ GetSSRComponent()", WRAP_MFN(Entity, GetComponent<SSRComponent>) }
         },
         {}
     );

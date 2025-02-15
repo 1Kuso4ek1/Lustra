@@ -327,6 +327,27 @@ inline bool IsActionPressed(const std::string& action)
     return InputManager::Get().IsActionPressed(action);
 }
 
+inline TextureAssetPtr LoadTexture(const std::string& path, bool relativeToAssetsDir = false)
+{
+    return AssetManager::Get().Load<TextureAsset>(path, relativeToAssetsDir);
+}
+
+inline MaterialAssetPtr LoadMaterial(const std::string& path, bool relativeToAssetsDir = false)
+{
+    return AssetManager::Get().Load<MaterialAsset>(path, relativeToAssetsDir);
+}
+
+inline ModelAssetPtr LoadModel(const std::string& path, bool relativeToAssetsDir = false)
+{
+    return AssetManager::Get().Load<ModelAsset>(path, relativeToAssetsDir);
+}
+
+template<class T>
+inline T* GetAssetPtr(std::shared_ptr<T>* asset)
+{
+    return asset->get();
+}
+
 }
 
 }

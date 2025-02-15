@@ -45,7 +45,16 @@ ScriptManager::ScriptManager()
     RegisterInputManager();
 
     SetDefaultNamespace("");
+    RegisterTextureAsset();
+    RegisterMaterialAsset();
+    RegisterModelAsset();
+    
+    SetDefaultNamespace("AssetManager");
+    RegisterAssetManager();
+
+    SetDefaultNamespace("");
     RegisterCamera();
+    RegisterTimer();
 
     RegisterNameComponent();
     RegisterTransformComponent();
@@ -665,6 +674,55 @@ void ScriptManager::RegisterInputManager()
     AddFunction("void MapKeyboardAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Keyboard::Key), void));
     AddFunction("void MapMouseAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Mouse::Button), void));
     AddFunction("bool IsActionPressed(const string& in)", WRAP_FN(as::IsActionPressed));
+}
+
+void ScriptManager::RegisterTextureAsset()
+{
+    AddType("TextureAsset", sizeof(TextureAsset), {}, {});
+
+    AddValueType("TextureAssetPtr", sizeof(TextureAssetPtr), asGetTypeTraits<TextureAssetPtr>() | asOBJ_POD,
+        {
+            { "TextureAssetPtr& opAssign(const TextureAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<TextureAsset>) },
+            { "TextureAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<TextureAsset>) }
+        }, {}
+    );
+
+    AddTypeConstructor("TextureAssetPtr", "void f(const TextureAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<TextureAssetPtr>));
+}
+
+void ScriptManager::RegisterMaterialAsset()
+{
+    AddType("MaterialAsset", sizeof(MaterialAsset), {}, {});
+
+    AddValueType("MaterialAssetPtr", sizeof(MaterialAssetPtr), asGetTypeTraits<MaterialAssetPtr>() | asOBJ_POD,
+        {
+            { "MaterialAssetPtr& opAssign(const MaterialAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<MaterialAsset>) },
+            { "MaterialAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<MaterialAsset>) }
+        }, {}
+    );
+
+    AddTypeConstructor("MaterialAssetPtr", "void f(const MaterialAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<MaterialAssetPtr>));
+}
+
+void ScriptManager::RegisterModelAsset()
+{
+    AddType("ModelAsset", sizeof(ModelAsset), {}, {});
+
+    AddValueType("ModelAssetPtr", sizeof(ModelAssetPtr), asGetTypeTraits<ModelAssetPtr>() | asOBJ_POD,
+        {
+            { "ModelAssetPtr& opAssign(const ModelAssetPtr& in)", WRAP_OBJ_LAST(as::AssignType<ModelAsset>) },
+            { "ModelAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ModelAsset>) }
+        }, {}
+    );
+
+    AddTypeConstructor("ModelAssetPtr", "void f(const ModelAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<ModelAssetPtr>));
+}
+
+void ScriptManager::RegisterAssetManager()
+{
+    AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false)", WRAP_FN(as::LoadTexture));
+    AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false)", WRAP_FN(as::LoadMaterial));
+    AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false)", WRAP_FN(as::LoadModel));
 }
 
 void ScriptManager::RegisterTimer()

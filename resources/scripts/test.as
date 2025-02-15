@@ -14,6 +14,10 @@ void Start(Scene@ scene, Entity entity)
     InputManager::MapKeyboardAction("Up", Keyboard::Key::Space);
     InputManager::MapKeyboardAction("Up", Keyboard::Key::Up);
     InputManager::MapKeyboardAction("Up", Keyboard::Key::W);
+
+    TextureAssetPtr asset = AssetManager::LoadTexture("default", true);
+    TextureAsset@ textureAsset = asset.get();
+    textureAsset.print();
 }
 
 void Update(Scene@ scene, Entity entity, float deltaTime)

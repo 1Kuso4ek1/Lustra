@@ -83,6 +83,11 @@ private:
     void RegisterMouse();
     void RegisterInputManager();
 
+    void RegisterTextureAsset();
+    void RegisterMaterialAsset();
+    void RegisterModelAsset();
+    void RegisterAssetManager();
+
     void RegisterTimer();
 
     void RegisterNameComponent();

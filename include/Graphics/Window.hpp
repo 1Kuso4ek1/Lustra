@@ -59,6 +59,17 @@ private:
     GLFWwindow* window{};
 };
 
+class WindowResizeEvent : public Event
+{
+public:
+    WindowResizeEvent(const LLGL::Extent2D& size) : Event(Type::WindowResize), size(size) {}
+
+    LLGL::Extent2D GetSize() const { return size; }
+
+private:
+    LLGL::Extent2D size;
+};
+
 using WindowPtr = std::shared_ptr<Window>;
 
 }

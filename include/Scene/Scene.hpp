@@ -12,7 +12,7 @@ namespace dev
 
 class Entity;
 
-class Scene
+class Scene : public EventListener
 {
 public:
     Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>());
@@ -24,8 +24,12 @@ public:
     void Update(float deltaTime);
     void Draw(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
+    void OnEvent(Event& event) override;
+
     void SetUpdatePhysics(bool updatePhysics);
     void ToggleUpdatePhysics();
+    void SetIsRunning(bool running);
+    void ToggleIsRunning();
 
     void ReparentEntity(Entity child, Entity parent);
 
@@ -85,6 +89,7 @@ private:
     LLGL::Texture* ApplySSR(LLGL::Texture* frame);
 
 private:
+    bool isRunning = false;
     bool updatePhysics = false;
 
 private:

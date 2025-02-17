@@ -4,6 +4,7 @@
 #include <EventManager.hpp>
 #include <AssetManager.hpp>
 #include <ModelAsset.hpp>
+#include <Window.hpp>
 
 namespace dev
 {

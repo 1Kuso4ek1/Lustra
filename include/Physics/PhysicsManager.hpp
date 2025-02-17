@@ -3,6 +3,7 @@
 
 #include <LayerFilters.hpp>
 #include <BroadPhaseLayer.hpp>
+#include <CollisionListener.hpp>
 
 namespace dev
 {
@@ -24,6 +25,7 @@ public:
     JPH::BodyInterface& GetBodyInterface();
 
 private:
+    std::unique_ptr<CollisionListener> collisionListener;
     std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
     std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
 

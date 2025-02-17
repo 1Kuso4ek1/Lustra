@@ -88,6 +88,10 @@ private:
     void RegisterModelAsset();
     void RegisterAssetManager();
 
+    void RegisterWindowResizeEvent();
+    void RegisterAssetLoadedEvent();
+    void RegisterCollisionEvent();
+
     void RegisterTimer();
 
     void RegisterNameComponent();

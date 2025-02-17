@@ -1,5 +1,6 @@
 #pragma once
 #include <EventManager.hpp>
+#include <Window.hpp>
 
 #include <LLGL/Types.h>
 #include <entt/fwd.hpp>

@@ -56,6 +56,10 @@ ScriptManager::ScriptManager()
     RegisterCamera();
     RegisterTimer();
 
+    RegisterWindowResizeEvent();
+    RegisterAssetLoadedEvent();
+    RegisterCollisionEvent();
+
     RegisterNameComponent();
     RegisterTransformComponent();
     RegisterMeshComponent();
@@ -93,7 +97,7 @@ void ScriptManager::Build()
 
     bool buildSucceded = true;
 
-    for(auto i : scripts)
+    for(auto& i : scripts)
     {
         for(int j = 0; j < i->modulesCount; j++)
         {
@@ -245,7 +249,7 @@ void ScriptManager::SetDefaultNamespace(std::string_view name)
 
 void ScriptManager::DiscardModules()
 {
-    for(auto i : scripts)
+    for(auto& i : scripts)
         for(int j = 0; j < i->modulesCount; j++)
             engine->DiscardModule((i->path.stem().string() + std::to_string(j)).c_str());
 }
@@ -455,6 +459,7 @@ void ScriptManager::RegisterBody()
             { "void AddImpulse(const glm::vec3& in)", WRAP_OBJ_LAST(as::AddImpulse) },
             { "void SetLinearVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetLinearVelocity) },
             { "void SetAngularVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetAngularVelocity) },
+            { "void SetIsSensor(bool)", WRAP_MFN(JPH::Body, SetIsSensor) },
             { "glm::vec3 GetLinearVelocity() const", WRAP_OBJ_LAST(as::GetLinearVelocity) },
             { "glm::vec3 GetAngularVelocity() const", WRAP_OBJ_LAST(as::GetAngularVelocity) }
         }, {}
@@ -756,6 +761,38 @@ void ScriptManager::RegisterAssetManager()
     AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false)", WRAP_FN(as::LoadTexture));
     AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false)", WRAP_FN(as::LoadMaterial));
     AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false)", WRAP_FN(as::LoadModel));
+}
+
+void ScriptManager::RegisterWindowResizeEvent()
+{
+    AddType("WindowResizeEvent", sizeof(WindowResizeEvent),
+        {
+            { "void SetHandled()", WRAP_MFN(WindowResizeEvent, SetHandled) },
+            { "bool IsHandled() const", WRAP_MFN(WindowResizeEvent, IsHandled) },
+            { "Extent2D GetSize() const", WRAP_MFN(WindowResizeEvent, GetSize) }
+        }, {}
+    );
+}
+
+void ScriptManager::RegisterAssetLoadedEvent()
+{
+    // TODO ...
+}
+
+void ScriptManager::RegisterCollisionEvent()
+{
+    AddType("CollisionEvent", sizeof(CollisionEvent),
+        {
+            { "void SetHandled()", WRAP_MFN(CollisionEvent, SetHandled) },
+            { "bool IsHandled() const", WRAP_MFN(CollisionEvent, IsHandled) },
+            { "JPH::Body@ GetBodyID1() const", WRAP_MFN(CollisionEvent, GetBody1) },
+            { "JPH::Body@ GetBodyID2() const", WRAP_MFN(CollisionEvent, GetBody2) },
+            { "glm::vec3 GetContactPosition1() const", WRAP_MFN(CollisionEvent, GetContactPosition1) },
+            { "glm::vec3 GetContactPosition2() const", WRAP_MFN(CollisionEvent, GetContactPosition2) },
+            { "glm::vec3 GetNormal() const", WRAP_MFN(CollisionEvent, GetNormal) },
+            { "float GetPenetration() const", WRAP_MFN(CollisionEvent, GetPenetration) }
+        }, {}
+    );
 }
 
 void ScriptManager::RegisterTimer()

@@ -23,20 +23,31 @@ void Scene::Start()
         SetupShadowsBuffer();
     }
 
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+    EventManager::Get().AddListener(Event::Type::Collision, this);
+
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
         if(script.script)
         {
             Entity ent{ entity, this };
 
+            auto variables = ScriptManager::Get().GetGlobalVariables(script.script, script.moduleIndex);
+
+            auto it = variables.find("Entity self");
+
+            if(it != variables.end())
+                *((Entity*)(it->second)) = ent;
+
+            it = variables.find("Scene@ scene");
+
+            if(it != variables.end())
+                *((Scene**)(it->second)) = this;
+
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Start(Scene@, Entity)",
-                [&](auto context)
-                {
-                    context->SetArgAddress(0, (void*)(this));
-                    context->SetArgObject(1, (void*)(&ent));
-                },
+                "void Start()",
+                nullptr,
                 script.moduleIndex
             );
         }
@@ -54,16 +65,12 @@ void Scene::Update(float deltaTime)
     {
         if(script.script)
         {
-            Entity ent{ entity, this };
-
             ScriptManager::Get().ExecuteFunction(
                 script.script,
-                "void Update(Scene@, Entity, float)",
+                "void Update(float)",
                 [&](auto context)
                 {
-                    context->SetArgAddress(0, (void*)(this));
-                    context->SetArgObject(1, (void*)(&ent));
-                    context->SetArgFloat(2, deltaTime);
+                    context->SetArgFloat(0, deltaTime);
                 },
                 script.moduleIndex
             );
@@ -99,6 +106,62 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     ApplyPostProcessing(renderTarget);
 }
 
+void Scene::OnEvent(Event& event)
+{
+    if(!isRunning)
+        return;
+    
+    switch(event.GetType())
+    {
+        case Event::Type::WindowResize:
+        {
+            auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+
+            registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+            {
+                if(script.script)
+                {
+                    ScriptManager::Get().ExecuteFunction(
+                        script.script,
+                        "void OnWindowResize(WindowResizeEvent@)",
+                        [&](auto context)
+                        {
+                            context->SetArgAddress(0, resizeEvent);
+                        },
+                        script.moduleIndex
+                    );
+                }
+            });
+        }
+        break;
+
+        case Event::Type::Collision:
+        {
+            auto collisionEvent = dynamic_cast<CollisionEvent*>(&event);
+
+            registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+            {
+                if(script.script)
+                {
+                    ScriptManager::Get().ExecuteFunction(
+                        script.script,
+                        "void OnCollision(CollisionEvent@)",
+                        [&](auto context)
+                        {
+                            context->SetArgAddress(0, collisionEvent);
+                        },
+                        script.moduleIndex
+                    );
+                }
+            });
+        }
+        break;
+
+        default:
+            break;
+    }
+}
+
 void Scene::SetUpdatePhysics(bool updatePhysics)
 {
     this->updatePhysics = updatePhysics;
@@ -107,6 +170,16 @@ void Scene::SetUpdatePhysics(bool updatePhysics)
 void Scene::ToggleUpdatePhysics()
 {
     updatePhysics = !updatePhysics;
+}
+
+void Scene::SetIsRunning(bool running)
+{
+    isRunning = running;
+}
+
+void Scene::ToggleIsRunning()
+{
+    isRunning = !isRunning;
 }
 
 void Scene::ReparentEntity(Entity child, Entity parent)

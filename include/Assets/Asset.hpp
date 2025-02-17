@@ -1,4 +1,6 @@
 #pragma once
+#include <Event.hpp>
+
 #include <memory>
 #include <unordered_map>
 #include <filesystem>
@@ -58,5 +60,16 @@ inline Asset::Type GetAssetType(const std::string& extension)
 
     return Asset::Type::Unknown; 
 }
+
+class AssetLoadedEvent : public Event
+{
+public:
+    AssetLoadedEvent(AssetPtr asset) : Event(Type::AssetLoaded), asset(asset) {}
+
+    AssetPtr GetAsset() const { return asset; }
+
+private:
+    AssetPtr asset;
+};
 
 }

@@ -5,11 +5,11 @@ namespace dev
 
 void InputManager::Update()
 {
-    for(auto [action, keys] : keyboardMapping)
+    for(auto const& [action, keys] : keyboardMapping)
     {
         bool isPressed = false;
 
-        for(auto key : keys)
+        for(auto& key : keys)
             if(Keyboard::IsKeyPressed(key))
             {
                 isPressed = true;
@@ -19,11 +19,11 @@ void InputManager::Update()
         actionStates[action] = isPressed;
     }
 
-    for(auto [action, buttons] : mouseMapping)
+    for(auto const& [action, buttons] : mouseMapping)
     {
         bool isPressed = false;
 
-        for(auto button : buttons)
+        for(auto& button : buttons)
             if(Mouse::IsButtonPressed(button))
             {
                 isPressed = true;

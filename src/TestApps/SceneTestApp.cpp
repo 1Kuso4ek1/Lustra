@@ -691,6 +691,8 @@ void SceneTestApp::DrawExecutionControl()
         if(!paused)
             scene.Start();
 
+        scene.SetIsRunning(true);
+
         playing = true;
         paused = false;
     }
@@ -709,7 +711,10 @@ void SceneTestApp::DrawExecutionControl()
     }
 
     if(ImGui::ImageButton("##Pause", pauseIcon->nativeHandle, { 20, 20 }))
+    {
         paused = true;
+        scene.SetIsRunning(false);
+    }
     else if(!playing || paused)
     {
         ImGui::PopStyleVar();
@@ -728,6 +733,8 @@ void SceneTestApp::DrawExecutionControl()
     {
         playing = false;
         paused = false;
+
+        scene.SetIsRunning(false);
         // Restore scene state
     }
     else if(!playing && !paused)

@@ -17,6 +17,8 @@ void PhysicsManager::Init()
     JPH::Factory::sInstance = new JPH::Factory();
     JPH::RegisterTypes();
 
+    collisionListener = std::make_unique<CollisionListener>();
+
     tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
 
     jobSystem = std::make_unique<JPH::JobSystemThreadPool>(
@@ -34,6 +36,8 @@ void PhysicsManager::Init()
         objectVsBroadPhaseFilter,
         objectLayerPairFilter
     );
+
+    physicsSystem.SetContactListener(collisionListener.get());
 }
 
 void PhysicsManager::Update(float deltaTime)

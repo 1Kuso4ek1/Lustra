@@ -397,6 +397,10 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
     ImGui::Separator();
 
+    bool isSensor = component.body->IsSensor();
+    if(ImGui::Checkbox("Is Sensor", &isSensor))
+        component.body->SetIsSensor(isSensor);
+
     if(ImGui::CollapsingHeader("Shape"))
     {
         ImGui::Indent();

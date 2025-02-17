@@ -1,13 +1,16 @@
+Entity self;
+Scene@ scene;
+
 JPH::Body@ rigidBody;
 TransformComponent@ transform;
 TransformComponent@ cameraTransform;
 
-void Start(Scene@ scene, Entity entity)
+void Start()
 {
-    Log::Write(format("{}\n", entity.GetNameComponent().name));
+    Log::Write(format("{}\n", self.GetNameComponent().name));
 
-    //@rigidBody = @entity.GetRigidBodyComponent().body;
-    @transform = @entity.GetTransformComponent();
+    //@rigidBody = @self.GetRigidBodyComponent().body;
+    @transform = @self.GetTransformComponent();
 
     @cameraTransform = @scene.GetEntity("Camera").GetTransformComponent();
 
@@ -15,14 +18,19 @@ void Start(Scene@ scene, Entity entity)
     InputManager::MapKeyboardAction("Up", Keyboard::Key::Up);
     InputManager::MapKeyboardAction("Up", Keyboard::Key::W);
 
-    auto@ material = entity.GetMeshRendererComponent();
+    auto@ material = self.GetMeshRendererComponent();
     material.at(0).get().albedo = glm::vec4(1.0, 0.0, 0.0, 1.0);
 
-    entity.GetMeshComponent().model = AssetManager::LoadModel("cube", true);
+    self.GetMeshComponent().model = AssetManager::LoadModel("cube", true);
 }
 
-void Update(Scene@ scene, Entity entity, float deltaTime)
+void Update(float deltaTime)
 {
     if(InputManager::IsActionPressed("Up"))
         transform.position.y += 1.0f * deltaTime;
+}
+
+void OnWindowResize(WindowResizeEvent@ event)
+{
+    Log::Write(format("Size: {}x{}\n", event.GetSize().width, event.GetSize().height));
 }

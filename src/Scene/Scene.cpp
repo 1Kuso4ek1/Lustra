@@ -240,6 +240,19 @@ Entity Scene::CreateEntity()
     return { registry.create(), this };
 }
 
+Entity Scene::CloneEntity(Entity entity)
+{
+    auto clone = CreateEntity();
+
+    for(auto [id, storage] : registry.storage())
+    {
+        if(storage.contains(entity))
+            storage.push(clone, storage.value(entity));
+    }
+
+    return clone;
+}
+
 Entity Scene::GetEntity(entt::id_type id)
 {
     return { entt::entity(id), this };

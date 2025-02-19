@@ -36,6 +36,7 @@ public:
     void RemoveEntity(Entity entity);
 
     Entity CreateEntity();
+    Entity CloneEntity(Entity entity);
     Entity GetEntity(entt::id_type id);
     Entity GetEntity(const std::string& name); // Not using std::string_view since this function is used by Angelscript
 

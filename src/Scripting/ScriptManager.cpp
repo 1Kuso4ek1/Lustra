@@ -989,7 +989,26 @@ void ScriptManager::RegisterEntity()
             { "TonemapComponent@ GetTonemapComponent()", WRAP_MFN(Entity, GetComponent<TonemapComponent>) },
             { "BloomComponent@ GetBloomComponent()", WRAP_MFN(Entity, GetComponent<BloomComponent>) },
             { "GTAOComponent@ GetGTAOComponent()", WRAP_MFN(Entity, GetComponent<GTAOComponent>) },
-            { "SSRComponent@ GetSSRComponent()", WRAP_MFN(Entity, GetComponent<SSRComponent>) }
+            { "SSRComponent@ GetSSRComponent()", WRAP_MFN(Entity, GetComponent<SSRComponent>) },
+
+
+
+
+            { "NameComponent@ RemoveNameComponent()", WRAP_MFN(Entity, RemoveComponent<NameComponent>) },
+            { "TransformComponent@ RemoveTransformComponent()", WRAP_MFN(Entity, RemoveComponent<TransformComponent>) },
+            { "MeshComponent@ RemoveMeshComponent()", WRAP_MFN(Entity, RemoveComponent<MeshComponent>) },
+            { "MeshRendererComponent@ RemoveMeshRendererComponent()", WRAP_MFN(Entity, RemoveComponent<MeshRendererComponent>) },
+            { "LightComponent@ RemoveLightComponent()", WRAP_MFN(Entity, RemoveComponent<LightComponent>) },
+            { "CameraComponent@ RemoveCameraComponent()", WRAP_MFN(Entity, RemoveComponent<CameraComponent>) },
+            { "RigidBodyComponent@ RemoveRigidBodyComponent()", WRAP_MFN(Entity, RemoveComponent<RigidBodyComponent>) },
+
+            { "ProceduralSkyComponent@ RemoveProceduralSkyComponent()", WRAP_MFN(Entity, RemoveComponent<ProceduralSkyComponent>) },
+            { "HDRISkyComponent@ RemoveHDRISkyComponent()", WRAP_MFN(Entity, RemoveComponent<HDRISkyComponent>) },
+
+            { "TonemapComponent@ RemoveTonemapComponent()", WRAP_MFN(Entity, RemoveComponent<TonemapComponent>) },
+            { "BloomComponent@ RemoveBloomComponent()", WRAP_MFN(Entity, RemoveComponent<BloomComponent>) },
+            { "GTAOComponent@ RemoveGTAOComponent()", WRAP_MFN(Entity, RemoveComponent<GTAOComponent>) },
+            { "SSRComponent@ RemoveSSRComponent()", WRAP_MFN(Entity, RemoveComponent<SSRComponent>) }
         },
         {}
     );
@@ -1000,11 +1019,12 @@ void ScriptManager::RegisterScene()
     AddType("Scene", sizeof(Scene),
         {
             { "Entity CreateEntity()", WRAP_MFN(Scene, CreateEntity) },
-            { "void RemoveEntity(const Entity& in)", WRAP_MFN(Scene, RemoveEntity) },
-            { "void ReparentEntity(const Entity& in, const Entity& in)", WRAP_MFN(Scene, ReparentEntity) },
+            { "void RemoveEntity(Entity)", WRAP_MFN(Scene, RemoveEntity) },
+            { "void ReparentEntity(Entity, Entity)", WRAP_MFN(Scene, ReparentEntity) },
+            { "Entity CloneEntity(Entity)", WRAP_MFN(Scene, CloneEntity) },
             { "Entity GetEntity(uint32)", WRAP_MFN_PR(Scene, GetEntity, (entt::id_type), Entity) },
             { "Entity GetEntity(const string& in)", WRAP_MFN_PR(Scene, GetEntity, (const std::string&), Entity) },
-            { "bool IsChildOf(const Entity& in, const Entity& in)", WRAP_MFN(Scene, IsChildOf) },
+            { "bool IsChildOf(Entity, Entity)", WRAP_MFN(Scene, IsChildOf) },
             { "glm::mat4 GetWorldTransform(Entity)", WRAP_OBJ_LAST(as::GetWorldTransform) }
         }, {}
     );

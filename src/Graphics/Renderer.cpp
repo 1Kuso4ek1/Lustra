@@ -235,6 +235,12 @@ LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolutio
 
 LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader)
 {
+    uint64_t key = (uint64_t)vertexShader ^ (uint64_t)fragmentShader;
+
+    auto it = pipelineCache.find(key);
+    if(it != pipelineCache.end())
+        return it->second;
+
     LLGL::PipelineLayoutDescriptor layoutDesc;
 
     layoutDesc.bindings =
@@ -289,7 +295,9 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     pipelineStateDesc.rasterizer.frontCCW = true;
     pipelineStateDesc.rasterizer.multiSampleEnabled = (swapChain->GetSamples() > 1);
 
-    return renderSystem->CreatePipelineState(pipelineStateDesc);
+    pipelineCache[key] = renderSystem->CreatePipelineState(pipelineStateDesc);
+
+    return pipelineCache[key];
 }
 
 LLGL::PipelineState* Renderer::CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc,

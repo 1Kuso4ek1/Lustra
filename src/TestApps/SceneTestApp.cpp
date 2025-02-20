@@ -24,7 +24,6 @@ SceneTestApp::SceneTestApp()
 
     SetupAssetManager();
 
-    LoadShaders();
     LoadTextures();
 
     deferredRenderer = std::make_shared<dev::DeferredRenderer>();
@@ -34,53 +33,6 @@ SceneTestApp::SceneTestApp()
     CreateRenderTarget();
 
     CreateEntities();
-
-    {
-        std::ofstream file("output.json");
-
-        cereal::JSONOutputArchive archive(file);
-
-        entt::snapshot(scene.GetRegistry())
-            .get<dev::NameComponent>(archive)
-            .get<dev::MeshComponent>(archive)
-            .get<dev::MeshRendererComponent>(archive)
-            .get<dev::TransformComponent>(archive)
-            .get<dev::PipelineComponent>(archive)
-            .get<dev::HierarchyComponent>(archive)
-            .get<dev::CameraComponent>(archive)
-            .get<dev::LightComponent>(archive)
-            .get<dev::HierarchyComponent>(archive)
-            .get<dev::TonemapComponent>(archive)
-            .get<dev::BloomComponent>(archive)
-            .get<dev::GTAOComponent>(archive)
-            .get<dev::SSRComponent>(archive)
-            .get<dev::ProceduralSkyComponent>(archive)
-            .get<dev::HDRISkyComponent>(archive);
-            //.get<dev::RigidBodyComponent>(archive);
-    }
-
-    scene.GetRegistry().clear<>();
-
-    std::ifstream file("output.json");
-    
-    cereal::JSONInputArchive archive(file);
-
-    entt::snapshot_loader(scene.GetRegistry())
-        .get<dev::NameComponent>(archive)
-        .get<dev::MeshComponent>(archive)
-        .get<dev::MeshRendererComponent>(archive)
-        .get<dev::TransformComponent>(archive)
-        .get<dev::PipelineComponent>(archive)
-        .get<dev::HierarchyComponent>(archive)
-        .get<dev::CameraComponent>(archive)
-        .get<dev::LightComponent>(archive)
-        .get<dev::HierarchyComponent>(archive)
-        .get<dev::TonemapComponent>(archive)
-        .get<dev::BloomComponent>(archive)
-        .get<dev::GTAOComponent>(archive)
-        .get<dev::SSRComponent>(archive)
-        .get<dev::ProceduralSkyComponent>(archive)
-        .get<dev::HDRISkyComponent>(archive);
 
     list = { rifle, camera, postProcessing, light, light1, sky };
 }
@@ -113,8 +65,8 @@ void SceneTestApp::Run()
 
         if(playing && !paused)
             scene.Update(deltaTimeTimer.GetElapsedSeconds());
-        else
-            camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds());
+        /* else
+            camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds()); */
 
         deltaTimeTimer.Reset();
 
@@ -139,15 +91,8 @@ void SceneTestApp::SetupAssetManager()
     dev::AssetManager::Get().AddLoader<dev::MaterialAsset, dev::MaterialLoader>("materials");
     dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
     dev::AssetManager::Get().AddLoader<dev::ScriptAsset, dev::ScriptLoader>("scripts");
-}
-
-// TODO: Make ShaderAsset
-void SceneTestApp::LoadShaders()
-{
-    vertexShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/vertex.vert");
-    fragmentShader = dev::Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/deferred.frag");
-
-    pipeline = dev::Renderer::Get().CreatePipelineState(vertexShader, fragmentShader);
+    dev::AssetManager::Get().AddLoader<dev::VertexShaderAsset, dev::VertexShaderLoader>("../shaders");
+    dev::AssetManager::Get().AddLoader<dev::FragmentShaderAsset, dev::FragmentShaderLoader>("../shaders");
 }
 
 void SceneTestApp::LoadTextures()
@@ -205,7 +150,10 @@ void SceneTestApp::CreateRifleEntity()
     rifle.AddComponent<dev::TransformComponent>().rotation = { -90.0f, 180.0f, 0.0f };
     rifle.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true);
     rifle.AddComponent<dev::MeshRendererComponent>().materials = { ak47Wood, ak47Metal };
-    rifle.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+    rifle.AddComponent<dev::PipelineComponent>(
+        dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
+        dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+    );
     rifle.AddComponent<dev::ScriptComponent>();
 }
 
@@ -335,7 +283,10 @@ void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCa
     entity.AddComponent<dev::TransformComponent>();
     entity.AddComponent<dev::MeshComponent>().model = model;
     entity.AddComponent<dev::MeshRendererComponent>();
-    entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+    entity.AddComponent<dev::PipelineComponent>(
+        dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
+        dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+    );
     
     auto& rigidBody = entity.AddComponent<dev::RigidBodyComponent>();
 
@@ -1285,6 +1236,59 @@ void SceneTestApp::Draw()
     if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) && keyboardTimer.GetElapsedSeconds() > 0.2f)
     {
         scene.ToggleUpdatePhysics();
+        keyboardTimer.Reset();
+    }
+
+    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) && keyboardTimer.GetElapsedSeconds() > 0.2f)
+    {
+        {
+            std::ofstream file("output.json");
+
+            cereal::JSONOutputArchive archive(file);
+
+            entt::snapshot(scene.GetRegistry())
+                .get<dev::NameComponent>(archive)
+                .get<dev::MeshComponent>(archive)
+                .get<dev::MeshRendererComponent>(archive)
+                .get<dev::TransformComponent>(archive)
+                .get<dev::PipelineComponent>(archive)
+                .get<dev::HierarchyComponent>(archive)
+                .get<dev::CameraComponent>(archive)
+                .get<dev::LightComponent>(archive)
+                .get<dev::HierarchyComponent>(archive)
+                .get<dev::TonemapComponent>(archive)
+                .get<dev::BloomComponent>(archive)
+                .get<dev::GTAOComponent>(archive)
+                .get<dev::SSRComponent>(archive)
+                .get<dev::ProceduralSkyComponent>(archive)
+                .get<dev::HDRISkyComponent>(archive)
+                .get<dev::RigidBodyComponent>(archive);
+        }
+
+        scene.GetRegistry().clear<>();
+
+        std::ifstream file("output.json");
+        
+        cereal::JSONInputArchive archive(file);
+
+        entt::snapshot_loader(scene.GetRegistry())
+            .get<dev::NameComponent>(archive)
+            .get<dev::MeshComponent>(archive)
+            .get<dev::MeshRendererComponent>(archive)
+            .get<dev::TransformComponent>(archive)
+            .get<dev::PipelineComponent>(archive)
+            .get<dev::HierarchyComponent>(archive)
+            .get<dev::CameraComponent>(archive)
+            .get<dev::LightComponent>(archive)
+            .get<dev::HierarchyComponent>(archive)
+            .get<dev::TonemapComponent>(archive)
+            .get<dev::BloomComponent>(archive)
+            .get<dev::GTAOComponent>(archive)
+            .get<dev::SSRComponent>(archive)
+            .get<dev::ProceduralSkyComponent>(archive)
+            .get<dev::HDRISkyComponent>(archive)
+            .get<dev::RigidBodyComponent>(archive);
+            
         keyboardTimer.Reset();
     }
 

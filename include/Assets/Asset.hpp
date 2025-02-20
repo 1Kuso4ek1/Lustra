@@ -17,7 +17,9 @@ struct Asset
         Material,
         Model,
         Environment,
-        Script
+        Script,
+        VertexShader,
+        FragmentShader
     };
 
     Asset(Type type) : type(type) {}

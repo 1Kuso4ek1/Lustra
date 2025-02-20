@@ -424,6 +424,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::EmptyShapeSettings>(settings)->
                     mCenterOfMass = { centerOfMass.x, centerOfMass.y, centerOfMass.z };
 
+                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Empty;
+                component.settings.centerOfMass = centerOfMass;
+
                 break;
             }
 
@@ -439,6 +442,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::BoxShapeSettings>(settings)->
                     mHalfExtent = { halfExtent.x, halfExtent.y, halfExtent.z };
 
+                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Box;
+                component.settings.halfExtent = halfExtent;
+
                 break;
             }
 
@@ -453,6 +459,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                 std::static_pointer_cast<JPH::SphereShapeSettings>(settings)->
                     mRadius = radius;
+
+                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Sphere;
+                component.settings.radius = radius;
 
                 break;
             }
@@ -472,6 +481,10 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                     mRadius = radius;
                 std::static_pointer_cast<JPH::CapsuleShapeSettings>(settings)->
                     mHalfHeightOfCylinder = halfHeight;
+
+                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Capsule;
+                component.settings.radius = radius;
+                component.settings.halfHeight = halfHeight;
 
                 break;
             }
@@ -515,6 +528,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                         if(!settings)
                             settings = std::make_shared<JPH::MeshShapeSettings>(list);
+
+                        component.settings.type = RigidBodyComponent::ShapeSettings::Type::Mesh;
+                        component.settings.meshShape = model;
                     }
 
                     ImGui::EndDragDropTarget();

@@ -43,7 +43,25 @@ struct MeshRendererComponent : public ComponentBase
 
 struct PipelineComponent : public ComponentBase
 {
-    PipelineComponent() : ComponentBase("PipelineComponent") {}
+    PipelineComponent(
+        VertexShaderAssetPtr vertexShader = {},
+        FragmentShaderAssetPtr fragmentShader = {}
+    ) : ComponentBase("PipelineComponent"),
+        vertexShader(vertexShader),
+        fragmentShader(fragmentShader)
+    {
+        if(vertexShader && fragmentShader)
+        {
+            pipeline = 
+                Renderer::Get().CreatePipelineState(
+                    vertexShader->shader,
+                    fragmentShader->shader
+                );
+        }
+    }
+
+    VertexShaderAssetPtr vertexShader;
+    FragmentShaderAssetPtr fragmentShader;
 
     LLGL::PipelineState* pipeline{};
 };
@@ -140,6 +158,30 @@ struct RigidBodyComponent : public ComponentBase
     };
 
     JPH::Body* body{};
+
+    // For saving
+    struct ShapeSettings
+    {
+        enum class Type
+        {
+            Empty,
+            Box,
+            Sphere,
+            Capsule,
+            Mesh
+        };
+
+        Type type = Type::Empty;
+
+        glm::vec3 centerOfMass;
+        glm::vec3 halfExtent;
+        
+        float radius;
+        float halfHeight;
+
+        ModelAssetPtr meshShape;
+        
+    } settings;
 };
 
 }

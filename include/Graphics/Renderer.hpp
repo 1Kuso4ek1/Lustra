@@ -89,6 +89,8 @@ private: // Private members
 
     LLGL::Buffer* matricesBuffer{};
     std::shared_ptr<Matrices> matrices;
+
+    std::unordered_map<uint64_t, LLGL::PipelineState*> pipelineCache;
 };
 
 }

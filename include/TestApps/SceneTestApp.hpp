@@ -20,6 +20,7 @@
 #include <MaterialLoader.hpp>
 #include <ModelLoader.hpp>
 #include <ScriptLoader.hpp>
+#include <ShaderLoader.hpp>
 #include <AssetManager.hpp>
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
@@ -35,7 +36,6 @@ public:
 private:
     void SetupAssetManager();
 
-    void LoadShaders();
     void LoadTextures();
 
     void CreateEntities();
@@ -106,10 +106,7 @@ private:
     dev::Timer deltaTimeTimer, keyboardTimer;
 
 private:
-    LLGL::PipelineState* pipeline{};
-
-    LLGL::Shader* vertexShader{};
-    LLGL::Shader* fragmentShader{};
+    LLGL::PipelineState* pipeline;
 
     GLuint nativeViewportAttachment;
 

@@ -1,3 +1,5 @@
+#include <cereal/archives/json.hpp>
+#include <Serialize.hpp>
 #include <SceneTestApp.hpp>
 #include <fstream>
 
@@ -32,6 +34,53 @@ SceneTestApp::SceneTestApp()
     CreateRenderTarget();
 
     CreateEntities();
+
+    {
+        std::ofstream file("output.json");
+
+        cereal::JSONOutputArchive archive(file);
+
+        entt::snapshot(scene.GetRegistry())
+            .get<dev::NameComponent>(archive)
+            .get<dev::MeshComponent>(archive)
+            .get<dev::MeshRendererComponent>(archive)
+            .get<dev::TransformComponent>(archive)
+            .get<dev::PipelineComponent>(archive)
+            .get<dev::HierarchyComponent>(archive)
+            .get<dev::CameraComponent>(archive)
+            .get<dev::LightComponent>(archive)
+            .get<dev::HierarchyComponent>(archive)
+            .get<dev::TonemapComponent>(archive)
+            .get<dev::BloomComponent>(archive)
+            .get<dev::GTAOComponent>(archive)
+            .get<dev::SSRComponent>(archive)
+            .get<dev::ProceduralSkyComponent>(archive)
+            .get<dev::HDRISkyComponent>(archive);
+            //.get<dev::RigidBodyComponent>(archive);
+    }
+
+    scene.GetRegistry().clear<>();
+
+    std::ifstream file("output.json");
+    
+    cereal::JSONInputArchive archive(file);
+
+    entt::snapshot_loader(scene.GetRegistry())
+        .get<dev::NameComponent>(archive)
+        .get<dev::MeshComponent>(archive)
+        .get<dev::MeshRendererComponent>(archive)
+        .get<dev::TransformComponent>(archive)
+        .get<dev::PipelineComponent>(archive)
+        .get<dev::HierarchyComponent>(archive)
+        .get<dev::CameraComponent>(archive)
+        .get<dev::LightComponent>(archive)
+        .get<dev::HierarchyComponent>(archive)
+        .get<dev::TonemapComponent>(archive)
+        .get<dev::BloomComponent>(archive)
+        .get<dev::GTAOComponent>(archive)
+        .get<dev::SSRComponent>(archive)
+        .get<dev::ProceduralSkyComponent>(archive)
+        .get<dev::HDRISkyComponent>(archive);
 
     list = { rifle, camera, postProcessing, light, light1, sky };
 }

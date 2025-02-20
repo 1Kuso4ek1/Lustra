@@ -85,6 +85,20 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
     };
 }
 
+BloomComponent::BloomComponent(BloomComponent&& other)
+    : ComponentBase("BloomComponent"),
+      resolution(other.resolution), threshold(other.threshold), strength(other.strength),
+      resolutionScale(other.resolutionScale), sampler(other.sampler), thresholdPass(std::move(other.thresholdPass)),
+      pingPong(std::move(other.pingPong))
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
+    setThresholdUniforms = [&](auto commandBuffer)
+    {
+        commandBuffer->SetUniforms(0, &threshold, sizeof(threshold));
+    };
+}
+
 BloomComponent::~BloomComponent()
 {
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);

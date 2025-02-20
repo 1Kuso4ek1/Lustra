@@ -66,6 +66,15 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
     );
 }
 
+GTAOComponent::GTAOComponent(GTAOComponent&& other)
+    : ComponentBase("GTAOComponent"),
+      resolution(other.resolution), gtao(std::move(other.gtao)), boxBlur(std::move(other.boxBlur)),
+      resolutionScale(other.resolutionScale), samples(other.samples), limit(other.limit), radius(other.radius),
+      falloff(other.falloff), thicknessMix(other.thicknessMix), maxStride(other.maxStride)
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+}
+
 GTAOComponent::~GTAOComponent()
 {
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);

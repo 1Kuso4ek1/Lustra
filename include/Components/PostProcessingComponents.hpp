@@ -4,12 +4,38 @@
 namespace dev
 {
 
-struct TonemapComponent : public ComponentBase
+struct TonemapComponent : public ComponentBase, public EventListener
 {
-    TonemapComponent(
-        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
-        bool registerEvent = true
-    );
+    TonemapComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    // All these move constructors are required since:
+    // 1. they're being used by entt::snapshot
+    // 1.1. destructor removes listener
+    // 1.2. setUniforms captures everything by reference and cannot be copied/moved
+    // 1.3. i can't even think of a better way to do it...
+    TonemapComponent(TonemapComponent&& other);
+    ~TonemapComponent();
+
+    void SetupPostProcessing();
+    void OnEvent(Event& event) override;
+
+    void MakeSetUniforms();
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity, vignetteRoundness, filmGrain, contrast, saturation, brightness, lut->path.string(), resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        std::string lutPath;
+        archive(algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity, vignetteRoundness, filmGrain, contrast, saturation, brightness, lutPath, resolution);
+        
+        lut = AssetManager::Get().Load<TextureAsset>(lutPath);
+
+        SetupPostProcessing();
+    }
 
     int algorithm = 0;
     float exposure = 1.0f;
@@ -24,6 +50,8 @@ struct TonemapComponent : public ComponentBase
     float saturation = 1.0f;
     float brightness = 1.0f;
 
+    LLGL::Extent2D resolution;
+
     TextureAssetPtr lut;
 
     PostProcessingPtr postProcessing;
@@ -33,11 +61,26 @@ struct TonemapComponent : public ComponentBase
 
 struct BloomComponent : public ComponentBase, public EventListener
 {
-    BloomComponent(const LLGL::Extent2D& resolution);
+    BloomComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    BloomComponent(BloomComponent&& other);
     ~BloomComponent();
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(threshold, strength, resolutionScale, resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        archive(threshold, strength, resolutionScale, resolution);
+        
+        SetupPostProcessing();
+    }
 
     float threshold = 1.0f, strength = 0.3f, resolutionScale = 8.0f;
 
@@ -54,11 +97,26 @@ struct BloomComponent : public ComponentBase, public EventListener
 
 struct GTAOComponent : public ComponentBase, public EventListener
 {
-    GTAOComponent(const LLGL::Extent2D& resolution);
+    GTAOComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    GTAOComponent(GTAOComponent&& other);
     ~GTAOComponent();
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(resolutionScale, samples, limit, radius, falloff, thicknessMix, maxStride, resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        archive(resolutionScale, samples, limit, radius, falloff, thicknessMix, maxStride, resolution);
+
+        SetupPostProcessing();
+    }
 
     float resolutionScale = 2.0f;
 
@@ -77,11 +135,26 @@ struct GTAOComponent : public ComponentBase, public EventListener
 
 struct SSRComponent : public ComponentBase, public EventListener
 {
-    SSRComponent(const LLGL::Extent2D& resolution);
+    SSRComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    SSRComponent(SSRComponent&& other);
     ~SSRComponent();
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(resolutionScale, maxSteps, maxBinarySearchSteps, rayStep, resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        archive(resolutionScale, maxSteps, maxBinarySearchSteps, rayStep, resolution);
+
+        SetupPostProcessing();
+    }
 
     float resolutionScale = 1.0f;
 

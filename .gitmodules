@@ -30,3 +30,6 @@
 [submodule "libraries/Angelscript"]
 	path = libraries/Angelscript
 	url = https://github.com/codecat/angelscript-mirror.git
+[submodule "libraries/cereal"]
+	path = libraries/cereal
+	url = https://github.com/USCiLab/cereal.git

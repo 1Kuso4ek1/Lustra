@@ -44,6 +44,18 @@ SSRComponent::SSRComponent(const LLGL::Extent2D& resolution)
     );
 }
 
+SSRComponent::SSRComponent(SSRComponent&& other)
+    : ComponentBase("SSRComponent"),
+      resolution(other.resolution),
+      resolutionScale(other.resolutionScale),
+      maxSteps(other.maxSteps),
+      maxBinarySearchSteps(other.maxBinarySearchSteps),
+      rayStep(other.rayStep),
+      ssr(std::move(other.ssr))
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+}
+
 SSRComponent::~SSRComponent()
 {
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);

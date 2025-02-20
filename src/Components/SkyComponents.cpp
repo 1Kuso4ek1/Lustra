@@ -39,15 +39,17 @@ ProceduralSkyComponent::ProceduralSkyComponent(const LLGL::Extent2D& resolution)
         }
     );
 
-    setUniforms = [&](auto commandBuffer)
-    {
-        commandBuffer->SetUniforms(0, &time, sizeof(time));
-        commandBuffer->SetUniforms(1, &cirrus, sizeof(cirrus));
-        commandBuffer->SetUniforms(2, &cumulus, sizeof(cumulus));
-        commandBuffer->SetUniforms(3, &flip, sizeof(flip));
-    };
+    MakeSetUniforms();
 
     Build();
+}
+
+ProceduralSkyComponent::ProceduralSkyComponent(ProceduralSkyComponent&& other)
+    : ComponentBase("ProceduralSkyComponent"),
+      time(other.time), cirrus(other.cirrus), cumulus(other.cumulus), flip(other.flip),
+      resolution(other.resolution), asset(std::move(other.asset)), pipeline(other.pipeline)
+{
+    MakeSetUniforms();
 }
 
 void ProceduralSkyComponent::Build()
@@ -77,6 +79,17 @@ void ProceduralSkyComponent::Build()
     flip = 0;
 }
 
+void ProceduralSkyComponent::MakeSetUniforms()
+{
+    setUniforms = [&](auto commandBuffer)
+    {
+        commandBuffer->SetUniforms(0, &time, sizeof(time));
+        commandBuffer->SetUniforms(1, &cirrus, sizeof(cirrus));
+        commandBuffer->SetUniforms(2, &cumulus, sizeof(cumulus));
+        commandBuffer->SetUniforms(3, &flip, sizeof(flip));
+    };
+}
+
 void ProceduralSkyComponent::DefaultTextures()
 {
     auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
@@ -104,6 +117,19 @@ HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent
     }
 }
 
+HDRISkyComponent::HDRISkyComponent(HDRISkyComponent&& other)
+    : ComponentBase("HDRISkyComponent"),
+      environmentMap(std::move(other.environmentMap)), resolution(other.resolution),
+      asset(std::move(other.asset)), pipelineSky(other.pipelineSky)
+{
+    EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+}
+
+HDRISkyComponent::~HDRISkyComponent()
+{
+    EventManager::Get().RemoveListener(Event::Type::AssetLoaded, this);
+}
+
 void HDRISkyComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::AssetLoaded)
@@ -119,7 +145,7 @@ void HDRISkyComponent::Build()
 {
     if(asset)
     {
-        if(asset->loaded)
+        if(asset->loaded && asset->cubeMap)
         {
             Renderer::Get().Release(asset->cubeMap);
             Renderer::Get().Release(asset->irradiance);

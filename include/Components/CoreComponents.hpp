@@ -17,7 +17,7 @@ struct TransformComponent : public ComponentBase
 
     glm::vec3 position = { 0.0f, 0.0f, 0.0f };
     glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-    glm::vec3 scale =    { 1.0f, 1.0f, 1.0f };
+    glm::vec3 scale    = { 1.0f, 1.0f, 1.0f };
 
     void SetTransform(const glm::mat4& transform);
     
@@ -59,6 +59,9 @@ struct HierarchyComponent : public ComponentBase
 struct CameraComponent : public ComponentBase
 {
     CameraComponent() : ComponentBase("CameraComponent") {}
+    CameraComponent(CameraComponent&& other)
+        : ComponentBase("CameraComponent"), camera(std::move(other.camera))
+    {  }
 
     Camera camera;
 };
@@ -67,8 +70,26 @@ struct LightComponent : public ComponentBase
 {
 public:
     LightComponent();
+    LightComponent(LightComponent&&) = default;
 
     void SetupShadowMap(const LLGL::Extent2D& resolution);
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(color, intensity, cutoff, outerCutoff, bias, shadowMap, resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+
+        archive(color, intensity, cutoff, outerCutoff, bias, shadowMap, resolution);
+
+        if(shadowMap)
+            SetupShadowMap(resolution);
+    }
 
     glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 

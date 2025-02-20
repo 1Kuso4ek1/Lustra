@@ -3,11 +3,11 @@
 namespace dev
 {
 
-TonemapComponent::TonemapComponent(
-    const LLGL::Extent2D& resolution,
-    bool registerEvent
-) : ComponentBase("TonemapComponent")
+TonemapComponent::TonemapComponent(const LLGL::Extent2D& resolution)
+    : resolution(resolution), ComponentBase("TonemapComponent")
 {
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
     postProcessing = std::make_shared<PostProcessing>(
         LLGL::PipelineLayoutDescriptor
         {
@@ -43,9 +43,55 @@ TonemapComponent::TonemapComponent(
         },
         resolution,
         true,
-        registerEvent
+        false
     );
 
+    MakeSetUniforms();
+
+    lut = AssetManager::Get().Load<TextureAsset>("empty");
+}
+
+TonemapComponent::TonemapComponent(TonemapComponent&& other)
+    : ComponentBase("TonemapComponent"),
+      resolution(other.resolution), algorithm(other.algorithm), exposure(other.exposure),
+      colorGrading(other.colorGrading), colorGradingIntensity(other.colorGradingIntensity),
+      vignetteIntensity(other.vignetteIntensity), vignetteRoundness(other.vignetteRoundness),
+      filmGrain(other.filmGrain), contrast(other.contrast), saturation(other.saturation),
+      brightness(other.brightness), lut(std::move(other.lut)), postProcessing(std::move(other.postProcessing))
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+
+    MakeSetUniforms();
+}
+
+TonemapComponent::~TonemapComponent()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+
+    postProcessing = nullptr;
+}
+
+void TonemapComponent::OnEvent(Event& event)
+{
+    if(event.GetType() == Event::Type::WindowResize)
+    {
+        auto windowResizeEvent = static_cast<WindowResizeEvent&>(event);
+
+        resolution = windowResizeEvent.GetSize();
+
+        postProcessing->OnEvent(windowResizeEvent);
+    }
+}
+
+void TonemapComponent::SetupPostProcessing()
+{
+    WindowResizeEvent event(resolution);
+
+    OnEvent(event);
+}
+
+void TonemapComponent::MakeSetUniforms()
+{
     setUniforms = [&](auto commandBuffer)
     {
         auto ns = std::chrono::steady_clock::now()
@@ -66,8 +112,6 @@ TonemapComponent::TonemapComponent(
         commandBuffer->SetUniforms(10, &brightness, sizeof(brightness));
         commandBuffer->SetUniforms(11, &time, sizeof(time));
     };
-
-    lut = AssetManager::Get().Load<TextureAsset>("empty");
 }
 
 }

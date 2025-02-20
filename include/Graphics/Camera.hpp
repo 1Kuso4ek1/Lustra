@@ -5,6 +5,8 @@
 #include <LLGL/Types.h>
 #include <entt/fwd.hpp>
 
+#include <cereal/access.hpp>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -17,6 +19,7 @@ class Camera : public EventListener
 {
 public:
     Camera();
+    Camera(Camera&& other);
     ~Camera();
 
     void SetPerspective();
@@ -73,7 +76,25 @@ private:
     glm::vec2 viewportSize;
 
 private:
+    friend class cereal::access;
+
     friend void DrawComponentUI(CameraComponent& component, entt::entity entity);
+
+private:
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(fov, near, far, aspect, firstPerson, up, lookAtPos, viewportSize);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        archive(fov, near, far, aspect, firstPerson, up, lookAtPos, viewportSize);
+
+        SetPerspective();
+        SetViewport({ (uint32_t)viewportSize.x, (uint32_t)viewportSize.y });
+    }
 };
 
 }

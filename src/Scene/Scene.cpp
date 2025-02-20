@@ -576,7 +576,12 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
     }
 }
 
-void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRenderer, PipelineComponent pipeline, LLGL::RenderTarget* renderTarget)
+void Scene::MeshRenderPass(
+    const MeshComponent& mesh,
+    const MeshRendererComponent& meshRenderer,
+    const PipelineComponent& pipeline,
+    LLGL::RenderTarget* renderTarget
+)
 {
     if(!mesh.model)
         return;
@@ -615,7 +620,7 @@ void Scene::MeshRenderPass(MeshComponent mesh, MeshRendererComponent meshRendere
     }
 }
 
-void Scene::ShadowRenderPass(LightComponent light, MeshComponent mesh)
+void Scene::ShadowRenderPass(const LightComponent& light, const MeshComponent& mesh)
 {
     for(size_t i = 0; i < mesh.model->meshes.size(); i++)
     {
@@ -635,7 +640,11 @@ void Scene::ShadowRenderPass(LightComponent light, MeshComponent mesh)
     }
 }
 
-void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent sky, LLGL::RenderTarget* renderTarget)
+void Scene::ProceduralSkyRenderPass(
+    const MeshComponent& mesh,
+    const ProceduralSkyComponent& sky,
+    LLGL::RenderTarget* renderTarget
+)
 {
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
@@ -656,7 +665,11 @@ void Scene::ProceduralSkyRenderPass(MeshComponent mesh, ProceduralSkyComponent s
     );
 }
 
-void Scene::HDRISkyRenderPass(MeshComponent mesh, HDRISkyComponent sky, LLGL::RenderTarget* renderTarget)
+void Scene::HDRISkyRenderPass(
+    const MeshComponent& mesh,
+    const HDRISkyComponent& sky,
+    LLGL::RenderTarget* renderTarget
+)
 {
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
@@ -706,7 +719,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
-        auto sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
+        auto& sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
 
         irradiance = sky.asset->irradiance;
         prefiltered = sky.asset->prefiltered;
@@ -714,7 +727,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     }
     else if(proceduralSkyView.begin() != proceduralSkyView.end())
     {
-        auto sky = proceduralSkyView.get<ProceduralSkyComponent>(*proceduralSkyView.begin());
+        auto& sky = proceduralSkyView.get<ProceduralSkyComponent>(*proceduralSkyView.begin());
 
         irradiance = sky.asset->irradiance;
         prefiltered = sky.asset->prefiltered;
@@ -755,7 +768,13 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
         return;
     }
 
-    auto toneMapping = *tonemapView->begin();
+    auto& toneMapping = *tonemapView->begin();
+    
+    if(!toneMapping.postProcessing)
+    {
+        RenderResult(renderTarget);
+        return;
+    }
     
     RenderResult(toneMapping.postProcessing->GetRenderTarget());
 
@@ -792,7 +811,7 @@ std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
     if(bloomView->begin() == bloomView->end())
         return { AssetManager::Get().Load<TextureAsset>("empty", true)->texture, 0.0f };
 
-    auto bloom = *bloomView->begin();
+    auto& bloom = *bloomView->begin();
 
     bloom.thresholdPass->Apply(
         {
@@ -842,7 +861,7 @@ LLGL::Texture* Scene::ApplyGTAO()
     if(gtaoView->begin() == gtaoView->end())
         return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;
 
-    auto gtao = *gtaoView->begin();
+    auto& gtao = *gtaoView->begin();
 
     auto depth = renderer->GetDepth();
 
@@ -889,7 +908,7 @@ LLGL::Texture* Scene::ApplySSR(LLGL::Texture* frame)
     if(ssrView->begin() == ssrView->end())
         return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;
 
-    auto ssr = *ssrView->begin();
+    auto& ssr = *ssrView->begin();
 
     // Needs some attention
     auto deferredRenderer = static_pointer_cast<DeferredRenderer>(renderer);

@@ -1,4 +1,6 @@
 #pragma once
+#include <entt/entt.hpp>
+
 #include <PhysicsManager.hpp>
 #include <Mesh.hpp>
 #include <ImGuiManager.hpp>
@@ -10,8 +12,6 @@
 #include <MaterialAsset.hpp>
 #include <ModelAsset.hpp>
 #include <ScriptAsset.hpp>
-
-#include <entt/entt.hpp>
 
 namespace dev
 {

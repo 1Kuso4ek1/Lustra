@@ -8,6 +8,14 @@ Camera::Camera()
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 }
 
+Camera::Camera(Camera&& other)
+    : fov(other.fov), near(other.near), far(other.far), aspect(other.aspect),
+      firstPerson(other.firstPerson), up(other.up), lookAtPos(other.lookAtPos),
+      viewMatrix(other.viewMatrix), projectionMatrix(other.projectionMatrix), viewportSize(other.viewportSize)
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+}
+
 Camera::~Camera()
 {
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);

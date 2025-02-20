@@ -24,6 +24,9 @@ public:
     void Update(float deltaTime);
     void Draw(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
+    void Save(const std::ostream& stream);
+    void Load(const std::istream& stream);
+
     void OnEvent(Event& event) override;
 
     void SetUpdatePhysics(bool updatePhysics);
@@ -61,23 +64,23 @@ private:
     void RenderSky(LLGL::RenderTarget* renderTarget);
 
     void MeshRenderPass(
-        MeshComponent mesh,
-        MeshRendererComponent meshRenderer,
-        PipelineComponent pipeline,
+        const MeshComponent& mesh,
+        const MeshRendererComponent& meshRenderer,
+        const PipelineComponent& pipeline,
         LLGL::RenderTarget* renderTarget
     );
     void ShadowRenderPass(
-        LightComponent light,
-        MeshComponent mesh
+        const LightComponent& light,
+        const MeshComponent& mesh
     );
     void ProceduralSkyRenderPass(
-        MeshComponent mesh,
-        ProceduralSkyComponent sky,
+        const MeshComponent& mesh,
+        const ProceduralSkyComponent& sky,
         LLGL::RenderTarget* renderTarget
     );
     void HDRISkyRenderPass(
-        MeshComponent mesh,
-        HDRISkyComponent sky,
+        const MeshComponent& mesh,
+        const HDRISkyComponent& sky,
         LLGL::RenderTarget* renderTarget
     );
 

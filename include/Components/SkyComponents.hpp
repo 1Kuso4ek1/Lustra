@@ -6,9 +6,26 @@ namespace dev
 
 struct ProceduralSkyComponent : public ComponentBase
 {
-    ProceduralSkyComponent(const LLGL::Extent2D& resolution);
+    ProceduralSkyComponent(const LLGL::Extent2D& resolution = { 1024, 1024 });
+    ProceduralSkyComponent(ProceduralSkyComponent&&);
 
     void Build();
+
+    void MakeSetUniforms();
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(time, cirrus, cumulus, flip, resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        archive(time, cirrus, cumulus, flip, resolution);
+
+        Build();
+    }
 
     float time = 40.0f, cirrus = 0.0f, cumulus = 0.0f;
     int flip = 0;
@@ -27,10 +44,32 @@ private:
 struct HDRISkyComponent : public ComponentBase, public EventListener
 {
 public:
-    HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution);
+    HDRISkyComponent(
+        TextureAssetPtr hdri = AssetManager::Get().Load<TextureAsset>("empty", true),
+        const LLGL::Extent2D& resolution = { 1024, 1024 }
+    );
+    HDRISkyComponent(HDRISkyComponent&& other);
+    ~HDRISkyComponent();
 
     void Build();
     void OnEvent(Event& event) override;
+
+    template<class Archive>
+    void save(Archive& archive) const
+    {
+        archive(environmentMap->path.string(), resolution);
+    }
+
+    template<class Archive>
+    void load(Archive& archive)
+    {
+        std::string path;
+        archive(path, resolution);
+
+        environmentMap = AssetManager::Get().Load<TextureAsset>(path);
+
+        Build();
+    }
 
     TextureAssetPtr environmentMap;
     EnvironmentAssetPtr asset;

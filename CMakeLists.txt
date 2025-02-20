@@ -19,6 +19,10 @@ set(ASSIMP_BUILD_TESTS OFF)
 set(ASSIMP_INSTALL OFF)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF)
 
+set(BUILD_DOC OFF)
+set(BUILD_SANDBOX OFF)
+set(SKIP_PERFORMANCE_COMPARISON ON)
+
 set(OUTPUT_DIR ${CMAKE_BINARY_DIR})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
@@ -149,3 +153,4 @@ add_subdirectory(libraries/LLGL)
 add_subdirectory(libraries/assimp)
 add_subdirectory(libraries/JoltPhysics/Build)
 add_subdirectory(libraries/Angelscript/sdk/angelscript/projects/cmake)
+add_subdirectory(libraries/cereal)

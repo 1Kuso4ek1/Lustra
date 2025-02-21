@@ -39,17 +39,10 @@ public:
                 return std::static_pointer_cast<T>(it->second.second);
         }
 
-        auto loader = loaders[std::type_index(typeid(T))];
+        auto loader = GetAssetLoader<T>();
 
         if(!loader)
-        {
-            LLGL::Log::Errorf(
-                LLGL::Log::ColorFlags::StdError,
-                "No loader found for asset type %s\n", typeid(T).name()
-            );
-
             return nullptr;
-        }
 
         auto asset = loader->Load(assetPath);
 
@@ -76,19 +69,22 @@ public:
     template<class T>
     void Write(std::shared_ptr<T> asset, const std::filesystem::path& path, bool relativeToAssetsDir = false)
     {
-        auto assetPath = path;
+        auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
 
-        if(relativeToAssetsDir)
-        {
-            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+        assets.emplace(assetPath, std::pair(std::type_index(typeid(T)), asset));
 
-            if(relativeAssetPath != assetsRelativePaths.end())
-                assetPath = assetsDirectory / relativeAssetPath->second / path;
-            else
-                assetPath = assetsDirectory / path;
-        }
+        auto loader = GetAssetLoader<T>();
 
-        assets[assetPath] = asset;
+        if(!loader)
+            return;
+
+        loader->Write(asset, assetPath);
+    }
+
+    template<class T>
+    void Write(std::shared_ptr<T> asset)
+    {
+        Write(asset, asset->path);
     }
 
     void SetAssetsDirectory(const std::filesystem::path& path)
@@ -107,6 +103,43 @@ public:
     {
         loaders[typeid(AssetType)] = &LoaderType::Get();
         assetsRelativePaths[typeid(AssetType)] = relativePath;
+    }
+
+private:
+    template<class T>
+    auto GetAssetPath(const std::filesystem::path& path, bool relativeToAssetsDir)
+    {
+        auto assetPath = path;
+
+        if(relativeToAssetsDir)
+        {
+            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+
+            if(relativeAssetPath != assetsRelativePaths.end())
+                assetPath = assetsDirectory / relativeAssetPath->second / path;
+            else
+                assetPath = assetsDirectory / path;
+        }
+
+        return assetPath;
+    }
+
+    template<class T>
+    AssetLoader* GetAssetLoader()
+    {
+        auto loader = loaders[std::type_index(typeid(T))];
+
+        if(!loader)
+        {
+            LLGL::Log::Errorf(
+                LLGL::Log::ColorFlags::StdError,
+                "No loader found for asset type %s\n", typeid(T).name()
+            );
+
+            return nullptr;
+        }
+
+        return loader;
     }
 
 private:

@@ -1,5 +1,3 @@
-#include <cereal/archives/json.hpp>
-#include <Serialize.hpp>
 #include <SceneTestApp.hpp>
 #include <fstream>
 
@@ -16,7 +14,11 @@ SceneTestApp::SceneTestApp()
 
     dev::Renderer::Get().InitSwapChain(window);
 
-    dev::ImGuiManager::Get().Init(window->GetGLFWWindow(), "../resources/fonts/OpenSans-Regular.ttf");
+    dev::ImGuiManager::Get().Init(
+        window->GetGLFWWindow(),
+        "../resources/fonts/OpenSans-Regular.ttf",
+        "../resources/layout/editor_layout.ini"
+    );
 
     dev::PhysicsManager::Get().Init();
 
@@ -28,13 +30,24 @@ SceneTestApp::SceneTestApp()
 
     deferredRenderer = std::make_shared<dev::DeferredRenderer>();
 
-    scene.SetRenderer(deferredRenderer);
+    //scene = std::make_shared<dev::Scene>(deferredRenderer);
 
     CreateRenderTarget();
 
-    CreateEntities();
+    //CreateEntities();
 
-    list = { rifle, camera, postProcessing, light, light1, sky };
+    /* dev::SceneAssetPtr sceneAsset = std::make_shared<dev::SceneAsset>();
+    sceneAsset->scene = scene;
+
+    dev::AssetManager::Get().Write(sceneAsset, "scene.json", true); */
+
+    auto sceneAsset = dev::AssetManager::Get().Load<dev::SceneAsset>("scene.json", true);
+    scene = sceneAsset->scene;
+    scene->SetRenderer(deferredRenderer);
+
+    for(auto entity: scene->GetRegistry().view<entt::entity>()) 
+        list.emplace_back(entity, scene.get());
+    //list = { rifle, camera, postProcessing, light, light1, sky };
 }
 
 SceneTestApp::~SceneTestApp()
@@ -55,7 +68,7 @@ void SceneTestApp::Run()
         return;
     }
 
-    scene.Start();
+    scene->Start();
 
     while(window->PollEvents())
     {
@@ -64,7 +77,7 @@ void SceneTestApp::Run()
         dev::Multithreading::Get().Update();
 
         if(playing && !paused)
-            scene.Update(deltaTimeTimer.GetElapsedSeconds());
+            scene->Update(deltaTimeTimer.GetElapsedSeconds());
         /* else
             camera.GetComponent<dev::ScriptComponent>().update(camera, deltaTimeTimer.GetElapsedSeconds()); */
 
@@ -93,6 +106,7 @@ void SceneTestApp::SetupAssetManager()
     dev::AssetManager::Get().AddLoader<dev::ScriptAsset, dev::ScriptLoader>("scripts");
     dev::AssetManager::Get().AddLoader<dev::VertexShaderAsset, dev::VertexShaderLoader>("../shaders");
     dev::AssetManager::Get().AddLoader<dev::FragmentShaderAsset, dev::FragmentShaderLoader>("../shaders");
+    dev::AssetManager::Get().AddLoader<dev::SceneAsset, dev::SceneLoader>("scenes");
 }
 
 void SceneTestApp::LoadTextures()
@@ -144,7 +158,7 @@ void SceneTestApp::CreateEntities()
 
 void SceneTestApp::CreateRifleEntity()
 {
-    rifle = scene.CreateEntity();
+    rifle = scene->CreateEntity();
 
     rifle.AddComponent<dev::NameComponent>().name = "Rifle";
     rifle.AddComponent<dev::TransformComponent>().rotation = { -90.0f, 180.0f, 0.0f };
@@ -159,7 +173,7 @@ void SceneTestApp::CreateRifleEntity()
 
 void SceneTestApp::CreateCameraEntity()
 {
-    camera = scene.CreateEntity();
+    camera = scene->CreateEntity();
 
     camera.AddComponent<dev::NameComponent>().name = "Camera";
     camera.AddComponent<dev::TransformComponent>().position = { 0.0f, 0.0f, 5.0f };
@@ -233,7 +247,7 @@ void SceneTestApp::CreateCameraEntity()
 
 void SceneTestApp::CreatePostProcessingEntity()
 {
-    postProcessing = scene.CreateEntity();
+    postProcessing = scene->CreateEntity();
 
     postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
     postProcessing.AddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
@@ -244,7 +258,7 @@ void SceneTestApp::CreatePostProcessingEntity()
 
 void SceneTestApp::CreateLightEntity()
 {
-    light = scene.CreateEntity();
+    light = scene->CreateEntity();
 
     light.AddComponent<dev::NameComponent>().name = "Light";
     light.AddComponent<dev::TransformComponent>().position = { 5.0f, 5.0f, 5.0f };
@@ -253,7 +267,7 @@ void SceneTestApp::CreateLightEntity()
 
 void SceneTestApp::CreateLight1Entity()
 {
-    light1 = scene.CreateEntity();
+    light1 = scene->CreateEntity();
 
     light1.AddComponent<dev::NameComponent>().name = "Light1";
     light1.AddComponent<dev::TransformComponent>().position = { -5.0f, 5.0f, 5.0f };
@@ -263,7 +277,7 @@ void SceneTestApp::CreateLight1Entity()
 
 void SceneTestApp::CreateSkyEntity()
 {
-    sky = scene.CreateEntity();
+    sky = scene->CreateEntity();
     
     sky.AddComponent<dev::NameComponent>().name = "Sky";
     sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
@@ -277,7 +291,7 @@ void SceneTestApp::CreateSkyEntity()
 
 void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
 {
-    auto entity = scene.CreateEntity();
+    auto entity = scene->CreateEntity();
 
     entity.AddComponent<dev::NameComponent>().name = "Model";
     entity.AddComponent<dev::TransformComponent>();
@@ -392,13 +406,13 @@ void SceneTestApp::DrawSceneTree()
     }
 
     if(ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered())
-        selectedEntity = { entt::null, &scene };
+        selectedEntity = { entt::null, scene.get() };
 
     if(ImGui::BeginPopupContextWindow("Create entity"))
     {
         if(ImGui::MenuItem("Create Empty Entity"))
         {
-            auto entity = scene.CreateEntity();
+            auto entity = scene->CreateEntity();
 
             entity.AddComponent<dev::NameComponent>().name = "Empty";
 
@@ -409,13 +423,16 @@ void SceneTestApp::DrawSceneTree()
 
         if(ImGui::MenuItem("Create Drawable Entity"))
         {
-            auto entity = scene.CreateEntity();
+            auto entity = scene->CreateEntity();
 
             entity.AddComponent<dev::NameComponent>().name = "Drawable";
             entity.AddComponent<dev::TransformComponent>();
             entity.AddComponent<dev::MeshComponent>();
             entity.AddComponent<dev::MeshRendererComponent>();
-            entity.AddComponent<dev::PipelineComponent>().pipeline = pipeline;
+            entity.AddComponent<dev::PipelineComponent>(
+                dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
+                dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+            );
 
             selectedEntity = entity;
 
@@ -456,7 +473,7 @@ void SceneTestApp::DrawEntityNode(dev::Entity entity)
             auto& hierarchy = entity.GetComponent<dev::HierarchyComponent>();
 
             for(auto& child : hierarchy.children)
-                DrawEntityNode(scene.GetEntity((entt::id_type)child));
+                DrawEntityNode(scene->GetEntity((entt::id_type)child));
         }
         ImGui::TreePop();
     }
@@ -474,10 +491,10 @@ void SceneTestApp::EntityNodeInteraction(dev::Entity entity, std::string_view na
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
         {
             auto payloadEntity = *(dev::Entity*)payload->Data;
-            payloadEntity = scene.GetEntity((entt::id_type)(entt::entity)payloadEntity);
+            payloadEntity = scene->GetEntity((entt::id_type)(entt::entity)payloadEntity);
 
             if(entity != payloadEntity)
-                scene.ReparentEntity(payloadEntity, entity);
+                scene->ReparentEntity(payloadEntity, entity);
         }
 
         ImGui::EndDragDropTarget();
@@ -514,7 +531,7 @@ void SceneTestApp::DrawPropertiesWindow()
             dev::ProceduralSkyComponent,
             dev::HDRISkyComponent,
             dev::RigidBodyComponent
-        >(scene.GetRegistry(), selectedEntity);
+        >(scene->GetRegistry(), selectedEntity);
 
         ImGui::Separator();
 
@@ -524,9 +541,9 @@ void SceneTestApp::DrawPropertiesWindow()
             if (it != list.end())
                 list.erase(it);
 
-            scene.RemoveEntity(selectedEntity);
+            scene->RemoveEntity(selectedEntity);
 
-            selectedEntity = { entt::null, &scene };
+            selectedEntity = { entt::null, scene.get() };
         }
 
         if(ImGui::BeginPopupContextWindow("Add component"))
@@ -542,6 +559,12 @@ void SceneTestApp::DrawPropertiesWindow()
             
             if(ImGui::MenuItem("Add MeshRendererComponent"))
                 selectedEntity.GetOrAddComponent<dev::MeshRendererComponent>();
+
+            if(ImGui::MenuItem("Add PipelineComponent"))
+                selectedEntity.GetOrAddComponent<dev::PipelineComponent>(
+                    dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
+                    dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+                );
             
             if(ImGui::MenuItem("Add CameraComponent"))
                 selectedEntity.GetOrAddComponent<dev::CameraComponent>();
@@ -624,7 +647,7 @@ void SceneTestApp::DrawImGuizmo()
             auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
 
             auto& transform = selectedEntity.GetComponent<dev::TransformComponent>();
-            auto modelMatrix = scene.GetWorldTransform(selectedEntity);
+            auto modelMatrix = scene->GetWorldTransform(selectedEntity);
             glm::mat4 deltaMatrix(1.0f);
 
             ImGuizmo::SetDrawlist();
@@ -689,9 +712,9 @@ void SceneTestApp::DrawExecutionControl()
     {
         // Save scene state
         if(!paused)
-            scene.Start();
+            scene->Start();
 
-        scene.SetIsRunning(true);
+        scene->SetIsRunning(true);
 
         playing = true;
         paused = false;
@@ -713,7 +736,7 @@ void SceneTestApp::DrawExecutionControl()
     if(ImGui::ImageButton("##Pause", pauseIcon->nativeHandle, { 20, 20 }))
     {
         paused = true;
-        scene.SetIsRunning(false);
+        scene->SetIsRunning(false);
     }
     else if(!playing || paused)
     {
@@ -734,7 +757,7 @@ void SceneTestApp::DrawExecutionControl()
         playing = false;
         paused = false;
 
-        scene.SetIsRunning(false);
+        scene->SetIsRunning(false);
         // Restore scene state
     }
     else if(!playing && !paused)
@@ -1199,14 +1222,14 @@ void SceneTestApp::DrawViewport()
 
     DrawImGuizmo();
 
-    auto lights = scene.GetRegistry().view<dev::TransformComponent, dev::LightComponent>();
+    auto lights = scene->GetRegistry().view<dev::TransformComponent, dev::LightComponent>();
 
     for(auto entity : lights)
     {
         auto[transform, light] = 
             lights.get<dev::TransformComponent, dev::LightComponent>(entity);
 
-        auto screenPos = camera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
+        /* auto screenPos = camera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
 
         if(!glm::any(glm::isnan(screenPos)))
         {
@@ -1223,7 +1246,7 @@ void SceneTestApp::DrawViewport()
             );
 
             ImGui::PopID();
-        }
+        } */
     }
 
     ImGui::End();
@@ -1235,64 +1258,11 @@ void SceneTestApp::Draw()
 {
     if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) && keyboardTimer.GetElapsedSeconds() > 0.2f)
     {
-        scene.ToggleUpdatePhysics();
+        scene->ToggleUpdatePhysics();
         keyboardTimer.Reset();
     }
 
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) && keyboardTimer.GetElapsedSeconds() > 0.2f)
-    {
-        {
-            std::ofstream file("output.json");
-
-            cereal::JSONOutputArchive archive(file);
-
-            entt::snapshot(scene.GetRegistry())
-                .get<dev::NameComponent>(archive)
-                .get<dev::MeshComponent>(archive)
-                .get<dev::MeshRendererComponent>(archive)
-                .get<dev::TransformComponent>(archive)
-                .get<dev::PipelineComponent>(archive)
-                .get<dev::HierarchyComponent>(archive)
-                .get<dev::CameraComponent>(archive)
-                .get<dev::LightComponent>(archive)
-                .get<dev::HierarchyComponent>(archive)
-                .get<dev::TonemapComponent>(archive)
-                .get<dev::BloomComponent>(archive)
-                .get<dev::GTAOComponent>(archive)
-                .get<dev::SSRComponent>(archive)
-                .get<dev::ProceduralSkyComponent>(archive)
-                .get<dev::HDRISkyComponent>(archive)
-                .get<dev::RigidBodyComponent>(archive);
-        }
-
-        scene.GetRegistry().clear<>();
-
-        std::ifstream file("output.json");
-        
-        cereal::JSONInputArchive archive(file);
-
-        entt::snapshot_loader(scene.GetRegistry())
-            .get<dev::NameComponent>(archive)
-            .get<dev::MeshComponent>(archive)
-            .get<dev::MeshRendererComponent>(archive)
-            .get<dev::TransformComponent>(archive)
-            .get<dev::PipelineComponent>(archive)
-            .get<dev::HierarchyComponent>(archive)
-            .get<dev::CameraComponent>(archive)
-            .get<dev::LightComponent>(archive)
-            .get<dev::HierarchyComponent>(archive)
-            .get<dev::TonemapComponent>(archive)
-            .get<dev::BloomComponent>(archive)
-            .get<dev::GTAOComponent>(archive)
-            .get<dev::SSRComponent>(archive)
-            .get<dev::ProceduralSkyComponent>(archive)
-            .get<dev::HDRISkyComponent>(archive)
-            .get<dev::RigidBodyComponent>(archive);
-            
-        keyboardTimer.Reset();
-    }
-
-    scene.Draw(viewportRenderTarget);
+    scene->Draw(viewportRenderTarget);
 
     dev::Renderer::Get().ClearRenderTarget();
 

@@ -21,6 +21,7 @@
 #include <ModelLoader.hpp>
 #include <ScriptLoader.hpp>
 #include <ShaderLoader.hpp>
+#include <SceneLoader.hpp>
 #include <AssetManager.hpp>
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
@@ -99,15 +100,13 @@ private:
 private:
     std::shared_ptr<dev::DeferredRenderer> deferredRenderer;
 
-    dev::Scene scene;
+    std::shared_ptr<dev::Scene> scene;
 
     dev::WindowPtr window;
 
     dev::Timer deltaTimeTimer, keyboardTimer;
 
 private:
-    LLGL::PipelineState* pipeline;
-
     GLuint nativeViewportAttachment;
 
     LLGL::Texture* viewportAttachment{};

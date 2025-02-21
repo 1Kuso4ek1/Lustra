@@ -15,6 +15,7 @@ public:
     virtual ~AssetLoader() = default;
 
     virtual AssetPtr Load(const std::filesystem::path& path) = 0;
+    virtual void Write(const AssetPtr& asset, const std::filesystem::path& path) {};
 };
 
 }

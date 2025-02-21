@@ -19,7 +19,8 @@ struct Asset
         Environment,
         Script,
         VertexShader,
-        FragmentShader
+        FragmentShader,
+        Scene
     };
 
     Asset(Type type) : type(type) {}

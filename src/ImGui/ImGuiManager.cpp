@@ -3,7 +3,11 @@
 namespace dev
 {
 
-void ImGuiManager::Init(GLFWwindow* window, std::filesystem::path fontPath)
+void ImGuiManager::Init(
+    GLFWwindow* window,
+    const std::filesystem::path& fontPath,
+    const std::filesystem::path& iniPath
+)
 {
     IMGUI_CHECKVERSION();
     
@@ -11,15 +15,20 @@ void ImGuiManager::Init(GLFWwindow* window, std::filesystem::path fontPath)
     
     SetupStyle();
 
+    this->iniPath = iniPath.string();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    if(!iniPath.empty() && std::filesystem::exists(iniPath))
+        io.IniFilename = this->iniPath.c_str();
 
     ImFontConfig config;
     config.OversampleH = 8;
     config.OversampleV = 8;
 
-    if(!fontPath.empty())
+    if(!fontPath.empty() && std::filesystem::exists(fontPath))
         io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 18.0f, &config);
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);

@@ -1,0 +1,256 @@
+{
+    "value0": 6,
+    "value1": 0,
+    "value2": {
+        "value0": "Rifle"
+    },
+    "value3": 1,
+    "value4": {
+        "value0": "Camera"
+    },
+    "value5": 2,
+    "value6": {
+        "value0": "PostProcessing"
+    },
+    "value7": 3,
+    "value8": {
+        "value0": "Light"
+    },
+    "value9": 4,
+    "value10": {
+        "value0": "Light1"
+    },
+    "value11": 5,
+    "value12": {
+        "value0": "Sky"
+    },
+    "value13": 2,
+    "value14": 0,
+    "value15": {
+        "value0": "../resources/models/ak-47.fbx"
+    },
+    "value16": 5,
+    "value17": {
+        "value0": "../resources/models/cube"
+    },
+    "value18": 1,
+    "value19": 0,
+    "value20": {
+        "value0": 2,
+        "value1": "../resources/materials/ak47Wood",
+        "value2": "../resources/materials/ak47Metal"
+    },
+    "value21": 4,
+    "value22": 0,
+    "value23": {
+        "value0": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value1": {
+            "value0": -90.0,
+            "value1": 180.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value24": 1,
+    "value25": {
+        "value0": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value26": 3,
+    "value27": {
+        "value0": {
+            "value0": 5.0,
+            "value1": 5.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value28": 4,
+    "value29": {
+        "value0": {
+            "value0": -5.0,
+            "value1": 5.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value30": 1,
+    "value31": 0,
+    "value32": {
+        "value0": "../resources/../shaders/vertex.vert",
+        "value1": "../resources/../shaders/deferred.frag"
+    },
+    "value33": 0,
+    "value34": 1,
+    "value35": 1,
+    "value36": {
+        "value0": {
+            "value0": 90.0,
+            "value1": 0.10000000149011612,
+            "value2": 100.0,
+            "value3": 1.7777777910232545,
+            "value4": true,
+            "value5": {
+                "value0": 0.0,
+                "value1": 1.0,
+                "value2": 0.0
+            },
+            "value6": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0
+            },
+            "value7": {
+                "value0": 1920.0,
+                "value1": 1080.0
+            }
+        }
+    },
+    "value37": 2,
+    "value38": 3,
+    "value39": {
+        "value0": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        },
+        "value1": 1.0,
+        "value2": 0.0,
+        "value3": 0.0,
+        "value4": 0.000009999999747378752,
+        "value5": false,
+        "value6": {
+            "value0": 2048,
+            "value1": 2048
+        }
+    },
+    "value40": 4,
+    "value41": {
+        "value0": {
+            "value0": 1.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value1": 1.0,
+        "value2": 0.0,
+        "value3": 0.0,
+        "value4": 0.000009999999747378752,
+        "value5": false,
+        "value6": {
+            "value0": 2048,
+            "value1": 2048
+        }
+    },
+    "value42": 0,
+    "value43": 1,
+    "value44": 2,
+    "value45": {
+        "value0": 0,
+        "value1": 1.0,
+        "value2": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value3": 0.0,
+        "value4": 0.0,
+        "value5": 0.0,
+        "value6": 0.0,
+        "value7": 1.0,
+        "value8": 1.0,
+        "value9": 1.0,
+        "value10": "empty",
+        "value11": {
+            "value0": 1280,
+            "value1": 720
+        }
+    },
+    "value46": 1,
+    "value47": 2,
+    "value48": {
+        "value0": 1.0,
+        "value1": 0.30000001192092898,
+        "value2": 8.0,
+        "value3": {
+            "value0": 1280,
+            "value1": 720
+        }
+    },
+    "value49": 1,
+    "value50": 2,
+    "value51": {
+        "value0": 2.0,
+        "value1": 4,
+        "value2": 100.0,
+        "value3": 2.0,
+        "value4": 1.5,
+        "value5": 0.20000000298023225,
+        "value6": 8.0,
+        "value7": {
+            "value0": 1280,
+            "value1": 720
+        }
+    },
+    "value52": 1,
+    "value53": 2,
+    "value54": {
+        "value0": 1.0,
+        "value1": 100,
+        "value2": 5,
+        "value3": 0.019999999552965165,
+        "value4": {
+            "value0": 1280,
+            "value1": 720
+        }
+    },
+    "value55": 0,
+    "value56": 1,
+    "value57": 5,
+    "value58": {
+        "value0": "../resources/textures/hdri/meadow_2_1k.hdr",
+        "value1": {
+            "value0": 1024,
+            "value1": 1024
+        }
+    },
+    "value59": 0
+}

@@ -24,9 +24,6 @@ public:
     void Update(float deltaTime);
     void Draw(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
-    void Save(const std::ostream& stream);
-    void Load(const std::istream& stream);
-
     void OnEvent(Event& event) override;
 
     void SetUpdatePhysics(bool updatePhysics);

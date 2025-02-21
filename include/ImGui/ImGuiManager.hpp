@@ -17,13 +17,20 @@ namespace dev
 class ImGuiManager : public Singleton<ImGuiManager>
 {
 public:
-    void Init(GLFWwindow* window, std::filesystem::path fontPath = {});
+    void Init(
+        GLFWwindow* window,
+        const std::filesystem::path& fontPath = {},
+        const std::filesystem::path& iniPath = {}
+    );
     void NewFrame();
     void Render();
     void Destroy();
 
 private:
     void SetupStyle();
+
+private:
+    std::string iniPath;
 };
 
 }

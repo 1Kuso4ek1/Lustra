@@ -3,6 +3,8 @@
 
 #include <Components.hpp>
 
+#include <ScriptManager.hpp>
+
 namespace glm
 {
 
@@ -75,9 +77,25 @@ namespace entt
 {
 
 template<class Archive>
-void serialize(Archive& archive, std::vector<entity>& entity)
+void save(Archive& archive, const std::vector<entity>& entities)
 {
-    archive(entity);
+    archive(entities.size());
+
+    for(auto& entity : entities)
+        archive((uint32_t)entity);
+}
+
+template<class Archive>
+void load(Archive& archive, std::vector<entity>& entities)
+{
+    size_t size;
+
+    archive(size);
+
+    entities.resize(size);
+
+    for(auto& entity : entities)
+        archive(entity);
 }
 
 }
@@ -177,11 +195,29 @@ void serialize(Archive& archive, CameraComponent& component)
     archive(component.camera);
 }
 
-/* template<class Archive>
-void serialize(Archive& archive, ScriptComponent& component)
+template<class Archive>
+void save(Archive& archive, const ScriptComponent& component)
 {
-    archive(component.script, component.moduleIndex, component.start, component.update);
-} */
+    archive(component.script ? component.script->path.string() : "");
+}
+
+template<class Archive>
+void load(Archive& archive, ScriptComponent& component)
+{
+    std::string path;
+
+    archive(path);
+
+    if(path.empty())
+        return;
+
+    component.script = AssetManager::Get().Load<ScriptAsset>(path);
+    component.moduleIndex = component.script->modulesCount++;
+
+    ScriptManager::Get().AddScript(component.script);
+
+    ScriptManager::Get().Build();
+}
 
 template<class Archive>
 void save(Archive& archive, const RigidBodyComponent& component)

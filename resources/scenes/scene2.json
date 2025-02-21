@@ -1,5 +1,5 @@
 {
-    "value0": 7,
+    "value0": 8,
     "value1": 0,
     "value2": {
         "value0": "Rifle"
@@ -28,80 +28,57 @@
     "value14": {
         "value0": "Sky"
     },
-    "value15": 2,
-    "value16": 0,
-    "value17": {
+    "value15": 7,
+    "value16": {
+        "value0": "Model"
+    },
+    "value17": 3,
+    "value18": 0,
+    "value19": {
         "value0": "../resources/models/ak-47.fbx"
     },
-    "value18": 6,
-    "value19": {
+    "value20": 6,
+    "value21": {
         "value0": "../resources/models/cube"
     },
-    "value20": 1,
-    "value21": 0,
-    "value22": {
+    "value22": 7,
+    "value23": {
+        "value0": "../resources/models/suzanne.fbx"
+    },
+    "value24": 2,
+    "value25": 0,
+    "value26": {
         "value0": 2,
         "value1": "../resources/materials/ak47Wood",
         "value2": "../resources/materials/ak47Metal"
     },
-    "value23": 5,
-    "value24": 0,
-    "value25": {
-        "value0": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
-        },
-        "value1": {
-            "value0": -90.0,
-            "value1": 180.0,
-            "value2": 0.0
-        },
-        "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
-        }
+    "value27": 7,
+    "value28": {
+        "value0": 1,
+        "value1": "../resources/materials/default"
     },
-    "value26": 1,
-    "value27": {
-        "value0": {
-            "value0": 5.0,
-            "value1": 5.0,
-            "value2": 5.0
-        },
-        "value1": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
-        },
-        "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
-        }
-    },
-    "value28": 2,
-    "value29": {
-        "value0": {
-            "value0": 0.009452808648347855,
-            "value1": 0.7542818784713745,
-            "value2": 3.0773122310638429
-        },
-        "value1": {
-            "value0": -7.069986820220947,
-            "value1": 15.190095901489258,
-            "value2": 0.0
-        },
-        "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
-        }
-    },
-    "value30": 4,
+    "value29": 6,
+    "value30": 0,
     "value31": {
         "value0": {
+            "value0": 0.013586997985839844,
+            "value1": -2.9802322387695315e-8,
+            "value2": 0.0
+        },
+        "value1": {
+            "value0": 90.0,
+            "value1": -0.000005008956122765085,
+            "value2": -180.0
+        },
+        "value2": {
+            "value0": 0.9990938901901245,
+            "value1": 0.9995469450950623,
+            "value2": 0.9995469450950623
+        }
+    },
+    "value32": 1,
+    "value33": {
+        "value0": {
             "value0": 5.0,
             "value1": 5.0,
             "value2": 5.0
@@ -117,8 +94,44 @@
             "value2": 1.0
         }
     },
-    "value32": 5,
-    "value33": {
+    "value34": 2,
+    "value35": {
+        "value0": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value36": 4,
+    "value37": {
+        "value0": {
+            "value0": 5.0,
+            "value1": 5.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value38": 5,
+    "value39": {
         "value0": {
             "value0": -5.0,
             "value1": 5.0,
@@ -135,16 +148,54 @@
             "value2": 1.0
         }
     },
-    "value34": 1,
-    "value35": 0,
-    "value36": {
+    "value40": 7,
+    "value41": {
+        "value0": {
+            "value0": 0.7971922159194946,
+            "value1": 4.609968584645685e-8,
+            "value2": -1.9426746368408204
+        },
+        "value1": {
+            "value0": 0.00002390566442045383,
+            "value1": 2.985571046030394e-13,
+            "value2": 180.0
+        },
+        "value2": {
+            "value0": 1.0000001192092896,
+            "value1": 0.9999147057533264,
+            "value2": 0.9999147057533264
+        }
+    },
+    "value42": 2,
+    "value43": 0,
+    "value44": {
         "value0": "../resources/../shaders/vertex.vert",
         "value1": "../resources/../shaders/deferred.frag"
     },
-    "value37": 0,
-    "value38": 2,
-    "value39": 1,
-    "value40": {
+    "value45": 7,
+    "value46": {
+        "value0": "../resources/../shaders/vertex.vert",
+        "value1": "../resources/../shaders/deferred.frag"
+    },
+    "value47": 2,
+    "value48": 7,
+    "value49": {
+        "value0": 0,
+        "value1": {
+            "value0": 0
+        }
+    },
+    "value50": 0,
+    "value51": {
+        "value0": 4294967295,
+        "value1": {
+            "value0": 1,
+            "value1": 7
+        }
+    },
+    "value52": 2,
+    "value53": 1,
+    "value54": {
         "value0": {
             "value0": 90.0,
             "value1": 0.10000000149011612,
@@ -167,8 +218,8 @@
             }
         }
     },
-    "value41": 2,
-    "value42": {
+    "value55": 2,
+    "value56": {
         "value0": {
             "value0": 90.0,
             "value1": 0.10000000149011612,
@@ -191,9 +242,9 @@
             }
         }
     },
-    "value43": 2,
-    "value44": 4,
-    "value45": {
+    "value57": 2,
+    "value58": 4,
+    "value59": {
         "value0": {
             "value0": 1.0,
             "value1": 1.0,
@@ -209,8 +260,8 @@
             "value1": 2048
         }
     },
-    "value46": 5,
-    "value47": {
+    "value60": 5,
+    "value61": {
         "value0": {
             "value0": 1.0,
             "value1": 0.0,
@@ -226,10 +277,18 @@
             "value1": 2048
         }
     },
-    "value48": 0,
-    "value49": 1,
-    "value50": 3,
-    "value51": {
+    "value62": 2,
+    "value63": 0,
+    "value64": {
+        "value0": "../resources/scripts/test.as"
+    },
+    "value65": 2,
+    "value66": {
+        "value0": ""
+    },
+    "value67": 1,
+    "value68": 3,
+    "value69": {
         "value0": 0,
         "value1": 1.0,
         "value2": {
@@ -250,9 +309,9 @@
             "value1": 736
         }
     },
-    "value52": 1,
-    "value53": 3,
-    "value54": {
+    "value70": 1,
+    "value71": 3,
+    "value72": {
         "value0": 1.0,
         "value1": 0.30000001192092898,
         "value2": 8.0,
@@ -261,9 +320,9 @@
             "value1": 736
         }
     },
-    "value55": 1,
-    "value56": 3,
-    "value57": {
+    "value73": 1,
+    "value74": 3,
+    "value75": {
         "value0": 2.0,
         "value1": 4,
         "value2": 100.0,
@@ -276,9 +335,9 @@
             "value1": 736
         }
     },
-    "value58": 1,
-    "value59": 3,
-    "value60": {
+    "value76": 1,
+    "value77": 3,
+    "value78": {
         "value0": 1.0,
         "value1": 100,
         "value2": 5,
@@ -288,15 +347,40 @@
             "value1": 736
         }
     },
-    "value61": 0,
-    "value62": 1,
-    "value63": 6,
-    "value64": {
-        "value0": "../resources/textures/hdri/sky5.hdr",
-        "value1": {
+    "value79": 1,
+    "value80": 6,
+    "value81": {
+        "value0": 600.0,
+        "value1": 0.0,
+        "value2": 0.0,
+        "value3": 0,
+        "value4": {
             "value0": 1024,
             "value1": 1024
         }
     },
-    "value65": 0
+    "value82": 0,
+    "value83": 1,
+    "value84": 7,
+    "value85": {
+        "value0": {
+            "value0": 0.7971922159194946,
+            "value1": 4.609968584645685e-8,
+            "value2": -1.9426746368408204
+        },
+        "value1": {
+            "value0": -6.513504640433699e-15,
+            "value1": -2.086162709247219e-7,
+            "value2": -1.0,
+            "value3": -4.371138828673793e-8
+        },
+        "value2": 2,
+        "value3": false,
+        "value4": 0,
+        "value5": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        }
+    }
 }

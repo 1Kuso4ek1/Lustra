@@ -1087,7 +1087,11 @@ void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
                 break;
 
             case dev::Asset::Type::Scene:
-                dev::AssetManager::Get().Load<dev::SceneAsset>(entry);
+                dev::Multithreading::Get().AddJob({ {},
+                    [entry]() {
+                        dev::AssetManager::Get().Load<dev::SceneAsset>(entry);
+                    }
+                });
                 break;
 
             default:

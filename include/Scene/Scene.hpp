@@ -16,6 +16,9 @@ class Scene : public EventListener
 {
 public:
     Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>());
+    ~Scene();
+
+    void Setup();
 
     void SetRenderer(std::shared_ptr<RendererBase> renderer);
 
@@ -95,7 +98,6 @@ private:
 
 private:
     Camera* camera{};
-    Camera* externalCamera{};
 
     glm::vec3 cameraPosition; // Only for shaders
 
@@ -119,19 +121,23 @@ private:
         float bias __attribute__ ((aligned(16)));
     };
 
-    std::vector<Light> lights;
-    std::vector<Shadow> shadows;
-    
-    std::array<LLGL::Texture*, 4> shadowSamplers;
+    // How good of an idea is it?...
+    struct SharedSceneData : public Singleton<SharedSceneData>
+    {
+        std::vector<Light> lights;
+        std::vector<Shadow> shadows;
+        
+        std::array<LLGL::Texture*, 4> shadowSamplers;
 
-    LLGL::Buffer* lightsBuffer{};
-    LLGL::Buffer* shadowsBuffer{};
+        LLGL::Buffer* lightsBuffer{};
+        LLGL::Buffer* shadowsBuffer{};
+    };
 
 private:
     std::shared_ptr<RendererBase> renderer;
 
 private:
-    entt::registry registry;
+    entt::registry registry{};
 
 private:
     friend class Entity;

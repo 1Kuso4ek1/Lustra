@@ -6,7 +6,11 @@ namespace dev
 
 void EventManager::AddListener(Event::Type eventType, EventListener* listener)
 {
-    listeners[eventType].push_back(listener);
+    auto& vec = listeners[eventType];
+    if(std::find(vec.begin(), vec.end(), listener) != vec.end())
+        return;
+
+    vec.push_back(listener);
 }
 
 void EventManager::RemoveListener(Event::Type eventType, EventListener* listener)

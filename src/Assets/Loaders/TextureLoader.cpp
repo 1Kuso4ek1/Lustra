@@ -105,8 +105,6 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
         create();
     }
 
-    textureAsset->path = path;
-
     return textureAsset;
 }
 
@@ -137,7 +135,6 @@ void TextureLoader::LoadDefaultData()
     defaultTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
     defaultTextureAsset->nativeHandle = nativeHandle.id;
 
-    defaultTextureAsset->path = "default";
     defaultTextureAsset->loaded = true;
 
     imageView.data = emptyData;
@@ -150,7 +147,6 @@ void TextureLoader::LoadDefaultData()
     emptyTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
     emptyTextureAsset->nativeHandle = nativeHandle.id;
 
-    emptyTextureAsset->path = "empty";
     emptyTextureAsset->loaded = true;
 }
 

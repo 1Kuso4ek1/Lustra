@@ -79,6 +79,8 @@ public:
             return;
 
         loader->Write(asset, assetPath);
+
+        asset->path = assetPath;
     }
 
     template<class T>

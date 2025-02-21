@@ -28,25 +28,16 @@ SceneTestApp::SceneTestApp()
 
     LoadTextures();
 
+    CreateRenderTarget();
+
     deferredRenderer = std::make_shared<dev::DeferredRenderer>();
 
     scene = std::make_shared<dev::Scene>(deferredRenderer);
-
-    CreateRenderTarget();
+    sceneAsset = std::make_shared<dev::SceneAsset>(scene);
+    sceneAsset->path = dev::AssetManager::Get().GetAssetsDirectory() / "scenes/scene2.json";
 
     CreateEntities();
 
-    sceneAsset = std::make_shared<dev::SceneAsset>(scene);
-
-    //dev::AssetManager::Get().Write(sceneAsset, "scene.json", true);
-
-    /* auto sceneAsset = dev::AssetManager::Get().Load<dev::SceneAsset>("scene.json", true);
-    scene = sceneAsset->scene;
-    scene->SetRenderer(deferredRenderer);
-
-    for(auto entity: scene->GetRegistry().view<entt::entity>()) 
-        list.emplace_back(entity, scene.get()); */
-    //list = { rifle, camera, editorCamera, postProcessing, light, light1, sky };
     UpdateList();
 }
 
@@ -68,7 +59,7 @@ void SceneTestApp::Run()
         return;
     }
 
-    scene->Start();
+    scene->Setup();
 
     while(window->PollEvents())
     {
@@ -76,13 +67,12 @@ void SceneTestApp::Run()
         
         dev::Multithreading::Get().Update();
 
+        editorCamera.GetComponent<dev::CameraComponent>().active = true;
+
         if(playing && !paused)
             scene->Update(deltaTimeTimer.GetElapsedSeconds());
         else
-        {
-            editorCamera.GetComponent<dev::CameraComponent>().active = true;
             editorCamera.GetComponent<dev::ScriptComponent>().update(editorCamera, deltaTimeTimer.GetElapsedSeconds());
-        }
 
         deltaTimeTimer.Reset();
 
@@ -279,7 +269,7 @@ void SceneTestApp::UpdateEditorCameraScript()
 
     cameraScript.update = [&](dev::Entity entity, float deltaTime)
     {
-        static auto& transform = entity.GetComponent<dev::TransformComponent>();
+        auto& transform = entity.GetComponent<dev::TransformComponent>();
 
         static float speed = 0.0f;
 
@@ -450,15 +440,26 @@ void SceneTestApp::DrawSceneTree()
         {
             sceneAsset = *(dev::SceneAssetPtr*)payload->Data;
 
-            scene = sceneAsset->scene;
-            scene->SetRenderer(deferredRenderer);
+            selectedEntity = {};
 
-            UpdateList();
+            dev::Multithreading::Get().AddJob({ {},
+                [&]() {
+                    scene = sceneAsset->scene;
+                    scene->SetRenderer(deferredRenderer);
+                    scene->Setup();
 
-            if(editorCamera)
-                UpdateEditorCameraScript();
-            else
-                CreateEditorCameraEntity();
+                    dev::EventManager::Get().Dispatch(
+                        std::make_unique<dev::WindowResizeEvent>(dev::Renderer::Get().GetViewportResolution())
+                    );
+
+                    UpdateList();
+
+                    if(editorCamera)
+                        UpdateEditorCameraScript();
+                    else
+                        CreateEditorCameraEntity();
+                }
+            });
         }
 
         ImGui::EndDragDropTarget();
@@ -1393,7 +1394,7 @@ void SceneTestApp::DrawViewport()
         auto[transform, light] = 
             lights.get<dev::TransformComponent, dev::LightComponent>(entity);
 
-        /* auto screenPos = camera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
+        auto screenPos = editorCamera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
 
         if(!glm::any(glm::isnan(screenPos)))
         {
@@ -1410,7 +1411,7 @@ void SceneTestApp::DrawViewport()
             );
 
             ImGui::PopID();
-        } */
+        }
     }
 
     ImGui::End();
@@ -1423,6 +1424,12 @@ void SceneTestApp::Draw()
     if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) && keyboardTimer.GetElapsedSeconds() > 0.2f)
     {
         scene->ToggleUpdatePhysics();
+        keyboardTimer.Reset();
+    }
+
+    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) && keyboardTimer.GetElapsedSeconds() > 0.2f)
+    {
+        dev::AssetManager::Get().Write(sceneAsset);
         keyboardTimer.Reset();
     }
 

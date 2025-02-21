@@ -10,6 +10,24 @@ Scene::Scene(std::shared_ptr<RendererBase> renderer)
 {
 }
 
+Scene::~Scene()
+{
+    EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+    EventManager::Get().RemoveListener(Event::Type::Collision, this);
+}
+
+void Scene::Setup()
+{
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
+    EventManager::Get().AddListener(Event::Type::Collision, this);
+
+    if(!SharedSceneData::Get().lightsBuffer)
+    {
+        SetupLightsBuffer();
+        SetupShadowsBuffer();
+    }
+}
+
 void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
 {
     this->renderer = renderer;
@@ -17,15 +35,6 @@ void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
 
 void Scene::Start()
 {
-    if(!lightsBuffer)
-    {
-        SetupLightsBuffer();
-        SetupShadowsBuffer();
-    }
-
-    EventManager::Get().AddListener(Event::Type::WindowResize, this);
-    EventManager::Get().AddListener(Event::Type::Collision, this);
-
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
         if(script.script)
@@ -327,9 +336,9 @@ void Scene::SetupLightsBuffer()
 
     LLGL::BufferDescriptor lightBufferDesc = LLGL::ConstantBufferDesc(maxLights * sizeof(Light));
     
-    lightsBuffer = Renderer::Get().CreateBuffer(lightBufferDesc);
+    SharedSceneData::Get().lightsBuffer = Renderer::Get().CreateBuffer(lightBufferDesc);
 
-    lights.reserve(maxLights);
+    SharedSceneData::Get().lights.reserve(maxLights);
 }
 
 void Scene::SetupShadowsBuffer()
@@ -338,9 +347,9 @@ void Scene::SetupShadowsBuffer()
 
     LLGL::BufferDescriptor shadowBufferDesc = LLGL::ConstantBufferDesc(maxShadows * sizeof(Shadow));
 
-    shadowsBuffer = Renderer::Get().CreateBuffer(shadowBufferDesc);
+    SharedSceneData::Get().shadowsBuffer = Renderer::Get().CreateBuffer(shadowBufferDesc);
 
-    shadows.reserve(maxShadows);
+    SharedSceneData::Get().shadows.reserve(maxShadows);
 }
 
 void Scene::UpdateLightsBuffer()
@@ -348,7 +357,7 @@ void Scene::UpdateLightsBuffer()
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
+            commandBuffer->UpdateBuffer(*SharedSceneData::Get().lightsBuffer, 0, SharedSceneData::Get().lights.data(), SharedSceneData::Get().lights.size() * sizeof(Light));
         }, {}, [](auto) {}, nullptr
     );
 }
@@ -358,7 +367,7 @@ void Scene::UpdateShadowsBuffer()
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            commandBuffer->UpdateBuffer(*shadowsBuffer, 0, shadows.data(), shadows.size() * sizeof(Shadow));
+            commandBuffer->UpdateBuffer(*SharedSceneData::Get().shadowsBuffer, 0, SharedSceneData::Get().shadows.data(), SharedSceneData::Get().shadows.size() * sizeof(Shadow));
         }, {}, [](auto) {}, nullptr
     );
 }
@@ -415,7 +424,7 @@ void Scene::SetupCamera()
 
 void Scene::SetupLights()
 {
-    lights.clear();
+    SharedSceneData::Get().lights.clear();
 
     auto lightsView = registry.view<LightComponent, TransformComponent>();
 
@@ -429,7 +438,7 @@ void Scene::SetupLights()
         if(registry.all_of<HierarchyComponent>(entity))
             localTransform.SetTransform(GetWorldTransform(entity));
 
-        lights.push_back(
+        SharedSceneData::Get().lights.push_back(
             {
                 localTransform.position,
                 glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
@@ -444,12 +453,12 @@ void Scene::SetupLights()
 
 void Scene::SetupShadows()
 {
-    shadows.clear();
+    SharedSceneData::Get().shadows.clear();
 
-    // Fill shadowSamplers with an empty texture
+    // Fill SharedSceneData::Get().shadowSamplers with an empty texture
     std::fill(
-        shadowSamplers.begin(),
-        shadowSamplers.end(),
+        SharedSceneData::Get().shadowSamplers.begin(),
+        SharedSceneData::Get().shadowSamplers.end(),
         AssetManager::Get().Load<TextureAsset>("empty", true)->texture
     );
 
@@ -469,7 +478,7 @@ void Scene::SetupShadows()
 
             auto delta = glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
         
-            shadows.push_back(
+            SharedSceneData::Get().shadows.push_back(
                 {
                     light.projection *
                     glm::lookAt(localTransform.position, localTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f)),
@@ -477,7 +486,7 @@ void Scene::SetupShadows()
                 }
             );
 
-            shadowSamplers[shadows.size() - 1] = light.depth;
+            SharedSceneData::Get().shadowSamplers[SharedSceneData::Get().shadows.size() - 1] = light.depth;
         }
     }
 }
@@ -695,10 +704,10 @@ void Scene::HDRISkyRenderPass(
 
 void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 {
-    static auto uniforms = [&](auto commandBuffer)
+    auto uniforms = [&](auto commandBuffer)
     {
-        auto numLights = lights.size();
-        auto numShadows = shadows.size();
+        auto numLights = SharedSceneData::Get().lights.size();
+        auto numShadows = SharedSceneData::Get().shadows.size();
 
         commandBuffer->SetUniforms(0, &numLights, sizeof(numLights));
         commandBuffer->SetUniforms(1, &numShadows, sizeof(numShadows));
@@ -739,13 +748,13 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     renderer->Draw(
         {
-            { 5, lightsBuffer },
-            { 6, shadowsBuffer },
+            { 5, SharedSceneData::Get().lightsBuffer },
+            { 6, SharedSceneData::Get().shadowsBuffer },
 
-            { 7, shadowSamplers[0] },
-            { 8, shadowSamplers[1] },
-            { 9, shadowSamplers[2] },
-            { 10, shadowSamplers[3] },
+            { 7, SharedSceneData::Get().shadowSamplers[0] },
+            { 8, SharedSceneData::Get().shadowSamplers[1] },
+            { 9, SharedSceneData::Get().shadowSamplers[2] },
+            { 10, SharedSceneData::Get().shadowSamplers[3] },
 
             { 11, irradiance },
             { 12, prefiltered },

@@ -35,7 +35,6 @@ AssetPtr SceneLoader::Load(const std::filesystem::path& path)
         .get<dev::RigidBodyComponent>(archive);
 
     asset->loaded = true;
-    asset->path = path;
 
     LLGL::Log::Printf(
         LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,

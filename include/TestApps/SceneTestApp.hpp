@@ -43,14 +43,18 @@ private:
 
     void CreateRifleEntity();
     void CreateCameraEntity();
+    void CreateEditorCameraEntity();
     void CreatePostProcessingEntity();
     void CreateLightEntity();
     void CreateLight1Entity();
     void CreateSkyEntity();
 
+    void UpdateList();
+    void UpdateEditorCameraScript();
+
     void CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera = false);
 
-    void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetSwapChain()->GetResolution());
+    void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetViewportResolution());
 
     void DrawImGui();
 
@@ -72,6 +76,7 @@ private:
     void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
     bool DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory);
     bool DrawCreateScriptMenu(const std::filesystem::path& currentDirectory);
+    bool DrawCreateSceneMenu(const std::filesystem::path& currentDirectory);
 
     void DrawMaterialEditor(dev::MaterialAssetPtr material);
     void DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent = false);
@@ -93,13 +98,14 @@ private:
     bool canMoveCamera = false;
 
 private:
-    dev::Entity rifle, camera, postProcessing, light, light1, sky, selectedEntity;
+    dev::Entity editorCamera, selectedEntity;
 
     std::vector<dev::Entity> list;
 
 private:
     std::shared_ptr<dev::DeferredRenderer> deferredRenderer;
 
+    dev::SceneAssetPtr sceneAsset;
     std::shared_ptr<dev::Scene> scene;
 
     dev::WindowPtr window;
@@ -119,7 +125,7 @@ private:
                          fileIcon, folderIcon, textureIcon,
                          materialIcon, modelIcon, scriptIcon,
                          playIcon, pauseIcon, stopIcon,
-                         buildIcon, lightIcon;
+                         buildIcon, lightIcon, sceneIcon;
     dev::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<dev::Asset::Type, dev::TextureAssetPtr> assetIcons;

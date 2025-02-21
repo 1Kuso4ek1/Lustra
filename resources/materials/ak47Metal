@@ -1,0 +1,69 @@
+{
+    "value0": {
+        "value0": {
+            "value0": 1,
+            "value1": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0,
+                "value3": 1.0
+            },
+            "value2": "../resources/textures/Metall_ak-47_Base_Color.png"
+        },
+        "value1": {
+            "value0": 0,
+            "value1": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0,
+                "value3": 1.0
+            },
+            "value2": "../resources/textures/default"
+        },
+        "value2": {
+            "value0": 0,
+            "value1": {
+                "value0": 1.0,
+                "value1": 0.5,
+                "value2": 0.5,
+                "value3": 0.5
+            },
+            "value2": "../resources/textures/default"
+        },
+        "value3": {
+            "value0": 0,
+            "value1": {
+                "value0": 0.30000001192092898,
+                "value1": 0.5,
+                "value2": 0.5,
+                "value3": 0.5
+            },
+            "value2": "../resources/textures/default"
+        },
+        "value4": {
+            "value0": 0,
+            "value1": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0,
+                "value3": 1.0
+            },
+            "value2": "../resources/textures/default"
+        },
+        "value5": {
+            "value0": 0,
+            "value1": {
+                "value0": 0.0,
+                "value1": 0.0,
+                "value2": 0.0,
+                "value3": 0.0
+            },
+            "value2": "../resources/textures/default"
+        },
+        "value6": 1.0,
+        "value7": {
+            "value0": 1.0,
+            "value1": 1.0
+        }
+    }
+}

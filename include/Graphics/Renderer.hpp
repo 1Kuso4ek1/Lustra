@@ -43,6 +43,10 @@ public: // Public methods
 
     void WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView);
 
+    void SetViewportResolution(const LLGL::Extent2D& resolution);
+
+    LLGL::Extent2D GetViewportResolution() const;
+
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);
     LLGL::Shader* CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes = {});
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
@@ -78,6 +82,8 @@ private: // Private methods
 
 private: // Private members
     uint64_t renderPassCounter = 0;
+
+    LLGL::Extent2D viewportResolution;
 
     LLGL::RenderSystemPtr renderSystem;
 

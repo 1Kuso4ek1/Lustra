@@ -1,3 +1,6 @@
+#include <cereal/archives/json.hpp>
+
+#include <Serialize.hpp>
 #include <MaterialLoader.hpp>
 #include <AssetManager.hpp>
 #include <EventManager.hpp>
@@ -15,11 +18,15 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
     if(path.filename() == "default")
         return defaultMaterial;
 
-    std::ofstream file(path.string());
+    std::ifstream file(path.string());
 
     auto material = std::make_shared<MaterialAsset>();
+    
+    cereal::JSONInputArchive archive(file);
 
-    material->albedo.texture = defaultTexture;
+    archive(*material);
+
+    /* material->albedo.texture = defaultTexture;
     material->albedo.texture = defaultTexture;
     material->normal.texture = defaultTexture;
     material->metallic.texture = defaultTexture;
@@ -28,13 +35,25 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
     material->emission.texture = defaultTexture;
 
     material->metallic = glm::vec4(0.0f);
-    material->emission = glm::vec4(0.0f);
+    material->emission = glm::vec4(0.0f); */
 
+    material->path = path;
     material->loaded = true;
 
     EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(material));
 
     return material;
+}
+
+void MaterialLoader::Write(const AssetPtr& asset, const std::filesystem::path& path)
+{
+    auto material = std::static_pointer_cast<MaterialAsset>(asset);
+
+    std::ofstream file(path);
+
+    cereal::JSONOutputArchive archive(file);
+
+    archive(*material);
 }
 
 void MaterialLoader::LoadDefaultData()
@@ -52,6 +71,7 @@ void MaterialLoader::LoadDefaultData()
     defaultMaterial->metallic = glm::vec4(0.0f);
     defaultMaterial->emission = glm::vec4(0.0f);
     
+    defaultMaterial->path = "default";
     defaultMaterial->loaded = true;
 }
 

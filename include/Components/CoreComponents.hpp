@@ -82,6 +82,8 @@ struct CameraComponent : public ComponentBase
     {  }
 
     Camera camera;
+
+    bool active = false;
 };
 
 struct LightComponent : public ComponentBase

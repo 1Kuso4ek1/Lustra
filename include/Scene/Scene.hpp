@@ -94,7 +94,8 @@ private:
     bool updatePhysics = false;
 
 private:
-    Camera* cam{};
+    Camera* camera{};
+    Camera* externalCamera{};
 
     glm::vec3 cameraPosition; // Only for shaders
 

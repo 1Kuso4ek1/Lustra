@@ -14,7 +14,7 @@ class PostProcessing : public EventListener
 public:
     PostProcessing(
         const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc,
-        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+        const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
         bool newRenderTarget = true,
         bool registerEvent = true,
         bool mipMaps = false,

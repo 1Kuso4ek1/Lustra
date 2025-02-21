@@ -6,7 +6,8 @@ namespace dev
 
 struct SceneAsset : public Asset
 {
-    SceneAsset() : Asset(Type::Scene) {}
+    SceneAsset(std::shared_ptr<Scene> scene)
+        : Asset(Type::Scene), scene(scene) {}
 
     std::shared_ptr<Scene> scene;
 };

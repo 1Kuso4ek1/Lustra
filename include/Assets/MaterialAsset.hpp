@@ -1,5 +1,6 @@
 #pragma once
 #include <TextureAsset.hpp>
+#include <AssetManager.hpp>
 
 #include <LLGL/CommandBuffer.h>
 
@@ -13,6 +14,11 @@ struct MaterialAsset : public Asset
     struct Property
     {
         enum class Type { Color, Texture };
+
+        Property()
+        {
+            texture = AssetManager::Get().Load<TextureAsset>("default", true);
+        }
 
         Property& operator=(const glm::vec4& value)
         {
@@ -30,13 +36,34 @@ struct MaterialAsset : public Asset
             return *this;
         }
 
+        template<class Archive>
+        void save(Archive& archive) const
+        {
+            archive(type, value, texture ? texture->path.string() : "default");
+        }
+
+        template<class Archive>
+        void load(Archive& archive)
+        {
+            std::string texturePath;
+
+            archive(type, value, texturePath);
+
+            texture = AssetManager::Get().Load<TextureAsset>(texturePath);
+        }
+
         Type type = Type::Color;
 
         glm::vec4 value{ 1.0f };
         TextureAssetPtr texture;
     };
 
-    MaterialAsset() : Asset(Type::Material) {}
+    MaterialAsset() : Asset(Type::Material)
+    {
+        roughness = glm::vec4(0.5f);
+        metallic = glm::vec4(0.5f);
+        emission = glm::vec4(0.0f);
+    }
 
     void SetUniforms(LLGL::CommandBuffer* commandBuffer)
     {
@@ -61,6 +88,12 @@ struct MaterialAsset : public Asset
 
         commandBuffer->SetUniforms(10, &emissionStrength, sizeof(emissionStrength));
         commandBuffer->SetUniforms(11, &uvScale, sizeof(uvScale));
+    }
+
+    template<class Archive>
+    void serialize(Archive& archive)
+    {
+        archive(albedo, normal, metallic, roughness, ao, emission, emissionStrength, uvScale);
     }
 
     Property albedo;

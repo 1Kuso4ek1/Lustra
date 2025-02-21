@@ -54,7 +54,9 @@ inline Asset::Type GetAssetType(const std::string& extension)
         { ".glb", Asset::Type::Model },
         { ".dae", Asset::Type::Model },
 
-        { ".as", Asset::Type::Script }
+        { ".as", Asset::Type::Script },
+
+        { ".json", Asset::Type::Scene }
     };
 
     auto it = extensionMap.find(extension);

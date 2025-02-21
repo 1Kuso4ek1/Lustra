@@ -10,8 +10,7 @@ namespace dev
 
 AssetPtr SceneLoader::Load(const std::filesystem::path& path)
 {
-    auto asset = std::make_shared<SceneAsset>();
-    asset->scene = std::make_shared<Scene>();
+    auto asset = std::make_shared<SceneAsset>(std::make_shared<Scene>());
 
     std::ifstream file(path);
 
@@ -37,6 +36,12 @@ AssetPtr SceneLoader::Load(const std::filesystem::path& path)
 
     asset->loaded = true;
     asset->path = path;
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
+        "Scene \"%s\" loaded.\n",
+        path.string().c_str()
+    );
 
     return asset;
 }

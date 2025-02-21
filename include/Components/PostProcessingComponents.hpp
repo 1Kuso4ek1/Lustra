@@ -6,7 +6,7 @@ namespace dev
 
 struct TonemapComponent : public ComponentBase, public EventListener
 {
-    TonemapComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    TonemapComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
     // All these move constructors are required since:
     // 1. they're being used by entt::snapshot
     // 1.1. destructor removes listener
@@ -61,7 +61,7 @@ struct TonemapComponent : public ComponentBase, public EventListener
 
 struct BloomComponent : public ComponentBase, public EventListener
 {
-    BloomComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    BloomComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
     BloomComponent(BloomComponent&& other);
     ~BloomComponent();
 
@@ -97,7 +97,7 @@ struct BloomComponent : public ComponentBase, public EventListener
 
 struct GTAOComponent : public ComponentBase, public EventListener
 {
-    GTAOComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    GTAOComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
     GTAOComponent(GTAOComponent&& other);
     ~GTAOComponent();
 
@@ -135,7 +135,7 @@ struct GTAOComponent : public ComponentBase, public EventListener
 
 struct SSRComponent : public ComponentBase, public EventListener
 {
-    SSRComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution());
+    SSRComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
     SSRComponent(SSRComponent&& other);
     ~SSRComponent();
 

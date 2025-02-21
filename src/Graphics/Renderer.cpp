@@ -50,6 +50,8 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
 
     swapChain = renderSystem->CreateSwapChain(swapChainDesc);
 
+    viewportResolution = resolution;
+
     SetupBuffers();
 }
 
@@ -58,6 +60,8 @@ void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
     swapChain = renderSystem->CreateSwapChain({}, surface);
 
     swapChain->SetVsyncInterval(0);
+
+    viewportResolution = swapChain->GetResolution();
 
     SetupBuffers();
 }
@@ -176,6 +180,16 @@ void Renderer::Unload()
 void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView)
 {
     renderSystem->WriteTexture(texture, textureRegion, srcImageView);
+}
+
+void Renderer::SetViewportResolution(const LLGL::Extent2D& resolution)
+{
+    viewportResolution = resolution;
+}
+
+LLGL::Extent2D Renderer::GetViewportResolution() const
+{
+    return viewportResolution;
 }
 
 LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData)

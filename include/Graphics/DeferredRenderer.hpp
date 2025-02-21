@@ -14,7 +14,7 @@ class DeferredRenderer final : public RendererBase, public EventListener
 {
 public:
     DeferredRenderer(
-        const LLGL::Extent2D& resolution = Renderer::Get().GetSwapChain()->GetResolution(),
+        const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
         bool registerEvent = true
     );
     ~DeferredRenderer();

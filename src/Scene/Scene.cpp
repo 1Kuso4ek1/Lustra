@@ -369,44 +369,47 @@ void Scene::SetupCamera()
 
     TransformComponent cameraTransform;
 
-    cam = nullptr;
+    camera = nullptr;
 
     for(auto entity : cameraView)
     {
-        cam = &cameraView.get<CameraComponent>(entity).camera;
-        cameraTransform = cameraView.get<TransformComponent>(entity);
+        auto [transform, cam] = cameraView.get<TransformComponent, CameraComponent>(entity);
 
-        if(registry.all_of<HierarchyComponent>(entity))
+        if(!camera || cam.active)
         {
-            auto rotation = cameraTransform.rotation;
+            camera = &cam.camera;
+            cameraTransform = transform;
+        
+            if(registry.all_of<HierarchyComponent>(entity))
+            {
+                auto rotation = cameraTransform.rotation;
 
-            cameraTransform.SetTransform(GetWorldTransform(entity));
+                cameraTransform.SetTransform(GetWorldTransform(entity));
 
-            cameraTransform.rotation = rotation;
+                cameraTransform.rotation = rotation;
+            }
+
+            cameraPosition = cameraTransform.position;
         }
-
-        cameraPosition = cameraTransform.position;
-
-        break;
     }
 
-    if(cam)
+    if(camera)
     {
         glm::mat4 view(1.0f);
 
-        if(cam->IsFirstPerson())
+        if(camera->IsFirstPerson())
         {
             auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
 
-            view = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, cam->GetUp());
+            view = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, camera->GetUp());
         }
         else
-            view = glm::lookAt(cameraTransform.position, cam->GetLookAt(), cam->GetUp());
+            view = glm::lookAt(cameraTransform.position, camera->GetLookAt(), camera->GetUp());
 
-        cam->SetViewMatrix(view);
+        camera->SetViewMatrix(view);
         
         Renderer::Get().GetMatrices()->GetView() = view;
-        Renderer::Get().GetMatrices()->GetProjection() = cam->GetProjectionMatrix();
+        Renderer::Get().GetMatrices()->GetProjection() = camera->GetProjectionMatrix();
     }
 }
 
@@ -873,10 +876,10 @@ LLGL::Texture* Scene::ApplyGTAO()
         },
         [&](auto commandBuffer)
         {
-            if(cam)
+            if(camera)
             {
-                float far = cam->GetFar();
-                float near = cam->GetNear();
+                float far = camera->GetFar();
+                float near = camera->GetNear();
 
                 commandBuffer->SetUniforms(0, &far, sizeof(far));
                 commandBuffer->SetUniforms(1, &near, sizeof(near));

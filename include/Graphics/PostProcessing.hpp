@@ -12,12 +12,16 @@ namespace dev
 class PostProcessing : public EventListener
 {
 public:
+    // Make it use something like PostProcessingDescriptor?
     PostProcessing(
-        const LLGL::PipelineLayoutDescriptor& layoutDesc, LLGL::GraphicsPipelineDescriptor pipelineDesc,
+        const LLGL::PipelineLayoutDescriptor& layoutDesc,
+        const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
         const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
+
         bool newRenderTarget = true,
         bool registerEvent = true,
         bool mipMaps = false,
+
         const LLGL::Format& format = LLGL::Format::RGBA16Float
     );
     ~PostProcessing();

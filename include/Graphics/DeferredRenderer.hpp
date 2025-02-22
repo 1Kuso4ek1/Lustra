@@ -10,7 +10,7 @@
 namespace dev
 {
 
-class DeferredRenderer final : public RendererBase, public EventListener
+class DeferredRenderer : public RendererBase, public EventListener
 {
 public:
     DeferredRenderer(

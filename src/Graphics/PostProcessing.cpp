@@ -5,11 +5,13 @@ namespace dev
 
 PostProcessing::PostProcessing(
     const LLGL::PipelineLayoutDescriptor& layoutDesc,
-    LLGL::GraphicsPipelineDescriptor pipelineDesc,
+    const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
     const LLGL::Extent2D& resolution,
+
     bool newRenderTarget,
     bool registerEvent,
     bool mipMaps,
+    
     const LLGL::Format& format
 )
 {

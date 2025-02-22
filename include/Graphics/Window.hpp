@@ -21,7 +21,7 @@ namespace dev
 
 static void OnWindowResize(GLFWwindow* window, int width, int height);
 
-class Window final : public LLGL::Surface
+class Window : public LLGL::Surface
 {
 public:
     Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);

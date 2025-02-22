@@ -121,17 +121,13 @@ private:
         float bias __attribute__ ((aligned(16)));
     };
 
-    // How good of an idea is it?...
-    struct SharedSceneData : public Singleton<SharedSceneData>
-    {
-        std::vector<Light> lights;
-        std::vector<Shadow> shadows;
-        
-        std::array<LLGL::Texture*, 4> shadowSamplers;
+    std::vector<Light> lights;
+    std::vector<Shadow> shadows;
+    
+    std::array<LLGL::Texture*, 4> shadowSamplers;
 
-        LLGL::Buffer* lightsBuffer{};
-        LLGL::Buffer* shadowsBuffer{};
-    };
+    LLGL::Buffer* lightsBuffer{};
+    LLGL::Buffer* shadowsBuffer{};
 
 private:
     std::shared_ptr<RendererBase> renderer;

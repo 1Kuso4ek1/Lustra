@@ -197,6 +197,20 @@ LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, c
     return renderSystem->CreateBuffer(bufferDesc, initialData);
 }
 
+LLGL::Buffer* Renderer::CreateBuffer(const std::string& name, const LLGL::BufferDescriptor& bufferDesc, const void* initialData)
+{
+    auto it = globalBuffers.find(name);
+
+    if(it != globalBuffers.end())
+        return it->second;
+
+    auto buffer = renderSystem->CreateBuffer(bufferDesc, initialData);
+
+    globalBuffers[name] = buffer;
+
+    return buffer;
+}
+
 LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes)
 {
     LLGL::ShaderDescriptor shaderDesc = { type, path.c_str() };

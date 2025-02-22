@@ -21,7 +21,7 @@ void Scene::Setup()
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
     EventManager::Get().AddListener(Event::Type::Collision, this);
 
-    if(!SharedSceneData::Get().lightsBuffer)
+    if(!lightsBuffer)
     {
         SetupLightsBuffer();
         SetupShadowsBuffer();
@@ -336,9 +336,9 @@ void Scene::SetupLightsBuffer()
 
     LLGL::BufferDescriptor lightBufferDesc = LLGL::ConstantBufferDesc(maxLights * sizeof(Light));
     
-    SharedSceneData::Get().lightsBuffer = Renderer::Get().CreateBuffer(lightBufferDesc);
+    lightsBuffer = Renderer::Get().CreateBuffer("sceneLightBuffer", lightBufferDesc);
 
-    SharedSceneData::Get().lights.reserve(maxLights);
+    lights.reserve(maxLights);
 }
 
 void Scene::SetupShadowsBuffer()
@@ -347,9 +347,9 @@ void Scene::SetupShadowsBuffer()
 
     LLGL::BufferDescriptor shadowBufferDesc = LLGL::ConstantBufferDesc(maxShadows * sizeof(Shadow));
 
-    SharedSceneData::Get().shadowsBuffer = Renderer::Get().CreateBuffer(shadowBufferDesc);
+    shadowsBuffer = Renderer::Get().CreateBuffer("sceneShadowBuffer", shadowBufferDesc);
 
-    SharedSceneData::Get().shadows.reserve(maxShadows);
+    shadows.reserve(maxShadows);
 }
 
 void Scene::UpdateLightsBuffer()
@@ -357,7 +357,7 @@ void Scene::UpdateLightsBuffer()
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            commandBuffer->UpdateBuffer(*SharedSceneData::Get().lightsBuffer, 0, SharedSceneData::Get().lights.data(), SharedSceneData::Get().lights.size() * sizeof(Light));
+            commandBuffer->UpdateBuffer(*lightsBuffer, 0, lights.data(), lights.size() * sizeof(Light));
         }, {}, [](auto) {}, nullptr
     );
 }
@@ -367,7 +367,7 @@ void Scene::UpdateShadowsBuffer()
     Renderer::Get().RenderPass(
         [&](auto commandBuffer)
         {
-            commandBuffer->UpdateBuffer(*SharedSceneData::Get().shadowsBuffer, 0, SharedSceneData::Get().shadows.data(), SharedSceneData::Get().shadows.size() * sizeof(Shadow));
+            commandBuffer->UpdateBuffer(*shadowsBuffer, 0, shadows.data(), shadows.size() * sizeof(Shadow));
         }, {}, [](auto) {}, nullptr
     );
 }
@@ -424,7 +424,7 @@ void Scene::SetupCamera()
 
 void Scene::SetupLights()
 {
-    SharedSceneData::Get().lights.clear();
+    lights.clear();
 
     auto lightsView = registry.view<LightComponent, TransformComponent>();
 
@@ -438,7 +438,7 @@ void Scene::SetupLights()
         if(registry.all_of<HierarchyComponent>(entity))
             localTransform.SetTransform(GetWorldTransform(entity));
 
-        SharedSceneData::Get().lights.push_back(
+        lights.push_back(
             {
                 localTransform.position,
                 glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
@@ -453,12 +453,12 @@ void Scene::SetupLights()
 
 void Scene::SetupShadows()
 {
-    SharedSceneData::Get().shadows.clear();
+    shadows.clear();
 
-    // Fill SharedSceneData::Get().shadowSamplers with an empty texture
+    // Fill shadowSamplers with an empty texture
     std::fill(
-        SharedSceneData::Get().shadowSamplers.begin(),
-        SharedSceneData::Get().shadowSamplers.end(),
+        shadowSamplers.begin(),
+        shadowSamplers.end(),
         AssetManager::Get().Load<TextureAsset>("empty", true)->texture
     );
 
@@ -478,7 +478,7 @@ void Scene::SetupShadows()
 
             auto delta = glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
         
-            SharedSceneData::Get().shadows.push_back(
+            shadows.push_back(
                 {
                     light.projection *
                     glm::lookAt(localTransform.position, localTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f)),
@@ -486,7 +486,7 @@ void Scene::SetupShadows()
                 }
             );
 
-            SharedSceneData::Get().shadowSamplers[SharedSceneData::Get().shadows.size() - 1] = light.depth;
+            shadowSamplers[shadows.size() - 1] = light.depth;
         }
     }
 }
@@ -706,8 +706,8 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 {
     auto uniforms = [&](auto commandBuffer)
     {
-        auto numLights = SharedSceneData::Get().lights.size();
-        auto numShadows = SharedSceneData::Get().shadows.size();
+        auto numLights = lights.size();
+        auto numShadows = shadows.size();
 
         commandBuffer->SetUniforms(0, &numLights, sizeof(numLights));
         commandBuffer->SetUniforms(1, &numShadows, sizeof(numShadows));
@@ -748,13 +748,13 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     renderer->Draw(
         {
-            { 5, SharedSceneData::Get().lightsBuffer },
-            { 6, SharedSceneData::Get().shadowsBuffer },
+            { 5, lightsBuffer },
+            { 6, shadowsBuffer },
 
-            { 7, SharedSceneData::Get().shadowSamplers[0] },
-            { 8, SharedSceneData::Get().shadowSamplers[1] },
-            { 9, SharedSceneData::Get().shadowSamplers[2] },
-            { 10, SharedSceneData::Get().shadowSamplers[3] },
+            { 7, shadowSamplers[0] },
+            { 8, shadowSamplers[1] },
+            { 9, shadowSamplers[2] },
+            { 10, shadowSamplers[3] },
 
             { 11, irradiance },
             { 12, prefiltered },

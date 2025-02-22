@@ -48,6 +48,7 @@ public: // Public methods
     LLGL::Extent2D GetViewportResolution() const;
 
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);
+    LLGL::Buffer* CreateBuffer(const std::string& name, const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr);
     LLGL::Shader* CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes = {});
     LLGL::Texture* CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage = nullptr);
     LLGL::Sampler* CreateSampler(const LLGL::SamplerDescriptor& samplerDesc);
@@ -96,6 +97,7 @@ private: // Private members
     LLGL::Buffer* matricesBuffer{};
     std::shared_ptr<Matrices> matrices;
 
+    std::unordered_map<std::string, LLGL::Buffer*> globalBuffers;
     std::unordered_map<uint64_t, LLGL::PipelineState*> pipelineCache;
 };
 

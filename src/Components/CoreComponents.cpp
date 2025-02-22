@@ -83,8 +83,8 @@ void LightComponent::CreatePipeline()
         LLGL::GraphicsPipelineDescriptor
         {
             .renderPass = renderTarget->GetRenderPass(),
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/depth.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/depth.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("depth.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("depth.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,

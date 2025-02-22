@@ -49,13 +49,13 @@
     "value25": 0,
     "value26": {
         "value0": 2,
-        "value1": "../resources/materials/ak47Wood",
-        "value2": "../resources/materials/ak47Metal"
+        "value1": "../resources/materials/ak47Wood.mat",
+        "value2": "../resources/materials/ak47Metal.mat"
     },
     "value27": 7,
     "value28": {
         "value0": 1,
-        "value1": "../resources/materials/default"
+        "value1": "../resources/materials/ak47Metal"
     },
     "value29": 6,
     "value30": 0,
@@ -66,14 +66,14 @@
             "value2": 0.0
         },
         "value1": {
-            "value0": -90.0,
-            "value1": 180.0,
-            "value2": 0.0
+            "value0": 90.0,
+            "value1": -0.000005008956122765085,
+            "value2": -180.0
         },
         "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
+            "value0": 0.9997659921646118,
+            "value1": 0.9998829960823059,
+            "value2": 0.9998829960823059
         }
     },
     "value32": 1,
@@ -97,13 +97,13 @@
     "value34": 2,
     "value35": {
         "value0": {
-            "value0": 1.055597186088562,
-            "value1": 0.9956376552581787,
-            "value2": 3.4386239051818849
+            "value0": 2.1787617206573488,
+            "value1": 1.3587532043457032,
+            "value2": 3.241281270980835
         },
         "value1": {
-            "value0": -16.409975051879884,
-            "value1": 25.619871139526368,
+            "value0": -16.20996856689453,
+            "value1": 40.5998649597168,
             "value2": 0.0
         },
         "value2": {
@@ -169,13 +169,13 @@
     "value42": 2,
     "value43": 0,
     "value44": {
-        "value0": "../resources/../shaders/vertex.vert",
-        "value1": "../resources/../shaders/deferred.frag"
+        "value0": "../resources/shaders/vertex.vert",
+        "value1": "../resources/shaders/deferred.frag"
     },
     "value45": 7,
     "value46": {
-        "value0": "../resources/../shaders/vertex.vert",
-        "value1": "../resources/../shaders/deferred.frag"
+        "value0": "../resources/shaders/vertex.vert",
+        "value1": "../resources/shaders/deferred.frag"
     },
     "value47": 0,
     "value48": 2,
@@ -262,10 +262,14 @@
             "value1": 2048
         }
     },
-    "value58": 0,
-    "value59": 1,
-    "value60": 3,
-    "value61": {
+    "value58": 1,
+    "value59": 2,
+    "value60": {
+        "value0": ""
+    },
+    "value61": 1,
+    "value62": 3,
+    "value63": {
         "value0": 0,
         "value1": 1.0,
         "value2": {
@@ -286,9 +290,9 @@
             "value1": 736
         }
     },
-    "value62": 1,
-    "value63": 3,
-    "value64": {
+    "value64": 1,
+    "value65": 3,
+    "value66": {
         "value0": 1.0,
         "value1": 0.30000001192092898,
         "value2": 8.0,
@@ -297,9 +301,9 @@
             "value1": 736
         }
     },
-    "value65": 1,
-    "value66": 3,
-    "value67": {
+    "value67": 1,
+    "value68": 3,
+    "value69": {
         "value0": 2.0,
         "value1": 4,
         "value2": 100.0,
@@ -312,9 +316,9 @@
             "value1": 736
         }
     },
-    "value68": 1,
-    "value69": 3,
-    "value70": {
+    "value70": 1,
+    "value71": 3,
+    "value72": {
         "value0": 1.0,
         "value1": 100,
         "value2": 5,
@@ -324,19 +328,19 @@
             "value1": 736
         }
     },
-    "value71": 0,
-    "value72": 1,
-    "value73": 6,
-    "value74": {
+    "value73": 0,
+    "value74": 1,
+    "value75": 6,
+    "value76": {
         "value0": "../resources/textures/hdri/meadow_2_1k.hdr",
         "value1": {
             "value0": 1024,
             "value1": 1024
         }
     },
-    "value75": 1,
-    "value76": 7,
-    "value77": {
+    "value77": 1,
+    "value78": 7,
+    "value79": {
         "value0": {
             "value0": -1.108716368675232,
             "value1": -1.9701042175292969,

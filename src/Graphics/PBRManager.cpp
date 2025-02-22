@@ -1,4 +1,5 @@
 #include <PBRManager.hpp>
+#include <ShaderAsset.hpp>
 
 namespace dev
 {
@@ -255,8 +256,8 @@ void PBRManager::SetupConvertPipeline()
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/HDRIConvert.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("skybox.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("HDRIConvert.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
@@ -286,8 +287,8 @@ void PBRManager::SetupIrradiancePipeline()
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/irradiance.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("skybox.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("irradiance.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
@@ -322,8 +323,8 @@ void PBRManager::SetupPrefilteredPipeline()
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/prefilter.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("skybox.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("prefilter.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
@@ -343,8 +344,8 @@ void PBRManager::SetupBRDFPipeline()
 {
     pipelineBRDF = Renderer::Get().CreatePipelineState({},
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/BRDF.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("BRDF.frag", true)->shader
         }
     );
 }

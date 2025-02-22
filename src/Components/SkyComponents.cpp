@@ -23,8 +23,8 @@ ProceduralSkyComponent::ProceduralSkyComponent(const LLGL::Extent2D& resolution)
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/proceduralSky.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("skybox.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("proceduralSky.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,
@@ -171,8 +171,8 @@ void HDRISkyComponent::SetupSkyPipeline()
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/skybox.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/HDRISky.frag"),
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("skybox.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("HDRISky.frag", true)->shader,
             .depth = LLGL::DepthDescriptor
             {
                 .testEnabled = true,

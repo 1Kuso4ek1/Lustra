@@ -60,7 +60,7 @@
             },
             "texturePath": "../resources/textures/default"
         },
-        "emissionStrength": 1.0,
+        "emissionStrength": 0.0,
         "uvScale": {
             "value0": 1.0,
             "value1": 1.0

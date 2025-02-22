@@ -72,8 +72,8 @@ void Application::SetupAssetManager()
     AssetManager::Get().AddLoader<MaterialAsset, MaterialLoader>("materials");
     AssetManager::Get().AddLoader<ModelAsset, ModelLoader>("models");
     AssetManager::Get().AddLoader<ScriptAsset, ScriptLoader>("scripts");
-    AssetManager::Get().AddLoader<VertexShaderAsset, VertexShaderLoader>("../shaders");
-    AssetManager::Get().AddLoader<FragmentShaderAsset, FragmentShaderLoader>("../shaders");
+    AssetManager::Get().AddLoader<VertexShaderAsset, VertexShaderLoader>("shaders");
+    AssetManager::Get().AddLoader<FragmentShaderAsset, FragmentShaderLoader>("shaders");
     AssetManager::Get().AddLoader<SceneAsset, SceneLoader>("scenes");
 }
 

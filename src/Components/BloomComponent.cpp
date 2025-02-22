@@ -29,8 +29,8 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
 
     LLGL::GraphicsPipelineDescriptor pingPongGraphics = 
     {
-        .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-        .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/blur.frag")
+        .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+        .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("blur.frag", true)->shader
     };
 
     thresholdPass = std::make_shared<PostProcessing>(
@@ -47,8 +47,8 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/threshold.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("threshold.frag", true)->shader
         },
         scaledResolution,
         true,

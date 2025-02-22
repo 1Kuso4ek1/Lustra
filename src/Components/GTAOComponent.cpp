@@ -35,8 +35,8 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/GTAO.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("GTAO.frag", true)->shader
         },
         scaledResolution,
         true,
@@ -55,8 +55,8 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/boxBlur.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("boxBlur.frag", true)->shader
         },
         scaledResolution,
         true,

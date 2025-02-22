@@ -38,8 +38,8 @@ TonemapComponent::TonemapComponent(const LLGL::Extent2D& resolution)
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/tonemap.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("tonemap.frag", true)->shader
         },
         resolution,
         true,

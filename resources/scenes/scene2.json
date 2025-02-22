@@ -49,13 +49,13 @@
     "value25": 0,
     "value26": {
         "value0": 2,
-        "value1": "../resources/materials/ak47Wood",
-        "value2": "../resources/materials/ak47Metal"
+        "value1": "../resources/materials/ak47Wood.mat",
+        "value2": "../resources/materials/ak47Metal.mat"
     },
     "value27": 7,
     "value28": {
         "value0": 1,
-        "value1": "../resources/materials/default"
+        "value1": "../resources/materials/ak47Metal"
     },
     "value29": 6,
     "value30": 0,
@@ -67,13 +67,13 @@
         },
         "value1": {
             "value0": 90.0,
-            "value1": -0.000005008956122765085,
+            "value1": -0.000005008956577512436,
             "value2": -180.0
         },
         "value2": {
-            "value0": 0.9990938901901245,
-            "value1": 0.9995469450950623,
-            "value2": 0.9995469450950623
+            "value0": 0.9987980127334595,
+            "value1": 0.9993990063667297,
+            "value2": 0.9993990063667297
         }
     },
     "value32": 1,
@@ -169,13 +169,13 @@
     "value42": 2,
     "value43": 0,
     "value44": {
-        "value0": "../resources/../shaders/vertex.vert",
-        "value1": "../resources/../shaders/deferred.frag"
+        "value0": "../resources/shaders/vertex.vert",
+        "value1": "../resources/shaders/deferred.frag"
     },
     "value45": 7,
     "value46": {
-        "value0": "../resources/../shaders/vertex.vert",
-        "value1": "../resources/../shaders/deferred.frag"
+        "value0": "../resources/shaders/vertex.vert",
+        "value1": "../resources/shaders/deferred.frag"
     },
     "value47": 2,
     "value48": 7,

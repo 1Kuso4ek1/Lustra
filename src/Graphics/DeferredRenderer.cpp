@@ -1,4 +1,5 @@
 #include <DeferredRenderer.hpp>
+#include <ShaderAsset.hpp>
 
 namespace dev
 {
@@ -101,8 +102,8 @@ DeferredRenderer::DeferredRenderer(
         },
         LLGL::GraphicsPipelineDescriptor
         {
-            .vertexShader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, "../shaders/screenRect.vert"),
-            .fragmentShader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, "../shaders/lightingPass.frag")
+            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("lightingPass.frag", true)->shader
         }
     );
 }

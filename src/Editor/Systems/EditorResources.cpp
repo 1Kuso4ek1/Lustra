@@ -1,18 +1,5 @@
 #include <Editor.hpp>
 
-void Editor::SetupAssetManager()
-{
-    dev::AssetManager::Get().SetAssetsDirectory("../resources/");
-
-    dev::AssetManager::Get().AddLoader<dev::TextureAsset, dev::TextureLoader>("textures");
-    dev::AssetManager::Get().AddLoader<dev::MaterialAsset, dev::MaterialLoader>("materials");
-    dev::AssetManager::Get().AddLoader<dev::ModelAsset, dev::ModelLoader>("models");
-    dev::AssetManager::Get().AddLoader<dev::ScriptAsset, dev::ScriptLoader>("scripts");
-    dev::AssetManager::Get().AddLoader<dev::VertexShaderAsset, dev::VertexShaderLoader>("../shaders");
-    dev::AssetManager::Get().AddLoader<dev::FragmentShaderAsset, dev::FragmentShaderLoader>("../shaders");
-    dev::AssetManager::Get().AddLoader<dev::SceneAsset, dev::SceneLoader>("scenes");
-}
-
 void Editor::LoadIcons()
 {
     fileIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/file.png", true);

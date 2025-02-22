@@ -825,7 +825,8 @@ void ScriptManager::RegisterTransformComponent()
         {
             { "glm::vec3 position", asOFFSET(TransformComponent, position) },
             { "glm::vec3 rotation", asOFFSET(TransformComponent, rotation) },
-            { "glm::vec3 scale", asOFFSET(TransformComponent, scale) }
+            { "glm::vec3 scale", asOFFSET(TransformComponent, scale) },
+            { "bool overridePhysics", asOFFSET(TransformComponent, overridePhysics) }
         }
     );
 }

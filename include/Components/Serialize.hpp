@@ -11,19 +11,28 @@ namespace glm
 template<class Archive>
 void serialize(Archive& archive, vec2& vec)
 {
-    archive(vec.x, vec.y);
+    archive(cereal::make_nvp("x", vec.x), cereal::make_nvp("y", vec.y));
 }
 
 template<class Archive>
 void serialize(Archive& archive, vec3& vec)
 {
-    archive(vec.x, vec.y, vec.z);
+    archive(
+        cereal::make_nvp("x", vec.x),
+        cereal::make_nvp("y", vec.y),
+        cereal::make_nvp("z", vec.z)
+    );
 }
 
 template<class Archive>
 void serialize(Archive& archive, vec4& vec)
 {
-    archive(vec.x, vec.y, vec.z, vec.w);
+    archive(
+        cereal::make_nvp("x", vec.x),
+        cereal::make_nvp("y", vec.y),
+        cereal::make_nvp("z", vec.z),
+        cereal::make_nvp("w", vec.w)
+    );
 }
 
 }
@@ -34,7 +43,7 @@ namespace LLGL
 template<class Archive>
 void serialize(Archive& archive, Extent2D& extent)
 {
-    archive(extent.width, extent.height);
+    archive(cereal::make_nvp("width", extent.width), cereal::make_nvp("height", extent.height));
 }
 
 }
@@ -42,11 +51,14 @@ void serialize(Archive& archive, Extent2D& extent)
 namespace JPH
 {
 
-// Serialize vectors
 template<class Archive>
 void save(Archive& archive, const Vec3& vec)
 {
-    archive(vec.GetX(), vec.GetY(), vec.GetZ());
+    archive(
+        cereal::make_nvp("x", vec.GetX()),
+        cereal::make_nvp("y", vec.GetY()),
+        cereal::make_nvp("z", vec.GetZ())
+    );
 }
 
 template<class Archive>
@@ -60,7 +72,12 @@ void load(Archive& archive, Vec3& vec)
 template<class Archive>
 void save(Archive& archive, const Quat& vec)
 {
-    archive(vec.GetX(), vec.GetY(), vec.GetZ(), vec.GetW());
+    archive(
+        cereal::make_nvp("x", vec.GetX()),
+        cereal::make_nvp("y", vec.GetY()),
+        cereal::make_nvp("z", vec.GetZ()),
+        cereal::make_nvp("w", vec.GetW())
+    );
 }
 
 template<class Archive>
@@ -79,10 +96,10 @@ namespace entt
 template<class Archive>
 void save(Archive& archive, const std::vector<entity>& entities)
 {
-    archive(entities.size());
+    archive(cereal::make_nvp("size", entities.size()));
 
     for(auto& entity : entities)
-        archive((uint32_t)entity);
+        archive(cereal::make_nvp("entity", (uint32_t)entity));
 }
 
 template<class Archive>
@@ -106,19 +123,24 @@ namespace dev
 template<class Archive>
 void serialize(Archive& archive, NameComponent& component)
 {
-    archive(component.name);
+    archive(cereal::make_nvp("name", component.name));
 }
 
 template<class Archive>
 void serialize(Archive& archive, TransformComponent& component)
 {
-    archive(component.position, component.rotation, component.scale);
+    archive(
+        cereal::make_nvp("position", component.position),
+        cereal::make_nvp("rotation", component.rotation),
+        cereal::make_nvp("scale", component.scale),
+        cereal::make_nvp("overridePhysics", component.overridePhysics)
+    );
 }
 
 template<class Archive>
 void save(Archive& archive, const MeshComponent& component)
 {
-    archive(component.model->path.string());
+    archive(cereal::make_nvp("modelPath", component.model->path.string()));
 }
 
 template<class Archive>
@@ -134,10 +156,10 @@ void load(Archive& archive, MeshComponent& component)
 template<class Archive>
 void save(Archive& archive, const MeshRendererComponent& component)
 {
-    archive(component.materials.size());
+    archive(cereal::make_nvp("size", component.materials.size()));
 
     for(auto& material : component.materials)
-        archive(material->path.string());
+        archive(cereal::make_nvp("materialPath", material->path.string()));
 }
 
 template<class Archive>
@@ -162,8 +184,8 @@ void load(Archive& archive, MeshRendererComponent& component)
 template<class Archive>
 void save(Archive& archive, const PipelineComponent& component)
 {
-    archive(component.vertexShader->path.string());
-    archive(component.fragmentShader->path.string());
+    archive(cereal::make_nvp("vertexShaderPath", component.vertexShader->path.string()));
+    archive(cereal::make_nvp("fragmentShaderPath", component.fragmentShader->path.string()));
 }
 
 template<class Archive>
@@ -186,7 +208,10 @@ void load(Archive& archive, PipelineComponent& component)
 template<class Archive>
 void serialize(Archive& archive, HierarchyComponent& component)
 {
-    archive(component.parent, component.children);
+    archive(
+        cereal::make_nvp("parent", component.parent),
+        cereal::make_nvp("children", component.children)
+    );
 }
 
 template<class Archive>
@@ -198,7 +223,7 @@ void serialize(Archive& archive, CameraComponent& component)
 template<class Archive>
 void save(Archive& archive, const ScriptComponent& component)
 {
-    archive(component.script ? component.script->path.string() : "");
+    archive(cereal::make_nvp("scriptPath", component.script ? component.script->path.string() : ""));
 }
 
 template<class Archive>
@@ -222,11 +247,11 @@ void load(Archive& archive, ScriptComponent& component)
 template<class Archive>
 void save(Archive& archive, const RigidBodyComponent& component)
 {
-    archive(component.body->GetPosition());
-    archive(component.body->GetRotation());
+    archive(cereal::make_nvp("rigidBodyPosition", component.body->GetPosition()));
+    archive(cereal::make_nvp("rigidBodyRotation", component.body->GetRotation()));
 
-    archive(component.body->GetMotionType());
-    archive(component.body->IsSensor());
+    archive(cereal::make_nvp("rigidBodyMotionType", component.body->GetMotionType()));
+    archive(cereal::make_nvp("rigidBodyIsSensor", component.body->IsSensor()));
 
     archive(component.settings.type);
 

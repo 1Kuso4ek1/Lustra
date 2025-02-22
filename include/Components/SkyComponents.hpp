@@ -16,13 +16,16 @@ struct ProceduralSkyComponent : public ComponentBase
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(time, cirrus, cumulus, flip, resolution);
+        archive(
+            CEREAL_NVP(time), CEREAL_NVP(cirrus),
+            CEREAL_NVP(cumulus), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>
     void load(Archive& archive)
     {
-        archive(time, cirrus, cumulus, flip, resolution);
+        archive(time, cirrus, cumulus, resolution);
 
         Build();
     }
@@ -57,7 +60,10 @@ public:
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(environmentMap->path.string(), resolution);
+        archive(
+            cereal::make_nvp("environmentMapPath", environmentMap->path.string()),
+            CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>

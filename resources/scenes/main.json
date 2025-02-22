@@ -1,252 +1,316 @@
 {
-    "value0": 5,
+    "value0": 6,
     "value1": 0,
     "value2": {
-        "value0": "Camera"
+        "name": "Camera"
     },
     "value3": 1,
     "value4": {
-        "value0": "EditorCamera"
+        "name": "EditorCamera"
     },
     "value5": 2,
     "value6": {
-        "value0": "PostProcessing"
+        "name": "PostProcessing"
     },
     "value7": 3,
     "value8": {
-        "value0": "Sky"
+        "name": "Sky"
     },
     "value9": 4,
     "value10": {
-        "value0": "Model"
+        "name": "Model"
     },
-    "value11": 2,
-    "value12": 3,
-    "value13": {
-        "value0": "../resources/models/cube"
+    "value11": 5,
+    "value12": {
+        "name": "Model"
     },
-    "value14": 4,
+    "value13": 3,
+    "value14": 3,
     "value15": {
-        "value0": "../resources/models/suzanne.fbx"
+        "modelPath": "../resources/models/cube"
     },
-    "value16": 1,
-    "value17": 4,
-    "value18": {
-        "value0": 1,
-        "value1": "../resources/materials/ak47Metal"
+    "value16": 4,
+    "value17": {
+        "modelPath": "../resources/models/suzanne.fbx"
     },
-    "value19": 3,
-    "value20": 0,
-    "value21": {
-        "value0": {
-            "value0": 5.0,
-            "value1": 5.0,
-            "value2": 5.0
+    "value18": 5,
+    "value19": {
+        "modelPath": "../resources/models/ak-47.fbx"
+    },
+    "value20": 2,
+    "value21": 4,
+    "value22": {
+        "size": 1,
+        "materialPath": "../resources/materials/default"
+    },
+    "value23": 5,
+    "value24": {
+        "size": 2,
+        "materialPath": "../resources/materials/ak47Wood.mat",
+        "materialPath": "../resources/materials/ak47Metal.mat"
+    },
+    "value25": 4,
+    "value26": 0,
+    "value27": {
+        "position": {
+            "x": 7.709224700927734,
+            "y": 2.05932354927063,
+            "z": -1.8921324014663697
         },
-        "value1": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
+        "rotation": {
+            "x": -10.830007553100586,
+            "y": 74.80016326904297,
+            "z": 0.0
         },
-        "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
-        }
-    },
-    "value22": 1,
-    "value23": {
-        "value0": {
-            "value0": -0.7598694562911987,
-            "value1": 0.4688056707382202,
-            "value2": 3.2270944118499758
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
         },
-        "value1": {
-            "value0": -5.43995475769043,
-            "value1": -14.130019187927246,
-            "value2": 0.0
+        "overridePhysics": false
+    },
+    "value28": 1,
+    "value29": {
+        "position": {
+            "x": 3.568521022796631,
+            "y": 5.604335308074951,
+            "z": 7.18129301071167
         },
-        "value2": {
-            "value0": 1.0,
-            "value1": 1.0,
-            "value2": 1.0
-        }
-    },
-    "value24": 4,
-    "value25": {
-        "value0": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
+        "rotation": {
+            "x": -13.280329704284668,
+            "y": 0.46008816361427309,
+            "z": 0.0
         },
-        "value1": {
-            "value0": -90.00042724609375,
-            "value1": 0.0,
-            "value2": 0.0
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
         },
-        "value2": {
-            "value0": 1.0,
-            "value1": 0.9993657469749451,
-            "value2": 0.9993657469749451
-        }
+        "overridePhysics": false
     },
-    "value26": 1,
-    "value27": 4,
-    "value28": {
-        "value0": "../resources/shaders/vertex.vert",
-        "value1": "../resources/shaders/deferred.frag"
+    "value30": 4,
+    "value31": {
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rotation": {
+            "x": -89.99998474121094,
+            "y": 82.60383605957031,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 0.998976469039917,
+            "z": 0.998976469039917
+        },
+        "overridePhysics": true
     },
-    "value29": 0,
-    "value30": 2,
-    "value31": 0,
-    "value32": {
-        "value0": {
-            "value0": 90.0,
-            "value1": 0.10000000149011612,
-            "value2": 100.0,
-            "value3": 1.57744562625885,
-            "value4": true,
-            "value5": {
-                "value0": 0.0,
-                "value1": 1.0,
-                "value2": 0.0
-            },
-            "value6": {
-                "value0": 1.0,
-                "value1": 1.0,
-                "value2": 1.0
-            },
-            "value7": {
-                "value0": 1161.0,
-                "value1": 736.0
-            }
-        }
+    "value32": 5,
+    "value33": {
+        "position": {
+            "x": 0.5953412055969238,
+            "y": -0.9155511856079102,
+            "z": -0.6427807807922363
+        },
+        "rotation": {
+            "x": -90.15159606933594,
+            "y": 89.74283599853516,
+            "z": 0.4705694615840912
+        },
+        "scale": {
+            "x": 0.9998983144760132,
+            "y": 0.9991228580474854,
+            "z": 0.9987991452217102
+        },
+        "overridePhysics": false
     },
-    "value33": 1,
-    "value34": {
-        "value0": {
-            "value0": 90.0,
-            "value1": 0.10000000149011612,
-            "value2": 100.0,
-            "value3": 1.57744562625885,
-            "value4": true,
-            "value5": {
-                "value0": 0.0,
-                "value1": 1.0,
-                "value2": 0.0
-            },
-            "value6": {
-                "value0": 1.0,
-                "value1": 1.0,
-                "value2": 1.0
-            },
-            "value7": {
-                "value0": 1161.0,
-                "value1": 736.0
-            }
-        }
+    "value34": 2,
+    "value35": 4,
+    "value36": {
+        "vertexShaderPath": "../resources/shaders/vertex.vert",
+        "fragmentShaderPath": "../resources/shaders/deferred.frag"
     },
-    "value35": 0,
-    "value36": 1,
-    "value37": 1,
+    "value37": 5,
     "value38": {
-        "value0": ""
+        "vertexShaderPath": "../resources/shaders/vertex.vert",
+        "fragmentShaderPath": "../resources/shaders/deferred.frag"
     },
-    "value39": 1,
-    "value40": 2,
+    "value39": 2,
+    "value40": 5,
     "value41": {
-        "value0": 0,
-        "value1": 1.0,
-        "value2": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
-        },
-        "value3": 0.0,
-        "value4": 0.0,
-        "value5": 0.0,
-        "value6": 0.0,
-        "value7": 1.0,
-        "value8": 1.0,
-        "value9": 1.0,
-        "value10": "../resources/textures/empty",
-        "value11": {
-            "value0": 1161,
-            "value1": 736
+        "parent": 0,
+        "children": {
+            "size": 0
         }
     },
-    "value42": 1,
-    "value43": 2,
-    "value44": {
-        "value0": 1.0,
-        "value1": 0.30000001192092898,
-        "value2": 8.0,
-        "value3": {
-            "value0": 1161,
-            "value1": 736
+    "value42": 0,
+    "value43": {
+        "parent": 4294967295,
+        "children": {
+            "size": 1,
+            "entity": 5
         }
     },
-    "value45": 1,
-    "value46": 2,
-    "value47": {
-        "value0": 2.0,
-        "value1": 4,
-        "value2": 100.0,
-        "value3": 2.0,
-        "value4": 1.5,
-        "value5": 0.20000000298023225,
-        "value6": 8.0,
-        "value7": {
-            "value0": 1161,
-            "value1": 736
-        }
-    },
-    "value48": 1,
-    "value49": 2,
-    "value50": {
-        "value0": 1.0,
-        "value1": 100,
-        "value2": 5,
-        "value3": 0.019999999552965165,
-        "value4": {
-            "value0": 1161,
-            "value1": 736
-        }
-    },
-    "value51": 1,
-    "value52": 3,
-    "value53": {
-        "value0": 40.0,
-        "value1": 0.0,
-        "value2": 0.0,
-        "value3": 0,
-        "value4": {
-            "value0": 1024,
-            "value1": 1024
-        }
-    },
-    "value54": 0,
-    "value55": 1,
-    "value56": 4,
-    "value57": {
+    "value44": 2,
+    "value45": 0,
+    "value46": {
         "value0": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
-        },
-        "value1": {
-            "value0": -0.7071093916893005,
-            "value1": 0.0,
-            "value2": 0.0,
-            "value3": 0.7071041464805603
-        },
-        "value2": 2,
-        "value3": false,
-        "value4": 0,
-        "value5": {
-            "value0": 0.0,
-            "value1": 0.0,
-            "value2": 0.0
+            "value0": 90.0,
+            "value1": 0.10000000149011612,
+            "value2": 100.0,
+            "value3": 1.57744562625885,
+            "value4": true,
+            "value5": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "value6": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "value7": {
+                "x": 1161.0,
+                "y": 736.0
+            }
         }
-    }
+    },
+    "value47": 1,
+    "value48": {
+        "value0": {
+            "value0": 90.0,
+            "value1": 0.10000000149011612,
+            "value2": 100.0,
+            "value3": 1.57744562625885,
+            "value4": true,
+            "value5": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "value6": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "value7": {
+                "x": 1161.0,
+                "y": 736.0
+            }
+        }
+    },
+    "value49": 0,
+    "value50": 3,
+    "value51": 1,
+    "value52": {
+        "scriptPath": ""
+    },
+    "value53": 4,
+    "value54": {
+        "scriptPath": "../resources/scripts/spin.as"
+    },
+    "value55": 0,
+    "value56": {
+        "scriptPath": "../resources/scripts/camera.as"
+    },
+    "value57": 1,
+    "value58": 2,
+    "value59": {
+        "algorithm": 0,
+        "exposure": 1.0,
+        "colorGrading": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "colorGradingIntensity": 0.0,
+        "vignetteIntensity": 0.0,
+        "vignetteRoundness": 0.0,
+        "filmGrain": 0.0,
+        "contrast": 1.0,
+        "saturation": 1.0,
+        "brightness": 1.0,
+        "lutPath": "../resources/textures/empty",
+        "resolution": {
+            "width": 1161,
+            "height": 736
+        }
+    },
+    "value60": 1,
+    "value61": 2,
+    "value62": {
+        "threshold": 1.0,
+        "strength": 0.30000001192092898,
+        "resolutionScale": 8.0,
+        "resolution": {
+            "width": 1161,
+            "height": 736
+        }
+    },
+    "value63": 1,
+    "value64": 2,
+    "value65": {
+        "resolutionScale": 2.0,
+        "samples": 4,
+        "limit": 100.0,
+        "radius": 2.0,
+        "falloff": 1.5,
+        "thicknessMix": 0.20000000298023225,
+        "maxStride": 8.0,
+        "resolution": {
+            "width": 1161,
+            "height": 736
+        }
+    },
+    "value66": 1,
+    "value67": 2,
+    "value68": {
+        "resolutionScale": 1.0,
+        "maxSteps": 100,
+        "maxBinarySearchSteps": 5,
+        "rayStep": 0.019999999552965165,
+        "resolution": {
+            "width": 1161,
+            "height": 736
+        }
+    },
+    "value69": 1,
+    "value70": 3,
+    "value71": {
+        "time": 40.0,
+        "cirrus": 0.0,
+        "cumulus": 0.0,
+        "resolution": {
+            "width": 1024,
+            "height": 1024
+        }
+    },
+    "value72": 0,
+    "value73": 2,
+    "value74": 4,
+    "value75": {
+        "rigidBodyPosition": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rigidBodyRotation": {
+            "x": -0.5312649011611939,
+            "y": 0.4666449725627899,
+            "z": 0.4666447937488556,
+            "w": 0.531265139579773
+        },
+        "rigidBodyMotionType": 2,
+        "rigidBodyIsSensor": false,
+        "value0": 0,
+        "value1": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    },
+    "value76": 4294967295
 }

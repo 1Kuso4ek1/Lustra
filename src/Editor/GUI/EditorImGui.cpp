@@ -367,7 +367,6 @@ void Editor::DrawImGuizmo()
 
                 auto pos = transform.position;
                 auto rot = glm::quat(glm::radians(transform.rotation));
-                auto scale = transform.scale;
 
                 dev::PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
                     bodyId,

@@ -19,6 +19,8 @@ struct TransformComponent : public ComponentBase
     glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
     glm::vec3 scale    = { 1.0f, 1.0f, 1.0f };
 
+    bool overridePhysics = false;
+
     void SetTransform(const glm::mat4& transform);
     
     glm::mat4 GetTransform() const;
@@ -97,7 +99,11 @@ public:
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(color, intensity, cutoff, outerCutoff, bias, shadowMap, resolution);
+        archive(
+            CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(cutoff),
+            CEREAL_NVP(outerCutoff), CEREAL_NVP(bias),
+            CEREAL_NVP(shadowMap), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>

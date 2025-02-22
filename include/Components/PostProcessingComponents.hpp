@@ -23,14 +23,22 @@ struct TonemapComponent : public ComponentBase, public EventListener
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity, vignetteRoundness, filmGrain, contrast, saturation, brightness, lut->path.string(), resolution);
+        archive(
+            CEREAL_NVP(algorithm), CEREAL_NVP(exposure), CEREAL_NVP(colorGrading),
+            CEREAL_NVP(colorGradingIntensity), CEREAL_NVP(vignetteIntensity), CEREAL_NVP(vignetteRoundness),
+            CEREAL_NVP(filmGrain), CEREAL_NVP(contrast), CEREAL_NVP(saturation), CEREAL_NVP(brightness),
+            cereal::make_nvp("lutPath", lut->path.string()), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>
     void load(Archive& archive)
     {
         std::string lutPath;
-        archive(algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity, vignetteRoundness, filmGrain, contrast, saturation, brightness, lutPath, resolution);
+        archive(
+            algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity,
+            vignetteRoundness, filmGrain, contrast, saturation, brightness, lutPath, resolution
+        );
         
         lut = AssetManager::Get().Load<TextureAsset>(lutPath);
 
@@ -71,7 +79,10 @@ struct BloomComponent : public ComponentBase, public EventListener
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(threshold, strength, resolutionScale, resolution);
+        archive(
+            CEREAL_NVP(threshold), CEREAL_NVP(strength),
+            CEREAL_NVP(resolutionScale), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>
@@ -107,7 +118,11 @@ struct GTAOComponent : public ComponentBase, public EventListener
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(resolutionScale, samples, limit, radius, falloff, thicknessMix, maxStride, resolution);
+        archive(
+            CEREAL_NVP(resolutionScale), CEREAL_NVP(samples), CEREAL_NVP(limit),
+            CEREAL_NVP(radius), CEREAL_NVP(falloff), CEREAL_NVP(thicknessMix),
+            CEREAL_NVP(maxStride), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>
@@ -145,7 +160,10 @@ struct SSRComponent : public ComponentBase, public EventListener
     template<class Archive>
     void save(Archive& archive) const
     {
-        archive(resolutionScale, maxSteps, maxBinarySearchSteps, rayStep, resolution);
+        archive(
+            CEREAL_NVP(resolutionScale), CEREAL_NVP(maxSteps),
+            CEREAL_NVP(maxBinarySearchSteps), CEREAL_NVP(rayStep), CEREAL_NVP(resolution)
+        );
     }
 
     template<class Archive>

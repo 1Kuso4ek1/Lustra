@@ -505,11 +505,31 @@ void Scene::RenderMeshes()
         {
             auto body = registry.get<RigidBodyComponent>(entity).body;
 
-            auto position = body->GetPosition();
-            auto rotation = body->GetRotation().GetEulerAngles();
+            if(transform.overridePhysics)
+            {
+                auto bodyId = body->GetID();
 
-            transform.position = { position.GetX(), position.GetY(), position.GetZ() };
-            transform.rotation = glm::degrees(glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ()));
+                auto position = transform.position;
+                auto rotation = glm::quat(glm::radians(transform.rotation));
+
+                PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
+                    bodyId,
+                    { position.x, position.y, position.z },
+                    { rotation.x, rotation.y, rotation.z, rotation.w },
+                    JPH::EActivation::Activate
+                );
+
+                body->SetLinearVelocity({ 0.0f, 0.0f, 0.0f });
+                body->SetAngularVelocity({ 0.0f, 0.0f, 0.0f });
+            }
+            else
+            {
+                auto position = body->GetPosition();
+                auto rotation = body->GetRotation().GetEulerAngles();
+
+                transform.position = { position.GetX(), position.GetY(), position.GetZ() };
+                transform.rotation = glm::degrees(glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ()));
+            }
         }
 
         Renderer::Get().GetMatrices()->PushMatrix();

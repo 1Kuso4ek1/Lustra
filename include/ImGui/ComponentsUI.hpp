@@ -19,6 +19,8 @@ inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
 
     if(ImGui::Button("Reset Scale"))
         component.scale = glm::vec3(1.0f);
+
+    ImGui::Checkbox("Override physics", &component.overridePhysics);
 }
 
 inline void DrawComponentUI(MeshComponent& component, entt::entity)

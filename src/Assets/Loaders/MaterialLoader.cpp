@@ -20,6 +20,17 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
 
     std::ifstream file(path.string());
 
+    if(!file.is_open())
+    {
+        LLGL::Log::Errorf(
+            LLGL::Log::ColorFlags::StdError,
+            "Failed to load material: %s\n",
+            path.string().c_str()
+        );
+
+        return defaultMaterial;
+    }
+
     auto material = std::make_shared<MaterialAsset>();
     
     cereal::JSONInputArchive archive(file);

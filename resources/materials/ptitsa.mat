@@ -1,67 +1,67 @@
 {
     "value0": {
-        "value0": {
-            "value0": 1,
-            "value1": {
+        "albedo": {
+            "type": 1,
+            "value": {
                 "value0": 1.0,
                 "value1": 1.0,
                 "value2": 1.0,
                 "value3": 1.0
             },
-            "value2": "../resources/textures/Wood_ak-47_Base_Color.png"
+            "texturePath": "../resources/textures/ptitsa.png"
         },
-        "value1": {
-            "value0": 0,
-            "value1": {
+        "normal": {
+            "type": 0,
+            "value": {
                 "value0": 1.0,
                 "value1": 1.0,
                 "value2": 1.0,
                 "value3": 1.0
             },
-            "value2": "../resources/textures/default"
+            "texturePath": "../resources/textures/tex.jpg"
         },
-        "value2": {
-            "value0": 0,
-            "value1": {
+        "metallic": {
+            "type": 0,
+            "value": {
                 "value0": 0.0,
                 "value1": 0.5,
                 "value2": 0.5,
                 "value3": 0.5
             },
-            "value2": "../resources/textures/default"
+            "texturePath": "../resources/textures/default"
         },
-        "value3": {
-            "value0": 0,
-            "value1": {
+        "roughness": {
+            "type": 0,
+            "value": {
                 "value0": 1.0,
                 "value1": 0.5,
                 "value2": 0.5,
                 "value3": 0.5
             },
-            "value2": "../resources/textures/default"
+            "texturePath": "../resources/textures/default"
         },
-        "value4": {
-            "value0": 0,
-            "value1": {
+        "ao": {
+            "type": 0,
+            "value": {
                 "value0": 1.0,
                 "value1": 1.0,
                 "value2": 1.0,
                 "value3": 1.0
             },
-            "value2": "../resources/textures/default"
+            "texturePath": "../resources/textures/default"
         },
-        "value5": {
-            "value0": 0,
-            "value1": {
+        "emission": {
+            "type": 0,
+            "value": {
                 "value0": 0.0,
                 "value1": 0.0,
                 "value2": 0.0,
                 "value3": 0.0
             },
-            "value2": "../resources/textures/default"
+            "texturePath": "../resources/textures/ptitsa.png"
         },
-        "value6": 1.0,
-        "value7": {
+        "emissionStrength": 0.0,
+        "uvScale": {
             "value0": 1.0,
             "value1": 1.0
         }

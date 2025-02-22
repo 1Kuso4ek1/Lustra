@@ -1,3 +1,6 @@
+Entity self;
+Scene@ scene;
+
 TransformComponent@ transform = null;
 Camera@ camera = null;
 float maxSpeed = 3.0f;
@@ -5,13 +8,13 @@ float currentSpeed = 0.0f;
 
 glm::vec3 movement(0.0f);
 
-void Start(Entity entity)
+void Start()
 {
-    @transform = @entity.GetTransformComponent();
-    @camera = @entity.GetCameraComponent().camera;
+    @transform = @self.GetTransformComponent();
+    @camera = @self.GetCameraComponent().camera;
 }
 
-void Update(Entity entity, float deltaTime)
+void Update(float deltaTime)
 {
     if(Mouse::IsButtonPressed(Mouse::Button::Right)/*  && canMoveCamera */)
     {

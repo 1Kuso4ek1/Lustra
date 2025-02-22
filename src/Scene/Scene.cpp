@@ -8,6 +8,7 @@ namespace dev
 Scene::Scene(std::shared_ptr<RendererBase> renderer)
     : renderer(renderer)
 {
+    Setup();
 }
 
 Scene::~Scene()
@@ -61,8 +62,8 @@ void Scene::Start()
             );
         }
 
-        if(script.start)
-            script.start();
+        /* if(script.start)
+            script.start(); */
     });
 }
 
@@ -85,8 +86,8 @@ void Scene::Update(float deltaTime)
             );
         }
 
-        if(script.update)
-            script.update(Entity{ entity, this }, deltaTime);
+        /* if(script.update)
+            script.update(Entity{ entity, this }, deltaTime); */
     });
 
     if(updatePhysics)
@@ -384,7 +385,7 @@ void Scene::SetupCamera()
     {
         auto [transform, cam] = cameraView.get<TransformComponent, CameraComponent>(entity);
 
-        if(!camera || cam.active)
+        if(/* !camera ||  */cam.active)
         {
             camera = &cam.camera;
             cameraTransform = transform;

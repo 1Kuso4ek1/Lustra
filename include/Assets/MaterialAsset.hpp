@@ -4,6 +4,7 @@
 
 #include <LLGL/CommandBuffer.h>
 
+#include <cereal/cereal.hpp>
 #include <glm/glm.hpp>
 
 namespace dev
@@ -39,7 +40,11 @@ struct MaterialAsset : public Asset
         template<class Archive>
         void save(Archive& archive) const
         {
-            archive(type, value, texture ? texture->path.string() : "default");
+            archive(
+                CEREAL_NVP(type),
+                CEREAL_NVP(value),
+                cereal::make_nvp("texturePath", (texture ? texture->path.string() : "default"))
+            );
         }
 
         template<class Archive>
@@ -93,7 +98,11 @@ struct MaterialAsset : public Asset
     template<class Archive>
     void serialize(Archive& archive)
     {
-        archive(albedo, normal, metallic, roughness, ao, emission, emissionStrength, uvScale);
+        archive(
+            CEREAL_NVP(albedo), CEREAL_NVP(normal), CEREAL_NVP(metallic),
+            CEREAL_NVP(roughness), CEREAL_NVP(ao), CEREAL_NVP(emission),
+            CEREAL_NVP(emissionStrength), CEREAL_NVP(uvScale)
+        );
     }
 
     Property albedo;

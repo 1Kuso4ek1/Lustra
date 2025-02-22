@@ -1,8 +1,8 @@
-#include <SceneTestApp.hpp>
+#include <Editor.hpp>
 
 int main()
 {
-    SceneTestApp app;
+    Editor app(dev::Config::Load("../resources/config/config.json"));
 
     app.Run();
 }

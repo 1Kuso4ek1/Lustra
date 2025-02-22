@@ -72,4 +72,10 @@ private:
 
 using WindowPtr = std::shared_ptr<Window>;
 
+// There are some #include combinations where these X11 defines interfere with other libraries
+#ifdef __linux__
+    #undef Convex
+    #undef None
+#endif
+
 }

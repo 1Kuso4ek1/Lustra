@@ -1,52 +1,38 @@
 #pragma once
 #include <Application.hpp>
-
 #include <Scene.hpp>
 #include <Entity.hpp>
-
-#include <Window.hpp>
 
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
 
 #include <ImGuizmo.h>
 
-#include <ImGuiManager.hpp>
 #include <ComponentsUI.hpp>
 
 #include <ScriptManager.hpp>
 
-#include <TextureLoader.hpp>
-#include <MaterialLoader.hpp>
-#include <ModelLoader.hpp>
-#include <ScriptLoader.hpp>
-#include <ShaderLoader.hpp>
-#include <SceneLoader.hpp>
-#include <AssetManager.hpp>
-
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
 
-class SceneTestApp : public dev::Application, public dev::EventListener
+class Editor : public dev::Application, public dev::EventListener
 {
 public:
-    SceneTestApp();
-    ~SceneTestApp();
+    Editor(const dev::Config& config);
 
-    void Run() override;
+    void Init() override;
+    void Update(float deltaTime) override;
+    void Render() override;
 
 private:
     void SetupAssetManager();
 
-    void LoadTextures();
+    void LoadIcons();
 
-    void CreateEntities();
+    void CreateDefaultEntities();
 
-    void CreateRifleEntity();
     void CreateCameraEntity();
     void CreateEditorCameraEntity();
     void CreatePostProcessingEntity();
-    void CreateLightEntity();
-    void CreateLight1Entity();
     void CreateSkyEntity();
 
     void UpdateList();
@@ -83,8 +69,6 @@ private:
     
     void DrawViewport();
 
-    void Draw();
-
     void OnEvent(dev::Event& event) override;
 
 private:
@@ -108,9 +92,7 @@ private:
     dev::SceneAssetPtr sceneAsset;
     std::shared_ptr<dev::Scene> scene;
 
-    dev::WindowPtr window;
-
-    dev::Timer deltaTimeTimer, keyboardTimer;
+    dev::Timer keyboardTimer, sceneSaveTimer;
 
 private:
     GLuint nativeViewportAttachment;

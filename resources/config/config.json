@@ -1,0 +1,14 @@
+{
+    "config": {
+        "resolution": {
+            "width": 1280,
+            "height": 720
+        },
+        "vsync": false,
+        "fullscreen": true,
+        "title": "Editor",
+        "assetsRoot": "../resources",
+        "imGuiFontPath": "../resources/fonts/OpenSans-Regular.ttf",
+        "imGuiLayoutPath": "../resources/layout/editor_layout.ini"
+    }
+}

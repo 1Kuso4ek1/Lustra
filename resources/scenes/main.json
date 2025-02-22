@@ -1,0 +1,252 @@
+{
+    "value0": 5,
+    "value1": 0,
+    "value2": {
+        "value0": "Camera"
+    },
+    "value3": 1,
+    "value4": {
+        "value0": "EditorCamera"
+    },
+    "value5": 2,
+    "value6": {
+        "value0": "PostProcessing"
+    },
+    "value7": 3,
+    "value8": {
+        "value0": "Sky"
+    },
+    "value9": 4,
+    "value10": {
+        "value0": "Model"
+    },
+    "value11": 2,
+    "value12": 3,
+    "value13": {
+        "value0": "../resources/models/cube"
+    },
+    "value14": 4,
+    "value15": {
+        "value0": "../resources/models/suzanne.fbx"
+    },
+    "value16": 1,
+    "value17": 4,
+    "value18": {
+        "value0": 1,
+        "value1": "../resources/materials/default"
+    },
+    "value19": 3,
+    "value20": 0,
+    "value21": {
+        "value0": {
+            "value0": 5.0,
+            "value1": 5.0,
+            "value2": 5.0
+        },
+        "value1": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value22": 1,
+    "value23": {
+        "value0": {
+            "value0": -1.4425147771835328,
+            "value1": 0.49183958768844607,
+            "value2": 4.790911674499512
+        },
+        "value1": {
+            "value0": -7.120008945465088,
+            "value1": -19.799989700317384,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 1.0,
+            "value2": 1.0
+        }
+    },
+    "value24": 4,
+    "value25": {
+        "value0": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value1": {
+            "value0": -90.00042724609375,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value2": {
+            "value0": 1.0,
+            "value1": 0.99937504529953,
+            "value2": 0.99937504529953
+        }
+    },
+    "value26": 1,
+    "value27": 4,
+    "value28": {
+        "value0": "../resources/../shaders/vertex.vert",
+        "value1": "../resources/../shaders/deferred.frag"
+    },
+    "value29": 0,
+    "value30": 2,
+    "value31": 0,
+    "value32": {
+        "value0": {
+            "value0": 90.0,
+            "value1": 0.10000000149011612,
+            "value2": 100.0,
+            "value3": 1.57744562625885,
+            "value4": true,
+            "value5": {
+                "value0": 0.0,
+                "value1": 1.0,
+                "value2": 0.0
+            },
+            "value6": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0
+            },
+            "value7": {
+                "value0": 1161.0,
+                "value1": 736.0
+            }
+        }
+    },
+    "value33": 1,
+    "value34": {
+        "value0": {
+            "value0": 90.0,
+            "value1": 0.10000000149011612,
+            "value2": 100.0,
+            "value3": 1.57744562625885,
+            "value4": true,
+            "value5": {
+                "value0": 0.0,
+                "value1": 1.0,
+                "value2": 0.0
+            },
+            "value6": {
+                "value0": 1.0,
+                "value1": 1.0,
+                "value2": 1.0
+            },
+            "value7": {
+                "value0": 1161.0,
+                "value1": 736.0
+            }
+        }
+    },
+    "value35": 0,
+    "value36": 1,
+    "value37": 1,
+    "value38": {
+        "value0": ""
+    },
+    "value39": 1,
+    "value40": 2,
+    "value41": {
+        "value0": 0,
+        "value1": 1.0,
+        "value2": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value3": 0.0,
+        "value4": 0.0,
+        "value5": 0.0,
+        "value6": 0.0,
+        "value7": 1.0,
+        "value8": 1.0,
+        "value9": 1.0,
+        "value10": "../resources/textures/empty",
+        "value11": {
+            "value0": 1161,
+            "value1": 736
+        }
+    },
+    "value42": 1,
+    "value43": 2,
+    "value44": {
+        "value0": 1.0,
+        "value1": 0.30000001192092898,
+        "value2": 8.0,
+        "value3": {
+            "value0": 1161,
+            "value1": 736
+        }
+    },
+    "value45": 1,
+    "value46": 2,
+    "value47": {
+        "value0": 2.0,
+        "value1": 4,
+        "value2": 100.0,
+        "value3": 2.0,
+        "value4": 1.5,
+        "value5": 0.20000000298023225,
+        "value6": 8.0,
+        "value7": {
+            "value0": 1161,
+            "value1": 736
+        }
+    },
+    "value48": 1,
+    "value49": 2,
+    "value50": {
+        "value0": 1.0,
+        "value1": 100,
+        "value2": 5,
+        "value3": 0.019999999552965165,
+        "value4": {
+            "value0": 1161,
+            "value1": 736
+        }
+    },
+    "value51": 1,
+    "value52": 3,
+    "value53": {
+        "value0": 40.0,
+        "value1": 0.0,
+        "value2": 0.0,
+        "value3": 0,
+        "value4": {
+            "value0": 1024,
+            "value1": 1024
+        }
+    },
+    "value54": 0,
+    "value55": 1,
+    "value56": 4,
+    "value57": {
+        "value0": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        },
+        "value1": {
+            "value0": -0.7071093916893005,
+            "value1": 0.0,
+            "value2": 0.0,
+            "value3": 0.7071041464805603
+        },
+        "value2": 2,
+        "value3": false,
+        "value4": 0,
+        "value5": {
+            "value0": 0.0,
+            "value1": 0.0,
+            "value2": 0.0
+        }
+    }
+}

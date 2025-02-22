@@ -1,95 +1,98 @@
-#include <SceneTestApp.hpp>
+#include <Editor.hpp>
 #include <fstream>
 
-SceneTestApp::SceneTestApp()
+Editor::Editor(const dev::Config& config) : dev::Application(config)
 {
-    LLGL::Log::RegisterCallbackStd(LLGL::Log::StdOutFlags::Colored);
+    Init();
+}
 
-    dev::ScopedTimer timer("Engine initialization");
-
-    window = std::make_shared<dev::Window>(LLGL::Extent2D{ 1280, 720 }, "LLGLTest", 1, true);
-
-    if(!dev::Renderer::Get().IsInit())
-        return;
-
-    dev::Renderer::Get().InitSwapChain(window);
-
-    dev::ImGuiManager::Get().Init(
-        window->GetGLFWWindow(),
-        "../resources/fonts/OpenSans-Regular.ttf",
-        "../resources/layout/editor_layout.ini"
-    );
-
-    dev::PhysicsManager::Get().Init();
-
+void Editor::Init()
+{
     dev::EventManager::Get().AddListener(dev::Event::Type::WindowResize, this);
-
-    SetupAssetManager();
-
-    LoadTextures();
 
     CreateRenderTarget();
 
+    LoadIcons();
+
     deferredRenderer = std::make_shared<dev::DeferredRenderer>();
 
-    scene = std::make_shared<dev::Scene>(deferredRenderer);
-    sceneAsset = std::make_shared<dev::SceneAsset>(scene);
-    sceneAsset->path = dev::AssetManager::Get().GetAssetsDirectory() / "scenes/scene2.json";
+    auto mainScenePath = dev::AssetManager::Get().GetAssetsDirectory() / "scenes/main.json";
 
-    CreateEntities();
-
-    UpdateList();
-}
-
-SceneTestApp::~SceneTestApp()
-{
-    if(dev::Renderer::Get().IsInit())
+    if(!std::filesystem::exists(mainScenePath))
     {
-        dev::ImGuiManager::Get().Destroy();
+        scene = std::make_shared<dev::Scene>(deferredRenderer);
+        sceneAsset = std::make_shared<dev::SceneAsset>(scene);
+        sceneAsset->path = mainScenePath;
 
-        dev::Renderer::Get().Unload();
+        CreateDefaultEntities();
+
+        UpdateList();
+
+        dev::AssetManager::Get().Write(sceneAsset);
+    }
+    else
+    {
+        sceneAsset = dev::AssetManager::Get().Load<dev::SceneAsset>(mainScenePath);
+        scene = sceneAsset->scene;
+        scene->SetRenderer(deferredRenderer);
+
+        UpdateList();
+
+        UpdateEditorCameraScript();
     }
 }
 
-void SceneTestApp::Run()
+void Editor::Update(float deltaTime)
 {
-    if(!dev::Renderer::Get().IsInit())
+    if(playing && !paused)
     {
-        LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError, "Error: Renderer is not initialized\n");
-        return;
+        scene->GetRegistry().view<dev::CameraComponent>().each(
+            [](auto entity, auto& component)
+            {
+                component.active = true;
+            }
+        );
+
+        editorCamera.GetComponent<dev::CameraComponent>().active = false;
+
+        scene->Update(deltaTime);
     }
-
-    scene->Setup();
-
-    while(window->PollEvents())
+    else
     {
-        LLGL::Surface::ProcessEvents();
-        
-        dev::Multithreading::Get().Update();
-
         editorCamera.GetComponent<dev::CameraComponent>().active = true;
+        editorCamera.GetComponent<dev::ScriptComponent>().update(editorCamera, deltaTime);
+    }
 
-        if(playing && !paused)
-            scene->Update(deltaTimeTimer.GetElapsedSeconds());
-        else
-            editorCamera.GetComponent<dev::ScriptComponent>().update(editorCamera, deltaTimeTimer.GetElapsedSeconds());
+    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) &&
+       keyboardTimer.GetElapsedSeconds() > 0.2f)
+    {
+        scene->ToggleUpdatePhysics();
+        keyboardTimer.Reset();
+    }
 
-        deltaTimeTimer.Reset();
-
-        Draw();
-
-        if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::Escape))
-            break;
-
-        if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::F11) && keyboardTimer.GetElapsedSeconds() > 0.2f)
-        {
-            window->SetFullscreen(!window->IsFullscreen());
-            keyboardTimer.Reset();
-        }
+    if((dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) &&
+       dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) &&
+       keyboardTimer.GetElapsedSeconds() > 0.2f) ||
+       sceneSaveTimer.GetElapsedSeconds() >= 10.0f)
+    {
+        dev::AssetManager::Get().Write(sceneAsset);
+        keyboardTimer.Reset();
+        sceneSaveTimer.Reset();
     }
 }
 
-void SceneTestApp::SetupAssetManager()
+void Editor::Render()
+{
+    scene->Draw(viewportRenderTarget);
+
+    dev::Renderer::Get().ClearRenderTarget();
+
+    DrawImGui();
+
+    dev::Renderer::Get().Present();
+}
+
+void Editor::SetupAssetManager()
 {
     dev::AssetManager::Get().SetAssetsDirectory("../resources/");
 
@@ -102,25 +105,8 @@ void SceneTestApp::SetupAssetManager()
     dev::AssetManager::Get().AddLoader<dev::SceneAsset, dev::SceneLoader>("scenes");
 }
 
-void SceneTestApp::LoadTextures()
+void Editor::LoadIcons()
 {
-    texture = dev::AssetManager::Get().Load<dev::TextureAsset>("tex.jpg", true);
-
-    metal = dev::AssetManager::Get().Load<dev::TextureAsset>("Metall_ak-47_Base_Color.png", true);
-    wood = dev::AssetManager::Get().Load<dev::TextureAsset>("Wood_ak-47_Base_Color.png", true);
-
-    /* ak47Metal = std::make_shared<dev::MaterialAsset>();
-    ak47Wood = std::make_shared<dev::MaterialAsset>();
-
-    ak47Metal->albedo = metal;
-    ak47Wood->albedo = wood;
-
-    dev::AssetManager::Get().Write(ak47Metal, "ak47Metal", true);
-    dev::AssetManager::Get().Write(ak47Wood, "ak47Wood", true); */
-
-    ak47Metal = dev::AssetManager::Get().Load<dev::MaterialAsset>("ak47Metal", true);
-    ak47Wood = dev::AssetManager::Get().Load<dev::MaterialAsset>("ak47Wood", true);
-
     fileIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/file.png", true);
     folderIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/folder.png", true);
     textureIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/texture.png", true);
@@ -147,33 +133,15 @@ void SceneTestApp::LoadTextures()
     };
 }
 
-void SceneTestApp::CreateEntities()
+void Editor::CreateDefaultEntities()
 {
-    CreateRifleEntity();
     CreateCameraEntity();
     CreateEditorCameraEntity();
     CreatePostProcessingEntity();
-    CreateLightEntity();
-    CreateLight1Entity();
     CreateSkyEntity();
 }
 
-void SceneTestApp::CreateRifleEntity()
-{
-    auto rifle = scene->CreateEntity();
-
-    rifle.AddComponent<dev::NameComponent>().name = "Rifle";
-    rifle.AddComponent<dev::TransformComponent>().rotation = { -90.0f, 180.0f, 0.0f };
-    rifle.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("ak-47.fbx", true);
-    rifle.AddComponent<dev::MeshRendererComponent>().materials = { ak47Wood, ak47Metal };
-    rifle.AddComponent<dev::PipelineComponent>(
-        dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
-        dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
-    );
-    rifle.AddComponent<dev::ScriptComponent>();
-}
-
-void SceneTestApp::CreateCameraEntity()
+void Editor::CreateCameraEntity()
 {
     auto camera = scene->CreateEntity();
 
@@ -186,7 +154,7 @@ void SceneTestApp::CreateCameraEntity()
     cameraComponent.camera.SetPerspective();
 }
 
-void SceneTestApp::CreateEditorCameraEntity()
+void Editor::CreateEditorCameraEntity()
 {
     editorCamera = scene->CreateEntity();
 
@@ -202,7 +170,7 @@ void SceneTestApp::CreateEditorCameraEntity()
     UpdateEditorCameraScript();
 }
 
-void SceneTestApp::CreatePostProcessingEntity()
+void Editor::CreatePostProcessingEntity()
 {
     auto postProcessing = scene->CreateEntity();
 
@@ -213,40 +181,21 @@ void SceneTestApp::CreatePostProcessingEntity()
     postProcessing.AddComponent<dev::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
 }
 
-void SceneTestApp::CreateLightEntity()
-{
-    auto light = scene->CreateEntity();
-
-    light.AddComponent<dev::NameComponent>().name = "Light";
-    light.AddComponent<dev::TransformComponent>().position = { 5.0f, 5.0f, 5.0f };
-    light.AddComponent<dev::LightComponent>().intensity = 1.0f;
-}
-
-void SceneTestApp::CreateLight1Entity()
-{
-    auto light1 = scene->CreateEntity();
-
-    light1.AddComponent<dev::NameComponent>().name = "Light1";
-    light1.AddComponent<dev::TransformComponent>().position = { -5.0f, 5.0f, 5.0f };
-    light1.AddComponent<dev::LightComponent>().color = { 1.0f, 0.0f, 0.0f };
-    light1.GetComponent<dev::LightComponent>().intensity = 1.0f;
-}
-
-void SceneTestApp::CreateSkyEntity()
+void Editor::CreateSkyEntity()
 {
     auto sky = scene->CreateEntity();
     
     sky.AddComponent<dev::NameComponent>().name = "Sky";
     sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
 
-    //sky.AddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
-    sky.AddComponent<dev::HDRISkyComponent>(
+    sky.AddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
+    /* sky.AddComponent<dev::HDRISkyComponent>(
         dev::AssetManager::Get().Load<dev::TextureAsset>("hdri/meadow_2_1k.hdr", true),
         LLGL::Extent2D{ 1024, 1024 }
-    );
+    ); */
 }
 
-void SceneTestApp::UpdateList()
+void Editor::UpdateList()
 {
     list.clear();
             
@@ -256,7 +205,7 @@ void SceneTestApp::UpdateList()
     editorCamera = scene->GetEntity("EditorCamera");
 }
 
-void SceneTestApp::UpdateEditorCameraScript()
+void Editor::UpdateEditorCameraScript()
 {
     auto& cameraScript = editorCamera.GetOrAddComponent<dev::ScriptComponent>();
 
@@ -320,7 +269,7 @@ void SceneTestApp::UpdateEditorCameraScript()
     };
 }
 
-void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
+void Editor::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
 {
     auto entity = scene->CreateEntity();
 
@@ -365,7 +314,7 @@ void SceneTestApp::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCa
     list.push_back(entity);
 }
 
-void SceneTestApp::CreateRenderTarget(const LLGL::Extent2D& resolution)
+void Editor::CreateRenderTarget(const LLGL::Extent2D& resolution)
 {
     if(viewportRenderTarget)
     {
@@ -391,7 +340,7 @@ void SceneTestApp::CreateRenderTarget(const LLGL::Extent2D& resolution)
     nativeViewportAttachment = nativeHandle.id;
 }
 
-void SceneTestApp::DrawImGui()
+void Editor::DrawImGui()
 {
     dev::ImGuiManager::Get().NewFrame();
 
@@ -418,7 +367,7 @@ void SceneTestApp::DrawImGui()
     dev::ImGuiManager::Get().Render();
 }
 
-void SceneTestApp::DrawSceneTree()
+void Editor::DrawSceneTree()
 {
     const auto isRootNode = [](dev::Entity entity)
     {
@@ -446,7 +395,6 @@ void SceneTestApp::DrawSceneTree()
                 [&]() {
                     scene = sceneAsset->scene;
                     scene->SetRenderer(deferredRenderer);
-                    scene->Setup();
 
                     dev::EventManager::Get().Dispatch(
                         std::make_unique<dev::WindowResizeEvent>(dev::Renderer::Get().GetViewportResolution())
@@ -516,7 +464,7 @@ void SceneTestApp::DrawSceneTree()
     ImGui::End();
 }
 
-void SceneTestApp::DrawEntityNode(dev::Entity entity)
+void Editor::DrawEntityNode(dev::Entity entity)
 {
     bool hasChildren = false;
     if(entity.HasComponent<dev::HierarchyComponent>())
@@ -552,7 +500,7 @@ void SceneTestApp::DrawEntityNode(dev::Entity entity)
     ImGui::PopID();
 }
 
-void SceneTestApp::EntityNodeInteraction(dev::Entity entity, std::string_view name)
+void Editor::EntityNodeInteraction(dev::Entity entity, std::string_view name)
 {
     if(ImGui::IsItemClicked())
         selectedEntity = entity;
@@ -581,7 +529,7 @@ void SceneTestApp::EntityNodeInteraction(dev::Entity entity, std::string_view na
     }
 }
 
-void SceneTestApp::DrawPropertiesWindow()
+void Editor::DrawPropertiesWindow()
 {
     ImGui::Begin("Properties");
 
@@ -695,7 +643,7 @@ void SceneTestApp::DrawPropertiesWindow()
     ImGui::End();
 }
 
-void SceneTestApp::DrawImGuizmoControls()
+void Editor::DrawImGuizmoControls()
 {
     ImGui::Begin("ImGuizmo Controls");
 
@@ -715,7 +663,7 @@ void SceneTestApp::DrawImGuizmoControls()
     ImGui::End();
 }
 
-void SceneTestApp::DrawImGuizmo()
+void Editor::DrawImGuizmo()
 {
     if(selectedEntity) 
     {
@@ -776,7 +724,7 @@ void SceneTestApp::DrawImGuizmo()
         ImGuizmo::Enable(false);
 }
 
-void SceneTestApp::DrawExecutionControl()
+void Editor::DrawExecutionControl()
 {
     ImGui::Begin("Execution Control");
 
@@ -852,7 +800,7 @@ void SceneTestApp::DrawExecutionControl()
     ImGui::End();
 }
 
-void SceneTestApp::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size)
+void Editor::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size)
 {
     if(material->albedo.type == dev::MaterialAsset::Property::Type::Texture)
     {
@@ -875,7 +823,7 @@ void SceneTestApp::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImV
 }
 
 // Kinda messy, clean it up
-void SceneTestApp::DrawAssetBrowser()
+void Editor::DrawAssetBrowser()
 {
     static const auto assetsPath = dev::AssetManager::Get().GetAssetsDirectory();
     auto selectedAssetPath = assetsPath;
@@ -951,7 +899,7 @@ void SceneTestApp::DrawAssetBrowser()
     ImGui::End();
 }
 
-void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
+void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
 {
     switch(asset->type)
     {
@@ -1060,7 +1008,7 @@ void SceneTestApp::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr a
     }
 }
 
-void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
+void Editor::DrawUnloadedAsset(const std::filesystem::path& entry)
 {
     auto assetType = dev::GetAssetType(entry.extension().string());
 
@@ -1100,7 +1048,7 @@ void SceneTestApp::DrawUnloadedAsset(const std::filesystem::path& entry)
     }
 }
 
-void SceneTestApp::DrawCreateAssetMenu(const std::filesystem::path& currentDirectory)
+void Editor::DrawCreateAssetMenu(const std::filesystem::path& currentDirectory)
 {
     static bool materialActive = false;
     static bool scriptActive = false;
@@ -1132,9 +1080,9 @@ void SceneTestApp::DrawCreateAssetMenu(const std::filesystem::path& currentDirec
     }
 }
 
-bool SceneTestApp::DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory)
+bool Editor::DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory)
 {
-    static std::string newMaterialName = "material";
+    static std::string newMaterialName = "material.mat";
     static int uniqueId = 0;
     bool active = true;
 
@@ -1144,7 +1092,11 @@ bool SceneTestApp::DrawCreateMaterialMenu(const std::filesystem::path& currentDi
 
         if(ImGui::Button("OK", ImVec2(120, 0)))
         {
-            auto newMaterial = dev::AssetManager::Get().Load<dev::MaterialAsset>(currentDirectory / newMaterialName);
+            auto newMaterial = std::make_shared<dev::MaterialAsset>();
+            newMaterial->path = currentDirectory / newMaterialName;
+            newMaterial->loaded = true;
+
+            dev::AssetManager::Get().Write(newMaterial);
             
             newMaterialName = "material" + std::to_string(uniqueId++);
 
@@ -1168,7 +1120,7 @@ bool SceneTestApp::DrawCreateMaterialMenu(const std::filesystem::path& currentDi
     return active;
 }
 
-bool SceneTestApp::DrawCreateScriptMenu(const std::filesystem::path& currentDirectory)
+bool Editor::DrawCreateScriptMenu(const std::filesystem::path& currentDirectory)
 {
     static std::string newScriptName = "script.as";
     static int uniqueId = 0;
@@ -1180,16 +1132,19 @@ bool SceneTestApp::DrawCreateScriptMenu(const std::filesystem::path& currentDire
 
         if(ImGui::Button("OK", ImVec2(120, 0)))
         {
-            std::ofstream scriptFile(currentDirectory / newScriptName);
-            scriptFile << 
-                "void Start(Scene@ scene, Entity entity)\n"
-                "{\n"
-                "    \n"
-                "}\n\n"
-                "void Update(Scene@ scene, Entity entity, float deltaTime)\n"
-                "{\n"
-                "    \n"
-                "}\n";
+            std::ofstream scriptFile(currentDirectory / newScriptName, std::ios::app);
+            scriptFile <<
+R"(Entity self;
+Scene@ scene;
+
+void Start()
+{
+}
+
+void Update(float deltaTime)
+{
+}
+)";
             scriptFile.close();
             system(std::string("code " + currentDirectory.string() + "/" + newScriptName).c_str());
 
@@ -1217,7 +1172,7 @@ bool SceneTestApp::DrawCreateScriptMenu(const std::filesystem::path& currentDire
     return active;
 }
 
-bool SceneTestApp::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
+bool Editor::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
 {
     static std::string newSceneName = "scene.json";
     static int uniqueId = 0;
@@ -1260,7 +1215,7 @@ bool SceneTestApp::DrawCreateSceneMenu(const std::filesystem::path& currentDirec
     return active;
 }
 
-void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
+void Editor::DrawMaterialEditor(dev::MaterialAssetPtr material)
 {
     static dev::Timer saveTimer;
 
@@ -1303,7 +1258,7 @@ void SceneTestApp::DrawMaterialEditor(dev::MaterialAssetPtr material)
     ImGui::End();
 }
 
-void SceneTestApp::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent)
+void Editor::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent)
 {
     ImGui::PushID(id);
 
@@ -1344,7 +1299,7 @@ void SceneTestApp::DrawMaterialProperty(dev::MaterialAsset::Property& property, 
     ImGui::Separator();
 }
 
-void SceneTestApp::DrawViewport()
+void Editor::DrawViewport()
 {
     static dev::Timer eventTimer;
     static ImGuiWindowFlags flags = 0;
@@ -1423,30 +1378,7 @@ void SceneTestApp::DrawViewport()
     ImGui::PopStyleVar();
 }
 
-void SceneTestApp::Draw()
-{
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) && keyboardTimer.GetElapsedSeconds() > 0.2f)
-    {
-        scene->ToggleUpdatePhysics();
-        keyboardTimer.Reset();
-    }
-
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) && dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) && keyboardTimer.GetElapsedSeconds() > 0.2f)
-    {
-        dev::AssetManager::Get().Write(sceneAsset);
-        keyboardTimer.Reset();
-    }
-
-    scene->Draw(viewportRenderTarget);
-
-    dev::Renderer::Get().ClearRenderTarget();
-
-    DrawImGui();
-
-    dev::Renderer::Get().Present();
-}
-
-void SceneTestApp::OnEvent(dev::Event& event)
+void Editor::OnEvent(dev::Event& event)
 {
     if(event.GetType() == dev::Event::Type::WindowResize)
     {

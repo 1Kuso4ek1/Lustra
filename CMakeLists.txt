@@ -48,7 +48,7 @@ set(
     include/Physics
     include/Scene
     include/Scripting
-    include/TestApps
+    include/Editor
 )
 
 set(

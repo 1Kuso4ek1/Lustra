@@ -46,7 +46,7 @@ inline Asset::Type GetAssetType(const std::string& extension)
         { ".tga", Asset::Type::Texture },
         { ".hdr", Asset::Type::Texture },
 
-        { ".mtl", Asset::Type::Material },
+        { ".mat", Asset::Type::Material },
 
         { ".fbx", Asset::Type::Model },
         { ".obj", Asset::Type::Model },

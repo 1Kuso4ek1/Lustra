@@ -15,6 +15,9 @@ void EventManager::AddListener(Event::Type eventType, EventListener* listener)
 
 void EventManager::RemoveListener(Event::Type eventType, EventListener* listener)
 {
+    if(listeners.empty())
+        return;
+    
     auto& vec = listeners[eventType];
     vec.erase(std::remove(vec.begin(), vec.end(), listener), vec.end());
 }

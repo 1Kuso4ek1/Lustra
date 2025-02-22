@@ -1,14 +1,14 @@
 {
     "value0": {
         "albedo": {
-            "type": 0,
+            "type": 1,
             "value": {
                 "value0": 1.0,
                 "value1": 1.0,
                 "value2": 1.0,
                 "value3": 1.0
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "../resources/textures/Metall_ak-47_Base_Color.png"
         },
         "normal": {
             "type": 0,
@@ -23,10 +23,10 @@
         "metallic": {
             "type": 0,
             "value": {
-                "value0": 0.0,
-                "value1": 0.0,
-                "value2": 0.0,
-                "value3": 0.0
+                "value0": 1.0,
+                "value1": 0.5,
+                "value2": 0.5,
+                "value3": 0.5
             },
             "texturePath": "../resources/textures/default"
         },

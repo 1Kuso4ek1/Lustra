@@ -56,7 +56,8 @@ inline Asset::Type GetAssetType(const std::string& extension)
 
         { ".as", Asset::Type::Script },
 
-        { ".json", Asset::Type::Scene }
+        { ".json", Asset::Type::Scene },
+        { ".scn", Asset::Type::Scene }
     };
 
     auto it = extensionMap.find(extension);

@@ -374,7 +374,7 @@ void Update(float deltaTime)
 
 bool Editor::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
 {
-    static std::string newSceneName = "scene.json";
+    static std::string newSceneName = "scene.scn";
     static int uniqueId = 0;
     bool active = true;
 

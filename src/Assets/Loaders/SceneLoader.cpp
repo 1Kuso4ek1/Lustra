@@ -1,7 +1,9 @@
 #include <Serialize.hpp>
 #include <SceneLoader.hpp>
 
+#include <cereal/types/string.hpp>
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/binary.hpp>
 
 #include <fstream>
 
@@ -12,27 +14,20 @@ AssetPtr SceneLoader::Load(const std::filesystem::path& path)
 {
     auto asset = std::make_shared<SceneAsset>(std::make_shared<Scene>());
 
-    std::ifstream file(path);
+    bool binaryFile = path.extension() == ".scn";
 
-    cereal::JSONInputArchive archive(file);
-
-    entt::snapshot_loader(asset->scene->GetRegistry())
-        .get<dev::NameComponent>(archive)
-        .get<dev::MeshComponent>(archive)
-        .get<dev::MeshRendererComponent>(archive)
-        .get<dev::TransformComponent>(archive)
-        .get<dev::PipelineComponent>(archive)
-        .get<dev::HierarchyComponent>(archive)
-        .get<dev::CameraComponent>(archive)
-        .get<dev::LightComponent>(archive)
-        .get<dev::ScriptComponent>(archive)
-        .get<dev::TonemapComponent>(archive)
-        .get<dev::BloomComponent>(archive)
-        .get<dev::GTAOComponent>(archive)
-        .get<dev::SSRComponent>(archive)
-        .get<dev::ProceduralSkyComponent>(archive)
-        .get<dev::HDRISkyComponent>(archive)
-        .get<dev::RigidBodyComponent>(archive);
+    std::ifstream file(path, binaryFile ? std::ios::binary : std::ios::in);
+    
+    if(binaryFile)
+    {
+        cereal::BinaryInputArchive binary(file);
+        Load(binary, asset);
+    }
+    else
+    {
+        cereal::JSONInputArchive json(file);
+        Load(json, asset);
+    }
 
     asset->loaded = true;
 
@@ -49,27 +44,20 @@ void SceneLoader::Write(const AssetPtr& asset, const std::filesystem::path& path
 {
     auto sceneAsset = std::static_pointer_cast<SceneAsset>(asset);
 
-    std::ofstream file(path);
+    bool binaryFile = path.extension() == ".scn";
 
-    cereal::JSONOutputArchive archive(file);
+    std::ofstream file(path, binaryFile ? std::ios::binary : std::ios::out);
 
-    entt::snapshot(sceneAsset->scene->GetRegistry())
-        .get<dev::NameComponent>(archive)
-        .get<dev::MeshComponent>(archive)
-        .get<dev::MeshRendererComponent>(archive)
-        .get<dev::TransformComponent>(archive)
-        .get<dev::PipelineComponent>(archive)
-        .get<dev::HierarchyComponent>(archive)
-        .get<dev::CameraComponent>(archive)
-        .get<dev::LightComponent>(archive)
-        .get<dev::ScriptComponent>(archive)
-        .get<dev::TonemapComponent>(archive)
-        .get<dev::BloomComponent>(archive)
-        .get<dev::GTAOComponent>(archive)
-        .get<dev::SSRComponent>(archive)
-        .get<dev::ProceduralSkyComponent>(archive)
-        .get<dev::HDRISkyComponent>(archive)
-        .get<dev::RigidBodyComponent>(archive);
+    if(binaryFile)
+    {
+        cereal::BinaryOutputArchive binary(file);
+        Write(binary, sceneAsset);
+    }
+    else
+    {
+        cereal::JSONOutputArchive json(file);
+        Write(json, sceneAsset);
+    }
 }
 
 }

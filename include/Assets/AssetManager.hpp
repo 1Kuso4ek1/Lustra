@@ -56,6 +56,24 @@ public:
         return std::static_pointer_cast<T>(asset);
     }
 
+    template<class T>
+    auto GetAssetPath(const std::filesystem::path& path, bool relativeToAssetsDir) const
+    {
+        auto assetPath = path;
+
+        if(relativeToAssetsDir)
+        {
+            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+
+            if(relativeAssetPath != assetsRelativePaths.end())
+                assetPath = assetsDirectory / relativeAssetPath->second / path;
+            else
+                assetPath = assetsDirectory / path;
+        }
+
+        return assetPath;
+    }
+
     std::filesystem::path GetAssetsDirectory() const
     {
         return assetsDirectory;
@@ -108,24 +126,6 @@ public:
     }
 
 private:
-    template<class T>
-    auto GetAssetPath(const std::filesystem::path& path, bool relativeToAssetsDir)
-    {
-        auto assetPath = path;
-
-        if(relativeToAssetsDir)
-        {
-            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
-
-            if(relativeAssetPath != assetsRelativePaths.end())
-                assetPath = assetsDirectory / relativeAssetPath->second / path;
-            else
-                assetPath = assetsDirectory / path;
-        }
-
-        return assetPath;
-    }
-
     template<class T>
     AssetLoader* GetAssetLoader()
     {

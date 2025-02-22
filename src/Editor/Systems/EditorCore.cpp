@@ -15,7 +15,7 @@ void Editor::Init()
 
     deferredRenderer = std::make_shared<dev::DeferredRenderer>();
 
-    auto mainScenePath = dev::AssetManager::Get().GetAssetsDirectory() / "scenes/main.json";
+    auto mainScenePath = dev::AssetManager::Get().GetAssetPath<dev::SceneAsset>("main.json", true);
 
     if(!std::filesystem::exists(mainScenePath))
     {

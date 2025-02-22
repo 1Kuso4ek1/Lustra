@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(LLGLTest)
+project(Engine)
 
 find_package(Threads REQUIRED)
 
@@ -32,6 +32,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR} CACHE STRING "" FORCE)
 file(GLOB ENGINE_SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
 file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
 file(GLOB IMGUIZMO_SOURCES "libraries/ImGuizmo/*.cpp")
+
+list(REMOVE_ITEM ENGINE_SOURCES "src/Editor/main.cpp")
 
 set(
     ENGINE_INCLUDE_DIRS
@@ -135,17 +137,17 @@ target_link_libraries(
 )
 
 add_executable(
-    LLGLTest
+    Editor
 
-    main.cpp
+    src/Editor/main.cpp
 )
 
-set_target_properties(LLGLTest Engine PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+set_target_properties(Editor Engine PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
 include_directories(${INCLUDE_DIRS})
 
-target_include_directories(LLGLTest PUBLIC include)
-target_link_libraries(LLGLTest Engine)
+target_include_directories(Editor PUBLIC include)
+target_link_libraries(Editor Engine)
 
 add_subdirectory(libraries/glfw)
 add_subdirectory(libraries/glm)

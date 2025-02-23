@@ -504,8 +504,6 @@ void Editor::DrawViewport()
 
     canMoveCamera = ImGui::IsWindowHovered();
 
-    DrawImGuizmo();
-
     auto lights = scene->GetRegistry().view<dev::TransformComponent, dev::LightComponent>();
 
     for(auto entity : lights)
@@ -532,6 +530,8 @@ void Editor::DrawViewport()
             ImGui::PopID();
         }
     }
+
+    DrawImGuizmo();
 
     ImGui::End();
 

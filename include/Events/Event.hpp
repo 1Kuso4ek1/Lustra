@@ -9,7 +9,11 @@ class Event
 public:
     enum class Type
     {
-        Undefined, WindowResize, AssetLoaded, Collision
+        Undefined,
+        WindowResize,
+        WindowFocus,
+        AssetLoaded,
+        Collision
     };
 
     virtual ~Event() = default;

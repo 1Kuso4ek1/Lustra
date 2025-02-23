@@ -9,6 +9,14 @@ GLFWwindow* Window::lastCreatedWindow{};
 static void OnWindowResize(GLFWwindow* window, int width, int height)
 {
     auto event = std::make_unique<WindowResizeEvent>(LLGL::Extent2D{ (uint32_t)width, (uint32_t)height });
+
+    EventManager::Get().Dispatch(std::move(event));
+}
+
+static void OnWindowFocus(GLFWwindow* window, int focused)
+{
+    auto event = std::make_unique<WindowFocusEvent>((bool)focused);
+
     EventManager::Get().Dispatch(std::move(event));
 }
 
@@ -116,6 +124,7 @@ GLFWwindow* Window::CreateWindow()
     glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
     glfwSetFramebufferSizeCallback(window, OnWindowResize);
+    glfwSetWindowFocusCallback(window, OnWindowFocus);
 
     return window;
 }

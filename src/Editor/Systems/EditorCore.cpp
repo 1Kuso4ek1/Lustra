@@ -8,6 +8,7 @@ Editor::Editor(const dev::Config& config) : dev::Application(config)
 void Editor::Init()
 {
     dev::EventManager::Get().AddListener(dev::Event::Type::WindowResize, this);
+    dev::EventManager::Get().AddListener(dev::Event::Type::WindowFocus, this);
 
     CreateRenderTarget();
 
@@ -98,5 +99,14 @@ void Editor::OnEvent(dev::Event& event)
         auto resizeEvent = dynamic_cast<dev::WindowResizeEvent*>(&event);
 
         CreateRenderTarget(resizeEvent->GetSize());
+    }
+    else if(event.GetType() == dev::Event::Type::WindowFocus)
+    {
+        auto focusEvent = dynamic_cast<dev::WindowFocusEvent*>(&event);
+
+        if(focusEvent->IsFocused())
+            dev::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);
+        else
+            dev::Renderer::Get().GetSwapChain()->SetVsyncInterval(5);
     }
 }

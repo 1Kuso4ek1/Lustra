@@ -20,6 +20,7 @@ namespace dev
 {
 
 static void OnWindowResize(GLFWwindow* window, int width, int height);
+static void OnWindowFocus(GLFWwindow* window, int focused);
 
 class Window : public LLGL::Surface
 {
@@ -62,12 +63,25 @@ private:
 class WindowResizeEvent : public Event
 {
 public:
-    WindowResizeEvent(const LLGL::Extent2D& size) : Event(Type::WindowResize), size(size) {}
+    WindowResizeEvent(const LLGL::Extent2D& size)
+        : Event(Type::WindowResize), size(size) {}
 
     LLGL::Extent2D GetSize() const { return size; }
 
 private:
     LLGL::Extent2D size;
+};
+
+class WindowFocusEvent : public Event
+{
+public:
+    WindowFocusEvent(bool focused)
+        : Event(Type::WindowFocus), focused(focused) {}
+
+    bool IsFocused() const { return focused; }
+
+private:
+    bool focused;
 };
 
 using WindowPtr = std::shared_ptr<Window>;

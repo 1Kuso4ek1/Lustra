@@ -34,10 +34,9 @@ public:
 private:
     void SetupAssetManager();
 
-private:
+protected:
     Config config;
 
-protected:
     WindowPtr window;
 
     Timer deltaTimeTimer;

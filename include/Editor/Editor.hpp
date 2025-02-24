@@ -53,6 +53,8 @@ private:
     void DrawImGuizmo();
     void DrawExecutionControl();
 
+    void DrawLog();
+
     void DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size);
 
     void DrawAssetBrowser();

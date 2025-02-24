@@ -459,6 +459,11 @@ void Editor::DrawExecutionControl()
     ImGui::End();
 }
 
+void Editor::DrawLog()
+{
+    
+}
+
 void Editor::DrawViewport()
 {
     static dev::Timer eventTimer;

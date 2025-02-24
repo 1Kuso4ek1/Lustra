@@ -28,7 +28,9 @@ struct TransformComponent : public ComponentBase
 
 struct MeshComponent : public ComponentBase
 {
-    MeshComponent() : ComponentBase("MeshComponent") {}
+    MeshComponent()
+        : ComponentBase("MeshComponent"),
+          model(AssetManager::Get().Load<ModelAsset>("cube", true)) {}
 
     ModelAssetPtr model;
 };
@@ -95,14 +97,17 @@ public:
     LightComponent(LightComponent&&) = default;
 
     void SetupShadowMap(const LLGL::Extent2D& resolution);
+    void SetupProjection();
 
     template<class Archive>
     void save(Archive& archive) const
     {
         archive(
-            CEREAL_NVP(color), CEREAL_NVP(intensity), CEREAL_NVP(cutoff),
-            CEREAL_NVP(outerCutoff), CEREAL_NVP(bias),
-            CEREAL_NVP(shadowMap), CEREAL_NVP(resolution)
+            CEREAL_NVP(color), CEREAL_NVP(intensity),
+            CEREAL_NVP(cutoff), CEREAL_NVP(outerCutoff),
+            CEREAL_NVP(bias), CEREAL_NVP(orthoExtent),
+            CEREAL_NVP(shadowMap), CEREAL_NVP(orthographic),
+            CEREAL_NVP(resolution)
         );
     }
 
@@ -111,7 +116,7 @@ public:
     {
         projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
 
-        archive(color, intensity, cutoff, outerCutoff, bias, shadowMap, resolution);
+        archive(color, intensity, cutoff, outerCutoff, bias, orthoExtent, shadowMap, orthographic, resolution);
 
         if(shadowMap)
             SetupShadowMap(resolution);
@@ -122,8 +127,10 @@ public:
     float intensity = 1.0f;
     float cutoff = 0.0f, outerCutoff = 0.0f;
     float bias = 0.00001f;
+    float orthoExtent = 10.0f;
 
     bool shadowMap = false;
+    bool orthographic = false;
 
     LLGL::Extent2D resolution;
 

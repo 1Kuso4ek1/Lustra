@@ -131,7 +131,10 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     if(ImGui::Checkbox("Shadow map", &component.shadowMap))
         if(!component.renderTarget)
             component.SetupShadowMap(component.resolution);
-    
+
+    ImGui::Checkbox("Orthographic", &component.orthographic);
+    ImGui::DragFloat("Ortho Extent", &component.orthoExtent, 0.05f, 0.0f, 200.0f);
+
     static const uint32_t min = 128, max = 8192;
 
     ImGui::DragScalarN("Resolution", ImGuiDataType_U32, &component.resolution.width, 2, 1.0f, &min, &max);

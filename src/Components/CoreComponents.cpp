@@ -30,9 +30,17 @@ glm::mat4 TransformComponent::GetTransform() const
 LightComponent::LightComponent()
     : ComponentBase("LightComponent")
 {
-    projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+    SetupProjection();
 
     resolution = { 2048, 2048 };
+}
+
+void LightComponent::SetupProjection()
+{
+    if(orthographic)
+        projection = glm::ortho(-orthoExtent, orthoExtent, -orthoExtent, orthoExtent, 0.1f, 1000.0f);
+    else
+        projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
 }
 
 void LightComponent::SetupShadowMap(const LLGL::Extent2D& resolution)
@@ -45,6 +53,8 @@ void LightComponent::SetupShadowMap(const LLGL::Extent2D& resolution)
 
     CreateDepth(resolution);
     CreateRenderTarget(resolution);
+
+    SetupProjection();
 
     if(!shadowMapPipeline)
         CreatePipeline();

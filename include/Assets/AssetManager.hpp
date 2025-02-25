@@ -19,17 +19,7 @@ public:
     template<class T>
     std::shared_ptr<T> Load(const std::filesystem::path& path, bool relativeToAssetsDir = false)
     {
-        auto assetPath = path;
-
-        if(relativeToAssetsDir)
-        {
-            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
-
-            if(relativeAssetPath != assetsRelativePaths.end())
-                assetPath = assetsDirectory / relativeAssetPath->second / path;
-            else
-                assetPath = assetsDirectory / path;
-        }
+        auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
 
         auto it = assets.find(assetPath);
 

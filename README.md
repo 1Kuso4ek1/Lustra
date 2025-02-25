@@ -2,11 +2,13 @@
     <img src="resources/branding/logo.png" alt="Logo" width=400px>
 </p>
 
-#
+<hr>
 
-![](https://img.shields.io/badge/language-C++-green)
-![](https://img.shields.io/github/license/1Kuso4ek1/Lustra)
-![](https://img.shields.io/github/issues/1Kuso4ek1/Lustra)
+<p align=center>
+    <img src=https://img.shields.io/badge/language-C++-green>
+    <img src=https://img.shields.io/github/license/1Kuso4ek1/Lustra>
+    <img src=https://img.shields.io/github/issues/1Kuso4ek1/Lustra>
+</p>
 
 ## What is Lustra?
 **Lustra** is a small WIP game engine written in C++. As a successor to my previous project **3Dev**, **Lustra** aims to provide the most flexible, simple and intuitive experience, as well as being **lightweight** and **powerful**.

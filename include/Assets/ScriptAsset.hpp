@@ -1,7 +1,7 @@
 #pragma once
 #include <Asset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct ScriptAsset : public Asset

@@ -2,29 +2,29 @@
 
 void Editor::LoadIcons()
 {
-    fileIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/file.png", true);
-    folderIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/folder.png", true);
-    textureIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/texture.png", true);
-    materialIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/material.png", true);
-    modelIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/model.png", true);
-    scriptIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/script.png", true);
-    sceneIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/scene.png", true);
+    fileIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/file.png", true);
+    folderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/folder.png", true);
+    textureIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/texture.png", true);
+    materialIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/material.png", true);
+    modelIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/model.png", true);
+    scriptIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/script.png", true);
+    sceneIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/scene.png", true);
 
-    playIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/play.png", true);
-    pauseIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/pause.png", true);
-    stopIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/stop.png", true);
-    buildIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/build.png", true);
+    playIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/play.png", true);
+    pauseIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/pause.png", true);
+    stopIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/stop.png", true);
+    buildIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/build.png", true);
 
-    lightIcon = dev::AssetManager::Get().Load<dev::TextureAsset>("icons/light.png", true);
+    lightIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/light.png", true);
 
     assetIcons = 
     {
-        { dev::Asset::Type::Texture, textureIcon },
-        { dev::Asset::Type::Material, materialIcon },
-        { dev::Asset::Type::Model, modelIcon },
-        { dev::Asset::Type::Script, scriptIcon },
-        { dev::Asset::Type::Scene, sceneIcon },
-        { dev::Asset::Type::Unknown, fileIcon }
+        { lustra::Asset::Type::Texture, textureIcon },
+        { lustra::Asset::Type::Material, materialIcon },
+        { lustra::Asset::Type::Model, modelIcon },
+        { lustra::Asset::Type::Script, scriptIcon },
+        { lustra::Asset::Type::Scene, sceneIcon },
+        { lustra::Asset::Type::Unknown, fileIcon }
     };
 }
 
@@ -40,10 +40,10 @@ void Editor::CreateCameraEntity()
 {
     auto camera = scene->CreateEntity();
 
-    camera.AddComponent<dev::NameComponent>().name = "Camera";
-    camera.AddComponent<dev::TransformComponent>().position = { 5.0f, 5.0f, 5.0f };
+    camera.AddComponent<lustra::NameComponent>().name = "Camera";
+    camera.AddComponent<lustra::TransformComponent>().position = { 5.0f, 5.0f, 5.0f };
     
-    auto& cameraComponent = camera.AddComponent<dev::CameraComponent>();
+    auto& cameraComponent = camera.AddComponent<lustra::CameraComponent>();
     
     cameraComponent.camera.SetViewport(window->GetContentSize());
     cameraComponent.camera.SetPerspective();
@@ -53,10 +53,10 @@ void Editor::CreateEditorCameraEntity()
 {
     editorCamera = scene->CreateEntity();
 
-    editorCamera.AddComponent<dev::NameComponent>().name = "EditorCamera";
-    editorCamera.AddComponent<dev::TransformComponent>().position = { 0.0f, 0.0f, 5.0f };
+    editorCamera.AddComponent<lustra::NameComponent>().name = "EditorCamera";
+    editorCamera.AddComponent<lustra::TransformComponent>().position = { 0.0f, 0.0f, 5.0f };
     
-    auto& cameraComponent = editorCamera.AddComponent<dev::CameraComponent>();
+    auto& cameraComponent = editorCamera.AddComponent<lustra::CameraComponent>();
     
     cameraComponent.camera.SetViewport(window->GetContentSize());
     cameraComponent.camera.SetPerspective();
@@ -69,23 +69,23 @@ void Editor::CreatePostProcessingEntity()
 {
     auto postProcessing = scene->CreateEntity();
 
-    postProcessing.AddComponent<dev::NameComponent>().name = "PostProcessing";
-    postProcessing.AddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
-    postProcessing.AddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
-    postProcessing.AddComponent<dev::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
-    postProcessing.AddComponent<dev::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<lustra::NameComponent>().name = "PostProcessing";
+    postProcessing.AddComponent<lustra::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<lustra::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<lustra::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
+    postProcessing.AddComponent<lustra::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
 }
 
 void Editor::CreateSkyEntity()
 {
     auto sky = scene->CreateEntity();
     
-    sky.AddComponent<dev::NameComponent>().name = "Sky";
-    sky.AddComponent<dev::MeshComponent>().model = dev::AssetManager::Get().Load<dev::ModelAsset>("cube", true);
+    sky.AddComponent<lustra::NameComponent>().name = "Sky";
+    sky.AddComponent<lustra::MeshComponent>().model = lustra::AssetManager::Get().Load<lustra::ModelAsset>("cube", true);
 
-    sky.AddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
-    /* sky.AddComponent<dev::HDRISkyComponent>(
-        dev::AssetManager::Get().Load<dev::TextureAsset>("hdri/meadow_2_1k.hdr", true),
+    sky.AddComponent<lustra::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
+    /* sky.AddComponent<lustra::HDRISkyComponent>(
+        lustra::AssetManager::Get().Load<lustra::TextureAsset>("hdri/meadow_2_1k.hdr", true),
         LLGL::Extent2D{ 1024, 1024 }
     ); */
 }
@@ -102,38 +102,38 @@ void Editor::UpdateList()
 
 void Editor::UpdateEditorCameraScript()
 {
-    auto& cameraScript = editorCamera.GetOrAddComponent<dev::ScriptComponent>();
+    auto& cameraScript = editorCamera.GetOrAddComponent<lustra::ScriptComponent>();
 
     // Just a reminder that this is possible ;)
-    /* auto& script = camera.AddComponent<dev::ScriptComponent>();
-    script.script = dev::AssetManager::Get().Load<dev::ScriptAsset>("camera.as", true);
+    /* auto& script = camera.AddComponent<lustra::ScriptComponent>();
+    script.script = lustra::AssetManager::Get().Load<lustra::ScriptAsset>("camera.as", true);
 
-    dev::ScriptManager::Get().AddScript(script.script);
-    dev::ScriptManager::Get().Build(); */
+    lustra::ScriptManager::Get().AddScript(script.script);
+    lustra::ScriptManager::Get().Build(); */
 
-    cameraScript.update = [&](dev::Entity entity, float deltaTime)
+    cameraScript.update = [&](lustra::Entity entity, float deltaTime)
     {
-        auto& transform = entity.GetComponent<dev::TransformComponent>();
+        auto& transform = entity.GetComponent<lustra::TransformComponent>();
 
         static float speed = 0.0f;
 
         static glm::vec3 movement = glm::vec3(0.0f);
 
-        if(dev::Mouse::IsButtonPressed(dev::Mouse::Button::Right) && canMoveCamera)
+        if(lustra::Mouse::IsButtonPressed(lustra::Mouse::Button::Right) && canMoveCamera)
         {
-            dev::Mouse::SetCursorVisible(false);
+            lustra::Mouse::SetCursorVisible(false);
 
             auto rotation = glm::quat(glm::radians(transform.rotation));
 
             glm::vec3 input = glm::vec3(0.0f);
 
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::W))
+            if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::W))
                 input -= rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S))
+            if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::S))
                 input += rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::A))
+            if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::A))
                 input -= rotation * glm::vec3(1.0f, 0.0f, 0.0f);
-            if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::D))
+            if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::D))
                 input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 
             float lerpSpeed = glm::clamp(deltaTime * 5.0f, 0.0f, 1.0f);
@@ -150,42 +150,42 @@ void Editor::UpdateEditorCameraScript()
                 transform.position += glm::normalize(movement) * deltaTime * speed;
 
             glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
-            glm::vec2 delta = center - dev::Mouse::GetPosition();
+            glm::vec2 delta = center - lustra::Mouse::GetPosition();
 
             transform.rotation.x += delta.y / 100.0f;
             transform.rotation.y += delta.x / 100.0f;
 
             transform.rotation.x = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
 
-            dev::Mouse::SetPosition(center);
+            lustra::Mouse::SetPosition(center);
         }
         else
-            dev::Mouse::SetCursorVisible();
+            lustra::Mouse::SetCursorVisible();
     };
 }
 
-void Editor::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
+void Editor::CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera)
 {
     auto entity = scene->CreateEntity();
 
-    entity.AddComponent<dev::NameComponent>().name = "Model";
-    entity.AddComponent<dev::TransformComponent>();
-    entity.AddComponent<dev::MeshComponent>().model = model;
-    entity.AddComponent<dev::MeshRendererComponent>();
-    entity.AddComponent<dev::PipelineComponent>(
-        dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
-        dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+    entity.AddComponent<lustra::NameComponent>().name = "Model";
+    entity.AddComponent<lustra::TransformComponent>();
+    entity.AddComponent<lustra::MeshComponent>().model = model;
+    entity.AddComponent<lustra::MeshRendererComponent>();
+    entity.AddComponent<lustra::PipelineComponent>(
+        lustra::AssetManager::Get().Load<lustra::VertexShaderAsset>("vertex.vert", true),
+        lustra::AssetManager::Get().Load<lustra::FragmentShaderAsset>("deferred.frag", true)
     );
     
-    auto& rigidBody = entity.AddComponent<dev::RigidBodyComponent>();
+    auto& rigidBody = entity.AddComponent<lustra::RigidBodyComponent>();
 
-    auto& modelPos = entity.GetComponent<dev::TransformComponent>().position;
+    auto& modelPos = entity.GetComponent<lustra::TransformComponent>().position;
 
     if(relativeToCamera)
     {
-        auto& cameraPos = editorCamera.GetComponent<dev::TransformComponent>().position;
+        auto& cameraPos = editorCamera.GetComponent<lustra::TransformComponent>().position;
 
-        auto cameraOrient = glm::quat(glm::radians(editorCamera.GetComponent<dev::TransformComponent>().rotation));
+        auto cameraOrient = glm::quat(glm::radians(editorCamera.GetComponent<lustra::TransformComponent>().rotation));
 
         modelPos = cameraPos + cameraOrient * glm::vec3(0.0f, 0.0f, -5.0f);
     }
@@ -196,13 +196,13 @@ void Editor::CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera)
             { modelPos.x, modelPos.y, modelPos.z },
             { 0.0f, 0.0f, 0.0f, 1.0f },
             JPH::EMotionType::Dynamic,
-            dev::Layers::moving
+            lustra::Layers::moving
         );
 
     settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
     settings.mMassPropertiesOverride.mMass = 1.0f;
 
-    rigidBody.body = dev::PhysicsManager::Get().CreateBody(settings);
+    rigidBody.body = lustra::PhysicsManager::Get().CreateBody(settings);
 
     selectedEntity = entity;
 
@@ -213,8 +213,8 @@ void Editor::CreateRenderTarget(const LLGL::Extent2D& resolution)
 {
     if(viewportRenderTarget)
     {
-        dev::Renderer::Get().Release(viewportAttachment);
-        dev::Renderer::Get().Release(viewportRenderTarget);
+        lustra::Renderer::Get().Release(viewportAttachment);
+        lustra::Renderer::Get().Release(viewportRenderTarget);
     }
 
     LLGL::TextureDescriptor colorAttachmentDesc =
@@ -227,8 +227,8 @@ void Editor::CreateRenderTarget(const LLGL::Extent2D& resolution)
         .samples = 1
     };
 
-    viewportAttachment = dev::Renderer::Get().CreateTexture(colorAttachmentDesc);
-    viewportRenderTarget = dev::Renderer::Get().CreateRenderTarget(resolution, { viewportAttachment });
+    viewportAttachment = lustra::Renderer::Get().CreateTexture(colorAttachmentDesc);
+    viewportRenderTarget = lustra::Renderer::Get().CreateRenderTarget(resolution, { viewportAttachment });
 
     LLGL::OpenGL::ResourceNativeHandle nativeHandle;
     viewportAttachment->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));

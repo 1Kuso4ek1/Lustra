@@ -5,7 +5,7 @@
 
 #include <unordered_map>
 
-namespace dev
+namespace lustra
 {
 
 class InputManager : public Singleton<InputManager>

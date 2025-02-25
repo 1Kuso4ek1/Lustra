@@ -1,6 +1,6 @@
 #include <PostProcessingComponents.hpp>
 
-namespace dev
+namespace lustra
 {
 
 SSRComponent::SSRComponent(const LLGL::Extent2D& resolution)

@@ -1,7 +1,7 @@
 #pragma once
 #include <Layers.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class ObjectLayerPairFilter : public JPH::ObjectLayerPairFilter

@@ -27,7 +27,7 @@ void load(Archive& archive, Extent2D& extent)
 
 }
 
-namespace dev
+namespace lustra
 {
 
 struct Config

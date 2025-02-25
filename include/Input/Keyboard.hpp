@@ -1,7 +1,7 @@
 #pragma once
 #include <Window.hpp>
 
-namespace dev
+namespace lustra
 {
 
 namespace Keyboard

@@ -1,6 +1,6 @@
 #include <ShaderLoader.hpp>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr VertexShaderLoader::Load(const std::filesystem::path& path)

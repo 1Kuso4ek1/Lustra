@@ -16,7 +16,7 @@
 #include <ShaderLoader.hpp>
 #include <SceneLoader.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class Application

@@ -2,7 +2,7 @@
 
 void Editor::DrawImGui()
 {
-    dev::ImGuiManager::Get().NewFrame();
+    lustra::ImGuiManager::Get().NewFrame();
 
     ImGuizmo::BeginFrame();
 
@@ -18,21 +18,21 @@ void Editor::DrawImGui()
 
     if(selectedAsset)
     {
-        if(selectedAsset->type == dev::Asset::Type::Material)
-            DrawMaterialEditor(std::static_pointer_cast<dev::MaterialAsset>(selectedAsset));
+        if(selectedAsset->type == lustra::Asset::Type::Material)
+            DrawMaterialEditor(std::static_pointer_cast<lustra::MaterialAsset>(selectedAsset));
     }
 
     DrawViewport();
 
-    dev::ImGuiManager::Get().Render();
+    lustra::ImGuiManager::Get().Render();
 }
 
 void Editor::DrawSceneTree()
 {
-    const auto isRootNode = [](dev::Entity entity)
+    const auto isRootNode = [](lustra::Entity entity)
     {
-        if(entity.HasComponent<dev::HierarchyComponent>())
-            return entity.GetComponent<dev::HierarchyComponent>().parent == entt::null;
+        if(entity.HasComponent<lustra::HierarchyComponent>())
+            return entity.GetComponent<lustra::HierarchyComponent>().parent == entt::null;
         
         return true;
     };
@@ -47,17 +47,17 @@ void Editor::DrawSceneTree()
     {
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE"))
         {
-            sceneAsset = *(dev::SceneAssetPtr*)payload->Data;
+            sceneAsset = *(lustra::SceneAssetPtr*)payload->Data;
 
             selectedEntity = {};
 
-            dev::Multithreading::Get().AddJob({ {},
+            lustra::Multithreading::Get().AddJob({ {},
                 [&]() {
                     scene = sceneAsset->scene;
                     scene->SetRenderer(deferredRenderer);
 
-                    dev::EventManager::Get().Dispatch(
-                        std::make_unique<dev::WindowResizeEvent>(dev::Renderer::Get().GetViewportResolution())
+                    lustra::EventManager::Get().Dispatch(
+                        std::make_unique<lustra::WindowResizeEvent>(lustra::Renderer::Get().GetViewportResolution())
                     );
 
                     UpdateList();
@@ -77,8 +77,8 @@ void Editor::DrawSceneTree()
 
     for(auto& entity : list)
     {
-        if(entity.HasComponent<dev::CameraComponent>())
-            entity.GetComponent<dev::CameraComponent>().active = false;
+        if(entity.HasComponent<lustra::CameraComponent>())
+            entity.GetComponent<lustra::CameraComponent>().active = false;
 
         if(isRootNode(entity))
             DrawEntityNode(entity);
@@ -93,7 +93,7 @@ void Editor::DrawSceneTree()
         {
             auto entity = scene->CreateEntity();
 
-            entity.AddComponent<dev::NameComponent>().name = "Empty";
+            entity.AddComponent<lustra::NameComponent>().name = "Empty";
 
             selectedEntity = entity;
 
@@ -104,13 +104,13 @@ void Editor::DrawSceneTree()
         {
             auto entity = scene->CreateEntity();
 
-            entity.AddComponent<dev::NameComponent>().name = "Drawable";
-            entity.AddComponent<dev::TransformComponent>();
-            entity.AddComponent<dev::MeshComponent>();
-            entity.AddComponent<dev::MeshRendererComponent>();
-            entity.AddComponent<dev::PipelineComponent>(
-                dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
-                dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+            entity.AddComponent<lustra::NameComponent>().name = "Drawable";
+            entity.AddComponent<lustra::TransformComponent>();
+            entity.AddComponent<lustra::MeshComponent>();
+            entity.AddComponent<lustra::MeshRendererComponent>();
+            entity.AddComponent<lustra::PipelineComponent>(
+                lustra::AssetManager::Get().Load<lustra::VertexShaderAsset>("vertex.vert", true),
+                lustra::AssetManager::Get().Load<lustra::FragmentShaderAsset>("deferred.frag", true)
             );
 
             selectedEntity = entity;
@@ -124,14 +124,14 @@ void Editor::DrawSceneTree()
     ImGui::End();
 }
 
-void Editor::DrawEntityNode(dev::Entity entity)
+void Editor::DrawEntityNode(lustra::Entity entity)
 {
     bool hasChildren = false;
-    if(entity.HasComponent<dev::HierarchyComponent>())
-        hasChildren = !entity.GetComponent<dev::HierarchyComponent>().children.empty();
+    if(entity.HasComponent<lustra::HierarchyComponent>())
+        hasChildren = !entity.GetComponent<lustra::HierarchyComponent>().children.empty();
 
-    std::string name = entity.HasComponent<dev::NameComponent>() 
-                      ? entity.GetComponent<dev::NameComponent>().name 
+    std::string name = entity.HasComponent<lustra::NameComponent>() 
+                      ? entity.GetComponent<lustra::NameComponent>().name 
                       : "Entity";
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -149,7 +149,7 @@ void Editor::DrawEntityNode(dev::Entity entity)
     {
         if(hasChildren)
         {
-            auto& hierarchy = entity.GetComponent<dev::HierarchyComponent>();
+            auto& hierarchy = entity.GetComponent<lustra::HierarchyComponent>();
 
             for(auto& child : hierarchy.children)
                 DrawEntityNode(scene->GetEntity((entt::id_type)child));
@@ -160,7 +160,7 @@ void Editor::DrawEntityNode(dev::Entity entity)
     ImGui::PopID();
 }
 
-void Editor::EntityNodeInteraction(dev::Entity entity, std::string_view name)
+void Editor::EntityNodeInteraction(lustra::Entity entity, std::string_view name)
 {
     if(ImGui::IsItemClicked())
         selectedEntity = entity;
@@ -169,7 +169,7 @@ void Editor::EntityNodeInteraction(dev::Entity entity, std::string_view name)
     {
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
         {
-            auto payloadEntity = *(dev::Entity*)payload->Data;
+            auto payloadEntity = *(lustra::Entity*)payload->Data;
             payloadEntity = scene->GetEntity((entt::id_type)(entt::entity)payloadEntity);
 
             if(entity != payloadEntity)
@@ -195,24 +195,24 @@ void Editor::DrawPropertiesWindow()
 
     if(selectedEntity)
     {
-        if(selectedEntity.HasComponent<dev::CameraComponent>())
-            selectedEntity.GetComponent<dev::CameraComponent>().active = true;
+        if(selectedEntity.HasComponent<lustra::CameraComponent>())
+            selectedEntity.GetComponent<lustra::CameraComponent>().active = true;
 
-        dev::DrawEntityUI<
-            dev::NameComponent,
-            dev::TransformComponent,
-            dev::MeshComponent,
-            dev::MeshRendererComponent,
-            dev::CameraComponent,
-            dev::LightComponent,
-            dev::ScriptComponent,
-            dev::TonemapComponent,
-            dev::BloomComponent,
-            dev::GTAOComponent,
-            dev::SSRComponent,
-            dev::ProceduralSkyComponent,
-            dev::HDRISkyComponent,
-            dev::RigidBodyComponent
+        lustra::DrawEntityUI<
+            lustra::NameComponent,
+            lustra::TransformComponent,
+            lustra::MeshComponent,
+            lustra::MeshRendererComponent,
+            lustra::CameraComponent,
+            lustra::LightComponent,
+            lustra::ScriptComponent,
+            lustra::TonemapComponent,
+            lustra::BloomComponent,
+            lustra::GTAOComponent,
+            lustra::SSRComponent,
+            lustra::ProceduralSkyComponent,
+            lustra::HDRISkyComponent,
+            lustra::RigidBodyComponent
         >(scene->GetRegistry(), selectedEntity);
 
         ImGui::Separator();
@@ -231,66 +231,66 @@ void Editor::DrawPropertiesWindow()
         if(ImGui::BeginPopupContextWindow("Add component"))
         {
             if(ImGui::MenuItem("Add NameComponent"))
-                selectedEntity.GetOrAddComponent<dev::NameComponent>();
+                selectedEntity.GetOrAddComponent<lustra::NameComponent>();
 
             if(ImGui::MenuItem("Add TransformComponent"))
-                selectedEntity.GetOrAddComponent<dev::TransformComponent>();
+                selectedEntity.GetOrAddComponent<lustra::TransformComponent>();
             
             if(ImGui::MenuItem("Add MeshComponent"))
-                selectedEntity.GetOrAddComponent<dev::MeshComponent>();
+                selectedEntity.GetOrAddComponent<lustra::MeshComponent>();
             
             if(ImGui::MenuItem("Add MeshRendererComponent"))
-                selectedEntity.GetOrAddComponent<dev::MeshRendererComponent>();
+                selectedEntity.GetOrAddComponent<lustra::MeshRendererComponent>();
 
             if(ImGui::MenuItem("Add PipelineComponent"))
-                selectedEntity.GetOrAddComponent<dev::PipelineComponent>(
-                    dev::AssetManager::Get().Load<dev::VertexShaderAsset>("vertex.vert", true),
-                    dev::AssetManager::Get().Load<dev::FragmentShaderAsset>("deferred.frag", true)
+                selectedEntity.GetOrAddComponent<lustra::PipelineComponent>(
+                    lustra::AssetManager::Get().Load<lustra::VertexShaderAsset>("vertex.vert", true),
+                    lustra::AssetManager::Get().Load<lustra::FragmentShaderAsset>("deferred.frag", true)
                 );
             
             if(ImGui::MenuItem("Add CameraComponent"))
             {
-                auto& cameraComponent = selectedEntity.GetOrAddComponent<dev::CameraComponent>();
+                auto& cameraComponent = selectedEntity.GetOrAddComponent<lustra::CameraComponent>();
                 cameraComponent.camera.SetPerspective();
-                cameraComponent.camera.SetViewport(dev::Renderer::Get().GetViewportResolution());
+                cameraComponent.camera.SetViewport(lustra::Renderer::Get().GetViewportResolution());
             }
             
             if(ImGui::MenuItem("Add LightComponent"))
-                selectedEntity.GetOrAddComponent<dev::LightComponent>();
+                selectedEntity.GetOrAddComponent<lustra::LightComponent>();
 
             if(ImGui::MenuItem("Add RigidBodyComponent"))
-                selectedEntity.GetOrAddComponent<dev::RigidBodyComponent>().body = 
-                    dev::PhysicsManager::Get().CreateBody(
+                selectedEntity.GetOrAddComponent<lustra::RigidBodyComponent>().body = 
+                    lustra::PhysicsManager::Get().CreateBody(
                         JPH::BodyCreationSettings(
                         new JPH::EmptyShapeSettings(),
                         { 0.0f, 0.0f, 0.0f },
                         { 0.0f, 0.0f, 0.0f, 1.0f },
                         JPH::EMotionType::Dynamic,
-                        dev::Layers::moving
+                        lustra::Layers::moving
                         )
                     );
             
             if(ImGui::MenuItem("Add ScriptComponent"))
-                selectedEntity.GetOrAddComponent<dev::ScriptComponent>();
+                selectedEntity.GetOrAddComponent<lustra::ScriptComponent>();
             
             if(ImGui::MenuItem("Add TonemapComponent"))
-                selectedEntity.GetOrAddComponent<dev::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
+                selectedEntity.GetOrAddComponent<lustra::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });
             
             if(ImGui::MenuItem("Add BloomComponent"))
-                selectedEntity.GetOrAddComponent<dev::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
+                selectedEntity.GetOrAddComponent<lustra::BloomComponent>(LLGL::Extent2D{ 1280, 720 });
             
             if(ImGui::MenuItem("Add GTAOComponent"))
-                selectedEntity.GetOrAddComponent<dev::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
+                selectedEntity.GetOrAddComponent<lustra::GTAOComponent>(LLGL::Extent2D{ 1280, 720 });
             
             if(ImGui::MenuItem("Add SSRComponent"))
-                selectedEntity.GetOrAddComponent<dev::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
+                selectedEntity.GetOrAddComponent<lustra::SSRComponent>(LLGL::Extent2D{ 1280, 720 });
             
             if(ImGui::MenuItem("Add ProceduralSkyComponent"))
-                selectedEntity.GetOrAddComponent<dev::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
+                selectedEntity.GetOrAddComponent<lustra::ProceduralSkyComponent>(LLGL::Extent2D{ 1024, 1024 });
             
             if(ImGui::MenuItem("Add HDRISkyComponent"))
-                selectedEntity.GetOrAddComponent<dev::HDRISkyComponent>(
-                    dev::AssetManager::Get().Load<dev::TextureAsset>("empty", true),
+                selectedEntity.GetOrAddComponent<lustra::HDRISkyComponent>(
+                    lustra::AssetManager::Get().Load<lustra::TextureAsset>("empty", true),
                     LLGL::Extent2D{ 1024, 1024 }
                 );
             
@@ -327,12 +327,12 @@ void Editor::DrawImGuizmo()
 {
     if(selectedEntity) 
     {
-        if(selectedEntity.HasComponent<dev::TransformComponent>())
+        if(selectedEntity.HasComponent<lustra::TransformComponent>())
         {
-            auto viewMatrix = dev::Renderer::Get().GetMatrices()->GetView();
-            auto projectionMatrix = dev::Renderer::Get().GetMatrices()->GetProjection();
+            auto viewMatrix = lustra::Renderer::Get().GetMatrices()->GetView();
+            auto projectionMatrix = lustra::Renderer::Get().GetMatrices()->GetProjection();
 
-            auto& transform = selectedEntity.GetComponent<dev::TransformComponent>();
+            auto& transform = selectedEntity.GetComponent<lustra::TransformComponent>();
             auto modelMatrix = scene->GetWorldTransform(selectedEntity);
             glm::mat4 deltaMatrix(1.0f);
 
@@ -353,22 +353,22 @@ void Editor::DrawImGuizmo()
                 ImGuizmo::MODE::WORLD,
                 glm::value_ptr(modelMatrix),
                 glm::value_ptr(deltaMatrix),
-                dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) ? snap : nullptr
+                lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::LeftControl) ? snap : nullptr
             );
 
             deltaMatrix[3] = glm::clamp(deltaMatrix[3], glm::vec4(-1.0f), glm::vec4(1.0f));
 
             transform.SetTransform(deltaMatrix * transform.GetTransform());
 
-            if(selectedEntity.HasComponent<dev::RigidBodyComponent>())
+            if(selectedEntity.HasComponent<lustra::RigidBodyComponent>())
             {
-                auto body = selectedEntity.GetComponent<dev::RigidBodyComponent>().body;
+                auto body = selectedEntity.GetComponent<lustra::RigidBodyComponent>().body;
                 auto bodyId = body->GetID();
 
                 auto pos = transform.position;
                 auto rot = glm::quat(glm::radians(transform.rotation));
 
-                dev::PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
+                lustra::PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
                     bodyId,
                     { pos.x, pos.y, pos.z },
                     { rot.x, rot.y, rot.z, rot.w },
@@ -454,7 +454,7 @@ void Editor::DrawExecutionControl()
     ImGui::SameLine();
 
     if(ImGui::ImageButton("##Build", buildIcon->nativeHandle, { 20, 20 }))
-        dev::ScriptManager::Get().Build();
+        lustra::ScriptManager::Get().Build();
 
     ImGui::End();
 }
@@ -466,7 +466,7 @@ void Editor::DrawLog()
 
 void Editor::DrawViewport()
 {
-    static dev::Timer eventTimer;
+    static lustra::Timer eventTimer;
     static ImGuiWindowFlags flags = 0;
     
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -481,12 +481,12 @@ void Editor::DrawViewport()
         size.y != viewportRenderTarget->GetResolution().height) &&
         eventTimer.GetElapsedSeconds() > 0.02f)
     {
-        dev::Multithreading::Get().AddJob({ {}, [size]()
+        lustra::Multithreading::Get().AddJob({ {}, [size]()
         {
-            dev::Renderer::Get().SetViewportResolution({ (uint32_t)size.x, (uint32_t)size.y  });
+            lustra::Renderer::Get().SetViewportResolution({ (uint32_t)size.x, (uint32_t)size.y  });
 
-            dev::EventManager::Get().Dispatch(
-                std::make_unique<dev::WindowResizeEvent>(
+            lustra::EventManager::Get().Dispatch(
+                std::make_unique<lustra::WindowResizeEvent>(
                     LLGL::Extent2D{ (uint32_t)size.x, (uint32_t)size.y }
                 )
             );
@@ -502,21 +502,21 @@ void Editor::DrawViewport()
         auto payload = ImGui::AcceptDragDropPayload("MODEL");
 
         if(payload)
-            CreateModelEntity(*(dev::ModelAssetPtr*)payload->Data, true);
+            CreateModelEntity(*(lustra::ModelAssetPtr*)payload->Data, true);
 
         ImGui::EndDragDropTarget();
     }
 
     canMoveCamera = ImGui::IsWindowHovered();
 
-    auto lights = scene->GetRegistry().view<dev::TransformComponent, dev::LightComponent>();
+    auto lights = scene->GetRegistry().view<lustra::TransformComponent, lustra::LightComponent>();
 
     for(auto entity : lights)
     {
         auto[transform, light] = 
-            lights.get<dev::TransformComponent, dev::LightComponent>(entity);
+            lights.get<lustra::TransformComponent, lustra::LightComponent>(entity);
 
-        auto screenPos = editorCamera.GetComponent<dev::CameraComponent>().camera.WorldToScreen(transform.position);
+        auto screenPos = editorCamera.GetComponent<lustra::CameraComponent>().camera.WorldToScreen(transform.position);
 
         if(!glm::any(glm::isnan(screenPos)))
         {

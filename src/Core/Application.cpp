@@ -1,6 +1,6 @@
 #include <Application.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Application::Application(const Config& config) : config(config)

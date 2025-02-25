@@ -1,6 +1,6 @@
 #include <RendererBase.hpp>
 
-namespace dev
+namespace lustra
 {
 
 LLGL::RenderTarget* RendererBase::GetPrimaryRenderTarget()

@@ -1,6 +1,6 @@
 #include <ImGuiManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 void ImGuiManager::Init(

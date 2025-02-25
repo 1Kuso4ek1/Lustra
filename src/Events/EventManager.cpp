@@ -1,7 +1,7 @@
 #include <EventManager.hpp>
 #include <algorithm>
 
-namespace dev
+namespace lustra
 {
 
 void EventManager::AddListener(Event::Type eventType, EventListener* listener)

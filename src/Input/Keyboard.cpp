@@ -1,6 +1,6 @@
 #include <Keyboard.hpp>
 
-namespace dev
+namespace lustra
 {
 
 namespace Keyboard

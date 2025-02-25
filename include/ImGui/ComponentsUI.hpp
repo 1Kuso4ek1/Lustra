@@ -3,7 +3,7 @@
 #include <ScriptManager.hpp>
 #include <Entity.hpp>
 
-namespace dev
+namespace lustra
 {
 
 inline void DrawComponentUI(NameComponent& component, entt::entity entity)

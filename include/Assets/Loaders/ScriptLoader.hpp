@@ -2,7 +2,7 @@
 #include <AssetLoader.hpp>
 #include <ScriptAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class ScriptLoader : public AssetLoader, public Singleton<ScriptLoader>

@@ -4,7 +4,7 @@
 #include <Renderer.hpp>
 #include <Multithreading.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class TextureLoader : public AssetLoader, public Singleton<TextureLoader>

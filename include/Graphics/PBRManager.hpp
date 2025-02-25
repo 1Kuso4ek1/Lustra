@@ -6,7 +6,7 @@
 #include <ModelAsset.hpp>
 #include <AssetManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 // Needs some improvements

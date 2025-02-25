@@ -16,7 +16,7 @@
 #include <LLGL/Surface.h>
 #include <LLGL/Platform/NativeHandle.h>
 
-namespace dev
+namespace lustra
 {
 
 static void OnWindowResize(GLFWwindow* window, int width, int height);

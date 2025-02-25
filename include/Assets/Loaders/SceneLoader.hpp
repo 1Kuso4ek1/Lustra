@@ -2,7 +2,7 @@
 #include <AssetLoader.hpp>
 #include <SceneAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class SceneLoader : public AssetLoader, public Singleton<SceneLoader>

@@ -12,7 +12,7 @@
 #include <assimp/Vertex.h>
 #include <assimp/Bitmap.h>
 
-namespace dev
+namespace lustra
 {
 
 class ModelLoader : public AssetLoader, public Singleton<ModelLoader>

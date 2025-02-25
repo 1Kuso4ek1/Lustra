@@ -1,6 +1,6 @@
 #include <InputManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 void InputManager::Update()

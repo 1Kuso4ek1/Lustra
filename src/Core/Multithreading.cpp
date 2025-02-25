@@ -1,6 +1,6 @@
 #include <Multithreading.hpp>
 
-namespace dev
+namespace lustra
 {
 
 void Multithreading::Update()

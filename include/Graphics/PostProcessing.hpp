@@ -6,7 +6,7 @@
 #include <ModelAsset.hpp>
 #include <Window.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class PostProcessing : public EventListener

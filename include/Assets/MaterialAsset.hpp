@@ -7,7 +7,7 @@
 #include <cereal/cereal.hpp>
 #include <glm/glm.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct MaterialAsset : public Asset

@@ -14,10 +14,10 @@
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
 
-class Editor : public dev::Application, public dev::EventListener
+class Editor : public lustra::Application, public lustra::EventListener
 {
 public:
-    Editor(const dev::Config& config);
+    Editor(const lustra::Config& config);
 
     void Init() override;
     void Update(float deltaTime) override;
@@ -38,15 +38,15 @@ private:
     void UpdateList();
     void UpdateEditorCameraScript();
 
-    void CreateModelEntity(dev::ModelAssetPtr model, bool relativeToCamera = false);
+    void CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera = false);
 
-    void CreateRenderTarget(const LLGL::Extent2D& resolution = dev::Renderer::Get().GetViewportResolution());
+    void CreateRenderTarget(const LLGL::Extent2D& resolution = lustra::Renderer::Get().GetViewportResolution());
 
     void DrawImGui();
 
     void DrawSceneTree();
-    void DrawEntityNode(dev::Entity entity);
-    void EntityNodeInteraction(dev::Entity entity, std::string_view name);
+    void DrawEntityNode(lustra::Entity entity);
+    void EntityNodeInteraction(lustra::Entity entity, std::string_view name);
 
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();
@@ -55,10 +55,10 @@ private:
 
     void DrawLog();
 
-    void DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size);
+    void DrawMaterialPreview(lustra::MaterialAssetPtr material, const ImVec2& size);
 
     void DrawAssetBrowser();
-    void DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset);
+    void DrawAsset(const std::filesystem::path& entry, lustra::AssetPtr asset);
     void DrawUnloadedAsset(const std::filesystem::path& entry);
 
     void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
@@ -66,12 +66,12 @@ private:
     bool DrawCreateScriptMenu(const std::filesystem::path& currentDirectory);
     bool DrawCreateSceneMenu(const std::filesystem::path& currentDirectory);
 
-    void DrawMaterialEditor(dev::MaterialAssetPtr material);
-    void DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent = false);
+    void DrawMaterialEditor(lustra::MaterialAssetPtr material);
+    void DrawMaterialProperty(lustra::MaterialAsset::Property& property, int id, bool singleComponent = false);
     
     void DrawViewport();
 
-    void OnEvent(dev::Event& event) override;
+    void OnEvent(lustra::Event& event) override;
 
 private:
     bool playing = false, paused = false;
@@ -84,17 +84,17 @@ private:
     bool canMoveCamera = false;
 
 private:
-    dev::Entity editorCamera, selectedEntity;
+    lustra::Entity editorCamera, selectedEntity;
 
-    std::vector<dev::Entity> list;
+    std::vector<lustra::Entity> list;
 
 private:
-    std::shared_ptr<dev::DeferredRenderer> deferredRenderer;
+    std::shared_ptr<lustra::DeferredRenderer> deferredRenderer;
 
-    dev::SceneAssetPtr sceneAsset;
-    std::shared_ptr<dev::Scene> scene;
+    lustra::SceneAssetPtr sceneAsset;
+    std::shared_ptr<lustra::Scene> scene;
 
-    dev::Timer keyboardTimer, sceneSaveTimer;
+    lustra::Timer keyboardTimer, sceneSaveTimer;
 
 private:
     GLuint nativeViewportAttachment;
@@ -103,14 +103,14 @@ private:
     LLGL::RenderTarget* viewportRenderTarget{};
 
 private:
-    dev::AssetPtr selectedAsset;
+    lustra::AssetPtr selectedAsset;
 
-    dev::TextureAssetPtr texture, metal, wood,
+    lustra::TextureAssetPtr texture, metal, wood,
                          fileIcon, folderIcon, textureIcon,
                          materialIcon, modelIcon, scriptIcon,
                          playIcon, pauseIcon, stopIcon,
                          buildIcon, lightIcon, sceneIcon;
-    dev::MaterialAssetPtr ak47Metal, ak47Wood;
+    lustra::MaterialAssetPtr ak47Metal, ak47Wood;
 
-    std::unordered_map<dev::Asset::Type, dev::TextureAssetPtr> assetIcons;
+    std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;
 };

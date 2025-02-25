@@ -1,7 +1,7 @@
 #pragma once
 #include <Layers.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class BroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface

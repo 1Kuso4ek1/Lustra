@@ -4,7 +4,7 @@
 
 #include <LLGL/Log.h>
 
-namespace dev
+namespace lustra
 {
 
 class Timer

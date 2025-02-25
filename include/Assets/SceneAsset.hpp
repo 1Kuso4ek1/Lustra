@@ -1,7 +1,7 @@
 #pragma once
 #include <Scene.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct SceneAsset : public Asset

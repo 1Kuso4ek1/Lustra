@@ -1,7 +1,7 @@
 #pragma once
 #include <Renderer.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class RendererBase

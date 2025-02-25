@@ -1,6 +1,6 @@
 #include <PostProcessing.hpp>
 
-namespace dev
+namespace lustra
 {
 
 PostProcessing::PostProcessing(

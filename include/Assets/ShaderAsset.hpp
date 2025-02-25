@@ -3,7 +3,7 @@
 
 #include <Renderer.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct VertexShaderAsset : public Asset

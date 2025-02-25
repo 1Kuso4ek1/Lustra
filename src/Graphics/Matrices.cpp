@@ -1,6 +1,6 @@
 #include <Matrices.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Matrices::Matrices()

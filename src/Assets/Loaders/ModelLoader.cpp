@@ -2,7 +2,7 @@
 #include <Multithreading.hpp>
 #include <EventManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr ModelLoader::Load(const std::filesystem::path& path)

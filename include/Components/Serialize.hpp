@@ -117,7 +117,7 @@ void load(Archive& archive, std::vector<entity>& entities)
 
 }
 
-namespace dev
+namespace lustra
 {
 
 template<class Archive>

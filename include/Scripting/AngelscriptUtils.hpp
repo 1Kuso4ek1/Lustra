@@ -15,7 +15,7 @@
 #include <Scene.hpp>
 #include <Entity.hpp>
 
-namespace dev
+namespace lustra
 {
 
 namespace as

@@ -7,7 +7,7 @@
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
 
-namespace dev
+namespace lustra
 {
 
 struct TextureAsset : public Asset

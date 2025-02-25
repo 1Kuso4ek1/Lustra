@@ -14,7 +14,7 @@
 #include <ScriptAsset.hpp>
 #include <ShaderAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class Entity;

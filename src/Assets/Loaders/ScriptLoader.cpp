@@ -1,6 +1,6 @@
 #include <ScriptLoader.hpp>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr ScriptLoader::Load(const std::filesystem::path& path)

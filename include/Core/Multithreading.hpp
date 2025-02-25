@@ -6,7 +6,7 @@
 
 using namespace std::chrono_literals;
 
-namespace dev
+namespace lustra
 {
 
 class Multithreading : public Singleton<Multithreading>

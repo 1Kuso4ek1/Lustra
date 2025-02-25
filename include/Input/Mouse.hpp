@@ -4,7 +4,7 @@
 #include <glm/fwd.hpp>
 #include <glm/vec2.hpp>
 
-namespace dev
+namespace lustra
 {
 
 namespace Mouse

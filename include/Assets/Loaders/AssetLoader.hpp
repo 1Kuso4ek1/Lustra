@@ -6,7 +6,7 @@
 
 #include <filesystem>
 
-namespace dev
+namespace lustra
 {
 
 class AssetLoader

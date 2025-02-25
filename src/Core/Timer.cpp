@@ -1,7 +1,7 @@
 #include <Timer.hpp>
 #include <chrono>
 
-namespace dev
+namespace lustra
 {
 
 Timer::Timer()

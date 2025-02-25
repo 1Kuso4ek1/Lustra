@@ -1,6 +1,6 @@
 #include <Mesh.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, bool setupBuffers)

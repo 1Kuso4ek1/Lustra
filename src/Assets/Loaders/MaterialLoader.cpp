@@ -7,7 +7,7 @@
 
 #include <fstream>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr MaterialLoader::Load(const std::filesystem::path& path)

@@ -1,7 +1,7 @@
 #pragma once
 #include <Event.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class EventListener

@@ -7,7 +7,7 @@
 
 #include <fstream>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr SceneLoader::Load(const std::filesystem::path& path)

@@ -1,6 +1,6 @@
 #include <PhysicsManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 PhysicsManager::~PhysicsManager()

@@ -3,7 +3,7 @@
 #include <Mesh.hpp>
 #include <vector>
 
-namespace dev
+namespace lustra
 {
 
 struct ModelAsset : public Asset

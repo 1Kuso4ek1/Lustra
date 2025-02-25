@@ -2,7 +2,7 @@
 
 #include <glm/gtx/matrix_decompose.hpp>
 
-namespace dev
+namespace lustra
 {
 
 void TransformComponent::SetTransform(const glm::mat4& transform)

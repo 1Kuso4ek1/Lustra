@@ -2,7 +2,7 @@
 #include <AssetLoader.hpp>
 #include <MaterialAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class MaterialLoader : public AssetLoader, public Singleton<MaterialLoader>

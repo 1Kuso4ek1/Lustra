@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace dev
+namespace lustra
 {
 
 class Matrices

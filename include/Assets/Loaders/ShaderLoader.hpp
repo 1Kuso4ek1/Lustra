@@ -2,7 +2,7 @@
 #include <AssetLoader.hpp>
 #include <ShaderAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class VertexShaderLoader : public AssetLoader, public Singleton<VertexShaderLoader>

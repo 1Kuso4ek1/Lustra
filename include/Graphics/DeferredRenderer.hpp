@@ -7,7 +7,7 @@
 #include <ModelAsset.hpp>
 #include <Window.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class DeferredRenderer : public RendererBase, public EventListener

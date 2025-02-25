@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace dev
+namespace lustra
 {
 
 class EventManager : public Singleton<EventManager>

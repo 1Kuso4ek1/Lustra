@@ -7,7 +7,7 @@
 
 #include <entt/entt.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class Entity;

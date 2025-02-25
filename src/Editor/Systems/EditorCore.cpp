@@ -1,38 +1,38 @@
 #include <Editor.hpp>
 
-Editor::Editor(const dev::Config& config) : dev::Application(config)
+Editor::Editor(const lustra::Config& config) : lustra::Application(config)
 {
     Init();
 }
 
 void Editor::Init()
 {
-    dev::EventManager::Get().AddListener(dev::Event::Type::WindowResize, this);
-    dev::EventManager::Get().AddListener(dev::Event::Type::WindowFocus, this);
+    lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);
+    lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowFocus, this);
 
     CreateRenderTarget();
 
     LoadIcons();
 
-    deferredRenderer = std::make_shared<dev::DeferredRenderer>();
+    deferredRenderer = std::make_shared<lustra::DeferredRenderer>();
 
-    auto mainScenePath = dev::AssetManager::Get().GetAssetPath<dev::SceneAsset>("main.scn", true);
+    auto mainScenePath = lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>("main.scn", true);
 
     if(!std::filesystem::exists(mainScenePath))
     {
-        scene = std::make_shared<dev::Scene>(deferredRenderer);
-        sceneAsset = std::make_shared<dev::SceneAsset>(scene);
+        scene = std::make_shared<lustra::Scene>(deferredRenderer);
+        sceneAsset = std::make_shared<lustra::SceneAsset>(scene);
         sceneAsset->path = mainScenePath;
 
         CreateDefaultEntities();
 
         UpdateList();
 
-        dev::AssetManager::Get().Write(sceneAsset);
+        lustra::AssetManager::Get().Write(sceneAsset);
     }
     else
     {
-        sceneAsset = dev::AssetManager::Get().Load<dev::SceneAsset>(mainScenePath);
+        sceneAsset = lustra::AssetManager::Get().Load<lustra::SceneAsset>(mainScenePath);
         scene = sceneAsset->scene;
         scene->SetRenderer(deferredRenderer);
 
@@ -46,36 +46,36 @@ void Editor::Update(float deltaTime)
 {
     if(playing && !paused)
     {
-        scene->GetRegistry().view<dev::CameraComponent>().each(
+        scene->GetRegistry().view<lustra::CameraComponent>().each(
             [](auto entity, auto& component)
             {
                 component.active = true;
             }
         );
 
-        editorCamera.GetComponent<dev::CameraComponent>().active = false;
+        editorCamera.GetComponent<lustra::CameraComponent>().active = false;
 
         scene->Update(deltaTime);
     }
     else
     {
-        editorCamera.GetComponent<dev::CameraComponent>().active = true;
-        editorCamera.GetComponent<dev::ScriptComponent>().update(editorCamera, deltaTime);
+        editorCamera.GetComponent<lustra::CameraComponent>().active = true;
+        editorCamera.GetComponent<lustra::ScriptComponent>().update(editorCamera, deltaTime);
     }
 
-    if(dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::G) &&
+    if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::G) &&
        keyboardTimer.GetElapsedSeconds() > 0.2f)
     {
         scene->ToggleUpdatePhysics();
         keyboardTimer.Reset();
     }
 
-    if((dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::S) &&
-       dev::Keyboard::IsKeyPressed(dev::Keyboard::Key::LeftControl) &&
+    if((lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::S) &&
+       lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::LeftControl) &&
        keyboardTimer.GetElapsedSeconds() > 0.2f) ||
        sceneSaveTimer.GetElapsedSeconds() >= 10.0f)
     {
-        dev::AssetManager::Get().Write(sceneAsset);
+        lustra::AssetManager::Get().Write(sceneAsset);
         keyboardTimer.Reset();
         sceneSaveTimer.Reset();
     }
@@ -85,28 +85,28 @@ void Editor::Render()
 {
     scene->Draw(viewportRenderTarget);
 
-    dev::Renderer::Get().ClearRenderTarget();
+    lustra::Renderer::Get().ClearRenderTarget();
 
     DrawImGui();
 
-    dev::Renderer::Get().Present();
+    lustra::Renderer::Get().Present();
 }
 
-void Editor::OnEvent(dev::Event& event)
+void Editor::OnEvent(lustra::Event& event)
 {
-    if(event.GetType() == dev::Event::Type::WindowResize)
+    if(event.GetType() == lustra::Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<dev::WindowResizeEvent*>(&event);
+        auto resizeEvent = dynamic_cast<lustra::WindowResizeEvent*>(&event);
 
         CreateRenderTarget(resizeEvent->GetSize());
     }
-    else if(event.GetType() == dev::Event::Type::WindowFocus)
+    else if(event.GetType() == lustra::Event::Type::WindowFocus)
     {
-        auto focusEvent = dynamic_cast<dev::WindowFocusEvent*>(&event);
+        auto focusEvent = dynamic_cast<lustra::WindowFocusEvent*>(&event);
 
         if(focusEvent->IsFocused())
-            dev::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);
+            lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);
         else
-            dev::Renderer::Get().GetSwapChain()->SetVsyncInterval(5);
+            lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(5);
     }
 }

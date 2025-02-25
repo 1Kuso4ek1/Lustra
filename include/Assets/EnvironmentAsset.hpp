@@ -3,7 +3,7 @@
 
 #include <LLGL/Texture.h>
 
-namespace dev
+namespace lustra
 {
 
 struct EnvironmentAsset : public Asset

@@ -1,6 +1,6 @@
 #include <PostProcessingComponents.hpp>
 
-namespace dev
+namespace lustra
 {
 
 GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)

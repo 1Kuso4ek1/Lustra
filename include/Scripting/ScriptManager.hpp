@@ -3,7 +3,7 @@
 #include <AngelscriptUtils.hpp>
 #include <ScriptAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class ScriptManager : public Singleton<ScriptManager>

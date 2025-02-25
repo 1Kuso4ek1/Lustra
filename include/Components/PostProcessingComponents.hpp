@@ -1,7 +1,7 @@
 #pragma once
 #include <ComponentBase.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct TonemapComponent : public ComponentBase, public EventListener

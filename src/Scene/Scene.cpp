@@ -2,7 +2,7 @@
 #include <Entity.hpp>
 #include <ScriptManager.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Scene::Scene(std::shared_ptr<RendererBase> renderer)

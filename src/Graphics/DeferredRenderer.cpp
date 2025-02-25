@@ -1,7 +1,7 @@
 #include <DeferredRenderer.hpp>
 #include <ShaderAsset.hpp>
 
-namespace dev
+namespace lustra
 {
 
 DeferredRenderer::DeferredRenderer(

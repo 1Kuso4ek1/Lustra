@@ -1,8 +1,8 @@
 #include <Editor.hpp>
 
-void Editor::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& size)
+void Editor::DrawMaterialPreview(lustra::MaterialAssetPtr material, const ImVec2& size)
 {
-    if(material->albedo.type == dev::MaterialAsset::Property::Type::Texture)
+    if(material->albedo.type == lustra::MaterialAsset::Property::Type::Texture)
     {
         if(ImGui::ImageButton("##Asset", material->albedo.texture->nativeHandle, size))
             selectedAsset = material;
@@ -25,13 +25,13 @@ void Editor::DrawMaterialPreview(dev::MaterialAssetPtr material, const ImVec2& s
 // Kinda messy, clean it up
 void Editor::DrawAssetBrowser()
 {
-    static const auto assetsPath = dev::AssetManager::Get().GetAssetsDirectory();
+    static const auto assetsPath = lustra::AssetManager::Get().GetAssetsDirectory();
     auto selectedAssetPath = assetsPath;
 
     static auto currentDirectory = assetsPath;
     static std::string filter;
     
-    static const auto& assets = dev::AssetManager::Get().GetAssets();
+    static const auto& assets = lustra::AssetManager::Get().GetAssets();
 
     ImGui::Begin("Assets");
 
@@ -99,19 +99,19 @@ void Editor::DrawAssetBrowser()
     ImGui::End();
 }
 
-void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
+void Editor::DrawAsset(const std::filesystem::path& entry, lustra::AssetPtr asset)
 {
     switch(asset->type)
     {
-        case dev::Asset::Type::Texture:
+        case lustra::Asset::Type::Texture:
         {
-            auto texture = std::dynamic_pointer_cast<dev::TextureAsset>(asset);
+            auto texture = std::dynamic_pointer_cast<lustra::TextureAsset>(asset);
             
             ImGui::ImageButton("##Asset", texture->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                dev::TextureAssetPtr* payload = &texture;
+                lustra::TextureAssetPtr* payload = &texture;
                 
                 ImGui::SetDragDropPayload("TEXTURE", payload, 8);
                 ImGui::Image(texture->nativeHandle, ImVec2(64,64));
@@ -123,15 +123,15 @@ void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
             break;
         }
 
-        case dev::Asset::Type::Material:
+        case lustra::Asset::Type::Material:
         {
-            auto material = std::dynamic_pointer_cast<dev::MaterialAsset>(asset);
+            auto material = std::dynamic_pointer_cast<lustra::MaterialAsset>(asset);
             
             DrawMaterialPreview(material, { 128.0f, 128.0f });
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                dev::MaterialAssetPtr* payload = &material;
+                lustra::MaterialAssetPtr* payload = &material;
                 
                 ImGui::SetDragDropPayload("MATERIAL", payload, 8);
                 DrawMaterialPreview(material, { 64.0f, 64.0f });
@@ -143,15 +143,15 @@ void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
             break;
         }
 
-        case dev::Asset::Type::Model:
+        case lustra::Asset::Type::Model:
         {
-            auto model = std::dynamic_pointer_cast<dev::ModelAsset>(asset);
+            auto model = std::dynamic_pointer_cast<lustra::ModelAsset>(asset);
             
             ImGui::ImageButton("##Asset", modelIcon->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                dev::ModelAssetPtr* payload = &model;
+                lustra::ModelAssetPtr* payload = &model;
                 
                 ImGui::SetDragDropPayload("MODEL", payload, 8);
                 ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
@@ -163,15 +163,15 @@ void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
             break;
         }
 
-        case dev::Asset::Type::Script:
+        case lustra::Asset::Type::Script:
         {
-            auto script = std::dynamic_pointer_cast<dev::ScriptAsset>(asset);
+            auto script = std::dynamic_pointer_cast<lustra::ScriptAsset>(asset);
             
             ImGui::ImageButton("##Asset", scriptIcon->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                dev::ScriptAssetPtr* payload = &script;
+                lustra::ScriptAssetPtr* payload = &script;
                 
                 ImGui::SetDragDropPayload("SCRIPT", payload, 8);
                 ImGui::Image(scriptIcon->nativeHandle, ImVec2(64,64));
@@ -183,15 +183,15 @@ void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
             break;
         }
 
-        case dev::Asset::Type::Scene:
+        case lustra::Asset::Type::Scene:
         {
-            auto scene = std::dynamic_pointer_cast<dev::SceneAsset>(asset);
+            auto scene = std::dynamic_pointer_cast<lustra::SceneAsset>(asset);
 
             ImGui::ImageButton("##Asset", sceneIcon->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
-                dev::SceneAssetPtr* payload = &scene;
+                lustra::SceneAssetPtr* payload = &scene;
                 
                 ImGui::SetDragDropPayload("SCENE", payload, 8);
                 ImGui::Image(scriptIcon->nativeHandle, ImVec2(64,64));
@@ -210,7 +210,7 @@ void Editor::DrawAsset(const std::filesystem::path& entry, dev::AssetPtr asset)
 
 void Editor::DrawUnloadedAsset(const std::filesystem::path& entry)
 {
-    auto assetType = dev::GetAssetType(entry.extension().string());
+    auto assetType = lustra::GetAssetType(entry.extension().string());
 
     ImGui::ImageButton("##Asset", assetIcons[assetType]->nativeHandle, ImVec2(128.0f, 128.0f));
 
@@ -218,26 +218,26 @@ void Editor::DrawUnloadedAsset(const std::filesystem::path& entry)
     {
         switch(assetType)
         {
-            case dev::Asset::Type::Texture:
-                dev::AssetManager::Get().Load<dev::TextureAsset>(entry);
+            case lustra::Asset::Type::Texture:
+                lustra::AssetManager::Get().Load<lustra::TextureAsset>(entry);
                 break;
 
-            case dev::Asset::Type::Material:
-                dev::AssetManager::Get().Load<dev::MaterialAsset>(entry);
+            case lustra::Asset::Type::Material:
+                lustra::AssetManager::Get().Load<lustra::MaterialAsset>(entry);
                 break;
 
-            case dev::Asset::Type::Model:
-                dev::AssetManager::Get().Load<dev::ModelAsset>(entry);
+            case lustra::Asset::Type::Model:
+                lustra::AssetManager::Get().Load<lustra::ModelAsset>(entry);
                 break;
 
-            case dev::Asset::Type::Script:
-                dev::AssetManager::Get().Load<dev::ScriptAsset>(entry);
+            case lustra::Asset::Type::Script:
+                lustra::AssetManager::Get().Load<lustra::ScriptAsset>(entry);
                 break;
 
-            case dev::Asset::Type::Scene:
-                dev::Multithreading::Get().AddJob({ {},
+            case lustra::Asset::Type::Scene:
+                lustra::Multithreading::Get().AddJob({ {},
                     [entry]() {
-                        dev::AssetManager::Get().Load<dev::SceneAsset>(entry);
+                        lustra::AssetManager::Get().Load<lustra::SceneAsset>(entry);
                     }
                 });
                 break;
@@ -292,11 +292,11 @@ bool Editor::DrawCreateMaterialMenu(const std::filesystem::path& currentDirector
 
         if(ImGui::Button("OK", ImVec2(120, 0)))
         {
-            auto newMaterial = std::make_shared<dev::MaterialAsset>();
+            auto newMaterial = std::make_shared<lustra::MaterialAsset>();
             newMaterial->path = currentDirectory / newMaterialName;
             newMaterial->loaded = true;
 
-            dev::AssetManager::Get().Write(newMaterial);
+            lustra::AssetManager::Get().Write(newMaterial);
             
             newMaterialName = "material" + std::to_string(uniqueId++);
 
@@ -348,7 +348,7 @@ void Update(float deltaTime)
             scriptFile.close();
             system(std::string("code " + currentDirectory.string() + "/" + newScriptName).c_str());
 
-            auto newScript = dev::AssetManager::Get().Load<dev::ScriptAsset>(currentDirectory / newScriptName);
+            auto newScript = lustra::AssetManager::Get().Load<lustra::ScriptAsset>(currentDirectory / newScriptName);
             
             newScriptName = "script" + std::to_string(uniqueId++) + ".as";
 
@@ -384,14 +384,14 @@ bool Editor::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
 
         if(ImGui::Button("OK", ImVec2(120, 0)))
         {
-            dev::SceneAssetPtr newScene = 
-                std::make_shared<dev::SceneAsset>(
-                    std::make_shared<dev::Scene>(deferredRenderer)
+            lustra::SceneAssetPtr newScene = 
+                std::make_shared<lustra::SceneAsset>(
+                    std::make_shared<lustra::Scene>(deferredRenderer)
                 );
 
             newScene->path = currentDirectory / newSceneName;
 
-            dev::AssetManager::Get().Write(newScene);
+            lustra::AssetManager::Get().Write(newScene);
             
             newSceneName = "scene" + std::to_string(uniqueId++) + ".json";
 
@@ -415,15 +415,15 @@ bool Editor::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
     return active;
 }
 
-void Editor::DrawMaterialEditor(dev::MaterialAssetPtr material)
+void Editor::DrawMaterialEditor(lustra::MaterialAssetPtr material)
 {
-    static dev::Timer saveTimer;
+    static lustra::Timer saveTimer;
 
     ImGui::Begin("Material Editor");
 
     if((ImGui::Button("Save") || saveTimer.GetElapsedSeconds() > 3.0f) && ImGui::IsWindowFocused())
     {
-        dev::AssetManager::Get().Write(material);
+        lustra::AssetManager::Get().Write(material);
 
         saveTimer.Reset();
     }
@@ -458,11 +458,11 @@ void Editor::DrawMaterialEditor(dev::MaterialAssetPtr material)
     ImGui::End();
 }
 
-void Editor::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id, bool singleComponent)
+void Editor::DrawMaterialProperty(lustra::MaterialAsset::Property& property, int id, bool singleComponent)
 {
     ImGui::PushID(id);
 
-    if(property.type == dev::MaterialAsset::Property::Type::Color)
+    if(property.type == lustra::MaterialAsset::Property::Type::Color)
     {
         if(singleComponent)
             ImGui::DragFloat("##Value", &property.value.x, 0.01f, 0.0f, 1.0f);
@@ -470,7 +470,7 @@ void Editor::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id
             ImGui::ColorEdit4("##Color", &property.value.x);
 
         if(ImGui::Button("Set Texture"))
-            property.type = dev::MaterialAsset::Property::Type::Texture;
+            property.type = lustra::MaterialAsset::Property::Type::Texture;
     }
     else
     {
@@ -485,13 +485,13 @@ void Editor::DrawMaterialProperty(dev::MaterialAsset::Property& property, int id
             auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
             
             if(payload)
-                property.texture = *(dev::TextureAssetPtr*)payload->Data;
+                property.texture = *(lustra::TextureAssetPtr*)payload->Data;
 
             ImGui::EndDragDropTarget();
         }
 
         if(ImGui::Button("Set Color"))
-            property.type = dev::MaterialAsset::Property::Type::Color;
+            property.type = lustra::MaterialAsset::Property::Type::Color;
     }
 
     ImGui::PopID();

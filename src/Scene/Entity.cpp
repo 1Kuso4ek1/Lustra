@@ -1,6 +1,6 @@
 #include <Entity.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Entity::Entity(entt::entity entity, Scene* scene)

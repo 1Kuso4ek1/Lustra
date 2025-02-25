@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-namespace dev
+namespace lustra
 {
 
 AssetPtr TextureLoader::Load(const std::filesystem::path& path)

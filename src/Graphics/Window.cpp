@@ -1,6 +1,6 @@
 #include <Window.hpp>
 
-namespace dev
+namespace lustra
 {
 
 bool Window::glfwInitialized = false;

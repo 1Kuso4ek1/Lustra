@@ -1,6 +1,6 @@
 #include <Camera.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Camera::Camera()

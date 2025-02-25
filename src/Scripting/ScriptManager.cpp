@@ -4,7 +4,7 @@
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
 
-namespace dev
+namespace lustra
 {
 
 ScriptManager::ScriptManager()

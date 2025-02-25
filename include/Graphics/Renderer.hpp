@@ -9,7 +9,7 @@
 #include <memory>
 #include <unordered_map>
 
-namespace dev
+namespace lustra
 {
 
 class Renderer : public Singleton<Renderer>

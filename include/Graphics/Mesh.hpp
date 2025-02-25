@@ -1,7 +1,7 @@
 #pragma once
 #include <Utils.hpp>
 
-namespace dev
+namespace lustra
 {
 
 struct Vertex

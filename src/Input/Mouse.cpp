@@ -1,6 +1,6 @@
 #include <Mouse.hpp>
 
-namespace dev
+namespace lustra
 {
 
 namespace Mouse

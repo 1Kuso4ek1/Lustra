@@ -1,6 +1,6 @@
 #include <SkyComponents.hpp>
 
-namespace dev
+namespace lustra
 {
 
 ProceduralSkyComponent::ProceduralSkyComponent(const LLGL::Extent2D& resolution)

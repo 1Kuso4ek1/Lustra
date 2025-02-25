@@ -1,6 +1,6 @@
 #include <Renderer.hpp>
 
-namespace dev
+namespace lustra
 {
 
 Renderer::Renderer()

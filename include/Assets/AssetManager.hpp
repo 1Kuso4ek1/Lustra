@@ -8,7 +8,7 @@
 #include <filesystem>
 #include <typeindex>
 
-namespace dev
+namespace lustra
 {
 
 class AssetManager : public Singleton<AssetManager>

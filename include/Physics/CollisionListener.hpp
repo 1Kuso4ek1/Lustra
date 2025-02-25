@@ -4,7 +4,7 @@
 
 #include <glm/vec3.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class CollisionEvent : public Event

@@ -11,7 +11,7 @@
 
 #include <filesystem>
 
-namespace dev
+namespace lustra
 {
 
 class ImGuiManager : public Singleton<ImGuiManager>

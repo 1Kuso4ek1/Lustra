@@ -1,7 +1,7 @@
 #pragma once
 #include <LLGL/Types.h>
 
-namespace dev
+namespace lustra
 {
 
 class Event

@@ -5,7 +5,7 @@
 #include <BroadPhaseLayer.hpp>
 #include <CollisionListener.hpp>
 
-namespace dev
+namespace lustra
 {
 
 class PhysicsManager : public Singleton<PhysicsManager>

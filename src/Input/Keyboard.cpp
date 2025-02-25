@@ -8,17 +8,17 @@ namespace Keyboard
 
 bool IsKeyPressed(Key key)
 {
-    return glfwGetKey(dev::Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_PRESS;
+    return glfwGetKey(Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_PRESS;
 }
 
 bool IsKeyReleased(Key key)
 {
-    return glfwGetKey(dev::Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_RELEASE;
+    return glfwGetKey(Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_RELEASE;
 }
 
 bool IsKeyRepeated(Key key)
 {
-    return glfwGetKey(dev::Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_REPEAT;
+    return glfwGetKey(Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_REPEAT;
 }
 
 }

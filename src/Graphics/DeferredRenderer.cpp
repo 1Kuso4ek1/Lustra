@@ -58,7 +58,7 @@ DeferredRenderer::DeferredRenderer(
     gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal, gBufferCombined, gBufferEmission }, gBufferDepth);
     //gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
 
-    rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
+    rect = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
     rectPipeline = Renderer::Get().CreatePipelineState(
         LLGL::PipelineLayoutDescriptor

@@ -15,7 +15,7 @@ PostProcessing::PostProcessing(
     const LLGL::Format& format
 )
 {
-    rect = dev::AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
+    rect = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
     if(newRenderTarget)
     {

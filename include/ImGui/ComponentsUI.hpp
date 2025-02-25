@@ -51,7 +51,7 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
     {
         ImGui::PushID(i);
 
-        if(component.materials[i]->albedo.type == dev::MaterialAsset::Property::Type::Texture)
+        if(component.materials[i]->albedo.type == MaterialAsset::Property::Type::Texture)
             ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
         else
         {
@@ -83,7 +83,7 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
 
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            dev::MaterialAssetPtr* payload = &component.materials[i];
+            MaterialAssetPtr* payload = &component.materials[i];
             
             ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
             ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(64,64));
@@ -160,7 +160,7 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
             if(component.script)
                 ScriptManager::Get().RemoveScript(component.script);
 
-            component.script = *(dev::ScriptAssetPtr*)payload->Data;
+            component.script = *(ScriptAssetPtr*)payload->Data;
             component.moduleIndex = component.script->modulesCount++;
 
             ScriptManager::Get().AddScript(component.script);
@@ -506,7 +506,7 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                     if(payload)
                     {
-                        model = *(dev::ModelAssetPtr*)payload->Data;
+                        model = *(ModelAssetPtr*)payload->Data;
 
                         JPH::TriangleList list;
 

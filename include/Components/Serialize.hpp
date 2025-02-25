@@ -199,7 +199,7 @@ void load(Archive& archive, PipelineComponent& component)
     component.fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>(fragmentShaderPath);
 
     component.pipeline = 
-        dev::Renderer::Get().CreatePipelineState(
+        Renderer::Get().CreatePipelineState(
             component.vertexShader->shader,
             component.fragmentShader->shader
         );

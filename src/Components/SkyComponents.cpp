@@ -100,7 +100,7 @@ void ProceduralSkyComponent::DefaultTextures()
     asset->brdf = defaultTexture;
 }
 
-HDRISkyComponent::HDRISkyComponent(dev::TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
+HDRISkyComponent::HDRISkyComponent(TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
     : ComponentBase("HDRISkyComponent"), environmentMap(hdri), resolution(resolution)
 {
     EventManager::Get().AddListener(Event::Type::AssetLoaded, this);

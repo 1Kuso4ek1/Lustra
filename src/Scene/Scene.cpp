@@ -198,7 +198,7 @@ void Scene::ReparentEntity(Entity child, Entity parent)
     {
         if(registry.valid(parent))
         {
-            auto& prevParentHierarchy = parent.GetComponent<dev::HierarchyComponent>();
+            auto& prevParentHierarchy = parent.GetComponent<HierarchyComponent>();
 
             prevParentHierarchy.children.erase(
                 std::remove(prevParentHierarchy.children.begin(), 
@@ -208,7 +208,7 @@ void Scene::ReparentEntity(Entity child, Entity parent)
         }
     };
 
-    auto& childHierarchy = child.GetOrAddComponent<dev::HierarchyComponent>();
+    auto& childHierarchy = child.GetOrAddComponent<HierarchyComponent>();
     auto prevParent = Entity(childHierarchy.parent, this);
 
     if(prevParent == parent)
@@ -228,12 +228,12 @@ void Scene::ReparentEntity(Entity child, Entity parent)
     childHierarchy.parent = parent;
     if(registry.valid(parent))
     {
-        auto& parentHierarchy = parent.GetOrAddComponent<dev::HierarchyComponent>();
+        auto& parentHierarchy = parent.GetOrAddComponent<HierarchyComponent>();
         parentHierarchy.children.push_back(child);
 
-        if(child.HasComponent<dev::TransformComponent>())
+        if(child.HasComponent<TransformComponent>())
         {
-            auto& childTransform = child.GetComponent<dev::TransformComponent>();
+            auto& childTransform = child.GetComponent<TransformComponent>();
             auto parentWorld = GetWorldTransform(parent);
             childTransform.SetTransform(glm::inverse(parentWorld) * childTransform.GetTransform());
         }

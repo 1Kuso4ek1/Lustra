@@ -11,7 +11,7 @@
 </p>
 
 ## What is Lustra?
-**Lustra** is a small WIP game engine written in C++. As a successor to my previous project **3Dev**, **Lustra** aims to provide the most flexible, simple and intuitive experience, as well as being **lightweight** and **powerful**.
+**Lustra** is a small WIP game engine written in blazingly-fast memory safe modern C++. As a successor to my previous project **3Dev**, **Lustra** aims to provide the most flexible, simple and intuitive experience, as well as being **lightweight** and **powerful**.
 
 ## Features
 - **Free** and **open source** - **forever**

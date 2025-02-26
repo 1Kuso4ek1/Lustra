@@ -34,6 +34,7 @@ file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
 file(GLOB IMGUIZMO_SOURCES "libraries/ImGuizmo/*.cpp")
 
 list(REMOVE_ITEM ENGINE_SOURCES "src/Editor/main.cpp")
+list(REMOVE_ITEM ENGINE_SOURCES "src/Launcher/main.cpp")
 
 set(
     ENGINE_INCLUDE_DIRS
@@ -51,6 +52,7 @@ set(
     include/Scene
     include/Scripting
     include/Editor
+    include/Launcher
 )
 
 set(
@@ -142,12 +144,21 @@ add_executable(
     src/Editor/main.cpp
 )
 
-set_target_properties(Editor Engine PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+add_executable(
+    Launcher
+
+    src/Launcher/main.cpp
+)
+
+set_target_properties(Editor Launcher Engine PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 
 include_directories(${INCLUDE_DIRS})
 
 target_include_directories(Editor PUBLIC include)
 target_link_libraries(Editor Engine)
+
+target_include_directories(Launcher PUBLIC include)
+target_link_libraries(Launcher Engine)
 
 add_subdirectory(libraries/glfw)
 add_subdirectory(libraries/glm)

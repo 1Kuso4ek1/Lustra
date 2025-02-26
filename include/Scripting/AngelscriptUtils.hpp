@@ -15,6 +15,8 @@
 #include <Scene.hpp>
 #include <Entity.hpp>
 
+#include <SceneAsset.hpp>
+
 namespace lustra
 {
 
@@ -327,19 +329,14 @@ inline bool IsActionPressed(const std::string& action)
     return InputManager::Get().IsActionPressed(action);
 }
 
-inline TextureAssetPtr LoadTexture(const std::string& path, bool relativeToAssetsDir = false)
+template<class T>
+inline std::shared_ptr<T> Load(
+    const std::string& path,
+    bool relativeToAssetsDir = false,
+    bool useCache = true
+)
 {
-    return AssetManager::Get().Load<TextureAsset>(path, relativeToAssetsDir);
-}
-
-inline MaterialAssetPtr LoadMaterial(const std::string& path, bool relativeToAssetsDir = false)
-{
-    return AssetManager::Get().Load<MaterialAsset>(path, relativeToAssetsDir);
-}
-
-inline ModelAssetPtr LoadModel(const std::string& path, bool relativeToAssetsDir = false)
-{
-    return AssetManager::Get().Load<ModelAsset>(path, relativeToAssetsDir);
+    return AssetManager::Get().Load<T>(path, relativeToAssetsDir, useCache);
 }
 
 template<class T>

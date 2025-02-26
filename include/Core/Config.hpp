@@ -39,6 +39,7 @@ struct Config
 
     std::string title = "Application";
     std::string assetsRoot = "assets";
+    std::string mainScene = "main.scn";
     std::string imGuiFontPath;
     std::string imGuiLayoutPath;
 
@@ -80,6 +81,7 @@ struct Config
             CEREAL_NVP(fullscreen),
             CEREAL_NVP(title),
             CEREAL_NVP(assetsRoot),
+            CEREAL_NVP(mainScene),
             CEREAL_NVP(imGuiFontPath),
             CEREAL_NVP(imGuiLayoutPath)
         );

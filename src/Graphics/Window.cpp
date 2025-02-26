@@ -42,6 +42,11 @@ Window::~Window()
     glfwDestroyWindow(window);
 
     glfwTerminate();
+
+    glfwInitialized = false;
+
+    if(lastCreatedWindow == window)
+        lastCreatedWindow = nullptr;
 }
 
 void Window::SetFullscreen(bool fullscreen)

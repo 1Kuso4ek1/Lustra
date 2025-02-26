@@ -15,7 +15,7 @@ class Mesh
 {
 public:
     Mesh() = default;
-    Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, bool setupBuffers = true);
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, bool setupBuffers = true);
 
     void SetupBuffers();
 

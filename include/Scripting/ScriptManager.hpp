@@ -86,6 +86,7 @@ private:
     void RegisterTextureAsset();
     void RegisterMaterialAsset();
     void RegisterModelAsset();
+    void RegisterSceneAsset();
     void RegisterAssetManager();
 
     void RegisterWindowResizeEvent();

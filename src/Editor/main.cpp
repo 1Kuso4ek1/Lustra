@@ -1,8 +1,10 @@
 #include <Editor.hpp>
+#include <ProjectManager.hpp>
 
 int main()
 {
-    Editor app(lustra::Config::Load("../resources/config/config.json"));
-
-    app.Run();
+    ProjectManager().Run();
+    Editor(
+        lustra::Config::Load("../resources/config/config.json")
+    ).Run();
 }

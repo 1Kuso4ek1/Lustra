@@ -24,8 +24,6 @@ public:
     void Render() override;
 
 private:
-    void SetupAssetManager();
-
     void LoadIcons();
 
     void CreateDefaultEntities();
@@ -37,6 +35,8 @@ private:
 
     void UpdateList();
     void UpdateEditorCameraScript();
+
+    void SwitchScene(lustra::SceneAssetPtr scene);
 
     void CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera = false);
 

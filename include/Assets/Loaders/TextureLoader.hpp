@@ -11,6 +11,8 @@ class TextureLoader : public AssetLoader, public Singleton<TextureLoader>
 {
 public:
     AssetPtr Load(const std::filesystem::path& path) override;
+    
+    void Reset() override;
 
 private:
     void LoadDefaultData();

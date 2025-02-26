@@ -11,6 +11,8 @@ Application::Application(const Config& config) : config(config)
 
     window = std::make_shared<Window>(config.resolution, config.title, 1, config.fullscreen);
 
+    Renderer::Get().Init();
+
     if(!Renderer::Get().IsInit())
         return;
 
@@ -25,9 +27,7 @@ Application::Application(const Config& config) : config(config)
         config.imGuiLayoutPath
     );
 
-    PhysicsManager::Get().Init();
-
-    SetupAssetManager();
+    lustra::PhysicsManager::Get();
 }
 
 Application::~Application()
@@ -35,7 +35,7 @@ Application::~Application()
     if(Renderer::Get().IsInit())
     {
         ImGuiManager::Get().Destroy();
-
+        
         Renderer::Get().Unload();
     }
 

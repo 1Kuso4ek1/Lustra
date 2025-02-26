@@ -8,6 +8,7 @@
         "fullscreen": true,
         "title": "Editor",
         "assetsRoot": "../resources",
+        "mainScene": "main.scn",
         "imGuiFontPath": "../resources/fonts/OpenSans-Regular.ttf",
         "imGuiLayoutPath": "../resources/layout/editor_layout.ini"
     }

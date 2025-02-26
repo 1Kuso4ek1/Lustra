@@ -3,7 +3,7 @@
 namespace lustra
 {
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, bool setupBuffers)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, bool setupBuffers)
             : vertices(vertices), indices(indices)
 {
     if(setupBuffers)

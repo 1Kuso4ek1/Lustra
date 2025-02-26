@@ -164,6 +164,25 @@ void Editor::UpdateEditorCameraScript()
     };
 }
 
+void Editor::SwitchScene(lustra::SceneAssetPtr scene)
+{
+    this->scene = scene->scene;
+    scene->scene->SetRenderer(deferredRenderer);
+
+    sceneAsset = scene;
+
+    lustra::EventManager::Get().Dispatch(
+        std::make_unique<lustra::WindowResizeEvent>(lustra::Renderer::Get().GetViewportResolution())
+    );
+
+    UpdateList();
+    
+    if(editorCamera)
+        UpdateEditorCameraScript();
+    else
+        CreateEditorCameraEntity();
+}
+
 void Editor::CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera)
 {
     auto entity = scene->CreateEntity();

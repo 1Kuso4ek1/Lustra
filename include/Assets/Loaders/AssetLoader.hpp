@@ -16,6 +16,7 @@ public:
 
     virtual AssetPtr Load(const std::filesystem::path& path) = 0;
     virtual void Write(const AssetPtr& asset, const std::filesystem::path& path) {};
+    virtual void Reset() {};
 };
 
 }

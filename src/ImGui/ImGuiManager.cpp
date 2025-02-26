@@ -9,6 +9,11 @@ void ImGuiManager::Init(
     const std::filesystem::path& iniPath
 )
 {
+    if(initialized)
+        return;
+
+    initialized = true;
+
     IMGUI_CHECKVERSION();
     
     ImGui::CreateContext();
@@ -54,6 +59,8 @@ void ImGuiManager::Destroy()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    initialized = false;
 }
 
 void ImGuiManager::SetupStyle()

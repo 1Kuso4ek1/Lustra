@@ -15,6 +15,8 @@ namespace lustra
 class Renderer : public Singleton<Renderer>
 {
 public: // Public methods
+    void Init();
+
     void InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen = false, int samples = 1);
     void InitSwapChain(std::shared_ptr<LLGL::Surface> surface);
 
@@ -36,8 +38,12 @@ public: // Public methods
 
     void GenerateMips(LLGL::Texture* texture);
 
-    void Release(LLGL::Texture* texture);
-    void Release(LLGL::RenderTarget* renderTarget);
+    // BRUH
+    template<class T>
+    void Release(T* resource)
+    {
+        renderSystem->Release(*resource);
+    }
 
     void Unload();
 

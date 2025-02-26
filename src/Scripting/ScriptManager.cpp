@@ -3,6 +3,7 @@
 #include <Entity.hpp>
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
+#include <SceneAsset.hpp>
 
 namespace lustra
 {
@@ -79,6 +80,10 @@ ScriptManager::ScriptManager()
     RegisterEntity();
 
     RegisterScene();
+
+    RegisterSceneAsset();
+
+    AddFunction("SceneAssetPtr LoadScene(const string& in, bool = false)", WRAP_FN(as::Load<SceneAsset>));
 }
 
 ScriptManager::~ScriptManager()
@@ -756,11 +761,28 @@ void ScriptManager::RegisterModelAsset()
     AddTypeConstructor("ModelAssetPtr", "void f(const ModelAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<ModelAssetPtr>));
 }
 
+void ScriptManager::RegisterSceneAsset()
+{
+    AddType("SceneAsset", sizeof(SceneAsset), {},
+        {
+            { "Scene@ scene", asOFFSET(SceneAsset, scene) }
+        }
+    );
+
+    AddValueType("SceneAssetPtr", sizeof(SceneAssetPtr), asGetTypeTraits<SceneAssetPtr>() | asOBJ_POD,
+        {
+            { "SceneAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SceneAsset>) }
+        }, {}
+    );
+
+    AddTypeConstructor("SceneAssetPtr", "void f(const SceneAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SceneAssetPtr>));
+}
+
 void ScriptManager::RegisterAssetManager()
 {
-    AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false)", WRAP_FN(as::LoadTexture));
-    AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false)", WRAP_FN(as::LoadMaterial));
-    AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false)", WRAP_FN(as::LoadModel));
+    AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false)", WRAP_FN(as::Load<TextureAsset>));
+    AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false)", WRAP_FN(as::Load<MaterialAsset>));
+    AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false)", WRAP_FN(as::Load<ModelAsset>));
 }
 
 void ScriptManager::RegisterWindowResizeEvent()
@@ -1019,6 +1041,8 @@ void ScriptManager::RegisterScene()
 {
     AddType("Scene", sizeof(Scene),
         {
+            { "void Start()", WRAP_MFN(Scene, Start) },
+            { "void Update(float deltaTime)", WRAP_MFN(Scene, Update) },
             { "Entity CreateEntity()", WRAP_MFN(Scene, CreateEntity) },
             { "void RemoveEntity(Entity)", WRAP_MFN(Scene, RemoveEntity) },
             { "void ReparentEntity(Entity, Entity)", WRAP_MFN(Scene, ReparentEntity) },

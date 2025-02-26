@@ -17,16 +17,23 @@ public:
     using AssetStorage = std::unordered_map<std::filesystem::path, std::pair<std::type_index, AssetPtr>>;
 
     template<class T>
-    std::shared_ptr<T> Load(const std::filesystem::path& path, bool relativeToAssetsDir = false)
+    std::shared_ptr<T> Load(
+        const std::filesystem::path& path,
+        bool relativeToAssetsDir = false,
+        bool useCache = true
+    )
     {
         auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
 
-        auto it = assets.find(assetPath);
-
-        if(it != assets.end())
+        if(useCache)
         {
-            if(typeid(T) == it->second.first)
-                return std::static_pointer_cast<T>(it->second.second);
+            auto it = assets.find(assetPath);
+
+            if(it != assets.end())
+            {
+                if(typeid(T) == it->second.first)
+                    return std::static_pointer_cast<T>(it->second.second);
+            }
         }
 
         auto loader = GetAssetLoader<T>();
@@ -111,8 +118,20 @@ public:
     template<class AssetType, class LoaderType>
     void AddLoader(std::filesystem::path relativePath = "")
     {
+        if(loaders.find(typeid(AssetType)) != loaders.end())
+            return;
+
         loaders[typeid(AssetType)] = &LoaderType::Get();
         assetsRelativePaths[typeid(AssetType)] = relativePath;
+    }
+
+    template<class T>
+    void RemoveLoader()
+    {
+        loaders[typeid(T)]->Reset();
+        
+        loaders.erase(typeid(T));
+        assetsRelativePaths.erase(typeid(T));
     }
 
 private:

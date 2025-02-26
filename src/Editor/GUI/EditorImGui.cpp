@@ -53,19 +53,7 @@ void Editor::DrawSceneTree()
 
             lustra::Multithreading::Get().AddJob({ {},
                 [&]() {
-                    scene = sceneAsset->scene;
-                    scene->SetRenderer(deferredRenderer);
-
-                    lustra::EventManager::Get().Dispatch(
-                        std::make_unique<lustra::WindowResizeEvent>(lustra::Renderer::Get().GetViewportResolution())
-                    );
-
-                    UpdateList();
-
-                    if(editorCamera)
-                        UpdateEditorCameraScript();
-                    else
-                        CreateEditorCameraEntity();
+                    SwitchScene(sceneAsset);
                 }
             });
         }
@@ -397,7 +385,11 @@ void Editor::DrawExecutionControl()
     {
         // Save scene state
         if(!paused)
+        {
             scene->Start();
+
+            lustra::AssetManager::Get().Write(sceneAsset);
+        }
 
         scene->SetIsRunning(true);
 
@@ -444,6 +436,13 @@ void Editor::DrawExecutionControl()
 
         scene->SetIsRunning(false);
         // Restore scene state
+        lustra::Multithreading::Get().AddJob({ {},
+            [&]() {
+                SwitchScene(
+                    lustra::AssetManager::Get().Load<lustra::SceneAsset>(sceneAsset->path, false, false)
+                );
+            }
+        });
     }
     else if(!playing && !paused)
     {

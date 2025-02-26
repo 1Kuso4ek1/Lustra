@@ -108,6 +108,20 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
     return textureAsset;
 }
 
+void TextureLoader::Reset()
+{
+    if(defaultTexture)
+    {
+        Renderer::Get().Release(defaultTexture);
+        Renderer::Get().Release(emptyTexture);
+        Renderer::Get().Release(anisotropySampler);
+
+        defaultTexture = nullptr;
+        emptyTexture = nullptr;
+        anisotropySampler = nullptr;
+    }
+}
+
 void TextureLoader::LoadDefaultData()
 {
     LLGL::SamplerDescriptor samplerDesc;

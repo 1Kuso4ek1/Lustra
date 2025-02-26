@@ -5,6 +5,21 @@ namespace lustra
 
 Renderer::Renderer()
 {
+    
+}
+
+void Renderer::Init()
+{
+    if(renderSystem)
+    {
+        LLGL::Log::Printf(
+            LLGL::Log::ColorFlags::StdWarning,
+            "Renderer already initialized\n"
+        );
+
+        return;
+    }
+
     try
     {
         LoadRenderSystem("OpenGL");
@@ -37,7 +52,8 @@ Renderer::Renderer()
         info.shadingLanguageName.c_str()
     );
 
-    matrices = std::make_shared<Matrices>();
+    if(!matrices)
+        matrices = std::make_shared<Matrices>();
 }
 
 void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)
@@ -58,8 +74,6 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
 void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
 {   
     swapChain = renderSystem->CreateSwapChain({}, surface);
-
-    swapChain->SetVsyncInterval(0);
 
     viewportResolution = swapChain->GetResolution();
 
@@ -162,18 +176,14 @@ void Renderer::GenerateMips(LLGL::Texture* texture)
     Submit();
 }
 
-void Renderer::Release(LLGL::Texture* texture)
-{
-    renderSystem->Release(*texture);
-}
-
-void Renderer::Release(LLGL::RenderTarget* renderTarget)
-{
-    renderSystem->Release(*renderTarget);
-}
-
 void Renderer::Unload()
 {
+    renderSystem->Release(*matricesBuffer);
+    renderSystem->Release(*commandBuffer);
+    renderSystem->Release(*swapChain);
+
+    defaultVertexFormat = LLGL::VertexFormat();
+
     LLGL::RenderSystem::Unload(std::move(renderSystem));
 }
 

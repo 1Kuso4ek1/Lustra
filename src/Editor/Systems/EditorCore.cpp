@@ -7,6 +7,10 @@ Editor::Editor(const lustra::Config& config) : lustra::Application(config)
 
 void Editor::Init()
 {
+    lustra::PhysicsManager::Get().Init();
+
+    SetupAssetManager();
+
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowFocus, this);
 
@@ -16,7 +20,8 @@ void Editor::Init()
 
     deferredRenderer = std::make_shared<lustra::DeferredRenderer>();
 
-    auto mainScenePath = lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>("main.scn", true);
+    auto mainScenePath = 
+        lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>(config.mainScene, true);
 
     if(!std::filesystem::exists(mainScenePath))
     {
@@ -31,51 +36,59 @@ void Editor::Init()
         lustra::AssetManager::Get().Write(sceneAsset);
     }
     else
-    {
-        sceneAsset = lustra::AssetManager::Get().Load<lustra::SceneAsset>(mainScenePath);
-        scene = sceneAsset->scene;
-        scene->SetRenderer(deferredRenderer);
-
-        UpdateList();
-
-        UpdateEditorCameraScript();
-    }
+        SwitchScene(lustra::AssetManager::Get().Load<lustra::SceneAsset>(mainScenePath));
 }
 
 void Editor::Update(float deltaTime)
 {
+    using namespace lustra;
+
+    static auto checkShortcut =
+        [](const std::initializer_list<Keyboard::Key> shortcut)
+        {
+            static Timer timer;
+
+            if(timer.GetElapsedSeconds() < 0.2f)
+                return false;
+
+            for(auto key: shortcut)
+                if(!Keyboard::IsKeyPressed(key))
+                    return false;
+
+            timer.Reset();
+
+            return true;
+        };
+
     if(playing && !paused)
     {
-        scene->GetRegistry().view<lustra::CameraComponent>().each(
+        scene->GetRegistry().view<CameraComponent>().each(
             [](auto entity, auto& component)
             {
                 component.active = true;
             }
         );
 
-        editorCamera.GetComponent<lustra::CameraComponent>().active = false;
+        editorCamera.GetComponent<CameraComponent>().active = false;
 
         scene->Update(deltaTime);
     }
     else
     {
-        editorCamera.GetComponent<lustra::CameraComponent>().active = true;
-        editorCamera.GetComponent<lustra::ScriptComponent>().update(editorCamera, deltaTime);
+        editorCamera.GetComponent<CameraComponent>().active = true;
+        editorCamera.GetComponent<ScriptComponent>().update(editorCamera, deltaTime);
     }
 
-    if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::G) &&
-       keyboardTimer.GetElapsedSeconds() > 0.2f)
+    if(checkShortcut({ Keyboard::Key::G }))
     {
         scene->ToggleUpdatePhysics();
         keyboardTimer.Reset();
     }
 
-    if((lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::S) &&
-       lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::LeftControl) &&
-       keyboardTimer.GetElapsedSeconds() > 0.2f) ||
-       sceneSaveTimer.GetElapsedSeconds() >= 10.0f)
+    if((checkShortcut({ Keyboard::Key::LeftControl, Keyboard::Key::S }) ||
+        sceneSaveTimer.GetElapsedSeconds() >= 10.0f) && !playing)
     {
-        lustra::AssetManager::Get().Write(sceneAsset);
+        AssetManager::Get().Write(sceneAsset);
         keyboardTimer.Reset();
         sceneSaveTimer.Reset();
     }

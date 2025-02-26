@@ -30,6 +30,8 @@ private:
     void SetupStyle();
 
 private:
+    bool initialized = false;
+
     std::string iniPath;
 };
 

@@ -13,6 +13,7 @@ void Editor::Init()
 
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowFocus, this);
+    lustra::EventManager::Get().AddListener(lustra::Event::Type::AssetLoaded, this);
 
     CreateRenderTarget();
 
@@ -121,5 +122,12 @@ void Editor::OnEvent(lustra::Event& event)
             lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);
         else
             lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(5);
+    }
+    else if(event.GetType() == lustra::Event::Type::AssetLoaded)
+    {
+        auto assetLoadedEvent = dynamic_cast<lustra::AssetLoadedEvent*>(&event);
+
+        if(assetLoadedEvent->GetAsset() == sceneAsset)
+            SwitchScene(sceneAsset);
     }
 }

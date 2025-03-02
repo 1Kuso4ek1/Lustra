@@ -7,7 +7,7 @@
 namespace lustra
 {
 
-AssetPtr TextureLoader::Load(const std::filesystem::path& path)
+AssetPtr TextureLoader::Load(const std::filesystem::path& path, AssetPtr existing)
 {
     if(!defaultTexture)
         LoadDefaultData();
@@ -17,7 +17,10 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path)
     else if(path.filename() == "empty")
         return emptyTextureAsset; // 0 0 0 255
 
-    auto textureAsset = std::make_shared<TextureAsset>(defaultTexture);
+    auto textureAsset = existing
+        ? std::static_pointer_cast<TextureAsset>(existing)
+        : std::make_shared<TextureAsset>(defaultTexture);
+
     textureAsset->sampler = anisotropySampler;
 
     LLGL::Log::Printf(

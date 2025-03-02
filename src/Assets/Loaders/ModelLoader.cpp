@@ -5,7 +5,7 @@
 namespace lustra
 {
 
-AssetPtr ModelLoader::Load(const std::filesystem::path& path)
+AssetPtr ModelLoader::Load(const std::filesystem::path& path, AssetPtr existing)
 {
     if(!plane)
         LoadDefaultData();
@@ -21,7 +21,9 @@ AssetPtr ModelLoader::Load(const std::filesystem::path& path)
     if(path.filename() == "cube")
         return std::make_shared<ModelAsset>(ModelAsset({ cube }));
 
-    auto modelAsset = std::make_shared<ModelAsset>(ModelAsset({ cube }));
+    auto modelAsset = existing
+        ? std::static_pointer_cast<ModelAsset>(existing)
+        : std::make_shared<ModelAsset>(ModelAsset({ cube }));
 
     auto load = [path, modelAsset, this]()
     {

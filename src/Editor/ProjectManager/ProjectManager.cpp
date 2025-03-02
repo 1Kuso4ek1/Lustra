@@ -19,6 +19,7 @@ ProjectManager::~ProjectManager()
 
 void ProjectManager::Init()
 {
+    lustra::AssetManager::Get().LaunchWatch();
     lustra::AssetManager::Get().AddLoader<lustra::TextureAsset, lustra::TextureLoader>("");
 
     logo = lustra::AssetManager::Get().Load<lustra::TextureAsset>("../resources/branding/logo.png");

@@ -33,11 +33,8 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
                 { "maxStride", LLGL::UniformType::Float1 }
             }
         },
-        LLGL::GraphicsPipelineDescriptor
-        {
-            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
-            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("GTAO.frag", true)->shader
-        },
+        AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true),
+        AssetManager::Get().Load<FragmentShaderAsset>("GTAO.frag", true),
         scaledResolution,
         true,
         false,
@@ -53,11 +50,8 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
                 { "frame", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 }
             }
         },
-        LLGL::GraphicsPipelineDescriptor
-        {
-            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
-            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("boxBlur.frag", true)->shader
-        },
+        AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true),
+        AssetManager::Get().Load<FragmentShaderAsset>("boxBlur.frag", true),
         scaledResolution,
         true,
         false,

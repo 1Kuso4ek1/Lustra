@@ -10,9 +10,14 @@
 namespace lustra
 {
 
-AssetPtr SceneLoader::Load(const std::filesystem::path& path)
+AssetPtr SceneLoader::Load(const std::filesystem::path& path, AssetPtr existing)
 {
-    auto asset = std::make_shared<SceneAsset>(std::make_shared<Scene>());
+    auto asset = existing
+        ? std::static_pointer_cast<SceneAsset>(existing)
+        : std::make_shared<SceneAsset>(std::make_shared<Scene>());
+
+    if(existing)
+        asset->scene->GetRegistry().clear<>();
 
     bool binaryFile = path.extension() == ".scn";
 
@@ -30,6 +35,8 @@ AssetPtr SceneLoader::Load(const std::filesystem::path& path)
     }
 
     asset->loaded = true;
+
+    EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(asset));
 
     LLGL::Log::Printf(
         LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,

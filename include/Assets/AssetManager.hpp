@@ -16,6 +16,11 @@ class AssetManager : public Singleton<AssetManager>
 public:
     using AssetStorage = std::unordered_map<std::filesystem::path, std::pair<std::type_index, AssetPtr>>;
 
+    ~AssetManager()
+    {
+        StopWatch();
+    }
+
     template<class T>
     std::shared_ptr<T> Load(
         const std::filesystem::path& path,
@@ -45,6 +50,10 @@ public:
 
         if(!asset)
             return nullptr;
+
+        if(fsWatch)
+            if(std::filesystem::exists(assetPath))
+                timestamps[assetPath] = std::filesystem::last_write_time(assetPath);
 
         asset->path = assetPath;
 
@@ -95,6 +104,9 @@ public:
 
         loader->Write(asset, assetPath);
 
+        if(fsWatch)
+            timestamps[assetPath] = std::filesystem::last_write_time(assetPath);
+
         asset->path = assetPath;
     }
 
@@ -113,6 +125,9 @@ public:
     void Unload(const std::filesystem::path& path)
     {
         assets.erase(path);
+
+        if(fsWatch)
+            timestamps.erase(path);
     }
 
     template<class AssetType, class LoaderType>
@@ -132,6 +147,50 @@ public:
         
         loaders.erase(typeid(T));
         assetsRelativePaths.erase(typeid(T));
+    }
+
+    void LaunchWatch()
+    {
+        fsWatch = true;
+
+        watchFuture = std::async(std::launch::async, [&]()
+        {
+            while(fsWatch)
+            {
+                for(auto& i : timestamps)
+                {
+                    if(std::filesystem::last_write_time(i.first) != i.second)
+                    {
+                        LLGL::Log::Printf(
+                            LLGL::Log::ColorFlags::Blue,
+                            "File %s modified\n",
+                            i.first.string().c_str()
+                        );
+
+                        auto& asset = assets.at(i.first);
+                        auto loader = loaders[std::type_index(asset.first)];
+
+                        std::this_thread::sleep_for(1s);
+
+                        Multithreading::Get().AddJob({ nullptr, [&]()
+                        {
+                            loader->Load(i.first, asset.second);
+                        } });
+
+                        timestamps[i.first] = std::filesystem::last_write_time(i.first);
+                    }
+                }
+
+                std::this_thread::sleep_for(1s);
+            }
+        });
+    }
+
+    void StopWatch()
+    {
+        fsWatch = false;
+
+        watchFuture.wait();
     }
 
 private:
@@ -154,9 +213,15 @@ private:
     }
 
 private:
+    bool fsWatch = false;
+
+    std::future<void> watchFuture;
+
     std::filesystem::path assetsDirectory = "assets";
 
     AssetStorage assets;
+
+    std::unordered_map<std::filesystem::path, std::filesystem::file_time_type> timestamps;
     
     std::unordered_map<std::type_index, std::filesystem::path> assetsRelativePaths;
     std::unordered_map<std::type_index, AssetLoader*> loaders;

@@ -10,7 +10,7 @@ namespace lustra
 class TextureLoader : public AssetLoader, public Singleton<TextureLoader>
 {
 public:
-    AssetPtr Load(const std::filesystem::path& path) override;
+    AssetPtr Load(const std::filesystem::path& path, AssetPtr existing = nullptr) override;
     
     void Reset() override;
 

@@ -45,7 +45,7 @@ struct MeshRendererComponent : public ComponentBase
     std::vector<MaterialAssetPtr> materials;
 };
 
-struct PipelineComponent : public ComponentBase
+struct PipelineComponent : public ComponentBase, public EventListener
 {
     PipelineComponent(
         VertexShaderAssetPtr vertexShader = {},
@@ -54,6 +54,8 @@ struct PipelineComponent : public ComponentBase
         vertexShader(vertexShader),
         fragmentShader(fragmentShader)
     {
+        EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+
         if(vertexShader && fragmentShader)
         {
             pipeline = 
@@ -61,6 +63,31 @@ struct PipelineComponent : public ComponentBase
                     vertexShader->shader,
                     fragmentShader->shader
                 );
+        }
+    }
+
+    PipelineComponent(PipelineComponent&& other)
+        : ComponentBase(std::move(other)),
+          vertexShader(std::move(other.vertexShader)),
+          fragmentShader(std::move(other.fragmentShader)),
+          pipeline(std::move(other.pipeline))
+    {
+        EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+    }
+
+    ~PipelineComponent()
+    {
+        EventManager::Get().RemoveListener(Event::Type::AssetLoaded, this);
+    }
+
+    void OnEvent(Event& event) override
+    {
+        if(event.GetType() == Event::Type::AssetLoaded)
+        {
+            auto& assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
+
+            if(assetLoadedEvent.GetAsset() == vertexShader || assetLoadedEvent.GetAsset() == fragmentShader)
+                pipeline = Renderer::Get().CreatePipelineState(vertexShader->shader, fragmentShader->shader);
         }
     }
 

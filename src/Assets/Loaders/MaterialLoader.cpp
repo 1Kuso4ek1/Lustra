@@ -10,7 +10,7 @@
 namespace lustra
 {
 
-AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
+AssetPtr MaterialLoader::Load(const std::filesystem::path& path, AssetPtr existing)
 {
     if(!defaultMaterial)
         LoadDefaultData();
@@ -31,7 +31,9 @@ AssetPtr MaterialLoader::Load(const std::filesystem::path& path)
         return defaultMaterial;
     }
 
-    auto material = std::make_shared<MaterialAsset>();
+    auto material = existing
+        ? std::static_pointer_cast<MaterialAsset>(existing)
+        : std::make_shared<MaterialAsset>();
     
     cereal::JSONInputArchive archive(file);
 

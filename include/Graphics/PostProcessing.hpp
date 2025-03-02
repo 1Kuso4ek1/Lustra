@@ -5,6 +5,7 @@
 #include <AssetManager.hpp>
 #include <ModelAsset.hpp>
 #include <Window.hpp>
+#include <ShaderAsset.hpp>
 
 namespace lustra
 {
@@ -15,7 +16,9 @@ public:
     // Make it use something like PostProcessingDescriptor?
     PostProcessing(
         const LLGL::PipelineLayoutDescriptor& layoutDesc,
-        const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
+        //const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
+        VertexShaderAssetPtr vertexShader,
+        FragmentShaderAssetPtr fragmentShader,
         const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
 
         bool newRenderTarget = true,
@@ -45,6 +48,9 @@ protected:
     LLGL::RenderTarget* renderTarget;
 
     MeshPtr rect;
+    LLGL::PipelineLayoutDescriptor layoutDesc;
+    VertexShaderAssetPtr vertexShader;
+    FragmentShaderAssetPtr fragmentShader;
     LLGL::PipelineState* rectPipeline;
 };
 

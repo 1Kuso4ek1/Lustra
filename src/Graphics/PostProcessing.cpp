@@ -5,7 +5,9 @@ namespace lustra
 
 PostProcessing::PostProcessing(
     const LLGL::PipelineLayoutDescriptor& layoutDesc,
-    const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
+    //const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
+    VertexShaderAssetPtr vertexShader,
+    FragmentShaderAssetPtr fragmentShader,
     const LLGL::Extent2D& resolution,
 
     bool newRenderTarget,
@@ -13,7 +15,7 @@ PostProcessing::PostProcessing(
     bool mipMaps,
     
     const LLGL::Format& format
-)
+) : layoutDesc(layoutDesc), vertexShader(vertexShader), fragmentShader(fragmentShader)
 {
     rect = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
@@ -36,12 +38,22 @@ PostProcessing::PostProcessing(
         renderTarget = Renderer::Get().CreateRenderTarget(resolution, { frame });
     }
 
-    rectPipeline = Renderer::Get().CreatePipelineState(layoutDesc, pipelineDesc);
+    EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+
+    rectPipeline =
+        Renderer::Get().CreatePipelineState(
+            layoutDesc,
+            {
+                .vertexShader = vertexShader->shader,
+                .fragmentShader = fragmentShader->shader
+            }
+        );
 }
 
 PostProcessing::~PostProcessing()
 {
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
+    EventManager::Get().RemoveListener(Event::Type::AssetLoaded, this);
 }
 
 void PostProcessing::OnEvent(Event& event)
@@ -59,6 +71,26 @@ void PostProcessing::OnEvent(Event& event)
 
         frame = Renderer::Get().CreateTexture(frameDesc);
         renderTarget = Renderer::Get().CreateRenderTarget(size, { frame });
+    }
+    else if(event.GetType() == Event::Type::AssetLoaded)
+    {
+        auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
+
+        if(assetEvent->GetAsset()->type == Asset::Type::FragmentShader)
+        {
+            auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
+            if(fragmentShader == shader)
+            {
+                rectPipeline =
+                    Renderer::Get().CreatePipelineState(
+                        layoutDesc,
+                        {
+                            .vertexShader = vertexShader->shader,
+                            .fragmentShader = fragmentShader->shader
+                        }
+                    );
+            }
+        }
     }
 }
 

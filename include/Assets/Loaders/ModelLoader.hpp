@@ -18,7 +18,7 @@ namespace lustra
 class ModelLoader : public AssetLoader, public Singleton<ModelLoader>
 {
 public:
-    AssetPtr Load(const std::filesystem::path& path) override;
+    AssetPtr Load(const std::filesystem::path& path, AssetPtr existing = nullptr) override;
 
 private:
     void LoadDefaultData();

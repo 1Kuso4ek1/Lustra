@@ -32,11 +32,8 @@ SSRComponent::SSRComponent(const LLGL::Extent2D& resolution)
                 { "rayStep", LLGL::UniformType::Float1 }
             }
         },
-        LLGL::GraphicsPipelineDescriptor
-        {
-            .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
-            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("SSR.frag", true)->shader
-        },
+        AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true),
+        AssetManager::Get().Load<FragmentShaderAsset>("SSR.frag", true),
         scaledResolution,
         true,
         false,

@@ -171,9 +171,8 @@ void Editor::SwitchScene(lustra::SceneAssetPtr scene)
 
     sceneAsset = scene;
 
-    lustra::EventManager::Get().Dispatch(
-        std::make_unique<lustra::WindowResizeEvent>(lustra::Renderer::Get().GetViewportResolution())
-    );
+    if(scene->scene->GetRegistry().storage().begin() == scene->scene->GetRegistry().storage().end())
+        CreateDefaultEntities();
 
     UpdateList();
     
@@ -181,6 +180,10 @@ void Editor::SwitchScene(lustra::SceneAssetPtr scene)
         UpdateEditorCameraScript();
     else
         CreateEditorCameraEntity();
+
+    lustra::EventManager::Get().Dispatch(
+        std::make_unique<lustra::WindowResizeEvent>(lustra::Renderer::Get().GetViewportResolution())
+    );
 }
 
 void Editor::CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera)

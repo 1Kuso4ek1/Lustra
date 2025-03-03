@@ -230,10 +230,10 @@ void main()
     
     color.rgb = ApplySSR(color.rgb, texelSize);
     color.rgb = ApplyTonemap(color.rgb * exposure);
+    color.rgb = ApplyLUT(color.rgb);
     color.rgb = ApplyFilmGrain(color.rgb);
     color.rgb = ApplyVignette(color.rgb);
     color.rgb = ApplyColorGrading(color.rgb);
-    color.rgb = ApplyLUT(color.rgb);
 
     color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 

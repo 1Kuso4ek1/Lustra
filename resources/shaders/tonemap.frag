@@ -186,7 +186,7 @@ vec3 ApplyLUT(vec3 color)
     if(texture(lut, vec2(0.1)).r == 0.0)
         return color;
 
-    color = clamp(color, 0.0, 1.0) * 0.01; // This is a very strange way of fixing some of the issues...
+    color = clamp(color, 0.0, 1.0);
 
     vec2 lutTextureSize = textureSize(lut, 0);
     vec4 lutSize = vec4(lutTextureSize, 1.0 / lutTextureSize);
@@ -201,7 +201,11 @@ vec3 ApplyLUT(vec3 color)
     vec3 color0 = texture(lut, texc).rgb;
     vec3 color1 = texture(lut, vec2(texc.x + lutSize.w, texc.y)).rgb;
 
-    return mix(color0, color1, bFrac) * 100.0;
+    // Weird fix of yellow dots on the color area edges
+    if(dot(color0, vec3(0.7, 0.7, 0.1)) > 0.5)
+        return color;
+
+    return mix(color0, color1, bFrac);
 }
 
 vec3 ApplyVignette(vec3 color)

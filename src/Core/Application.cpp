@@ -27,7 +27,7 @@ Application::Application(const Config& config) : config(config)
         config.imGuiLayoutPath
     );
 
-    lustra::PhysicsManager::Get();
+    PhysicsManager::Get();
 }
 
 Application::~Application()
@@ -75,6 +75,7 @@ void Application::SetupAssetManager()
     AssetManager::Get().AddLoader<VertexShaderAsset, VertexShaderLoader>("shaders");
     AssetManager::Get().AddLoader<FragmentShaderAsset, FragmentShaderLoader>("shaders");
     AssetManager::Get().AddLoader<SceneAsset, SceneLoader>("scenes");
+    AssetManager::Get().AddLoader<SoundAsset, SoundLoader>("sounds");
 }
 
 }

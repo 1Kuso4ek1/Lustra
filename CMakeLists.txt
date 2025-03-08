@@ -42,6 +42,7 @@ set(
     include
     include/Assets
     include/Assets/Loaders
+    include/Audio
     include/Components
     include/Core
     include/Events
@@ -51,6 +52,7 @@ set(
     include/Physics
     include/Scene
     include/Scripting
+
     include/Editor
     include/Launcher
 )
@@ -67,6 +69,7 @@ set(
     libraries/entt/src
     libraries/assimp/include
     libraries/JoltPhysics
+    libraries/miniaudio
 
     libraries/Angelscript/sdk/angelscript/include
     
@@ -136,6 +139,7 @@ target_link_libraries(
     glfw
     Jolt
     ${ANGELSCRIPT_LIBRARY_NAME}
+    miniaudio
 )
 
 add_executable(
@@ -167,3 +171,4 @@ add_subdirectory(libraries/assimp)
 add_subdirectory(libraries/JoltPhysics/Build)
 add_subdirectory(libraries/Angelscript/sdk/angelscript/projects/cmake)
 add_subdirectory(libraries/cereal)
+add_subdirectory(libraries/miniaudio)

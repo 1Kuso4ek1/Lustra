@@ -33,3 +33,6 @@
 [submodule "libraries/cereal"]
 	path = libraries/cereal
 	url = https://github.com/USCiLab/cereal.git
+[submodule "libraries/miniaudio"]
+	path = libraries/miniaudio
+	url = https://github.com/mackron/miniaudio.git

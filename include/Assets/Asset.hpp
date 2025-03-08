@@ -20,7 +20,8 @@ struct Asset
         Script,
         VertexShader,
         FragmentShader,
-        Scene
+        Scene,
+        Sound
     };
 
     Asset(Type type) : type(type) {}

@@ -15,6 +15,7 @@
 #include <ScriptLoader.hpp>
 #include <ShaderLoader.hpp>
 #include <SceneLoader.hpp>
+#include <SoundLoader.hpp>
 
 namespace lustra
 {

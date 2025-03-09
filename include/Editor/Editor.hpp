@@ -106,10 +106,11 @@ private:
     lustra::AssetPtr selectedAsset;
 
     lustra::TextureAssetPtr texture, metal, wood,
-                         fileIcon, folderIcon, textureIcon,
-                         materialIcon, modelIcon, scriptIcon,
-                         playIcon, pauseIcon, stopIcon,
-                         buildIcon, lightIcon, sceneIcon;
+                            fileIcon, folderIcon, textureIcon,
+                            materialIcon, modelIcon, scriptIcon,
+                            playIcon, pauseIcon, stopIcon,
+                            buildIcon, lightIcon, sceneIcon,
+                            soundIcon;
     lustra::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;

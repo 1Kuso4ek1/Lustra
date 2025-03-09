@@ -191,6 +191,7 @@ void Editor::DrawPropertiesWindow()
             lustra::TransformComponent,
             lustra::MeshComponent,
             lustra::MeshRendererComponent,
+            lustra::PipelineComponent,
             lustra::CameraComponent,
             lustra::LightComponent,
             lustra::ScriptComponent,
@@ -200,6 +201,7 @@ void Editor::DrawPropertiesWindow()
             lustra::SSRComponent,
             lustra::ProceduralSkyComponent,
             lustra::HDRISkyComponent,
+            lustra::SoundComponent,
             lustra::RigidBodyComponent
         >(scene->GetRegistry(), selectedEntity);
 
@@ -257,6 +259,9 @@ void Editor::DrawPropertiesWindow()
                         lustra::Layers::moving
                         )
                     );
+
+            if(ImGui::MenuItem("Add SoundComponent"))
+                selectedEntity.GetOrAddComponent<lustra::SoundComponent>();
             
             if(ImGui::MenuItem("Add ScriptComponent"))
                 selectedEntity.GetOrAddComponent<lustra::ScriptComponent>();

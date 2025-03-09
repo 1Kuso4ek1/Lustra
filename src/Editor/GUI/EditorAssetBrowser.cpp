@@ -203,6 +203,25 @@ void Editor::DrawAsset(const std::filesystem::path& entry, lustra::AssetPtr asse
             break;
         }
 
+        case lustra::Asset::Type::Sound:
+        {
+            auto sound = std::dynamic_pointer_cast<lustra::SoundAsset>(asset);
+            ImGui::ImageButton("##Asset", soundIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                lustra::SoundAssetPtr* payload = &sound;
+                
+                ImGui::SetDragDropPayload("SOUND", payload, 8);
+                ImGui::Image(soundIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Sound: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
         default:
             break;
     }
@@ -240,6 +259,10 @@ void Editor::DrawUnloadedAsset(const std::filesystem::path& entry)
                         lustra::AssetManager::Get().Load<lustra::SceneAsset>(entry);
                     }
                 });
+                break;
+
+            case lustra::Asset::Type::Sound:
+                lustra::AssetManager::Get().Load<lustra::SoundAsset>(entry);
                 break;
 
             default:

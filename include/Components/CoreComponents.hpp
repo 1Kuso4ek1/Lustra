@@ -226,4 +226,11 @@ struct RigidBodyComponent : public ComponentBase
     } settings;
 };
 
+struct SoundComponent : public ComponentBase
+{
+    SoundComponent() : ComponentBase("SoundComponent") {}
+
+    SoundAssetPtr sound;
+};
+
 }

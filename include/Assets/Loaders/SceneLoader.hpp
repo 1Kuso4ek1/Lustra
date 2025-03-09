@@ -31,7 +31,8 @@ private:
             .template get<SSRComponent>(archive)
             .template get<ProceduralSkyComponent>(archive)
             .template get<HDRISkyComponent>(archive)
-            .template get<RigidBodyComponent>(archive);
+            .template get<RigidBodyComponent>(archive)
+            .template get<SoundComponent>(archive);
     }
 
     template<class Archive>
@@ -53,7 +54,8 @@ private:
             .template get<SSRComponent>(archive)
             .template get<ProceduralSkyComponent>(archive)
             .template get<HDRISkyComponent>(archive)
-            .template get<RigidBodyComponent>(archive);
+            .template get<RigidBodyComponent>(archive)
+            .template get<SoundComponent>(archive);
     }
 };
 

@@ -140,7 +140,10 @@ void serialize(Archive& archive, TransformComponent& component)
 template<class Archive>
 void save(Archive& archive, const MeshComponent& component)
 {
-    archive(cereal::make_nvp("modelPath", component.model->path.string()));
+    if(component.model)
+        archive(cereal::make_nvp("modelPath", component.model->path.string()));
+    else
+        archive(cereal::make_nvp("modelPath", ""));
 }
 
 template<class Archive>
@@ -150,7 +153,8 @@ void load(Archive& archive, MeshComponent& component)
 
     archive(path);
 
-    component.model = AssetManager::Get().Load<ModelAsset>(path);
+    if(!path.empty())
+        component.model = AssetManager::Get().Load<ModelAsset>(path);
 }
 
 template<class Archive>
@@ -409,6 +413,26 @@ void load(Archive& archive, RigidBodyComponent& component)
         false,
         JPH::EActivation::Activate
     );
+}
+
+template<class Archive>
+void save(Archive& archive, const SoundComponent& component)
+{
+    if(component.sound)
+        archive(cereal::make_nvp("soundPath", component.sound->path.string()));
+    else
+        archive(cereal::make_nvp("soundPath", ""));
+}
+
+template<class Archive>
+void load(Archive& archive, SoundComponent& component)
+{
+    std::string path;
+
+    archive(path);
+
+    if(!path.empty())
+        component.sound = AssetManager::Get().Load<SoundAsset>(path);
 }
 
 }

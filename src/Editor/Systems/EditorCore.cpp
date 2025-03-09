@@ -8,6 +8,7 @@ Editor::Editor(const lustra::Config& config) : lustra::Application(config)
 void Editor::Init()
 {
     lustra::PhysicsManager::Get().Init();
+    lustra::AudioManager::Get().Init();
 
     SetupAssetManager();
 
@@ -38,11 +39,6 @@ void Editor::Init()
     }
     else
         SwitchScene(lustra::AssetManager::Get().Load<lustra::SceneAsset>(mainScenePath));
-
-    lustra::AudioManager::Get().Init();
-
-    auto sound = lustra::AssetManager::Get().Load<lustra::SoundAsset>("metal-pipe.mp3", true);
-    sound->sound.Play();
 }
 
 void Editor::Update(float deltaTime)

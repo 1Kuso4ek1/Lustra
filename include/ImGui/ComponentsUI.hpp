@@ -109,6 +109,11 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
         component.materials.push_back(component.materials.back());
 }
 
+inline void DrawComponentUI(PipelineComponent& component, entt::entity entity)
+{
+
+}
+
 inline void DrawComponentUI(CameraComponent& component, entt::entity entity)
 {
     if(ImGui::DragFloat("FOV", &component.camera.fov, 0.05f, 1.0f, 179.0f))
@@ -576,6 +581,32 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
             );
 
         scale = glm::vec3(1.0);
+    }
+}
+
+inline void DrawComponentUI(SoundComponent& component, entt::entity entity)
+{
+    ImGui::Button(
+        component.sound ? component.sound->path.filename().string().c_str() : "(Empty)##Sound",
+        ImVec2(128.0f, 128.0f)
+    );
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("SOUND");
+
+        if(payload)
+            component.sound = *(SoundAssetPtr*)payload->Data;
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(component.sound)
+    {
+        ImGui::Separator();
+
+        if(ImGui::Button("Play"))
+            component.sound->sound.Play();
     }
 }
 

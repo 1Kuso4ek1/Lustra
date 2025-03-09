@@ -17,6 +17,8 @@ void Editor::LoadIcons()
 
     lightIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/light.png", true);
 
+    soundIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/sound.png", true);
+
     assetIcons = 
     {
         { lustra::Asset::Type::Texture, textureIcon },
@@ -24,6 +26,7 @@ void Editor::LoadIcons()
         { lustra::Asset::Type::Model, modelIcon },
         { lustra::Asset::Type::Script, scriptIcon },
         { lustra::Asset::Type::Scene, sceneIcon },
+        { lustra::Asset::Type::Sound, soundIcon },
         { lustra::Asset::Type::Unknown, fileIcon }
     };
 }

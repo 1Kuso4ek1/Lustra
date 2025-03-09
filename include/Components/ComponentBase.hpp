@@ -13,6 +13,7 @@
 #include <ModelAsset.hpp>
 #include <ScriptAsset.hpp>
 #include <ShaderAsset.hpp>
+#include <SoundAsset.hpp>
 
 namespace lustra
 {

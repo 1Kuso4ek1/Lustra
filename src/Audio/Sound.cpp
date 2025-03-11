@@ -143,28 +143,28 @@ void Sound::SetSpatializationEnabled(bool enabled)
     ma_sound_set_spatialization_enabled(sound.get(), enabled);
 }
 
-glm::vec3 Sound::GetPosition()
+glm::vec3 Sound::GetPosition() const
 {
     auto position = ma_sound_get_position(sound.get());
 
     return { position.x, position.y, position.z };
 }
 
-glm::vec3 Sound::GetVelocity()
+glm::vec3 Sound::GetVelocity() const
 {
     auto velocity = ma_sound_get_velocity(sound.get());
 
     return { velocity.x, velocity.y, velocity.z };
 }
 
-glm::vec3 Sound::GetDirection()
+glm::vec3 Sound::GetDirection() const
 {
     auto direction = ma_sound_get_direction(sound.get());
 
     return { direction.x, direction.y, direction.z };
 }
 
-Sound::Cone Sound::GetCone()
+Sound::Cone Sound::GetCone() const
 {
     Cone cone;
 
@@ -176,62 +176,62 @@ Sound::Cone Sound::GetCone()
     return cone;
 }
 
-float Sound::GetDirectionalAttenuationFactor()
+float Sound::GetDirectionalAttenuationFactor() const
 {
     return ma_sound_get_directional_attenuation_factor(sound.get());
 }
 
-float Sound::GetDopplerFactor()
+float Sound::GetDopplerFactor() const
 {
     return ma_sound_get_doppler_factor(sound.get());
 }
 
-float Sound::GetRolloff()
+float Sound::GetRolloff() const
 {
     return ma_sound_get_rolloff(sound.get());
 }
 
-float Sound::GetMaxDistance()
+float Sound::GetMaxDistance() const
 {
     return ma_sound_get_max_distance(sound.get());
 }
 
-float Sound::GetMinDistance()
+float Sound::GetMinDistance() const
 {
     return ma_sound_get_min_distance(sound.get());
 }
 
-float Sound::GetMaxGain()
+float Sound::GetMaxGain() const
 {
     return ma_sound_get_max_gain(sound.get());
 }
 
-float Sound::GetMinGain()
+float Sound::GetMinGain() const
 {
     return ma_sound_get_min_gain(sound.get());
 }
 
-float Sound::GetPan()
+float Sound::GetPan() const
 {
     return ma_sound_get_pan(sound.get());
 }
 
-float Sound::GetPitch()
+float Sound::GetPitch() const
 {
     return ma_sound_get_pitch(sound.get());
 }
 
-float Sound::GetVolume()
+float Sound::GetVolume() const
 {
     return ma_sound_get_volume(sound.get());
 }
 
-bool Sound::IsLooping()
+bool Sound::IsLooping() const
 {
     return ma_sound_is_looping(sound.get());
 }
 
-bool Sound::IsSpatializationEnabled()
+bool Sound::IsSpatializationEnabled() const
 {
     return ma_sound_is_spatialization_enabled(sound.get());
 }

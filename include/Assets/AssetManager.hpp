@@ -46,6 +46,7 @@ public:
         if(!loader)
             return nullptr;
 
+        // try-catch
         auto asset = loader->Load(assetPath);
 
         if(!asset)

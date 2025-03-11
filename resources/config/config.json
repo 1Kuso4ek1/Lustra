@@ -7,9 +7,9 @@
         "vsync": false,
         "fullscreen": true,
         "title": "Editor",
-        "assetsRoot": "../resources",
+        "assetsRoot": "resources",
         "mainScene": "main.scn",
-        "imGuiFontPath": "../resources/fonts/OpenSans-Regular.ttf",
-        "imGuiLayoutPath": "../resources/layout/editor_layout.ini"
+        "imGuiFontPath": "resources/fonts/OpenSans-Regular.ttf",
+        "imGuiLayoutPath": "resources/layout/editor_layout.ini"
     }
 }

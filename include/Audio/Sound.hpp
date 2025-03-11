@@ -45,27 +45,27 @@ public:
     void SetLooping(bool looping);
     void SetSpatializationEnabled(bool enabled);
 
-    glm::vec3 GetPosition();
-    glm::vec3 GetVelocity();
-    glm::vec3 GetDirection();
+    glm::vec3 GetPosition() const;
+    glm::vec3 GetVelocity() const;
+    glm::vec3 GetDirection() const;
 
-    Cone GetCone();
+    Cone GetCone() const;
 
-    float GetDirectionalAttenuationFactor();
-    float GetDopplerFactor();
-    float GetRolloff();
+    float GetDirectionalAttenuationFactor() const;
+    float GetDopplerFactor() const;
+    float GetRolloff() const;
     
-    float GetMaxDistance();
-    float GetMinDistance();
-    float GetMaxGain();
-    float GetMinGain();
+    float GetMaxDistance() const;
+    float GetMinDistance() const;
+    float GetMaxGain() const;
+    float GetMinGain() const;
     
-    float GetPan();
-    float GetPitch();
-    float GetVolume();
+    float GetPan() const;
+    float GetPitch() const;
+    float GetVolume() const;
 
-    bool IsLooping();
-    bool IsSpatializationEnabled();
+    bool IsLooping() const;
+    bool IsSpatializationEnabled() const;
 
     std::shared_ptr<ma_sound> GetSound();
 

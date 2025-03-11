@@ -8,7 +8,7 @@
                 "z": 1.0,
                 "w": 1.0
             },
-            "texturePath": "../resources/textures/Metall_ak-47_Base_Color.png"
+            "texturePath": "resources/textures/Metall_ak-47_Base_Color.png"
         },
         "normal": {
             "type": 0,
@@ -18,7 +18,7 @@
                 "z": 1.0,
                 "w": 1.0
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "resources/textures/default"
         },
         "metallic": {
             "type": 0,
@@ -28,7 +28,7 @@
                 "z": 0.5,
                 "w": 0.5
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "resources/textures/default"
         },
         "roughness": {
             "type": 0,
@@ -38,7 +38,7 @@
                 "z": 0.5,
                 "w": 0.5
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "resources/textures/default"
         },
         "ao": {
             "type": 0,
@@ -48,7 +48,7 @@
                 "z": 1.0,
                 "w": 1.0
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "resources/textures/default"
         },
         "emission": {
             "type": 0,
@@ -58,7 +58,7 @@
                 "z": 0.0,
                 "w": 0.0
             },
-            "texturePath": "../resources/textures/default"
+            "texturePath": "resources/textures/default"
         },
         "emissionStrength": 1.0,
         "uvScale": {

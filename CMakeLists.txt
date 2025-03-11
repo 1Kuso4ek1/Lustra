@@ -131,6 +131,7 @@ add_library(
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})
 target_link_libraries(
     Engine
+
     assimp
     LLGL
     Threads::Threads
@@ -147,6 +148,8 @@ add_executable(
 
     src/Editor/main.cpp
 )
+
+add_definitions("-DEDITOR_ROOT=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 add_executable(
     Launcher

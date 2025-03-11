@@ -390,8 +390,14 @@ void Scene::UpdateSounds()
         if(registry.all_of<HierarchyComponent>(entity))
             worldTransform.SetTransform(GetWorldTransform(entity));
 
-        sound.sound->sound.SetPosition(worldTransform.position);
-        sound.sound->sound.SetOrientation(glm::radians(worldTransform.rotation));
+        if(sound.sound)
+        {
+            if(sound.sound->sound.GetSound().get()) // ??? :/
+            {
+                sound.sound->sound.SetPosition(worldTransform.position);
+                sound.sound->sound.SetOrientation(glm::radians(worldTransform.rotation));
+            }
+        }
     }
 }
 

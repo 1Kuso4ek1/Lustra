@@ -429,27 +429,29 @@ template<class Archive>
 void save(Archive& archive, const SoundComponent& component)
 {
     if(component.sound)
+    {
         archive(cereal::make_nvp("soundPath", component.sound->path.string()));
+
+        archive(cereal::make_nvp("cone", component.sound->sound.GetCone()));
+
+        archive(cereal::make_nvp("directionalAttenuationFactor", component.sound->sound.GetDirectionalAttenuationFactor()));
+        archive(cereal::make_nvp("dopplerFactor", component.sound->sound.GetDopplerFactor()));
+        archive(cereal::make_nvp("rolloff", component.sound->sound.GetRolloff()));
+
+        archive(cereal::make_nvp("maxDistance", component.sound->sound.GetMaxDistance()));
+        archive(cereal::make_nvp("minDistance", component.sound->sound.GetMinDistance()));
+        archive(cereal::make_nvp("maxGain", component.sound->sound.GetMaxGain()));
+        archive(cereal::make_nvp("minGain", component.sound->sound.GetMinGain()));
+
+        archive(cereal::make_nvp("pan", component.sound->sound.GetPan()));
+        archive(cereal::make_nvp("pitch", component.sound->sound.GetPitch()));
+        archive(cereal::make_nvp("volume", component.sound->sound.GetVolume()));
+
+        archive(cereal::make_nvp("looping", component.sound->sound.IsLooping()));
+        archive(cereal::make_nvp("spatializationEnabled", component.sound->sound.IsSpatializationEnabled()));
+    }
     else
         archive(cereal::make_nvp("soundPath", ""));
-
-    archive(cereal::make_nvp("cone", component.sound->sound.GetCone()));
-
-    archive(cereal::make_nvp("directionalAttenuationFactor", component.sound->sound.GetDirectionalAttenuationFactor()));
-    archive(cereal::make_nvp("dopplerFactor", component.sound->sound.GetDopplerFactor()));
-    archive(cereal::make_nvp("rolloff", component.sound->sound.GetRolloff()));
-
-    archive(cereal::make_nvp("maxDistance", component.sound->sound.GetMaxDistance()));
-    archive(cereal::make_nvp("minDistance", component.sound->sound.GetMinDistance()));
-    archive(cereal::make_nvp("maxGain", component.sound->sound.GetMaxGain()));
-    archive(cereal::make_nvp("minGain", component.sound->sound.GetMinGain()));
-
-    archive(cereal::make_nvp("pan", component.sound->sound.GetPan()));
-    archive(cereal::make_nvp("pitch", component.sound->sound.GetPitch()));
-    archive(cereal::make_nvp("volume", component.sound->sound.GetVolume()));
-
-    archive(cereal::make_nvp("looping", component.sound->sound.IsLooping()));
-    archive(cereal::make_nvp("spatializationEnabled", component.sound->sound.IsSpatializationEnabled()));
 }
 
 template<class Archive>
@@ -460,27 +462,29 @@ void load(Archive& archive, SoundComponent& component)
     archive(path);
 
     if(!path.empty())
+    {
         component.sound = AssetManager::Get().Load<SoundAsset>(path);
 
-    float data; Sound::Cone cone; bool enabled;
+        float data; Sound::Cone cone; bool enabled;
 
-    archive(cone); component.sound->sound.SetCone(cone);
+        archive(cone); component.sound->sound.SetCone(cone);
 
-    archive(data); component.sound->sound.SetDirectionalAttenuationFactor(data);
-    archive(data); component.sound->sound.SetDopplerFactor(data);
-    archive(data); component.sound->sound.SetRolloff(data);
+        archive(data); component.sound->sound.SetDirectionalAttenuationFactor(data);
+        archive(data); component.sound->sound.SetDopplerFactor(data);
+        archive(data); component.sound->sound.SetRolloff(data);
 
-    archive(data); component.sound->sound.SetMaxDistance(data);
-    archive(data); component.sound->sound.SetMinDistance(data);
-    archive(data); component.sound->sound.SetMaxGain(data);
-    archive(data); component.sound->sound.SetMinGain(data);
+        archive(data); component.sound->sound.SetMaxDistance(data);
+        archive(data); component.sound->sound.SetMinDistance(data);
+        archive(data); component.sound->sound.SetMaxGain(data);
+        archive(data); component.sound->sound.SetMinGain(data);
 
-    archive(data); component.sound->sound.SetPan(data);
-    archive(data); component.sound->sound.SetPitch(data);
-    archive(data); component.sound->sound.SetVolume(data);
-    
-    archive(enabled); component.sound->sound.SetLooping(enabled);
-    archive(enabled); component.sound->sound.SetSpatializationEnabled(enabled);
+        archive(data); component.sound->sound.SetPan(data);
+        archive(data); component.sound->sound.SetPitch(data);
+        archive(data); component.sound->sound.SetVolume(data);
+        
+        archive(enabled); component.sound->sound.SetLooping(enabled);
+        archive(enabled); component.sound->sound.SetSpatializationEnabled(enabled);
+    }
 }
 
 }

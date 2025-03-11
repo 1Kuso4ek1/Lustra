@@ -43,7 +43,7 @@ struct Config
     std::string imGuiFontPath;
     std::string imGuiLayoutPath;
 
-    std::filesystem::path configPath = "config.json";
+    std::filesystem::path configPath;
 
     void Save(const std::filesystem::path& path) const
     {

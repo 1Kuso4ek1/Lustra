@@ -40,7 +40,8 @@ Application::~Application()
         Renderer::Get().Unload();
     }
 
-    config.Save(config.configPath);
+    if(!config.configPath.empty())
+        config.Save(config.configPath);
 }
 
 void Application::Run()

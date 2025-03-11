@@ -607,6 +607,70 @@ inline void DrawComponentUI(SoundComponent& component, entt::entity entity)
 
         if(ImGui::Button("Play"))
             component.sound->sound.Play();
+
+        if(ImGui::Button("Stop"))
+            component.sound->sound.Stop();
+
+        ImGui::Separator();
+
+        Sound::Cone cone = component.sound->sound.GetCone();
+
+        if(ImGui::DragFloat("Inner Angle", &cone.inner, 0.05f, 0.0f, 360.0f))
+            component.sound->sound.SetCone(cone);
+
+        if(ImGui::DragFloat("Outer Angle", &cone.outer, 0.05f, 0.0f, 360.0f))
+            component.sound->sound.SetCone(cone);
+
+        if(ImGui::DragFloat("Outer Gain", &cone.outerGain, 0.05f, 0.0f, 1.0f))
+            component.sound->sound.SetCone(cone);
+
+        float data = component.sound->sound.GetDirectionalAttenuationFactor();
+        if(ImGui::DragFloat("Directional Attenuation Factor", &data, 0.05f, 0.0f, 1.0f))
+            component.sound->sound.SetDirectionalAttenuationFactor(data);
+
+        data = component.sound->sound.GetDopplerFactor();
+        if(ImGui::DragFloat("Doppler Factor", &data, 0.05f, 0.0f, 10.0f))
+            component.sound->sound.SetDopplerFactor(data);
+
+        data = component.sound->sound.GetRolloff();
+        if(ImGui::DragFloat("Rolloff", &data, 0.05f, 0.0f, 10.0f))
+            component.sound->sound.SetRolloff(data);
+
+        data = component.sound->sound.GetMaxDistance();
+        if(ImGui::DragFloat("Max Distance", &data, 0.05f, 0.0f, 10000.0f))
+            component.sound->sound.SetMaxDistance(data);
+
+        data = component.sound->sound.GetMinDistance();
+        if(ImGui::DragFloat("Min Distance", &data, 0.05f, 0.0f, 10000.0f))
+            component.sound->sound.SetMinDistance(data);
+
+        data = component.sound->sound.GetMaxGain();
+        if(ImGui::DragFloat("Max Gain", &data, 0.05f, 0.0f, 1.0f))
+            component.sound->sound.SetMaxGain(data);
+
+        data = component.sound->sound.GetMinGain();
+        if(ImGui::DragFloat("Min Gain", &data, 0.05f, 0.0f, 1.0f))
+            component.sound->sound.SetMinGain(data);
+
+        data = component.sound->sound.GetPan();
+        if(ImGui::DragFloat("Pan", &data, 0.05f, -1.0f, 1.0f))
+            component.sound->sound.SetPan(data);
+
+        data = component.sound->sound.GetPitch();
+        if(ImGui::DragFloat("Pitch", &data, 0.05f, 0.0f, 10.0f))
+            component.sound->sound.SetPitch(data);
+
+        data = component.sound->sound.GetVolume();
+        if(ImGui::DragFloat("Volume", &data, 0.05f, 0.0f, 1.0f))
+            component.sound->sound.SetVolume(data);
+
+        bool enabled = component.sound->sound.IsLooping();
+        if(ImGui::Checkbox("Looping", &enabled))
+            component.sound->sound.SetLooping(enabled);
+
+        enabled = component.sound->sound.IsSpatializationEnabled();
+        if(ImGui::Checkbox("Spatialization Enabled", &enabled))
+            component.sound->sound.SetSpatializationEnabled(enabled);
     }
 }
 

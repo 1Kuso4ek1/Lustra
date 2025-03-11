@@ -514,30 +514,44 @@ void Editor::DrawViewport()
     canMoveCamera = ImGui::IsWindowHovered();
 
     auto lights = scene->GetRegistry().view<lustra::TransformComponent, lustra::LightComponent>();
+    auto sounds = scene->GetRegistry().view<lustra::TransformComponent, lustra::SoundComponent>();
 
-    for(auto entity : lights)
+    auto drawOnScreen = [&](const glm::vec3& pos, int id, const glm::vec3& lightColor = glm::vec3(-1.0f))
     {
-        auto[transform, light] = 
-            lights.get<lustra::TransformComponent, lustra::LightComponent>(entity);
-
-        auto screenPos = editorCamera.GetComponent<lustra::CameraComponent>().camera.WorldToScreen(transform.position);
+        auto screenPos = editorCamera.GetComponent<lustra::CameraComponent>().camera.WorldToScreen(pos);
 
         if(!glm::any(glm::isnan(screenPos)))
         {
-            ImGui::PushID((int)entity);
+            ImGui::PushID(id);
 
             ImGui::SetCursorPos({ screenPos.x - 32.0f, screenPos.y - 36.0f });
 
             ImGui::Image(
-                lightIcon->nativeHandle,
+                lightColor == glm::vec3(-1.0f) ? soundIcon->nativeHandle : lightIcon->nativeHandle,
                 { 64, 64 },
                 { 0, 0 },
                 { 1, 1 },
-                { light.color.x, light.color.y, light.color.z, 1.0f }
+                { lightColor.x, lightColor.y, lightColor.z, 0.5f }
             );
 
             ImGui::PopID();
         }
+    };
+
+    for(auto entity : lights)
+    {
+        auto [transform, light] =
+            lights.get<lustra::TransformComponent, lustra::LightComponent>(entity);
+
+        drawOnScreen(transform.position, (int)entity, light.color);
+    }
+
+    for(auto entity : sounds)
+    {
+        auto [transform, sound] =
+            sounds.get<lustra::TransformComponent, lustra::SoundComponent>(entity);
+
+        drawOnScreen(transform.position, (int)entity);
     }
 
     DrawImGuizmo();

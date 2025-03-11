@@ -49,7 +49,11 @@ void ProjectManager::RenderImGui()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::Begin("Project Manager", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
 
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 600) * 0.5f);
+
     ImGui::Image(logo->nativeHandle, { 512, 214 });
+
+    ImGui::Separator();
     
     ImGui::End();
     ImGui::PopStyleVar();

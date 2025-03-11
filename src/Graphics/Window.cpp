@@ -49,6 +49,11 @@ Window::~Window()
         lastCreatedWindow = nullptr;
 }
 
+void Window::Close()
+{
+    glfwSetWindowShouldClose(window, true);
+}
+
 void Window::SetFullscreen(bool fullscreen)
 {
     this->fullscreen = fullscreen;

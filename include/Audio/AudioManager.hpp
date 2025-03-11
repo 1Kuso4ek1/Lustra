@@ -22,6 +22,8 @@ public:
 private:
     ma_engine engine;
     ma_result result;
+
+    bool initialized = false;
 };
 
 }

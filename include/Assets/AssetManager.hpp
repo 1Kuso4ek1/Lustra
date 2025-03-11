@@ -151,6 +151,9 @@ public:
 
     void LaunchWatch()
     {
+        if(fsWatch)
+            return;
+
         fsWatch = true;
 
         watchFuture = std::async(std::launch::async, [&]()
@@ -190,7 +193,8 @@ public:
     {
         fsWatch = false;
 
-        watchFuture.wait();
+        if(watchFuture.valid())
+            watchFuture.wait();
     }
 
 private:

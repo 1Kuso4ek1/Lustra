@@ -8,9 +8,9 @@ Editor::Editor(const lustra::Config& config) : lustra::Application(config)
 void Editor::Init()
 {
     lustra::PhysicsManager::Get().Init();
-    lustra::AudioManager::Get().Init();
-
+    
     SetupAssetManager();
+    lustra::AssetManager::Get().LaunchWatch();
 
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowFocus, this);

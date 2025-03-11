@@ -55,6 +55,8 @@ private:
     void UpdateLightsBuffer();
     void UpdateShadowsBuffer();
 
+    void UpdateSounds();
+
     void SetupCamera();
     void SetupLights();
     void SetupShadows();

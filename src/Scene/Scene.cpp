@@ -1,6 +1,7 @@
 #include <Scene.hpp>
 #include <Entity.hpp>
 #include <ScriptManager.hpp>
+#include <Listener.hpp>
 
 namespace lustra
 {
@@ -373,6 +374,25 @@ void Scene::UpdateShadowsBuffer()
     );
 }
 
+void Scene::UpdateSounds()
+{
+    auto soundsView = registry.view<SoundComponent, TransformComponent>();
+    
+    for(auto entity : soundsView)
+    {
+        auto [sound, transform] =
+            soundsView.get<SoundComponent, TransformComponent>(entity);
+
+        auto worldTransform = transform;
+
+        if(registry.all_of<HierarchyComponent>(entity))
+            worldTransform.SetTransform(GetWorldTransform(entity));
+
+        sound.sound->sound.SetPosition(worldTransform.position);
+        sound.sound->sound.SetOrientation(glm::radians(worldTransform.rotation));
+    }
+}
+
 void Scene::SetupCamera()
 {
     auto cameraView = registry.view<TransformComponent, CameraComponent>();
@@ -400,6 +420,9 @@ void Scene::SetupCamera()
             }
 
             cameraPosition = cameraTransform.position;
+
+            Listener::Get().SetPosition(cameraPosition);
+            Listener::Get().SetOrientation(glm::radians(cameraTransform.rotation));
         }
     }
 

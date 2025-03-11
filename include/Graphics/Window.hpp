@@ -28,6 +28,8 @@ public:
     Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);
     ~Window();
 
+    void Close();
+
     void SetFullscreen(bool fullscreen);
 
     GLFWwindow* GetGLFWWindow() const;

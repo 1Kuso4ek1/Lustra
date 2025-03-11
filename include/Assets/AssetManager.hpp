@@ -162,7 +162,7 @@ public:
             {
                 for(auto& i : timestamps)
                 {
-                    if(std::filesystem::last_write_time(i.first) != i.second)
+                    if(std::filesystem::last_write_time(i.first) > i.second)
                     {
                         LLGL::Log::Printf(
                             LLGL::Log::ColorFlags::Blue,

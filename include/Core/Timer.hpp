@@ -33,4 +33,11 @@ private:
     std::string_view name;
 };
 
+namespace global
+{
+
+inline Timer appTimer;
+
+}
+
 }

@@ -93,6 +93,7 @@ struct MaterialAsset : public Asset
 
         commandBuffer->SetUniforms(10, &emissionStrength, sizeof(emissionStrength));
         commandBuffer->SetUniforms(11, &uvScale, sizeof(uvScale));
+        commandBuffer->SetUniforms(12, &uvOffset, sizeof(uvOffset));
     }
 
     template<class Archive>
@@ -101,7 +102,7 @@ struct MaterialAsset : public Asset
         archive(
             CEREAL_NVP(albedo), CEREAL_NVP(normal), CEREAL_NVP(metallic),
             CEREAL_NVP(roughness), CEREAL_NVP(ao), CEREAL_NVP(emission),
-            CEREAL_NVP(emissionStrength), CEREAL_NVP(uvScale)
+            CEREAL_NVP(emissionStrength), CEREAL_NVP(uvScale), CEREAL_NVP(uvOffset)
         );
     }
 
@@ -114,6 +115,7 @@ struct MaterialAsset : public Asset
 
     float emissionStrength = 1.0f;
     glm::vec2 uvScale = { 1.0f, 1.0f };
+    glm::vec2 uvOffset = { 0.0f, 0.0f };
 };
 
 using MaterialAssetPtr = std::shared_ptr<MaterialAsset>;

@@ -103,6 +103,8 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     SetupLights();
     SetupShadows();
 
+    UpdateSounds();
+
     Renderer::Get().Begin();
 
     UpdateLightsBuffer();
@@ -667,6 +669,10 @@ void Scene::MeshRenderPass(
             [&](auto commandBuffer)
             {
                 material->SetUniforms(commandBuffer);
+
+                float time = global::appTimer.GetElapsedSeconds();
+
+                commandBuffer->SetUniforms(13, &time, sizeof(time));
 
                 mesh.model->meshes[i]->Draw(commandBuffer);
             },

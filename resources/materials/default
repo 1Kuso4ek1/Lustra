@@ -3,67 +3,71 @@
         "albedo": {
             "type": 0,
             "value": {
-                "value0": 1.0,
-                "value1": 1.0,
-                "value2": 1.0,
-                "value3": 1.0
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
             },
             "texturePath": "../resources/textures/default"
         },
         "normal": {
             "type": 0,
             "value": {
-                "value0": 1.0,
-                "value1": 1.0,
-                "value2": 1.0,
-                "value3": 1.0
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
             },
             "texturePath": "../resources/textures/default"
         },
         "metallic": {
             "type": 0,
             "value": {
-                "value0": 0.0,
-                "value1": 0.0,
-                "value2": 0.0,
-                "value3": 0.0
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 0.0
             },
             "texturePath": "../resources/textures/default"
         },
         "roughness": {
             "type": 0,
             "value": {
-                "value0": 0.5,
-                "value1": 0.5,
-                "value2": 0.5,
-                "value3": 0.5
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5,
+                "w": 0.5
             },
             "texturePath": "../resources/textures/default"
         },
         "ao": {
             "type": 0,
             "value": {
-                "value0": 1.0,
-                "value1": 1.0,
-                "value2": 1.0,
-                "value3": 1.0
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
             },
             "texturePath": "../resources/textures/default"
         },
         "emission": {
             "type": 0,
             "value": {
-                "value0": 0.0,
-                "value1": 0.0,
-                "value2": 0.0,
-                "value3": 0.0
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 0.0
             },
             "texturePath": "../resources/textures/default"
         },
-        "emissionStrength": 0.0,
+        "emissionStrength": 10.0,
         "uvScale": {
-            "value0": 1.0,
-            "value1": 1.0
+            "x": 1.0,
+            "y": 1.0
+        },
+        "uvOffset": {
+            "x": 0.0,
+            "y": 0.0
         }
     }
 }

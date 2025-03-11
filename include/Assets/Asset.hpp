@@ -62,7 +62,13 @@ inline Asset::Type GetAssetType(const std::string& extension)
 
         { ".mp3", Asset::Type::Sound },
         { ".wav", Asset::Type::Sound },
-        { ".ogg", Asset::Type::Sound }
+        { ".ogg", Asset::Type::Sound },
+
+        { ".vert", Asset::Type::VertexShader },
+        { ".vs", Asset::Type::VertexShader },
+
+        { ".frag", Asset::Type::FragmentShader },
+        { ".fs", Asset::Type::FragmentShader }
     };
 
     auto it = extensionMap.find(extension);

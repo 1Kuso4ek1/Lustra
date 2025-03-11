@@ -111,7 +111,37 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
 
 inline void DrawComponentUI(PipelineComponent& component, entt::entity entity)
 {
+    ImGui::Button(component.vertexShader ? component.vertexShader->path.filename().string().c_str() : "(Empty VS)##VertexShader", ImVec2(128.0f, 128.0f));
 
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("VS");
+
+        if(payload)
+        {
+            component.vertexShader = *(VertexShaderAssetPtr*)payload->Data;
+            component.SetupPipeline();
+        }
+
+        ImGui::EndDragDropTarget();
+    }
+
+    ImGui::SameLine();
+
+    ImGui::Button(component.fragmentShader ? component.fragmentShader->path.filename().string().c_str() : "(Empty FS)##FragmentShader", ImVec2(128.0f, 128.0f));
+
+    if(ImGui::BeginDragDropTarget())
+    {
+        auto payload = ImGui::AcceptDragDropPayload("FS");
+
+        if(payload)
+        {
+            component.fragmentShader = *(FragmentShaderAssetPtr*)payload->Data;
+            component.SetupPipeline();
+        }
+
+        ImGui::EndDragDropTarget();
+    }
 }
 
 inline void DrawComponentUI(CameraComponent& component, entt::entity entity)

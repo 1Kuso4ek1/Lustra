@@ -110,7 +110,7 @@ private:
                             materialIcon, modelIcon, scriptIcon,
                             playIcon, pauseIcon, stopIcon,
                             buildIcon, lightIcon, sceneIcon,
-                            soundIcon;
+                            soundIcon, vertexShaderIcon, fragmentShaderIcon;
     lustra::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;

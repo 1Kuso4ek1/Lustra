@@ -7,6 +7,7 @@
 namespace lustra
 {
 
+// Might not be a singleton. Pointless.
 class Listener : public Singleton<Listener>
 {
 public:

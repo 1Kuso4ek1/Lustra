@@ -222,6 +222,44 @@ void Editor::DrawAsset(const std::filesystem::path& entry, lustra::AssetPtr asse
             break;
         }
 
+        case lustra::Asset::Type::VertexShader:
+        {
+            auto shader = std::dynamic_pointer_cast<lustra::VertexShaderAsset>(asset);
+            ImGui::ImageButton("##Asset", vertexShaderIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                lustra::VertexShaderAssetPtr* payload = &shader;
+                
+                ImGui::SetDragDropPayload("VS", payload, 8);
+                ImGui::Image(vertexShaderIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Vertex shader: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
+        case lustra::Asset::Type::FragmentShader:
+        {
+            auto shader = std::dynamic_pointer_cast<lustra::FragmentShaderAsset>(asset);
+            ImGui::ImageButton("##Asset", fragmentShaderIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+
+            if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                lustra::FragmentShaderAssetPtr* payload = &shader;
+                
+                ImGui::SetDragDropPayload("FS", payload, 8);
+                ImGui::Image(fragmentShaderIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Text("Fragment shader: %s", entry.filename().string().c_str());
+
+                ImGui::EndDragDropSource();
+            }
+
+            break;
+        }
+
         default:
             break;
     }
@@ -263,6 +301,14 @@ void Editor::DrawUnloadedAsset(const std::filesystem::path& entry)
 
             case lustra::Asset::Type::Sound:
                 lustra::AssetManager::Get().Load<lustra::SoundAsset>(entry);
+                break;
+
+            case lustra::Asset::Type::VertexShader:
+                lustra::AssetManager::Get().Load<lustra::VertexShaderAsset>(entry);
+                break;
+
+            case lustra::Asset::Type::FragmentShader:
+                lustra::AssetManager::Get().Load<lustra::FragmentShaderAsset>(entry);
                 break;
 
             default:
@@ -477,6 +523,10 @@ void Editor::DrawMaterialEditor(lustra::MaterialAssetPtr material)
     ImGui::Separator();
     ImGui::Text("UV Scale:");
     ImGui::DragFloat2("##UVScale", &material->uvScale.x, 0.01f, 0.0f, 100.0f);
+
+    ImGui::Separator();
+    ImGui::Text("UV Offset:");
+    ImGui::DragFloat2("##UVOffset", &material->uvOffset.x, 0.01f, 0.0f, 100.0f);
 
     ImGui::End();
 }

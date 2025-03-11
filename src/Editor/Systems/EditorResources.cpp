@@ -19,6 +19,9 @@ void Editor::LoadIcons()
 
     soundIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/sound.png", true);
 
+    vertexShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/vertexShader.png", true);
+    fragmentShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/fragmentShader.png", true);
+
     assetIcons = 
     {
         { lustra::Asset::Type::Texture, textureIcon },
@@ -27,6 +30,8 @@ void Editor::LoadIcons()
         { lustra::Asset::Type::Script, scriptIcon },
         { lustra::Asset::Type::Scene, sceneIcon },
         { lustra::Asset::Type::Sound, soundIcon },
+        { lustra::Asset::Type::VertexShader, vertexShaderIcon },
+        { lustra::Asset::Type::FragmentShader, fragmentShaderIcon },
         { lustra::Asset::Type::Unknown, fileIcon }
     };
 }
@@ -149,8 +154,12 @@ void Editor::UpdateEditorCameraScript()
             else
                 speed = glm::mix(speed, 0.0f, lerpSpeed);
 
+            auto deltaPosition = glm::normalize(movement) * deltaTime * speed;
+
             if(speed > 0.0f)
-                transform.position += glm::normalize(movement) * deltaTime * speed;
+                transform.position += deltaPosition;
+
+            lustra::Listener::Get().SetVelocity(deltaPosition / deltaTime);
 
             glm::vec2 center(window->GetContentSize().width / 2.0f, window->GetContentSize().height / 2.0f);
             glm::vec2 delta = center - lustra::Mouse::GetPosition();
@@ -163,7 +172,10 @@ void Editor::UpdateEditorCameraScript()
             lustra::Mouse::SetPosition(center);
         }
         else
+        {
+            lustra::Listener::Get().SetVelocity(glm::vec3(0.0f));
             lustra::Mouse::SetCursorVisible();
+        }
     };
 }
 

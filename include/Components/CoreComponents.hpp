@@ -57,13 +57,7 @@ struct PipelineComponent : public ComponentBase, public EventListener
         EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
 
         if(vertexShader && fragmentShader)
-        {
-            pipeline = 
-                Renderer::Get().CreatePipelineState(
-                    vertexShader->shader,
-                    fragmentShader->shader
-                );
-        }
+            SetupPipeline();
     }
 
     PipelineComponent(PipelineComponent&& other)
@@ -87,8 +81,17 @@ struct PipelineComponent : public ComponentBase, public EventListener
             auto& assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
 
             if(assetLoadedEvent.GetAsset() == vertexShader || assetLoadedEvent.GetAsset() == fragmentShader)
-                pipeline = Renderer::Get().CreatePipelineState(vertexShader->shader, fragmentShader->shader);
+                SetupPipeline();
         }
+    }
+
+    void SetupPipeline()
+    {
+        pipeline =
+            Renderer::Get().CreatePipelineState(
+                vertexShader->shader,
+                fragmentShader->shader
+            );
     }
 
     VertexShaderAssetPtr vertexShader;

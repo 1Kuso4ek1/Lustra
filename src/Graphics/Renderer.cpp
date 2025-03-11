@@ -306,7 +306,9 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
         { "emissionType", LLGL::UniformType::Int1 },
         { "emissionValue", LLGL::UniformType::Float3 },
         { "emissionStrength", LLGL::UniformType::Float1 },
-        { "uvScale", LLGL::UniformType::Float2 }
+        { "uvScale", LLGL::UniformType::Float2 },
+        { "uvOffset", LLGL::UniformType::Float2 },
+        { "time", LLGL::UniformType::Float1 }
     };
 
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
@@ -338,8 +340,10 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
     return pipelineCache[key];
 }
 
-LLGL::PipelineState* Renderer::CreatePipelineState(const LLGL::PipelineLayoutDescriptor& layoutDesc,
-                                                   LLGL::GraphicsPipelineDescriptor pipelineDesc)
+LLGL::PipelineState* Renderer::CreatePipelineState(
+    const LLGL::PipelineLayoutDescriptor& layoutDesc,
+    LLGL::GraphicsPipelineDescriptor pipelineDesc
+)
 {
     LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
 

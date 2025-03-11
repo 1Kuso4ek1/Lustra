@@ -53,14 +53,14 @@
         "emission": {
             "type": 0,
             "value": {
-                "x": 1.0,
+                "x": 0.772549033164978,
                 "y": 0.0,
                 "z": 0.0,
                 "w": 0.0
             },
             "texturePath": "../resources/textures/default"
         },
-        "emissionStrength": 10.0,
+        "emissionStrength": 4.760000228881836,
         "uvScale": {
             "x": 1.0,
             "y": 1.0

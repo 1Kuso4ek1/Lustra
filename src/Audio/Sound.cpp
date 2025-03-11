@@ -54,7 +54,12 @@ void Sound::SetDirection(const glm::vec3& direction)
 
 void Sound::SetCone(const Cone& cone)
 {
-    ma_sound_set_cone(sound.get(), cone.inner, cone.outer, cone.outerGain);
+    ma_sound_set_cone(
+        sound.get(),
+        glm::radians(cone.inner),
+        glm::radians(cone.outer),
+        cone.outerGain
+    );
 }
 
 void Sound::SetDirectionalAttenuationFactor(float factor)
@@ -164,6 +169,9 @@ Sound::Cone Sound::GetCone()
     Cone cone;
 
     ma_sound_get_cone(sound.get(), &cone.inner, &cone.outer, &cone.outerGain);
+
+    cone.inner = glm::degrees(cone.inner);
+    cone.outer = glm::degrees(cone.outer);
 
     return cone;
 }

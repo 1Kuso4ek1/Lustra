@@ -416,12 +416,12 @@ void load(Archive& archive, RigidBodyComponent& component)
 }
 
 template<class Archive>
-void serialize(Archive& archive, Sound::Cone& component)
+void serialize(Archive& archive, Sound::Cone& cone)
 {
     archive(
-        cereal::make_nvp("outerAngle", component.outer),
-        cereal::make_nvp("innerAngle", component.inner),
-        cereal::make_nvp("outerGain", component.outerGain)
+        cereal::make_nvp("outerAngle", cone.outer),
+        cereal::make_nvp("innerAngle", cone.inner),
+        cereal::make_nvp("outerGain", cone.outerGain)
     );
 }
 

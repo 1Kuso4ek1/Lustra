@@ -33,6 +33,8 @@ struct MeshComponent : public ComponentBase
           model(AssetManager::Get().Load<ModelAsset>("cube", true)) {}
 
     ModelAssetPtr model;
+
+    bool drawable = true;
 };
 
 struct MeshRendererComponent : public ComponentBase

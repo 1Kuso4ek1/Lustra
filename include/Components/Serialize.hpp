@@ -144,6 +144,8 @@ void save(Archive& archive, const MeshComponent& component)
         archive(cereal::make_nvp("modelPath", component.model->path.string()));
     else
         archive(cereal::make_nvp("modelPath", ""));
+
+    archive(cereal::make_nvp("drawable", component.drawable));
 }
 
 template<class Archive>
@@ -155,6 +157,8 @@ void load(Archive& archive, MeshComponent& component)
 
     if(!path.empty())
         component.model = AssetManager::Get().Load<ModelAsset>(path);
+
+    archive(component.drawable);
 }
 
 template<class Archive>

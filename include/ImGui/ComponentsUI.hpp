@@ -36,6 +36,8 @@ inline void DrawComponentUI(MeshComponent& component, entt::entity)
 
         ImGui::EndDragDropTarget();
     }
+
+    ImGui::Checkbox("Drawable", &component.drawable);
 }
 
 inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entity)

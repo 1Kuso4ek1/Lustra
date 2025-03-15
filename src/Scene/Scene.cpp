@@ -525,6 +525,8 @@ void Scene::SetupShadows()
 
 void Scene::RenderMeshes()
 {
+    bool empty = true;
+
     auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
     
     for(auto entity : view)
@@ -563,15 +565,20 @@ void Scene::RenderMeshes()
             }
         }
 
+        if(!mesh.drawable)
+            continue;
+
         Renderer::Get().GetMatrices()->PushMatrix();
         Renderer::Get().GetMatrices()->GetModel() = GetWorldTransform(entity);
 
         MeshRenderPass(mesh, meshRenderer, pipeline, renderer->GetPrimaryRenderTarget());
 
         Renderer::Get().GetMatrices()->PopMatrix();
+
+        empty = false;
     }
 
-    if(view.begin() == view.end())
+    if(empty)
         Renderer::Get().ClearRenderTarget(renderer->GetPrimaryRenderTarget());
 }
 

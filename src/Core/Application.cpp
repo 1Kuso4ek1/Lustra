@@ -63,6 +63,9 @@ void Application::Run()
         deltaTimeTimer.Reset();
 
         Render();
+        RenderImGui();
+
+        Renderer::Get().Present();
     }
 }
 

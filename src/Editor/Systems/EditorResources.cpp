@@ -182,7 +182,6 @@ void Editor::UpdateEditorCameraScript()
 void Editor::SwitchScene(lustra::SceneAssetPtr scene)
 {
     this->scene = scene->scene;
-    scene->scene->SetRenderer(deferredRenderer);
 
     sceneAsset = scene;
 

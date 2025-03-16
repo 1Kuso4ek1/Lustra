@@ -4,13 +4,11 @@
 namespace lustra
 {
 
-DeferredRenderer::DeferredRenderer(
-    const LLGL::Extent2D& resolution,
-    bool registerEvent
-)
+DeferredRenderer::DeferredRenderer()
 {
-    if(registerEvent)
-        EventManager::Get().AddListener(Event::Type::WindowResize, this);
+    LLGL::Extent2D resolution = Renderer::Get().GetViewportResolution();
+
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
 
     LLGL::TextureDescriptor colorAttachmentDesc =
     {

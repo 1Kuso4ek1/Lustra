@@ -9,9 +9,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Render() override;
-
-private:
-    void RenderImGui();
+    void RenderImGui() override;
 
 private:
     lustra::TextureAssetPtr logo;

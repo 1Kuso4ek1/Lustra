@@ -6,8 +6,7 @@
 namespace lustra
 {
 
-Scene::Scene(std::shared_ptr<RendererBase> renderer)
-    : renderer(renderer)
+Scene::Scene()
 {
     Setup();
 }
@@ -28,11 +27,6 @@ void Scene::Setup()
         SetupLightsBuffer();
         SetupShadowsBuffer();
     }
-}
-
-void Scene::SetRenderer(std::shared_ptr<RendererBase> renderer)
-{
-    this->renderer = renderer;
 }
 
 void Scene::Start()
@@ -571,7 +565,7 @@ void Scene::RenderMeshes()
         Renderer::Get().GetMatrices()->PushMatrix();
         Renderer::Get().GetMatrices()->GetModel() = GetWorldTransform(entity);
 
-        MeshRenderPass(mesh, meshRenderer, pipeline, renderer->GetPrimaryRenderTarget());
+        MeshRenderPass(mesh, meshRenderer, pipeline, DeferredRenderer::Get().GetPrimaryRenderTarget());
 
         Renderer::Get().GetMatrices()->PopMatrix();
 
@@ -579,7 +573,7 @@ void Scene::RenderMeshes()
     }
 
     if(empty)
-        Renderer::Get().ClearRenderTarget(renderer->GetPrimaryRenderTarget());
+        Renderer::Get().ClearRenderTarget(DeferredRenderer::Get().GetPrimaryRenderTarget());
 }
 
 void Scene::RenderToShadowMap()
@@ -690,7 +684,7 @@ void Scene::MeshRenderPass(
                 mesh.model->meshes[i]->Draw(commandBuffer);
             },
             pipeline.pipeline,
-            renderer->GetPrimaryRenderTarget()
+            DeferredRenderer::Get().GetPrimaryRenderTarget()
         );
     }
 }
@@ -809,7 +803,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
         brdf = sky.asset->brdf;
     }
 
-    renderer->Draw(
+    DeferredRenderer::Get().Draw(
         {
             { 5, lightsBuffer },
             { 6, shadowsBuffer },
@@ -856,17 +850,14 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
     // Problem: reflections don't affect bloom yet
     auto ssrResult = ApplySSR(toneMapping.postProcessing->GetFrame());
     auto bloomResult = ApplyBloom(toneMapping.postProcessing->GetFrame());
-
-    // Needs some attention
-    auto deferredRenderer = static_pointer_cast<DeferredRenderer>(renderer);
     
     toneMapping.postProcessing->Apply(
         {
             { 0, toneMapping.postProcessing->GetFrame() },
             { 1, bloomResult.first },
             { 2, ssrResult },
-            { 3, deferredRenderer->GetAlbedo() },
-            { 4, deferredRenderer->GetCombined() },
+            { 3, DeferredRenderer::Get().GetAlbedo() },
+            { 4, DeferredRenderer::Get().GetCombined() },
             { 5, toneMapping.lut->texture }
         },
         [&](auto commandBuffer)
@@ -938,7 +929,7 @@ LLGL::Texture* Scene::ApplyGTAO()
 
     auto& gtao = *gtaoView->begin();
 
-    auto depth = renderer->GetDepth();
+    auto depth = DeferredRenderer::Get().GetDepth();
 
     Renderer::Get().GenerateMips(depth);
 
@@ -985,12 +976,9 @@ LLGL::Texture* Scene::ApplySSR(LLGL::Texture* frame)
 
     auto& ssr = *ssrView->begin();
 
-    // Needs some attention
-    auto deferredRenderer = static_pointer_cast<DeferredRenderer>(renderer);
-
-    auto gNormal = deferredRenderer->GetNormal();
-    auto gCombined = deferredRenderer->GetCombined();
-    auto depth = deferredRenderer->GetDepth();
+    auto gNormal = DeferredRenderer::Get().GetNormal();
+    auto gCombined = DeferredRenderer::Get().GetCombined();
+    auto depth = DeferredRenderer::Get().GetDepth();
 
     ssr.ssr->Apply(
         {

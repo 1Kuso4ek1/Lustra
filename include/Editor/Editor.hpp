@@ -22,6 +22,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Render() override;
+    void RenderImGui() override;
 
 private:
     void LoadIcons();
@@ -41,8 +42,6 @@ private:
     void CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera = false);
 
     void CreateRenderTarget(const LLGL::Extent2D& resolution = lustra::Renderer::Get().GetViewportResolution());
-
-    void DrawImGui();
 
     void DrawSceneTree();
     void DrawEntityNode(lustra::Entity entity);
@@ -77,6 +76,9 @@ private:
     bool playing = false, paused = false;
 
 private:
+    bool fullscreenViewport = false;
+
+private:
     ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
     float snap[3] = { 1.0f, 1.0f, 1.0f };
 
@@ -89,8 +91,6 @@ private:
     std::vector<lustra::Entity> list;
 
 private:
-    std::shared_ptr<lustra::DeferredRenderer> deferredRenderer;
-
     lustra::SceneAssetPtr sceneAsset;
     std::shared_ptr<lustra::Scene> scene;
 
@@ -111,7 +111,6 @@ private:
                             playIcon, pauseIcon, stopIcon,
                             buildIcon, lightIcon, sceneIcon,
                             soundIcon, vertexShaderIcon, fragmentShaderIcon;
-    lustra::MaterialAssetPtr ak47Metal, ak47Wood;
 
     std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;
 };

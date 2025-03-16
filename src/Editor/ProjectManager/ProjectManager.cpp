@@ -32,15 +32,13 @@ void ProjectManager::Update(float deltaTime)
 
 void ProjectManager::Render()
 {
-    lustra::Renderer::Get().ClearRenderTarget();
-
-    RenderImGui();
-
-    lustra::Renderer::Get().Present();
+    
 }
 
 void ProjectManager::RenderImGui()
 {
+    lustra::Renderer::Get().ClearRenderTarget();
+    
     lustra::ImGuiManager::Get().NewFrame();
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));

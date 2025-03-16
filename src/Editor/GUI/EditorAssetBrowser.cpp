@@ -455,7 +455,7 @@ bool Editor::DrawCreateSceneMenu(const std::filesystem::path& currentDirectory)
         {
             lustra::SceneAssetPtr newScene = 
                 std::make_shared<lustra::SceneAsset>(
-                    std::make_shared<lustra::Scene>(deferredRenderer)
+                    std::make_shared<lustra::Scene>()
                 );
 
             newScene->path = currentDirectory / newSceneName;

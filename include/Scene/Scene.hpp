@@ -15,12 +15,10 @@ class Entity;
 class Scene : public EventListener
 {
 public:
-    Scene(std::shared_ptr<RendererBase> renderer = std::make_shared<RendererBase>());
+    Scene();
     ~Scene();
 
     void Setup();
-
-    void SetRenderer(std::shared_ptr<RendererBase> renderer);
 
     void Start();
 
@@ -130,9 +128,6 @@ private:
 
     LLGL::Buffer* lightsBuffer{};
     LLGL::Buffer* shadowsBuffer{};
-
-private:
-    std::shared_ptr<RendererBase> renderer;
 
 private:
     entt::registry registry{};

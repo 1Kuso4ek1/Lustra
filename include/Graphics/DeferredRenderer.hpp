@@ -10,13 +10,9 @@
 namespace lustra
 {
 
-class DeferredRenderer : public RendererBase, public EventListener
+class DeferredRenderer : public RendererBase, public EventListener, public Singleton<DeferredRenderer>
 {
 public:
-    DeferredRenderer(
-        const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
-        bool registerEvent = true
-    );
     ~DeferredRenderer();
 
     void Draw(
@@ -35,6 +31,11 @@ public:
     LLGL::Texture* GetNormal();
     LLGL::Texture* GetCombined();
     LLGL::Texture* GetEmission();
+
+private:
+    DeferredRenderer();
+
+    friend class Singleton<DeferredRenderer>;
 
 private:
     LLGL::Texture* gBufferPosition;

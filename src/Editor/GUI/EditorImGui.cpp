@@ -1,7 +1,12 @@
 #include <Editor.hpp>
 
-void Editor::DrawImGui()
+void Editor::RenderImGui()
 {
+    if(fullscreenViewport)
+        return;
+
+    lustra::Renderer::Get().ClearRenderTarget();
+
     lustra::ImGuiManager::Get().NewFrame();
 
     ImGuizmo::BeginFrame();

@@ -20,14 +20,12 @@ void Editor::Init()
 
     LoadIcons();
 
-    deferredRenderer = std::make_shared<lustra::DeferredRenderer>();
-
     auto mainScenePath = 
         lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>(config.mainScene, true);
 
     if(!std::filesystem::exists(mainScenePath))
     {
-        scene = std::make_shared<lustra::Scene>(deferredRenderer);
+        scene = std::make_shared<lustra::Scene>();
         sceneAsset = std::make_shared<lustra::SceneAsset>(scene);
         sceneAsset->path = mainScenePath;
 
@@ -87,6 +85,41 @@ void Editor::Update(float deltaTime)
         keyboardTimer.Reset();
     }
 
+    if(checkShortcut({ Keyboard::Key::F11 }))
+    {
+        fullscreenViewport = !fullscreenViewport;
+
+        canMoveCamera = true;
+
+        lustra::WindowResizeEvent event(
+            fullscreenViewport ? window->GetContentSize() : lustra::Renderer::Get().GetViewportResolution()
+        );
+
+        lustra::EventManager::Get().Dispatch(std::make_unique<lustra::WindowResizeEvent>(event));
+    }
+
+    if(checkShortcut({ Keyboard::Key::F5 }))
+    {
+        playing = !playing;
+        paused = false;
+
+        if(playing)
+        {
+            scene->SetIsRunning(true);
+            scene->Start();
+        }
+        else
+            scene->SetIsRunning(false);
+
+        keyboardTimer.Reset();
+    }
+
+    if(checkShortcut({ Keyboard::Key::F6 }) && playing)
+    {
+        paused = !paused;
+        keyboardTimer.Reset();
+    }
+
     if((checkShortcut({ Keyboard::Key::LeftControl, Keyboard::Key::S }) ||
         sceneSaveTimer.GetElapsedSeconds() >= 10.0f) && !playing)
     {
@@ -98,13 +131,7 @@ void Editor::Update(float deltaTime)
 
 void Editor::Render()
 {
-    scene->Draw(viewportRenderTarget);
-
-    lustra::Renderer::Get().ClearRenderTarget();
-
-    DrawImGui();
-
-    lustra::Renderer::Get().Present();
+    scene->Draw(fullscreenViewport ? lustra::Renderer::Get().GetSwapChain() : viewportRenderTarget);
 }
 
 void Editor::OnEvent(lustra::Event& event)

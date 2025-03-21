@@ -3,6 +3,8 @@
 
 int main()
 {
+    lustra::EventManager::Get();
+
     std::filesystem::current_path(EDITOR_ROOT);
 
     ProjectManager().Run();

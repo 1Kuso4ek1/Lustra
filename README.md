@@ -25,7 +25,7 @@
 ## Building
 Every direct dependency is included within this repository as a submodule:
 ```bash
-git clone --recursive --depth=1 https://github.com/1Kuso4ek1/Lustra.git
+git clone --recursive --depth=1 --shallow-submodules https://github.com/1Kuso4ek1/Lustra.git
 ```
 And as with any other CMake project, create `build` directory, configure and build
 ```bash

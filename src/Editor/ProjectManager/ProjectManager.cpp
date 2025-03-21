@@ -206,9 +206,13 @@ void ProjectManager::RenderImGui()
 
     ImGui::Separator();
 
+    ImGui::Text("Recent Projects");
+
+    ImGui::BeginChild("Recent projects", { 500, 200 }, ImGuiChildFlags_FrameStyle);
+
     for(int i = 0; i < recentProjects.size(); i++)
     {
-        if(ImGui::Button(recentProjects[i].filename().string().c_str()))
+        if(ImGui::Button(recentProjects[i].filename().string().c_str(), { ImGui::GetContentRegionAvail().x, 30 }))
         {
             fs::current_path(recentProjects[i]);
 
@@ -226,6 +230,8 @@ void ProjectManager::RenderImGui()
 
     if(recentProjects.empty())
         ImGui::TextDisabled("No recent projects yet");
+
+    ImGui::EndChild();
     
     ImGui::End();
     ImGui::PopStyleVar();

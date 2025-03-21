@@ -10,9 +10,8 @@ void Editor::Init()
     if(!window->IsFullscreen())
         window->Maximize();
 
-    lustra::AudioManager::Get().Init();
-
     SetupAssetManager();
+    
     lustra::AssetManager::Get().LaunchWatch();
 
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);

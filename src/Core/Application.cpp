@@ -28,6 +28,8 @@ Application::Application(const Config& config) : config(config)
     );
 
     PhysicsManager::Get();
+
+    AudioManager::Get().Init();
 }
 
 Application::~Application()

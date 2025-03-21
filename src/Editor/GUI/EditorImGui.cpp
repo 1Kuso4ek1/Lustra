@@ -536,7 +536,8 @@ void Editor::DrawViewport()
                 { 64, 64 },
                 { 0, 0 },
                 { 1, 1 },
-                { lightColor.x, lightColor.y, lightColor.z, 0.5f }
+                { lightColor.x, lightColor.y, lightColor.z, 0.5f },
+                { 0.0f, 0.0f, 0.0f, 0.0f }
             );
 
             ImGui::PopID();

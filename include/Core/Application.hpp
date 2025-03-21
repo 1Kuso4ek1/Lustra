@@ -28,13 +28,12 @@ public:
     virtual ~Application();
 
     virtual void Run();
+    virtual void Stop();
 
     virtual void Init() = 0;
     virtual void Update(float deltaTime) = 0;
     virtual void Render() = 0;
     virtual void RenderImGui() {};
-
-    void Stop();
 
 protected:
     void SetupAssetManager();

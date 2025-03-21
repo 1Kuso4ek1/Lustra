@@ -2,6 +2,8 @@
 
 namespace fs = std::filesystem;
 
+bool ProjectManager::projectOpened = false;
+
 ProjectManager::ProjectManager()
     : lustra::Application(lustra::Config{
         .resolution = { 1280, 720 },
@@ -31,6 +33,13 @@ ProjectManager::~ProjectManager()
         for(auto& project : recentProjects)
             archive(cereal::make_nvp("project", project.string()));
     }
+}
+
+void ProjectManager::Stop()
+{
+    projectOpened = true;
+
+    lustra::Application::Stop();
 }
 
 void ProjectManager::Init()
@@ -222,6 +231,11 @@ void ProjectManager::RenderImGui()
     ImGui::PopStyleVar();
 
     lustra::ImGuiManager::Get().Render();
+}
+
+bool ProjectManager::IsProjectOpened()
+{
+    return projectOpened;
 }
 
 void ProjectManager::CreateProject(const fs::path& path)

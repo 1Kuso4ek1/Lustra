@@ -25,11 +25,16 @@ public:
     JPH::BodyInterface& GetBodyInterface();
 
 private:
+    PhysicsManager();
+
+    friend class Singleton<PhysicsManager>;
+
+private:
     std::unique_ptr<CollisionListener> collisionListener;
     std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
     std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
 
-    JPH::PhysicsSystem physicsSystem;
+    std::unique_ptr<JPH::PhysicsSystem> physicsSystem;
 
     BroadPhaseLayerInterface broadPhaseLayer{};
 	ObjectVsBroadPhaseLayerFilter objectVsBroadPhaseFilter{};

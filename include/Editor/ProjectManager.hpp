@@ -6,10 +6,15 @@ public:
     ProjectManager();
     ~ProjectManager();
 
+    void Stop() override;
+
     void Init() override;
     void Update(float deltaTime) override;
     void Render() override;
     void RenderImGui() override;
+
+public:
+    static bool IsProjectOpened();
 
 private:
     void CreateProject(const std::filesystem::path& path);
@@ -37,6 +42,8 @@ private:
 private:
     bool showCreatePopup = false;
     bool showOpenPopup = false;
+
+    static bool projectOpened;
 
     std::string newProjectName, newProjectPath;
 

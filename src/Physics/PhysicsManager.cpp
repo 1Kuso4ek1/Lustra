@@ -3,6 +3,13 @@
 namespace lustra
 {
 
+PhysicsManager::PhysicsManager()
+{
+    JPH::RegisterDefaultAllocator();
+    JPH::Factory::sInstance = new JPH::Factory();
+    JPH::RegisterTypes();
+}
+
 PhysicsManager::~PhysicsManager()
 {
     JPH::UnregisterTypes();
@@ -13,9 +20,7 @@ PhysicsManager::~PhysicsManager()
 
 void PhysicsManager::Init()
 {
-    JPH::RegisterDefaultAllocator();
-    JPH::Factory::sInstance = new JPH::Factory();
-    JPH::RegisterTypes();
+    physicsSystem = std::make_unique<JPH::PhysicsSystem>();
 
     collisionListener = std::make_unique<CollisionListener>();
 
@@ -27,7 +32,7 @@ void PhysicsManager::Init()
         std::thread::hardware_concurrency() - 1
     );
 
-    physicsSystem.Init(
+    physicsSystem->Init(
         1024,
         0,
         1024,
@@ -37,13 +42,13 @@ void PhysicsManager::Init()
         objectLayerPairFilter
     );
 
-    physicsSystem.SetContactListener(collisionListener.get());
+    physicsSystem->SetContactListener(collisionListener.get());
 }
 
 void PhysicsManager::Update(float deltaTime)
 {
-    physicsSystem.OptimizeBroadPhase();
-    physicsSystem.Update(deltaTime, 1, tempAllocator.get(), jobSystem.get());
+    physicsSystem->OptimizeBroadPhase();
+    physicsSystem->Update(deltaTime, 1, tempAllocator.get(), jobSystem.get());
 }
 
 void PhysicsManager::DestroyBody(const JPH::BodyID& bodyId)
@@ -70,12 +75,12 @@ JPH::Body* PhysicsManager::CreateBody(const JPH::BodyCreationSettings& settings)
 
 JPH::PhysicsSystem& PhysicsManager::GetPhysicsSystem()
 {
-    return physicsSystem;
+    return *physicsSystem;
 }
 
 JPH::BodyInterface& PhysicsManager::GetBodyInterface()
 {
-    return physicsSystem.GetBodyInterface();
+    return physicsSystem->GetBodyInterface();
 }
 
 }

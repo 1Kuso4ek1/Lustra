@@ -10,8 +10,8 @@ void Editor::Init()
     if(!window->IsFullscreen())
         window->Maximize();
 
-    lustra::PhysicsManager::Get().Init();
-    
+    lustra::AudioManager::Get().Init();
+
     SetupAssetManager();
     lustra::AssetManager::Get().LaunchWatch();
 
@@ -25,6 +25,8 @@ void Editor::Init()
 
     auto mainScenePath = 
         lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>(config.mainScene, true);
+
+    lustra::PhysicsManager::Get().Init();
 
     if(!std::filesystem::exists(mainScenePath))
     {

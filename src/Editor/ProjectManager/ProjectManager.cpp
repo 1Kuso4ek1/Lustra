@@ -19,6 +19,18 @@ ProjectManager::~ProjectManager()
     lustra::AssetManager::Get().RemoveLoader<lustra::TextureAsset>();
 
     lustra::Renderer::Get().Release(logo->texture);
+
+    std::ofstream file(EDITOR_ROOT"/resources/config/recent.json");
+
+    if(file.is_open())
+    {
+        cereal::JSONOutputArchive archive(file);
+
+        archive(cereal::make_nvp("size",recentProjects.size()));
+
+        for(auto& project : recentProjects)
+            archive(cereal::make_nvp("project", project.string()));
+    }
 }
 
 void ProjectManager::Init()
@@ -27,6 +39,24 @@ void ProjectManager::Init()
     lustra::AssetManager::Get().AddLoader<lustra::TextureAsset, lustra::TextureLoader>("");
 
     logo = lustra::AssetManager::Get().Load<lustra::TextureAsset>("resources/branding/logo.png");
+
+    std::ifstream file(EDITOR_ROOT"/resources/config/recent.json");
+
+    if(file.is_open())
+    {
+        cereal::JSONInputArchive archive(file);
+
+        int size;
+        std::string in;
+
+        archive(size);
+
+        for(int i = 0; i < size; i++)
+        {
+            archive(in);
+            recentProjects.emplace_back(in);
+        }
+    }
 }
 
 void ProjectManager::Update(float deltaTime) {}
@@ -88,9 +118,17 @@ void ProjectManager::RenderImGui()
             {
                 try
                 {
-                    CreateProject(fs::path(newProjectPath) / newProjectName);
+                    auto path = fs::path(newProjectPath) / newProjectName;
 
-                    fs::current_path(fs::path(newProjectPath) / newProjectName);
+                    CreateProject(path);
+
+                    fs::current_path(path);
+
+                    auto it = std::find(recentProjects.begin(), recentProjects.end(), path);
+                    if(it != recentProjects.end())
+                        recentProjects.erase(it);
+
+                    recentProjects.insert(recentProjects.begin(), fs::path(path));
 
                     Stop();
                 }
@@ -140,6 +178,13 @@ void ProjectManager::RenderImGui()
             {
                 fs::current_path(newProjectPath);
 
+                // insert in the front, check for duplicate
+                auto it = std::find(recentProjects.begin(), recentProjects.end(), newProjectPath);
+                if(it != recentProjects.end())
+                    recentProjects.erase(it);
+
+                recentProjects.insert(recentProjects.begin(), fs::path(newProjectPath));
+
                 Stop();
             }
 
@@ -149,6 +194,29 @@ void ProjectManager::RenderImGui()
             ImGui::EndPopup();
         }
     }
+
+    ImGui::Separator();
+
+    for(int i = 0; i < recentProjects.size(); i++)
+    {
+        if(ImGui::Button(recentProjects[i].filename().string().c_str()))
+        {
+            fs::current_path(recentProjects[i]);
+
+            if(recentProjects.size() > 1)
+            {
+                recentProjects.insert(recentProjects.begin(), recentProjects[i]);
+                recentProjects.erase(recentProjects.begin() + i + 1);
+            }
+
+            Stop();
+
+            break;
+        }
+    }
+
+    if(recentProjects.empty())
+        ImGui::TextDisabled("No recent projects yet");
     
     ImGui::End();
     ImGui::PopStyleVar();

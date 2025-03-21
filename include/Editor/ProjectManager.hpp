@@ -15,6 +15,8 @@ private:
     void CreateProject(const std::filesystem::path& path);
 
 private:
+    std::vector<std::filesystem::path> recentProjects;
+
     const std::vector<std::filesystem::path> projectStructure =
     {
         "config", "fonts", "materials",

@@ -7,6 +7,10 @@ int main()
 
     ProjectManager().Run();
     Editor(
-        lustra::Config::Load("resources/config/config.json")
+        lustra::Config::Load(
+            std::filesystem::current_path().string() == EDITOR_ROOT
+                ? "resources/config/config.json"
+                : "assets/config/config.json"
+        )
     ).Run();
 }

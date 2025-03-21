@@ -2,6 +2,10 @@
 
 void Editor::LoadIcons()
 {
+    auto currentDir = lustra::AssetManager::Get().GetAssetsDirectory();
+
+    lustra::AssetManager::Get().SetAssetsDirectory(EDITOR_ROOT / std::filesystem::path("resources"));
+
     fileIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/file.png", true);
     folderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/folder.png", true);
     textureIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/texture.png", true);
@@ -34,6 +38,8 @@ void Editor::LoadIcons()
         { lustra::Asset::Type::FragmentShader, fragmentShaderIcon },
         { lustra::Asset::Type::Unknown, fileIcon }
     };
+
+    lustra::AssetManager::Get().SetAssetsDirectory(currentDir);
 }
 
 void Editor::CreateDefaultEntities()

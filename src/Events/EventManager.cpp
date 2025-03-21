@@ -4,6 +4,11 @@
 namespace lustra
 {
 
+EventManager::~EventManager()
+{
+    listeners.clear();
+}
+
 void EventManager::AddListener(Event::Type eventType, EventListener* listener)
 {
     auto& vec = listeners[eventType];

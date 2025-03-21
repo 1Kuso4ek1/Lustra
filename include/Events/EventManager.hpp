@@ -12,6 +12,8 @@ namespace lustra
 class EventManager : public Singleton<EventManager>
 {
 public:
+    ~EventManager();
+    
     void AddListener(Event::Type eventType, EventListener* listener);
     void RemoveListener(Event::Type eventType, EventListener* listener);
 

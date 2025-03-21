@@ -26,6 +26,9 @@ public:
     void Render();
     void Destroy();
 
+public:
+    void SetIniPath(const std::filesystem::path& path);
+
 private:
     void SetupStyle();
 

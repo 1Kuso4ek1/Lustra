@@ -7,6 +7,9 @@ Editor::Editor(const lustra::Config& config) : lustra::Application(config)
 
 void Editor::Init()
 {
+    if(!window->IsFullscreen())
+        window->Maximize();
+
     lustra::PhysicsManager::Get().Init();
     
     SetupAssetManager();
@@ -139,6 +142,8 @@ void Editor::OnEvent(lustra::Event& event)
     if(event.GetType() == lustra::Event::Type::WindowResize)
     {
         auto resizeEvent = dynamic_cast<lustra::WindowResizeEvent*>(&event);
+
+        lustra::Renderer::Get().SetViewportResolution(resizeEvent->GetSize());
 
         CreateRenderTarget(resizeEvent->GetSize());
     }

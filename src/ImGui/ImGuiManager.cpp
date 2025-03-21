@@ -28,6 +28,8 @@ void ImGuiManager::Init(
 
     if(!iniPath.empty() && std::filesystem::exists(iniPath))
         io.IniFilename = this->iniPath.c_str();
+    else if(iniPath.string() == "null")
+        io.IniFilename = nullptr;
 
     ImFontConfig config;
     config.OversampleH = 8;
@@ -61,6 +63,12 @@ void ImGuiManager::Destroy()
     ImGui::DestroyContext();
 
     initialized = false;
+}
+
+void ImGuiManager::SetIniPath(const std::filesystem::path& path)
+{
+    iniPath = path.string();
+    ImGui::GetIO().IniFilename = iniPath.c_str();
 }
 
 void ImGuiManager::SetupStyle()

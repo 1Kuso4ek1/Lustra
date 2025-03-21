@@ -31,6 +31,9 @@ public:
     void Close();
 
     void SetFullscreen(bool fullscreen);
+    void Maximize();
+    void Minimize();
+    void Restore();    
 
     GLFWwindow* GetGLFWWindow() const;
     static GLFWwindow* GetLastCreatedGLFWWindow();

@@ -69,6 +69,11 @@ void Application::Run()
     }
 }
 
+void Application::Stop()
+{
+    window->Close();
+}
+
 void Application::SetupAssetManager()
 {
     AssetManager::Get().SetAssetsDirectory(config.assetsRoot);

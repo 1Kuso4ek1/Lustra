@@ -61,6 +61,21 @@ void Window::SetFullscreen(bool fullscreen)
     glfwSetWindowMonitor(window, fullscreen ? glfwGetPrimaryMonitor() : nullptr, 0, 0, size.width, size.height, GLFW_DONT_CARE);
 }
 
+void Window::Maximize()
+{
+    glfwMaximizeWindow(window);
+}
+
+void Window::Minimize()
+{
+    glfwIconifyWindow(window);
+}
+
+void Window::Restore()
+{
+    glfwRestoreWindow(window);
+}
+
 GLFWwindow* Window::GetGLFWWindow() const
 {
     return window;

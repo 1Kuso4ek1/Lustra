@@ -80,34 +80,45 @@ void ProjectManager::RenderImGui()
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-    
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::Begin("Project Manager", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
 
-    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 600) * 0.5f);
-
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 512) * 0.5f);
     ImGui::Image(logo->nativeHandle, { 512, 214 });
 
+    ImGui::Spacing();
     ImGui::Separator();
+    ImGui::Spacing();
 
-    if(ImGui::Button("New Project"))
-    {
+    ImGui::BeginGroup();
+
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200.0f) * 0.5f);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.4f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.26f, 0.59f, 0.98f, 0.6f));
+    
+    if(ImGui::Button("New Project", ImVec2(200.0f, 40.0f))) {
         showCreatePopup = true;
         newProjectName.clear();
         newProjectPath = getenv("HOME");
     }
     
-    if(ImGui::Button("Open Project"))
-    {
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200.0f) * 0.5f);
+    if(ImGui::Button("Open Project", ImVec2(200.0f, 40.0f))) {
         showOpenPopup = true;
         newProjectName.clear();
         newProjectPath = getenv("HOME");
     }
-    
+
+    ImGui::PopStyleColor(2);
+
+    ImGui::EndGroup();
+
     if(showCreatePopup)
     {
         ImGui::OpenPopup("Create New Project");
-        
+
         if(ImGui::BeginPopupModal("Create New Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::InputText("Project Name", &newProjectName);
@@ -116,7 +127,7 @@ void ProjectManager::RenderImGui()
             ImGui::SameLine();
 
             if(ImGui::Button("Browse...")) { /* use https://github.com/samhocevar/portable-file-dialogs.git? */ }
-            
+
             ImGui::TextDisabled("(a folder \"%s\" will be created in this directory)", newProjectName.c_str());
 
             bool canCreate = !newProjectName.empty() && !newProjectPath.empty() && fs::exists(newProjectPath);
@@ -152,17 +163,18 @@ void ProjectManager::RenderImGui()
                 showCreatePopup = false;
                 ImGui::CloseCurrentPopup();
             }
-            
+
             if(!canCreate)
                 ImGui::EndDisabled();
             
             ImGui::SameLine();
+
             if(ImGui::Button("Cancel"))
             {
                 showCreatePopup = false;
                 ImGui::CloseCurrentPopup();
             }
-            
+
             ImGui::EndPopup();
         }
     }
@@ -187,7 +199,6 @@ void ProjectManager::RenderImGui()
             {
                 fs::current_path(newProjectPath);
 
-                // insert in the front, check for duplicate
                 auto it = std::find(recentProjects.begin(), recentProjects.end(), newProjectPath);
                 if(it != recentProjects.end())
                     recentProjects.erase(it);
@@ -200,19 +211,45 @@ void ProjectManager::RenderImGui()
             if(!canOpen)
                 ImGui::EndDisabled();
 
+            ImGui::SameLine();
+
+            if(ImGui::Button("Cancel"))
+            {
+                showOpenPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
             ImGui::EndPopup();
         }
     }
 
+    ImGui::Spacing();
     ImGui::Separator();
+    ImGui::Spacing();
 
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("Recent Projects").x) * 0.5f);
     ImGui::Text("Recent Projects");
 
-    ImGui::BeginChild("Recent projects", { 500, 200 }, ImGuiChildFlags_FrameStyle);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+    const ImVec4 evenColor = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
+    const ImVec4 oddColor = ImVec4(0.16f, 0.16f, 0.16f, 1.0f);
+    const ImVec4 hoverColor = ImVec4(0.5, 0.5f, 0.5f, 0.5f);
+
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 500.0f) * 0.5f);
+    ImGui::BeginChild("Recent projects", { 500.0f, 200 }, ImGuiChildFlags_FrameStyle);
 
     for(int i = 0; i < recentProjects.size(); i++)
     {
-        if(ImGui::Button(recentProjects[i].filename().string().c_str(), { ImGui::GetContentRegionAvail().x, 30 }))
+        ImGui::PushStyleColor(ImGuiCol_Button, (i % 2) ? oddColor : evenColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoverColor);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, hoverColor);
+
+        if(
+            ImGui::Button(
+                recentProjects[i].filename().string().c_str(),
+                { ImGui::GetContentRegionAvail().x, 30 }
+            )
+        )
         {
             fs::current_path(recentProjects[i]);
 
@@ -224,15 +261,36 @@ void ProjectManager::RenderImGui()
 
             Stop();
 
+            ImGui::PopStyleColor(3);
+
             break;
         }
+
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("%s", recentProjects[i].string().c_str());
+            ImGui::EndTooltip();
+        }
+
+        ImGui::PopStyleColor(3);
     }
 
     if(recentProjects.empty())
         ImGui::TextDisabled("No recent projects yet");
 
     ImGui::EndChild();
-    
+
+    ImGui::PopStyleVar();
+
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 60);
+    ImGui::Separator();
+
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 40);
+    ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize("GitHub").x) * 0.5f);
+
+    ImGui::TextLinkOpenURL("GitHub", "https://github.com/1Kuso4ek1/Lustra");
+
     ImGui::End();
     ImGui::PopStyleVar();
 

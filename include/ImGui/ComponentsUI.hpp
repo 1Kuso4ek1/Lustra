@@ -448,6 +448,7 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
         ImGui::Indent();
 
         static std::shared_ptr<JPH::ShapeSettings> settings;
+        static RigidBodyComponent::ShapeSettings tempSettings;
 
         if(ImGui::Combo("Shape type", &shapeType, shapeTypes.data(), shapeTypes.size()))
             settings.reset();
@@ -466,8 +467,8 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::EmptyShapeSettings>(settings)->
                     mCenterOfMass = { centerOfMass.x, centerOfMass.y, centerOfMass.z };
 
-                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Empty;
-                component.settings.centerOfMass = centerOfMass;
+                tempSettings.type = RigidBodyComponent::ShapeSettings::Type::Empty;
+                tempSettings.centerOfMass = centerOfMass;
 
                 break;
             }
@@ -484,8 +485,8 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::BoxShapeSettings>(settings)->
                     mHalfExtent = { halfExtent.x, halfExtent.y, halfExtent.z };
 
-                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Box;
-                component.settings.halfExtent = halfExtent;
+                tempSettings.type = RigidBodyComponent::ShapeSettings::Type::Box;
+                tempSettings.halfExtent = halfExtent;
 
                 break;
             }
@@ -502,8 +503,8 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::SphereShapeSettings>(settings)->
                     mRadius = radius;
 
-                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Sphere;
-                component.settings.radius = radius;
+                tempSettings.type = RigidBodyComponent::ShapeSettings::Type::Sphere;
+                tempSettings.radius = radius;
 
                 break;
             }
@@ -524,9 +525,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                 std::static_pointer_cast<JPH::CapsuleShapeSettings>(settings)->
                     mHalfHeightOfCylinder = halfHeight;
 
-                component.settings.type = RigidBodyComponent::ShapeSettings::Type::Capsule;
-                component.settings.radius = radius;
-                component.settings.halfHeight = halfHeight;
+                tempSettings.type = RigidBodyComponent::ShapeSettings::Type::Capsule;
+                tempSettings.radius = radius;
+                tempSettings.halfHeight = halfHeight;
 
                 break;
             }
@@ -571,8 +572,8 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
                         if(!settings)
                             settings = std::make_shared<JPH::MeshShapeSettings>(list);
 
-                        component.settings.type = RigidBodyComponent::ShapeSettings::Type::Mesh;
-                        component.settings.meshShape = model;
+                        tempSettings.type = RigidBodyComponent::ShapeSettings::Type::Mesh;
+                        tempSettings.meshShape = model;
                     }
 
                     ImGui::EndDragDropTarget();
@@ -586,6 +587,8 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
         if(ImGui::Button("Update shape") && settings)
         {
+            component.settings = tempSettings;
+            
             auto body = component.body;
             auto bodyId = body->GetID();
 

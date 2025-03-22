@@ -4,7 +4,11 @@
 namespace lustra
 {
 
-AssetPtr VertexShaderLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr VertexShaderLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     auto shader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, path);
     
@@ -25,7 +29,11 @@ AssetPtr VertexShaderLoader::Load(const std::filesystem::path& path, AssetPtr ex
     return asset;
 }
 
-AssetPtr FragmentShaderLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr FragmentShaderLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     auto shader = Renderer::Get().CreateShader(LLGL::ShaderType::Fragment, path);
 

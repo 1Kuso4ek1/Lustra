@@ -5,7 +5,11 @@
 namespace lustra
 {
 
-AssetPtr ModelLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr ModelLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     if(!plane)
         LoadDefaultData();
@@ -43,10 +47,8 @@ AssetPtr ModelLoader::Load(const std::filesystem::path& path, AssetPtr existing)
         EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(modelAsset));
     };
 
-    if(true) // Add a "separateThread" parameter
-    {
+    if(async)
         Multithreading::Get().AddJob({ load, create });
-    }
     else
     {
         load();

@@ -10,7 +10,11 @@
 namespace lustra
 {
 
-AssetPtr MaterialLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr MaterialLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     if(!defaultMaterial)
         LoadDefaultData();

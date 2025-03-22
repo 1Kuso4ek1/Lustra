@@ -8,7 +8,11 @@ namespace lustra
 class SceneLoader : public AssetLoader, public Singleton<SceneLoader>
 {
 public:
-    AssetPtr Load(const std::filesystem::path& path, AssetPtr existing = nullptr) override;
+    AssetPtr Load(
+        const std::filesystem::path& path,
+        AssetPtr existing = nullptr,
+        bool async = true
+    ) override;
     void Write(const AssetPtr& asset, const std::filesystem::path& path) override;
 
 private:

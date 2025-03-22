@@ -282,7 +282,10 @@ void save(Archive& archive, const RigidBodyComponent& component)
         break;
 
     case RigidBodyComponent::ShapeSettings::Type::Mesh:
-        archive(component.settings.meshShape->path.string());
+        if(component.settings.meshShape)
+            archive(component.settings.meshShape->path.string());
+        else
+            archive("");
         break;
     }
 }
@@ -302,34 +305,17 @@ void load(Archive& archive, RigidBodyComponent& component)
     archive(motionType);
     archive(isSensor);
 
-    auto settings =
-        JPH::BodyCreationSettings(
-            new JPH::EmptyShapeSettings(),
-            pos,
-            rot,
-            motionType,
-            motionType == JPH::EMotionType::Dynamic || motionType == JPH::EMotionType::Kinematic ?
-                Layers::moving : Layers::nonMoving
-        );
-
-    settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
-    settings.mMassPropertiesOverride.mMass = 1.0f;
-
-    component.body = PhysicsManager::Get().CreateBody(settings);
-
-    component.body->SetIsSensor(isSensor);
-    
     archive(component.settings.type);
 
-    std::shared_ptr<JPH::ShapeSettings> shapeSettings;
+    JPH::ShapeSettings* shapeSettings = nullptr;
 
     switch(component.settings.type)
     {
         case RigidBodyComponent::ShapeSettings::Type::Empty:
             archive(component.settings.centerOfMass);
 
-            shapeSettings = std::make_shared<JPH::EmptyShapeSettings>();
-            std::static_pointer_cast<JPH::EmptyShapeSettings>(shapeSettings)->
+            shapeSettings = new JPH::EmptyShapeSettings();
+            static_cast<JPH::EmptyShapeSettings*>(shapeSettings)->
                 mCenterOfMass = { 
                     component.settings.centerOfMass.x,
                     component.settings.centerOfMass.y,
@@ -341,8 +327,8 @@ void load(Archive& archive, RigidBodyComponent& component)
         case RigidBodyComponent::ShapeSettings::Type::Box:
             archive(component.settings.halfExtent);
 
-            shapeSettings = std::make_shared<JPH::BoxShapeSettings>();
-            std::static_pointer_cast<JPH::BoxShapeSettings>(shapeSettings)->
+            shapeSettings = new JPH::BoxShapeSettings();
+            static_cast<JPH::BoxShapeSettings*>(shapeSettings)->
                 mHalfExtent = { 
                     component.settings.halfExtent.x,
                     component.settings.halfExtent.y,
@@ -354,8 +340,8 @@ void load(Archive& archive, RigidBodyComponent& component)
         case RigidBodyComponent::ShapeSettings::Type::Sphere:
             archive(component.settings.radius);
 
-            shapeSettings = std::make_shared<JPH::SphereShapeSettings>();
-            std::static_pointer_cast<JPH::SphereShapeSettings>(shapeSettings)->
+            shapeSettings = new JPH::SphereShapeSettings();
+            static_cast<JPH::SphereShapeSettings*>(shapeSettings)->
                 mRadius = component.settings.radius;
 
             break;
@@ -363,10 +349,10 @@ void load(Archive& archive, RigidBodyComponent& component)
         case RigidBodyComponent::ShapeSettings::Type::Capsule:
             archive(component.settings.radius, component.settings.halfHeight);
 
-            shapeSettings = std::make_shared<JPH::CapsuleShapeSettings>();
-            std::static_pointer_cast<JPH::CapsuleShapeSettings>(shapeSettings)->
+            shapeSettings = new JPH::CapsuleShapeSettings();
+            static_cast<JPH::CapsuleShapeSettings*>(shapeSettings)->
                 mRadius = component.settings.radius;
-            std::static_pointer_cast<JPH::CapsuleShapeSettings>(shapeSettings)->
+            static_cast<JPH::CapsuleShapeSettings*>(shapeSettings)->
                 mHalfHeightOfCylinder = component.settings.halfHeight;
 
             break;
@@ -376,7 +362,11 @@ void load(Archive& archive, RigidBodyComponent& component)
             std::string path;
             archive(path);
 
-            component.settings.meshShape = AssetManager::Get().Load<ModelAsset>(path);
+            if(path.empty())
+                break;
+
+            component.settings.meshShape = // Switch somehow to use cache
+                AssetManager::Get().Load<ModelAsset>(path, false, false, false);
 
             // Move this code somewhere so it doesn't repeat in 2 places
             JPH::TriangleList list;
@@ -402,21 +392,28 @@ void load(Archive& archive, RigidBodyComponent& component)
                 }
             }
 
-            shapeSettings = std::make_shared<JPH::MeshShapeSettings>(list);
+            shapeSettings = new JPH::MeshShapeSettings(list);
             
             break;
         }
     }
 
-    auto body = component.body;
-    auto bodyId = body->GetID();
+    auto settings =
+        JPH::BodyCreationSettings(
+            shapeSettings, // Will be deleted by Jolt
+            pos,
+            rot,
+            motionType,
+            motionType == JPH::EMotionType::Dynamic || motionType == JPH::EMotionType::Kinematic ?
+                Layers::moving : Layers::nonMoving
+        );
 
-    PhysicsManager::Get().GetBodyInterface().SetShape(
-        bodyId,
-        shapeSettings->Create().Get(),
-        false,
-        JPH::EActivation::Activate
-    );
+    settings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+    settings.mMassPropertiesOverride.mMass = 1.0f;
+
+    component.body = PhysicsManager::Get().CreateBody(settings);
+
+    component.body->SetIsSensor(isSensor);
 }
 
 template<class Archive>

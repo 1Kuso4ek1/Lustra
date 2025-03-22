@@ -25,7 +25,8 @@ public:
     std::shared_ptr<T> Load(
         const std::filesystem::path& path,
         bool relativeToAssetsDir = false,
-        bool useCache = true
+        bool useCache = true,
+        bool async = true
     )
     {
         auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
@@ -46,8 +47,8 @@ public:
         if(!loader)
             return nullptr;
 
-        // try-catch
-        auto asset = loader->Load(assetPath);
+        // try-catch?
+        auto asset = loader->Load(assetPath, nullptr, async);
 
         if(!asset)
             return nullptr;

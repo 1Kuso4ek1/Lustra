@@ -10,7 +10,11 @@
 namespace lustra
 {
 
-AssetPtr SceneLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr SceneLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     auto asset = existing
         ? std::static_pointer_cast<SceneAsset>(existing)

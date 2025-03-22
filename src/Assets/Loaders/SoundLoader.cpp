@@ -3,7 +3,11 @@
 namespace lustra
 {
 
-AssetPtr SoundLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr SoundLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     auto soundAsset = existing
         ? std::static_pointer_cast<SoundAsset>(existing)

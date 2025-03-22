@@ -7,7 +7,11 @@
 namespace lustra
 {
 
-AssetPtr TextureLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr TextureLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     if(!defaultTexture)
         LoadDefaultData();
@@ -94,10 +98,8 @@ AssetPtr TextureLoader::Load(const std::filesystem::path& path, AssetPtr existin
         stbi_image_free((void*)textureAsset->imageView.data);
     };
 
-    if(true) // Add a "separateThread" parameter
-    {
+    if(async)
         Multithreading::Get().AddJob({ path.extension() == ".hdr" ? std::function<void()>(loadFloat) : loadUint, create });
-    }
     else
     {
         if(path.extension() == ".hdr")

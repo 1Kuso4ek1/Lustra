@@ -4,7 +4,11 @@
 namespace lustra
 {
 
-AssetPtr ScriptLoader::Load(const std::filesystem::path& path, AssetPtr existing)
+AssetPtr ScriptLoader::Load(
+    const std::filesystem::path& path,
+    AssetPtr existing,
+    bool async
+)
 {
     auto asset = existing
         ? std::static_pointer_cast<ScriptAsset>(existing)

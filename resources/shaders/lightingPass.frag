@@ -11,6 +11,8 @@ const vec3 F0 = vec3(0.04);
 
 struct Light
 {
+    int shadow;
+
     vec3 position;
     vec3 direction;
     vec3 color;
@@ -171,15 +173,21 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
     return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-vec3 CalculateLights(vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, float metallic, float roughness)
+void CalculateLights(
+    inout vec3 totalLighting, inout vec3 totalNoShadow,
+
+    vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, float metallic, float roughness
+)
 {
-    vec3 totalLighting = vec3(0.0);
     for(int i = 0; i < numLights; i++)
     {
-        totalLighting += CalculateLight(i, worldPosition, V, N, albedo, metallic, roughness);
+        vec3 res = CalculateLight(i, worldPosition, V, N, albedo, metallic, roughness);
+        
+        if(lights[i].shadow == 1)
+            totalLighting += res;
+        else
+            totalNoShadow += res;
     }
-
-    return totalLighting;
 }
 
 void main()
@@ -203,7 +211,10 @@ void main()
 
     float NdotV = clamp(dot(normal, V), 0.0, 0.99);
 
-    vec3 lighting = CalculateLights(worldPosition, V, normal, albedo, metallic, roughness);
+    vec3 totalLighting = vec3(0.0);
+    vec3 totalNoShadow = vec3(0.0);
+
+    CalculateLights(totalLighting, totalNoShadow, worldPosition, V, normal, albedo, metallic, roughness);
 
     float shadow = CalculateShadows(vec4(worldPosition, 1.0));
 
@@ -221,7 +232,7 @@ void main()
     
     vec3 ambient = (kD * diffuse + specular);
 
-    vec3 finalColor = ((ambient + lighting) * (1.0 - shadow) + emission + (ambient / 5.0) * shadow) * ao;
+    vec3 finalColor = (((ambient + totalLighting) * (1.0 - shadow)) + totalNoShadow + emission + (ambient / 5.0) * shadow) * ao;
 
     fragColor = vec4(finalColor, 1.0);
 }

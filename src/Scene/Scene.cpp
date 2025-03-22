@@ -466,6 +466,7 @@ void Scene::SetupLights()
 
         lights.push_back(
             {
+                (int)light.shadowMap,
                 localTransform.position,
                 glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
                 light.color,

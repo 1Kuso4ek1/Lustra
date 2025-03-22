@@ -107,6 +107,7 @@ private:
         // Uniform buffer padding //
         // | //
         // V //
+        alignas(16) int shadowMap;
         alignas(16) glm::vec3 position;
         alignas(16) glm::vec3 direction;
         alignas(16) glm::vec3 color;
@@ -118,7 +119,7 @@ private:
     {
         glm::mat4 lightSpaceMatrix;
 
-        float bias __attribute__ ((aligned(16)));
+        alignas(16) float bias;
     };
 
     std::vector<Light> lights;

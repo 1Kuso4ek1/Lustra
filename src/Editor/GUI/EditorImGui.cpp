@@ -546,24 +546,27 @@ void Editor::DrawViewport()
         }
     };
 
-    for(auto entity : lights)
+    if(!playing)
     {
-        auto& light = lights.get<lustra::LightComponent>(entity);
+        for(auto entity : lights)
+        {
+            auto& light = lights.get<lustra::LightComponent>(entity);
 
-        lustra::TransformComponent transform;
-        transform.SetTransform(scene->GetWorldTransform(entity));
+            lustra::TransformComponent transform;
+            transform.SetTransform(scene->GetWorldTransform(entity));
 
-        drawOnScreen(transform.position, (int)entity, light.color);
-    }
+            drawOnScreen(transform.position, (int)entity, light.color);
+        }
 
-    for(auto entity : sounds)
-    {
-        auto& sound = sounds.get<lustra::SoundComponent>(entity);
-        
-        lustra::TransformComponent transform;
-        transform.SetTransform(scene->GetWorldTransform(entity));
-        
-        drawOnScreen(transform.position, (int)entity);
+        for(auto entity : sounds)
+        {
+            auto& sound = sounds.get<lustra::SoundComponent>(entity);
+            
+            lustra::TransformComponent transform;
+            transform.SetTransform(scene->GetWorldTransform(entity));
+            
+            drawOnScreen(transform.position, (int)entity);
+        }
     }
 
     DrawImGuizmo();

@@ -102,28 +102,6 @@ void Editor::Update(float deltaTime)
         lustra::EventManager::Get().Dispatch(std::make_unique<lustra::WindowResizeEvent>(event));
     }
 
-    if(checkShortcut({ Keyboard::Key::F5 }))
-    {
-        playing = !playing;
-        paused = false;
-
-        if(playing)
-        {
-            scene->SetIsRunning(true);
-            scene->Start();
-        }
-        else
-            scene->SetIsRunning(false);
-
-        keyboardTimer.Reset();
-    }
-
-    if(checkShortcut({ Keyboard::Key::F6 }) && playing)
-    {
-        paused = !paused;
-        keyboardTimer.Reset();
-    }
-
     if((checkShortcut({ Keyboard::Key::LeftControl, Keyboard::Key::S }) ||
         sceneSaveTimer.GetElapsedSeconds() >= 10.0f) && !playing)
     {

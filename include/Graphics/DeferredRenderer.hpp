@@ -5,6 +5,7 @@
 #include <TextureAsset.hpp>
 #include <AssetManager.hpp>
 #include <ModelAsset.hpp>
+#include <ShaderAsset.hpp>
 #include <Window.hpp>
 
 namespace lustra
@@ -38,6 +39,10 @@ private:
     friend class Singleton<DeferredRenderer>;
 
 private:
+    FragmentShaderAssetPtr lightingPass;
+
+    LLGL::PipelineLayoutDescriptor layoutDesc;
+    
     LLGL::Texture* gBufferPosition;
     LLGL::Texture* gBufferAlbedo;
     LLGL::Texture* gBufferNormal;

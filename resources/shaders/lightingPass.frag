@@ -150,9 +150,9 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
     vec3 F = FresnelSchlickRoughness(max(dot(H, V), 0.0), mix(F0, albedo, metallic), roughness);
 
     float dist = length(lights[index].position - worldPosition);
-    float attenuation = 1.0 / (dist * dist);
+    float attenuation = 1.0 / clamp(dist * 0.1, 0.0, 100.0); // Need a more flexible method
 
-    vec3 radiance = lights[index].color * lights[index].intensity/*  * attenuation */;
+    vec3 radiance = lights[index].color * lights[index].intensity * intensity * attenuation;
 
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);

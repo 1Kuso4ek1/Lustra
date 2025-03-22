@@ -9,6 +9,7 @@ DeferredRenderer::DeferredRenderer()
     LLGL::Extent2D resolution = Renderer::Get().GetViewportResolution();
 
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
+    EventManager::Get().AddListener(Event::Type::WindowResize, this);
 
     LLGL::TextureDescriptor colorAttachmentDesc =
     {
@@ -56,52 +57,55 @@ DeferredRenderer::DeferredRenderer()
     gBuffer = Renderer::Get().CreateRenderTarget(resolution, { gBufferPosition, gBufferAlbedo, gBufferNormal, gBufferCombined, gBufferEmission }, gBufferDepth);
     //gBufferPipeline = Renderer::Get().CreateRenderTargetPipeline(gBuffer);
 
+    lightingPass = AssetManager::Get().Load<FragmentShaderAsset>("lightingPass.frag", true);
+
     rect = AssetManager::Get().Load<ModelAsset>("plane", true)->meshes[0];
 
-    rectPipeline = Renderer::Get().CreatePipelineState(
-        LLGL::PipelineLayoutDescriptor
+    layoutDesc = {
+        .bindings =
         {
-            .bindings =
-            {
-                { "gPosition", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
-                { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
-                { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
-                { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
-                { "gEmission", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 },
-                { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 6 },
-                { "shadowBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 7 },
-                { "shadowMaps[0]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 8 },
-                { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
-                { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 10 },
-                { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 11 },
-                { "irradiance", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 12 },
-                { "prefiltered", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 13 },
-                { "brdf", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 14 },
-                { "gtao", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 15 },
-                { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
-            },
-            .staticSamplers =
-            {
-                { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 15, shadowSamplerDesc }
-            },
-            .uniforms =
-            {
-                { "numLights", LLGL::UniformType::Int1 },
-                { "numShadows", LLGL::UniformType::Int1 },
-                { "cameraPosition", LLGL::UniformType::Float3 }
-            },
-            .combinedTextureSamplers =
-            {
-                { "shadowMaps[0]", "shadowMaps[0]", "shadowMapSampler", 8 },
-                { "shadowMaps[1]", "shadowMaps[1]", "shadowMapSampler", 9 },
-                { "shadowMaps[2]", "shadowMaps[2]", "shadowMapSampler", 10 },
-                { "shadowMaps[3]", "shadowMaps[3]", "shadowMapSampler", 11 },
-            }
+            { "gPosition", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 1 },
+            { "gAlbedo", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
+            { "gNormal", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 3 },
+            { "gCombined", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 4 },
+            { "gEmission", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 5 },
+            { "lightBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 6 },
+            { "shadowBuffer", LLGL::ResourceType::Buffer, LLGL::BindFlags::ConstantBuffer, LLGL::StageFlags::FragmentStage, 7 },
+            { "shadowMaps[0]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 8 },
+            { "shadowMaps[1]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 9 },
+            { "shadowMaps[2]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 10 },
+            { "shadowMaps[3]", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 11 },
+            { "irradiance", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 12 },
+            { "prefiltered", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 13 },
+            { "brdf", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 14 },
+            { "gtao", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 15 },
+            { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 1 }
         },
+        .staticSamplers =
+        {
+            { "shadowMapSampler", LLGL::StageFlags::FragmentStage, 15, shadowSamplerDesc }
+        },
+        .uniforms =
+        {
+            { "numLights", LLGL::UniformType::Int1 },
+            { "numShadows", LLGL::UniformType::Int1 },
+            { "cameraPosition", LLGL::UniformType::Float3 }
+        },
+        .combinedTextureSamplers =
+        {
+            { "shadowMaps[0]", "shadowMaps[0]", "shadowMapSampler", 8 },
+            { "shadowMaps[1]", "shadowMaps[1]", "shadowMapSampler", 9 },
+            { "shadowMaps[2]", "shadowMaps[2]", "shadowMapSampler", 10 },
+            { "shadowMaps[3]", "shadowMaps[3]", "shadowMapSampler", 11 },
+        }
+    };
+
+    rectPipeline = Renderer::Get().CreatePipelineState(
+        layoutDesc,
         LLGL::GraphicsPipelineDescriptor
         {
             .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
-            .fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>("lightingPass.frag", true)->shader
+            .fragmentShader = lightingPass->shader
         }
     );
 }
@@ -197,6 +201,24 @@ void DeferredRenderer::OnEvent(Event& event)
         gBufferDepth = Renderer::Get().CreateTexture(depthAttachmentDesc);
 
         gBuffer = Renderer::Get().CreateRenderTarget(size, { gBufferPosition, gBufferAlbedo, gBufferNormal, gBufferCombined, gBufferEmission }, gBufferDepth);
+    }
+    else if(event.GetType() == Event::Type::AssetLoaded)
+    {
+        auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
+
+        if(assetEvent->GetAsset()->type == Asset::Type::FragmentShader)
+        {
+            auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
+            if(lightingPass == shader)
+                rectPipeline = Renderer::Get().CreatePipelineState(
+                    layoutDesc,
+                    LLGL::GraphicsPipelineDescriptor
+                    {
+                        .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
+                        .fragmentShader = lightingPass->shader
+                    }
+                );       
+        }
     }
 }
 

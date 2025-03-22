@@ -355,8 +355,8 @@ void load(Archive& archive, RigidBodyComponent& component)
             archive(component.settings.radius);
 
             shapeSettings = std::make_shared<JPH::SphereShapeSettings>();
-            std::static_pointer_cast<JPH::SphereShapeSettings>(shapeSettings)
-                ->mRadius = component.settings.radius;
+            std::static_pointer_cast<JPH::SphereShapeSettings>(shapeSettings)->
+                mRadius = component.settings.radius;
 
             break;
 

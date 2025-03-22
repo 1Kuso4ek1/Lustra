@@ -196,6 +196,8 @@ struct RigidBodyComponent : public ComponentBase
     RigidBodyComponent(RigidBodyComponent&& other) : ComponentBase("RigidBodyComponent")
     {
         body = other.body;
+        settings = other.settings;
+        
         other.body = nullptr;
     }
     ~RigidBodyComponent()

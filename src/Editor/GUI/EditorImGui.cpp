@@ -445,6 +445,8 @@ void Editor::DrawExecutionControl()
         paused = false;
 
         scene->SetIsRunning(false);
+        scene->GetRegistry().clear<>();
+
         // Restore scene state
         lustra::Multithreading::Get().AddJob({ {},
             [&]() {
@@ -546,17 +548,21 @@ void Editor::DrawViewport()
 
     for(auto entity : lights)
     {
-        auto [transform, light] =
-            lights.get<lustra::TransformComponent, lustra::LightComponent>(entity);
+        auto& light = lights.get<lustra::LightComponent>(entity);
+
+        lustra::TransformComponent transform;
+        transform.SetTransform(scene->GetWorldTransform(entity));
 
         drawOnScreen(transform.position, (int)entity, light.color);
     }
 
     for(auto entity : sounds)
     {
-        auto [transform, sound] =
-            sounds.get<lustra::TransformComponent, lustra::SoundComponent>(entity);
-
+        auto& sound = sounds.get<lustra::SoundComponent>(entity);
+        
+        lustra::TransformComponent transform;
+        transform.SetTransform(scene->GetWorldTransform(entity));
+        
         drawOnScreen(transform.position, (int)entity);
     }
 

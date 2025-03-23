@@ -46,9 +46,13 @@ ScriptManager::ScriptManager()
     RegisterInputManager();
 
     SetDefaultNamespace("");
+    RegisterSound();
+
     RegisterTextureAsset();
     RegisterMaterialAsset();
     RegisterModelAsset();
+    // RegisterSceneAsset();
+    RegisterSoundAsset();
     
     SetDefaultNamespace("AssetManager");
     RegisterAssetManager();
@@ -68,6 +72,7 @@ ScriptManager::ScriptManager()
     RegisterCameraComponent();
     RegisterLightComponent();
     RegisterBodyComponent();
+    RegisterSoundComponent();
 
     RegisterProceduralSkyComponent();
     RegisterHDRISkyComponent();

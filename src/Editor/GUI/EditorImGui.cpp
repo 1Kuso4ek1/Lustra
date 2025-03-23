@@ -396,10 +396,10 @@ void Editor::DrawExecutionControl()
         // Save scene state
         if(!paused)
         {
+            lustra::AssetManager::Get().Write(sceneAsset);
+            
             scene->Start();
             scene->SetUpdatePhysics(true);
-
-            lustra::AssetManager::Get().Write(sceneAsset);
         }
 
         scene->SetIsRunning(true);

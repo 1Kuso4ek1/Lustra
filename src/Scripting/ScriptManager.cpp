@@ -51,7 +51,6 @@ ScriptManager::ScriptManager()
     RegisterTextureAsset();
     RegisterMaterialAsset();
     RegisterModelAsset();
-    // RegisterSceneAsset();
     RegisterSoundAsset();
     
     SetDefaultNamespace("AssetManager");
@@ -141,7 +140,7 @@ void ScriptManager::ExecuteFunction(
             setArgs(context);
 
         context->Execute();
-        context->Release();
+        context->Unprepare();
     }
 }
 
@@ -541,7 +540,7 @@ void ScriptManager::RegisterCamera()
 
 void ScriptManager::RegisterSound()
 {
-    AddType("Sound", sizeof(Sound),
+    AddValueType("Sound", sizeof(Sound), asGetTypeTraits<Sound>() | asOBJ_POD,
         {
             { "void Play()", WRAP_MFN(Sound, Play) },
             { "void Stop()", WRAP_MFN(Sound, Stop) },
@@ -820,7 +819,7 @@ void ScriptManager::RegisterSoundAsset()
 {
     AddType("SoundAsset", sizeof(SoundAsset), {},
         {
-            { "Sound@ sound", asOFFSET(SoundAsset, sound) }
+            { "Sound sound", asOFFSET(SoundAsset, sound) }
         }
     );
 

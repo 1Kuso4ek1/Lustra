@@ -47,23 +47,6 @@ void Editor::Update(float deltaTime)
 {
     using namespace lustra;
 
-    static auto checkShortcut =
-        [](const std::initializer_list<Keyboard::Key> shortcut)
-        {
-            static Timer timer;
-
-            if(timer.GetElapsedSeconds() < 0.2f)
-                return false;
-
-            for(auto key: shortcut)
-                if(!Keyboard::IsKeyPressed(key))
-                    return false;
-
-            timer.Reset();
-
-            return true;
-        };
-
     if(playing && !paused)
     {
         scene->GetRegistry().view<CameraComponent>().each(
@@ -83,13 +66,13 @@ void Editor::Update(float deltaTime)
         editorCamera.GetComponent<ScriptComponent>().update(editorCamera, deltaTime);
     }
 
-    if(checkShortcut({ Keyboard::Key::G }))
+    if(CheckShortcut({ Keyboard::Key::G }))
     {
         scene->ToggleUpdatePhysics();
         keyboardTimer.Reset();
     }
 
-    if(checkShortcut({ Keyboard::Key::F11 }))
+    if(CheckShortcut({ Keyboard::Key::F11 }))
     {
         fullscreenViewport = !fullscreenViewport;
 
@@ -102,7 +85,7 @@ void Editor::Update(float deltaTime)
         lustra::EventManager::Get().Dispatch(std::make_unique<lustra::WindowResizeEvent>(event));
     }
 
-    if((checkShortcut({ Keyboard::Key::LeftControl, Keyboard::Key::S }) ||
+    if((CheckShortcut({ Keyboard::Key::LeftControl, Keyboard::Key::S }) ||
         sceneSaveTimer.GetElapsedSeconds() >= 10.0f) && !playing)
     {
         AssetManager::Get().Write(sceneAsset);
@@ -142,4 +125,20 @@ void Editor::OnEvent(lustra::Event& event)
         if(assetLoadedEvent->GetAsset() == sceneAsset)
             SwitchScene(sceneAsset);
     }
+}
+
+bool Editor::CheckShortcut(const std::initializer_list<lustra::Keyboard::Key> shortcut)
+{
+    static lustra::Timer timer;
+
+    if(timer.GetElapsedSeconds() < 0.2f)
+        return false;
+
+    for(auto key: shortcut)
+        if(!lustra::Keyboard::IsKeyPressed(key))
+            return false;
+
+    timer.Reset();
+
+    return true;
 }

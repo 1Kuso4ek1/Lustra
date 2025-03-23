@@ -114,7 +114,9 @@ struct PipelineComponent : public ComponentBase, public EventListener
 struct HierarchyComponent : public ComponentBase
 {
     HierarchyComponent() : ComponentBase("HierarchyComponent") {}
-
+    HierarchyComponent(const HierarchyComponent& other) = delete; // !
+    HierarchyComponent(HierarchyComponent&& other) = default;
+    
     entt::entity parent = entt::null;
     std::vector<entt::entity> children;
 };

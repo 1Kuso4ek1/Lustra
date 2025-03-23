@@ -25,6 +25,8 @@ public:
     void RenderImGui() override;
 
 private:
+    bool CheckShortcut(const std::initializer_list<lustra::Keyboard::Key> shortcut);
+
     void LoadIcons();
 
     void CreateDefaultEntities();
@@ -71,6 +73,9 @@ private:
     void DrawViewport();
 
     void OnEvent(lustra::Event& event) override;
+
+private:
+    lustra::Entity buffer;
 
 private:
     bool playing = false, paused = false;

@@ -113,6 +113,23 @@ void Editor::DrawSceneTree()
 
         ImGui::EndPopup();
     }
+
+    if(ImGui::IsWindowFocused())
+    {
+        if(CheckShortcut({ lustra::Keyboard::Key::LeftControl, lustra::Keyboard::Key::C }))
+        {
+            buffer = selectedEntity;
+            keyboardTimer.Reset();
+        }
+
+        if(CheckShortcut({ lustra::Keyboard::Key::LeftControl, lustra::Keyboard::Key::V }))
+        {
+            if(buffer)
+                list.push_back(scene->CloneEntity(buffer));
+
+            keyboardTimer.Reset();
+        }
+    }
     
     ImGui::End();
 }

@@ -78,6 +78,7 @@ private:
     void RegisterExtent2D();
 
     void RegisterCamera();
+    void RegisterSound();
 
     void RegisterKeyboard();
     void RegisterMouse();
@@ -87,6 +88,7 @@ private:
     void RegisterMaterialAsset();
     void RegisterModelAsset();
     void RegisterSceneAsset();
+    void RegisterSoundAsset();
     void RegisterAssetManager();
 
     void RegisterWindowResizeEvent();
@@ -102,6 +104,7 @@ private:
     void RegisterCameraComponent();
     void RegisterLightComponent();
     void RegisterBodyComponent();
+    void RegisterSoundComponent();
 
     void RegisterProceduralSkyComponent();
     void RegisterHDRISkyComponent();

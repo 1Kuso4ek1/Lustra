@@ -20,6 +20,7 @@ class Camera : public EventListener
 public:
     Camera();
     Camera(Camera&& other);
+    Camera(const Camera& other);
     ~Camera();
 
     void SetPerspective();

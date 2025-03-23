@@ -42,7 +42,6 @@ void Sound::SetVelocity(const glm::vec3& velocity)
 void Sound::SetOrientation(const glm::quat& orientation)
 {
     glm::vec3 forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 up = orientation * glm::vec3(0.0f, 1.0f, 0.0f);
 
     ma_sound_set_direction(sound.get(), forward.x, forward.y, forward.z);
 }

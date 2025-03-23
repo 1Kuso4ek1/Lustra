@@ -136,6 +136,7 @@ void ScriptManager::ExecuteFunction(
             setArgs(context);
 
         context->Execute();
+        context->Release();
     }
 }
 
@@ -533,6 +534,38 @@ void ScriptManager::RegisterCamera()
     );
 }
 
+void ScriptManager::RegisterSound()
+{
+    AddType("Sound", sizeof(Sound),
+        {
+            { "void Play()", WRAP_MFN(Sound, Play) },
+            { "void Stop()", WRAP_MFN(Sound, Stop) },
+
+            { "void SetVelocity(const glm::vec3& in)", WRAP_MFN(Sound, SetVelocity) },
+            // { "void SetCone(const Sound::Cone& in)", WRAP_MFN(Sound, SetCone) },
+
+            { "void SetDirectionalAttenuationFactor(float)", WRAP_MFN(Sound, SetDirectionalAttenuationFactor) },
+            { "void SetDopplerFactor(float)", WRAP_MFN(Sound, SetDopplerFactor) },
+            { "void SetFade(float, float, uint64)", WRAP_MFN(Sound, SetFade) },
+            { "void SetRolloff(float)", WRAP_MFN(Sound, SetRolloff) },
+
+            { "void SetStartTime(uint64)", WRAP_MFN(Sound, SetStartTime) },
+            { "void SetStopTime(uint64)", WRAP_MFN(Sound, SetStopTime) },
+
+            { "void SetMaxDistance(float)", WRAP_MFN(Sound, SetMaxDistance) },
+            { "void SetMinDistance(float)", WRAP_MFN(Sound, SetMinDistance) },
+            { "void SetMaxGain(float)", WRAP_MFN(Sound, SetMaxGain) },
+            { "void SetMinGain(float)", WRAP_MFN(Sound, SetMinGain) },
+
+            { "void SetPan(float)", WRAP_MFN(Sound, SetPan) },
+            { "void SetPitch(float)", WRAP_MFN(Sound, SetPitch) },
+            { "void SetVolume(float)", WRAP_MFN(Sound, SetVolume) },
+
+            { "void SetLooping(bool)", WRAP_MFN(Sound, SetLooping) }
+        }, {}
+    );
+}
+
 void ScriptManager::RegisterKeyboard()
 {
     AddFunction("bool IsKeyPressed(int)", WRAP_FN(Keyboard::IsKeyPressed));
@@ -778,11 +811,29 @@ void ScriptManager::RegisterSceneAsset()
     AddTypeConstructor("SceneAssetPtr", "void f(const SceneAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SceneAssetPtr>));
 }
 
+void ScriptManager::RegisterSoundAsset()
+{
+    AddType("SoundAsset", sizeof(SoundAsset), {},
+        {
+            { "Sound@ sound", asOFFSET(SoundAsset, sound) }
+        }
+    );
+
+    AddValueType("SoundAssetPtr", sizeof(SoundAssetPtr), asGetTypeTraits<SoundAssetPtr>() | asOBJ_POD,
+        {
+            { "SoundAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SoundAsset>) }
+        }, {}
+    );
+
+    AddTypeConstructor("SoundAssetPtr", "void f(const SoundAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SoundAssetPtr>));
+}
+
 void ScriptManager::RegisterAssetManager()
 {
-    AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false)", WRAP_FN(as::Load<TextureAsset>));
-    AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false)", WRAP_FN(as::Load<MaterialAsset>));
-    AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false)", WRAP_FN(as::Load<ModelAsset>));
+    AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<TextureAsset>));
+    AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<MaterialAsset>));
+    AddFunction("ModelAssetPtr LoadModel(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<ModelAsset>));
+    AddFunction("SoundAssetPtr LoadSound(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<SoundAsset>));
 }
 
 void ScriptManager::RegisterWindowResizeEvent()
@@ -905,6 +956,15 @@ void ScriptManager::RegisterBodyComponent()
     );
 }
 
+void ScriptManager::RegisterSoundComponent()
+{
+    AddType("SoundComponent", sizeof(SoundComponent), {},
+        {
+            { "SoundAssetPtr sound", asOFFSET(SoundComponent, sound) }
+        }
+    );
+}
+
 void ScriptManager::RegisterProceduralSkyComponent()
 {
     AddType("ProceduralSkyComponent", sizeof(ProceduralSkyComponent),
@@ -1005,7 +1065,8 @@ void ScriptManager::RegisterEntity()
             { "LightComponent@ GetLightComponent()", WRAP_MFN(Entity, GetComponent<LightComponent>) },
             { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) },
             { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) },
-
+            { "SoundComponent@ GetSoundComponent()", WRAP_MFN(Entity, GetComponent<SoundComponent>) },
+            
             { "ProceduralSkyComponent@ GetProceduralSkyComponent()", WRAP_MFN(Entity, GetComponent<ProceduralSkyComponent>) },
             { "HDRISkyComponent@ GetHDRISkyComponent()", WRAP_MFN(Entity, GetComponent<HDRISkyComponent>) },
 

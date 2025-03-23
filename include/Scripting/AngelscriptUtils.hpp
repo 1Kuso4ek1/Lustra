@@ -333,10 +333,11 @@ template<class T>
 inline std::shared_ptr<T> Load(
     const std::string& path,
     bool relativeToAssetsDir = false,
-    bool useCache = true
+    bool useCache = true,
+    bool async = true
 )
 {
-    return AssetManager::Get().Load<T>(path, relativeToAssetsDir, useCache);
+    return AssetManager::Get().Load<T>(path, relativeToAssetsDir, useCache, async);
 }
 
 template<class T>

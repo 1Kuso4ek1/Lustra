@@ -397,6 +397,7 @@ void Editor::DrawExecutionControl()
         if(!paused)
         {
             scene->Start();
+            scene->SetUpdatePhysics(true);
 
             lustra::AssetManager::Get().Write(sceneAsset);
         }
@@ -446,6 +447,7 @@ void Editor::DrawExecutionControl()
 
         scene->SetIsRunning(false);
         scene->GetRegistry().clear<>();
+        selectedEntity = {};
 
         // Restore scene state
         lustra::Multithreading::Get().AddJob({ {},

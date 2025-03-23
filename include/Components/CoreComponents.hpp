@@ -63,7 +63,7 @@ struct PipelineComponent : public ComponentBase, public EventListener
     }
 
     PipelineComponent(PipelineComponent&& other)
-        : ComponentBase(std::move(other)),
+        : ComponentBase("PipelineComponent"),
           vertexShader(std::move(other.vertexShader)),
           fragmentShader(std::move(other.fragmentShader)),
           pipeline(std::move(other.pipeline))
@@ -71,6 +71,15 @@ struct PipelineComponent : public ComponentBase, public EventListener
         EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
     }
 
+    PipelineComponent(const PipelineComponent& other)
+        : ComponentBase("PipelineComponent"),
+          vertexShader(other.vertexShader),
+          fragmentShader(other.fragmentShader),
+          pipeline(other.pipeline)
+    {
+        EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
+    }
+    
     ~PipelineComponent()
     {
         EventManager::Get().RemoveListener(Event::Type::AssetLoaded, this);
@@ -116,6 +125,7 @@ struct CameraComponent : public ComponentBase
     CameraComponent(CameraComponent&& other)
         : ComponentBase("CameraComponent"), camera(std::move(other.camera))
     {  }
+    CameraComponent(const CameraComponent& other) = default;
 
     Camera camera;
 
@@ -127,6 +137,7 @@ struct LightComponent : public ComponentBase
 public:
     LightComponent();
     LightComponent(LightComponent&&) = default;
+    LightComponent(const LightComponent&) = default;
 
     void SetupShadowMap(const LLGL::Extent2D& resolution);
     void SetupProjection();
@@ -199,6 +210,15 @@ struct RigidBodyComponent : public ComponentBase
         settings = other.settings;
         
         other.body = nullptr;
+    }
+    RigidBodyComponent(const RigidBodyComponent& other) : ComponentBase("RigidBodyComponent")
+    {
+        body = PhysicsManager::Get().GetBodyInterface().CreateBody(
+                   other.body->GetBodyCreationSettings()
+               );
+        PhysicsManager::Get().GetBodyInterface().AddBody(body->GetID(), JPH::EActivation::Activate);
+
+        settings = other.settings;
     }
     ~RigidBodyComponent()
     {

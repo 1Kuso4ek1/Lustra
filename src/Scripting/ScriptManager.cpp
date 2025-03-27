@@ -1,4 +1,4 @@
-#include <ScriptManager.hpp>
+#include <AngelscriptUtils.hpp>
 #include <Timer.hpp>
 #include <Entity.hpp>
 #include <Keyboard.hpp>
@@ -51,10 +51,14 @@ ScriptManager::ScriptManager()
     RegisterTextureAsset();
     RegisterMaterialAsset();
     RegisterModelAsset();
+    RegisterScriptAsset();
     RegisterSoundAsset();
     
     SetDefaultNamespace("AssetManager");
     RegisterAssetManager();
+
+    SetDefaultNamespace("ScriptManager");
+    RegisterScriptManager();
 
     SetDefaultNamespace("");
     RegisterCamera();
@@ -70,6 +74,7 @@ ScriptManager::ScriptManager()
     RegisterMeshRendererComponent();
     RegisterCameraComponent();
     RegisterLightComponent();
+    RegisterScriptComponent();
     RegisterBodyComponent();
     RegisterSoundComponent();
 
@@ -110,9 +115,7 @@ void ScriptManager::Build()
     {
         for(int j = 0; j < i->modulesCount; j++)
         {
-            builder.StartNewModule(engine, (i->path.stem().string() + std::to_string(j)).c_str());
-            builder.AddSectionFromFile(i->path.string().c_str());
-            buildSucceded = (builder.BuildModule() >= 0);
+            buildSucceded = BuildModule(i, (i->path.stem().string() + std::to_string(j)));
         }
     }
 
@@ -134,6 +137,12 @@ void ScriptManager::ExecuteFunction(
 
     if(func)
     {
+        if(context->GetState() == asEContextState::asEXECUTION_ACTIVE)
+            LLGL::Log::Printf(
+                LLGL::Log::ColorFlags::StdError,
+                "Context is already in use\n"
+            );
+            
         context->Prepare(func);
 
         if(setArgs)
@@ -255,6 +264,14 @@ void ScriptManager::AddTypeFactory(std::string_view name, std::string_view decla
 void ScriptManager::SetDefaultNamespace(std::string_view name)
 {
     engine->SetDefaultNamespace(name.data());
+}
+
+bool ScriptManager::BuildModule(ScriptAssetPtr script, std::string_view name)
+{
+    AddModule(name);
+    builder.AddSectionFromFile(script->path.string().c_str());
+
+    return (builder.BuildModule() >= 0);
 }
 
 void ScriptManager::DiscardModules()
@@ -734,13 +751,22 @@ void ScriptManager::RegisterInputManager()
     AddFunction("bool IsActionPressed(const string& in)", WRAP_FN(as::IsActionPressed));
 }
 
+void ScriptManager::RegisterScriptManager()
+{
+    AddFunction("void AddScript(ScriptAssetPtr)", WRAP_MFN(ScriptManager, AddScript));
+    AddFunction("void RemoveScript(ScriptAssetPtr)", WRAP_MFN(ScriptManager, RemoveScript));
+    AddFunction("void Build()", WRAP_MFN(ScriptManager, Build));
+    AddFunction("void ExecuteFunction(ScriptAssetPtr, const string& in, uint32 = 0)", WRAP_OBJ_LAST(as::ExecuteFunction));
+}
+
 void ScriptManager::RegisterTextureAsset()
 {
     AddType("TextureAsset", sizeof(TextureAsset), {}, {});
 
     AddValueType("TextureAssetPtr", sizeof(TextureAssetPtr), asGetTypeTraits<TextureAssetPtr>() | asOBJ_POD,
         {
-            { "TextureAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<TextureAsset>) }
+            { "TextureAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<TextureAsset>) },
+            { "TextureAsset@ opAssign(const TextureAssetPtr& in)", WRAP_MFN_PR(TextureAssetPtr, operator=, (const TextureAssetPtr&), TextureAssetPtr&) }
         }, {}
     );
 
@@ -778,7 +804,8 @@ void ScriptManager::RegisterMaterialAsset()
 
     AddValueType("MaterialAssetPtr", sizeof(MaterialAssetPtr), asGetTypeTraits<MaterialAssetPtr>() | asOBJ_POD,
         {
-            { "MaterialAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<MaterialAsset>) }
+            { "MaterialAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<MaterialAsset>) },
+            { "MaterialAsset@ opAssign(const MaterialAssetPtr& in)", WRAP_MFN_PR(MaterialAssetPtr, operator=, (const MaterialAssetPtr&), MaterialAssetPtr&) }
         }, {}
     );
 
@@ -791,7 +818,8 @@ void ScriptManager::RegisterModelAsset()
 
     AddValueType("ModelAssetPtr", sizeof(ModelAssetPtr), asGetTypeTraits<ModelAssetPtr>() | asOBJ_POD,
         {
-            { "ModelAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ModelAsset>) }
+            { "ModelAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ModelAsset>) },
+            { "ModelAsset@ opAssign(const ModelAssetPtr& in)", WRAP_MFN_PR(ModelAssetPtr, operator=, (const ModelAssetPtr&), ModelAssetPtr&) }
         }, {}
     );
 
@@ -808,11 +836,26 @@ void ScriptManager::RegisterSceneAsset()
 
     AddValueType("SceneAssetPtr", sizeof(SceneAssetPtr), asGetTypeTraits<SceneAssetPtr>() | asOBJ_POD,
         {
-            { "SceneAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SceneAsset>) }
+            { "SceneAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SceneAsset>) },
+            { "SceneAsset@ opAssign(const SceneAssetPtr& in)", WRAP_MFN_PR(SceneAssetPtr, operator=, (const SceneAssetPtr&), SceneAssetPtr&) }
         }, {}
     );
 
     AddTypeConstructor("SceneAssetPtr", "void f(const SceneAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SceneAssetPtr>));
+}
+
+void ScriptManager::RegisterScriptAsset()
+{
+    AddType("ScriptAsset", sizeof(ScriptAsset), {}, {});
+
+    AddValueType("ScriptAssetPtr", sizeof(ScriptAssetPtr), asGetTypeTraits<ScriptAssetPtr>() | asOBJ_POD,
+        {
+            { "ScriptAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ScriptAsset>) },
+            { "ScriptAsset@ opAssign(const ScriptAssetPtr& in)", WRAP_MFN_PR(ScriptAssetPtr, operator=, (const ScriptAssetPtr&), ScriptAssetPtr&) }
+        }, {}
+    );
+
+    AddTypeConstructor("ScriptAssetPtr", "void f(const ScriptAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<ScriptAssetPtr>));
 }
 
 void ScriptManager::RegisterSoundAsset()
@@ -825,7 +868,8 @@ void ScriptManager::RegisterSoundAsset()
 
     AddValueType("SoundAssetPtr", sizeof(SoundAssetPtr), asGetTypeTraits<SoundAssetPtr>() | asOBJ_POD,
         {
-            { "SoundAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SoundAsset>) }
+            { "SoundAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SoundAsset>) },
+            { "SoundAsset@ opAssign(const SoundAssetPtr& in)", WRAP_MFN_PR(SoundAssetPtr, operator=, (const SoundAssetPtr&), SoundAssetPtr&) }
         }, {}
     );
 
@@ -951,6 +995,16 @@ void ScriptManager::RegisterLightComponent()
     );
 }
 
+void ScriptManager::RegisterScriptComponent()
+{
+    AddType("ScriptComponent", sizeof(ScriptComponent), {},
+        {
+            { "ScriptAssetPtr script", asOFFSET(ScriptComponent, script) },
+            { "uint32 moduleIndex", asOFFSET(ScriptComponent, moduleIndex) }
+        }
+    );
+}
+
 void ScriptManager::RegisterBodyComponent()
 {
     AddType("RigidBodyComponent", sizeof(RigidBodyComponent), {},
@@ -1067,6 +1121,7 @@ void ScriptManager::RegisterEntity()
             { "MeshComponent@ GetMeshComponent()", WRAP_MFN(Entity, GetComponent<MeshComponent>) },
             { "MeshRendererComponent@ GetMeshRendererComponent()", WRAP_MFN(Entity, GetComponent<MeshRendererComponent>) },
             { "LightComponent@ GetLightComponent()", WRAP_MFN(Entity, GetComponent<LightComponent>) },
+            { "ScriptComponent@ GetScriptComponent()", WRAP_MFN(Entity, GetComponent<ScriptComponent>) },
             { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) },
             { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) },
             { "SoundComponent@ GetSoundComponent()", WRAP_MFN(Entity, GetComponent<SoundComponent>) },
@@ -1087,6 +1142,7 @@ void ScriptManager::RegisterEntity()
             { "MeshComponent@ RemoveMeshComponent()", WRAP_MFN(Entity, RemoveComponent<MeshComponent>) },
             { "MeshRendererComponent@ RemoveMeshRendererComponent()", WRAP_MFN(Entity, RemoveComponent<MeshRendererComponent>) },
             { "LightComponent@ RemoveLightComponent()", WRAP_MFN(Entity, RemoveComponent<LightComponent>) },
+            { "ScriptComponent@ RemoveScriptComponent()", WRAP_MFN(Entity, RemoveComponent<ScriptComponent>) },
             { "CameraComponent@ RemoveCameraComponent()", WRAP_MFN(Entity, RemoveComponent<CameraComponent>) },
             { "RigidBodyComponent@ RemoveRigidBodyComponent()", WRAP_MFN(Entity, RemoveComponent<RigidBodyComponent>) },
 

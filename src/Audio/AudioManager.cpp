@@ -25,6 +25,11 @@ void AudioManager::Init()
         initialized = true;
 }
 
+void AudioManager::RemoveSound(Sound& sound)
+{
+    ma_sound_uninit(sound.GetSound().get());
+}
+
 Sound AudioManager::LoadSound(const std::filesystem::path& path)
 {
     if(!initialized)
@@ -48,6 +53,30 @@ Sound AudioManager::LoadSound(const std::filesystem::path& path)
         );
 
     return sound;
+}
+
+Sound AudioManager::CopySound(Sound& sound)
+{
+    if(!initialized)
+    {
+        LLGL::Log::Errorf(
+            LLGL::Log::ColorFlags::StdError,
+            "Audio engine not initialized\n"
+        );
+
+        return Sound();
+    }
+
+    Sound newSound;
+    result = ma_sound_init_copy(&engine, sound.GetSound().get(), 0, nullptr, newSound.GetSound().get());
+
+    if(result != MA_SUCCESS)
+        LLGL::Log::Errorf(
+            LLGL::Log::ColorFlags::StdError,
+            "Failed to copy sound\n"
+        );
+
+    return newSound;
 }
 
 ma_engine* AudioManager::GetEngine()

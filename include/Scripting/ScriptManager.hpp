@@ -1,7 +1,11 @@
 #pragma once
 #include <Singleton.hpp>
-#include <AngelscriptUtils.hpp>
 #include <ScriptAsset.hpp>
+
+#include <angelscript.h>
+#include <scriptbuilder.h>
+
+#include <functional>
 
 namespace lustra
 {
@@ -54,6 +58,8 @@ public:
     
     void SetDefaultNamespace(std::string_view name);
 
+    bool BuildModule(ScriptAssetPtr script, std::string_view name);
+
 private:
     ScriptManager();
     
@@ -84,10 +90,13 @@ private:
     void RegisterMouse();
     void RegisterInputManager();
 
+    void RegisterScriptManager();
+
     void RegisterTextureAsset();
     void RegisterMaterialAsset();
     void RegisterModelAsset();
     void RegisterSceneAsset();
+    void RegisterScriptAsset();
     void RegisterSoundAsset();
     void RegisterAssetManager();
 
@@ -103,6 +112,7 @@ private:
     void RegisterMeshRendererComponent();
     void RegisterCameraComponent();
     void RegisterLightComponent();
+    void RegisterScriptComponent();
     void RegisterBodyComponent();
     void RegisterSoundComponent();
 

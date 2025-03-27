@@ -1,5 +1,6 @@
 #pragma once
 #include <ComponentBase.hpp>
+#include <ScriptManager.hpp>
 
 namespace lustra
 {
@@ -195,7 +196,21 @@ private:
 struct ScriptComponent : public ComponentBase
 {
     ScriptComponent() : ComponentBase("ScriptComponent") {}
+    ScriptComponent(const ScriptComponent& other) : ComponentBase("ScriptComponent")
+    {
+        script = other.script;
+        moduleIndex = script->modulesCount++;
 
+        ScriptManager::Get().AddScript(script);
+
+        ScriptManager::Get().BuildModule(script, (script->path.stem().string() + std::to_string(moduleIndex)));
+    }
+    ScriptComponent(ScriptComponent&& other) : ComponentBase("ScriptComponent")
+    {
+        script = other.script;
+        moduleIndex = other.moduleIndex;
+    }
+    
     ScriptAssetPtr script;
     uint32_t moduleIndex = 0;
 
@@ -258,7 +273,12 @@ struct RigidBodyComponent : public ComponentBase
 struct SoundComponent : public ComponentBase
 {
     SoundComponent() : ComponentBase("SoundComponent") {}
-
+    ~SoundComponent()
+    {
+        if(sound)
+            sound->sound.Stop();
+    }
+    
     SoundAssetPtr sound;
 };
 

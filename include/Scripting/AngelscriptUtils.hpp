@@ -1,7 +1,4 @@
 #pragma once
-#include <angelscript.h>
-
-#include <scriptbuilder.h>
 #include <scriptstdstring.h>
 #include <scriptarray.h>
 #include <aswrappedcall.h>
@@ -16,6 +13,8 @@
 #include <Entity.hpp>
 
 #include <SceneAsset.hpp>
+
+#include <ScriptManager.hpp>
 
 namespace lustra
 {
@@ -349,6 +348,13 @@ inline T* GetAssetPtr(std::shared_ptr<T>* asset)
 inline MaterialAssetPtr MaterialListAt(uint64_t index, MeshRendererComponent* component)
 {
     return component->materials[index];
+}
+
+inline void ExecuteFunction(ScriptAssetPtr script, const std::string& declaration, uint32_t moduleIndex)
+{
+    Multithreading::Get().AddJob(
+        { nullptr, [&]() { ScriptManager::Get().ExecuteFunction(script, declaration, nullptr, moduleIndex); } }
+    );
 }
 
 }

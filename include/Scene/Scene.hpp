@@ -48,6 +48,9 @@ public:
     entt::registry& GetRegistry();
 
 private:
+    void StartScript(ScriptComponent& script, Entity entity);
+    void UpdateScript(ScriptComponent& script, Entity entity, float deltaTime);
+
     void SetupLightsBuffer();
     void SetupShadowsBuffer();
     void UpdateLightsBuffer();

@@ -33,32 +33,7 @@ void Scene::Start()
 {
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
-        if(script.script)
-        {
-            Entity ent{ entity, this };
-
-            auto variables = ScriptManager::Get().GetGlobalVariables(script.script, script.moduleIndex);
-
-            auto it = variables.find("Entity self");
-
-            if(it != variables.end())
-                *((Entity*)(it->second)) = ent;
-
-            it = variables.find("Scene@ scene");
-
-            if(it != variables.end())
-                *((Scene**)(it->second)) = this;
-
-            ScriptManager::Get().ExecuteFunction(
-                script.script,
-                "void Start()",
-                nullptr,
-                script.moduleIndex
-            );
-        }
-
-        /* if(script.start)
-            script.start(); */
+        StartScript(script, { entity, this });
     });
 }
 
@@ -68,21 +43,7 @@ void Scene::Update(float deltaTime)
 
     registry.view<ScriptComponent>().each([&](auto entity, auto& script)
     {
-        if(script.script)
-        {
-            ScriptManager::Get().ExecuteFunction(
-                script.script,
-                "void Update(float)",
-                [&](auto context)
-                {
-                    context->SetArgFloat(0, deltaTime);
-                },
-                script.moduleIndex
-            );
-        }
-
-        /* if(script.update)
-            script.update(Entity{ entity, this }, deltaTime); */
+        UpdateScript(script, { entity, this }, deltaTime);
     });
 
     if(updatePhysics)
@@ -257,6 +218,18 @@ Entity Scene::CloneEntity(Entity entity)
             storage.push(clone, storage.value(entity));
     }
 
+    if(clone.HasComponent<ScriptComponent>() && isRunning)
+    {
+        auto& script = clone.GetComponent<ScriptComponent>();
+        
+        if(script.script)
+        {
+            Multithreading::Get().AddJob(
+                { nullptr, [&script, clone, this]() { StartScript(script, clone); } }
+            );
+        }
+    }
+
     return clone;
 }
 
@@ -326,6 +299,47 @@ glm::mat4 Scene::GetWorldTransform(entt::entity entity)
 entt::registry& Scene::GetRegistry()
 {
     return registry;
+}
+
+void Scene::StartScript(ScriptComponent& script, Entity entity)
+{
+    if(script.script)
+    {
+        auto variables = ScriptManager::Get().GetGlobalVariables(script.script, script.moduleIndex);
+
+        auto it = variables.find("Entity self");
+
+        if(it != variables.end())
+            *((Entity*)(it->second)) = entity;
+
+        it = variables.find("Scene@ scene");
+
+        if(it != variables.end())
+            *((Scene**)(it->second)) = this;
+
+        ScriptManager::Get().ExecuteFunction(
+            script.script,
+            "void Start()",
+            nullptr,
+            script.moduleIndex
+        );
+    }
+}
+
+void Scene::UpdateScript(ScriptComponent& script, Entity entity, float deltaTime)
+{
+    if(script.script)
+    {
+        ScriptManager::Get().ExecuteFunction(
+            script.script,
+            "void Update(float)",
+            [&](auto context)
+            {
+                context->SetArgFloat(0, deltaTime);
+            },
+            script.moduleIndex
+        );
+    }
 }
 
 void Scene::SetupLightsBuffer()

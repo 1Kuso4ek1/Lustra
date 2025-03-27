@@ -15,7 +15,10 @@ public:
 public:
     void Init();
 
+    void RemoveSound(Sound& sound);
+
     Sound LoadSound(const std::filesystem::path& path);
+    Sound CopySound(Sound& sound);
 
     ma_engine* GetEngine();
 

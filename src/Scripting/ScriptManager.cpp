@@ -29,6 +29,9 @@ ScriptManager::ScriptManager()
     SetDefaultNamespace("Log");
     RegisterLog();
 
+    SetDefaultNamespace("Random");
+    RegisterRandom();
+
     SetDefaultNamespace("glm");
     RegisterGLM();
 
@@ -286,6 +289,14 @@ void ScriptManager::RegisterLog()
     AddFunction("void Write(const string& in)", WRAP_FN(as::Write));
 }
 
+void ScriptManager::RegisterRandom()
+{
+    AddFunction("void SetSeed(uint32)", WRAP_FN(as::RandomSetSeed));
+    AddFunction("float Value()", WRAP_FN(as::RandomValue));
+    AddFunction("float Range(float, float)", WRAP_FN_PR(as::RandomRange, (float, float), float));
+    AddFunction("int Range(int, int)", WRAP_FN_PR(as::RandomRange, (int, int), int));
+}
+
 void ScriptManager::RegisterVec2()
 {
     AddValueType("vec2", sizeof(glm::vec2), asGetTypeTraits<glm::vec2>() | asOBJ_POD,
@@ -487,8 +498,13 @@ void ScriptManager::RegisterBody()
             { "void SetLinearVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetLinearVelocity) },
             { "void SetAngularVelocity(const glm::vec3& in)", WRAP_OBJ_LAST(as::SetAngularVelocity) },
             { "void SetIsSensor(bool)", WRAP_MFN(JPH::Body, SetIsSensor) },
+            { "void SetFriction(float)", WRAP_MFN(JPH::Body, SetFriction) },
+            { "void SetGravityFactor(float)", WRAP_OBJ_LAST(as::SetGravityFactor) },
+            { "void SetMass(float)", WRAP_OBJ_LAST(as::SetMass) },
             { "glm::vec3 GetLinearVelocity() const", WRAP_OBJ_LAST(as::GetLinearVelocity) },
-            { "glm::vec3 GetAngularVelocity() const", WRAP_OBJ_LAST(as::GetAngularVelocity) }
+            { "glm::vec3 GetAngularVelocity() const", WRAP_OBJ_LAST(as::GetAngularVelocity) },
+            { "bool IsSensor()", WRAP_MFN(JPH::Body, IsSensor) },
+            { "float GetFriction()", WRAP_MFN(JPH::Body, GetFriction) }
         }, {}
     );
 }

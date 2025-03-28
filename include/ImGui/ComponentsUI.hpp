@@ -443,6 +443,10 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
     if(ImGui::Checkbox("Is Sensor", &isSensor))
         component.body->SetIsSensor(isSensor);
 
+    float friction = component.body->GetFriction();
+    if(ImGui::SliderFloat("Friction", &friction, 0.0, 1.0))
+        component.body->SetFriction(friction);
+
     if(ImGui::CollapsingHeader("Shape"))
     {
         ImGui::Indent();

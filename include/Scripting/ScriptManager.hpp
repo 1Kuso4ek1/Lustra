@@ -70,6 +70,8 @@ private:
 
 private:
     void RegisterLog();
+
+    void RegisterRandom();
     
     void RegisterVec2();
     void RegisterVec3();

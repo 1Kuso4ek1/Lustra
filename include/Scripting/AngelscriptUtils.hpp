@@ -11,10 +11,9 @@
 
 #include <Scene.hpp>
 #include <Entity.hpp>
-
 #include <SceneAsset.hpp>
-
 #include <ScriptManager.hpp>
+#include <Random.hpp>
 
 namespace lustra
 {
@@ -355,6 +354,41 @@ inline void ExecuteFunction(ScriptAssetPtr script, const std::string& declaratio
     Multithreading::Get().AddJob(
         { nullptr, [&]() { ScriptManager::Get().ExecuteFunction(script, declaration, nullptr, moduleIndex); } }
     );
+}
+
+inline void RandomSetSeed(uint32_t seed)
+{
+    Random::Get().SetSeed(seed);
+}
+
+inline float RandomValue()
+{
+    return Random::Get().Value();
+}
+
+inline float RandomRange(float min, float max)
+{
+    return Random::Get().Range(min, max);
+}
+
+inline int RandomRange(int min, int max)
+{
+    return Random::Get().Range(min, max);
+}
+
+inline void SetGravityFactor(float factor, JPH::Body* body)
+{
+    PhysicsManager::Get().GetBodyInterface().SetGravityFactor(body->GetID(), factor);
+}
+
+inline void SetMass(float mass, JPH::Body* body)
+{
+    JPH::MassProperties newProperties;
+    newProperties.mMass = mass;
+    newProperties.mInertia = JPH::Mat44::sIdentity();
+
+    auto properties = body->GetMotionProperties();
+    properties->SetMassProperties(JPH::EAllowedDOFs::All, newProperties);
 }
 
 }

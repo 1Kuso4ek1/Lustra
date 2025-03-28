@@ -282,4 +282,11 @@ struct SoundComponent : public ComponentBase
     SoundAssetPtr sound;
 };
 
+struct PrefabComponent : public ComponentBase
+{
+    PrefabComponent() : ComponentBase("PrefabComponent") {}
+    PrefabComponent(const PrefabComponent& other) = delete;
+    PrefabComponent(PrefabComponent&& other) = default;
+};
+
 }

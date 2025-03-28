@@ -253,6 +253,12 @@ void load(Archive& archive, ScriptComponent& component)
 }
 
 template<class Archive>
+void serialize(Archive& archive, PrefabComponent& component)
+{
+    // ???
+}
+
+template<class Archive>
 void save(Archive& archive, const RigidBodyComponent& component)
 {
     archive(cereal::make_nvp("rigidBodyPosition", component.body->GetPosition()));

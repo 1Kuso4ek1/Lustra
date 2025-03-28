@@ -31,7 +31,8 @@ void Scene::Setup()
 
 void Scene::Start()
 {
-    registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+    registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
+        .each([&](auto entity, auto& script)
     {
         StartScript(script, { entity, this });
     });
@@ -41,7 +42,8 @@ void Scene::Update(float deltaTime)
 {
     InputManager::Get().Update();
 
-    registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+    registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
+        .each([&](auto entity, auto& script)
     {
         UpdateScript(script, { entity, this }, deltaTime);
     });
@@ -85,7 +87,8 @@ void Scene::OnEvent(Event& event)
         {
             auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
-            registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+            registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
+                .each([&](auto entity, auto& script)
             {
                 if(script.script)
                 {
@@ -107,7 +110,8 @@ void Scene::OnEvent(Event& event)
         {
             auto collisionEvent = dynamic_cast<CollisionEvent*>(&event);
 
-            registry.view<ScriptComponent>().each([&](auto entity, auto& script)
+            registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
+                .each([&](auto entity, auto& script)
             {
                 if(script.script)
                 {
@@ -386,7 +390,7 @@ void Scene::UpdateShadowsBuffer()
 
 void Scene::UpdateSounds()
 {
-    auto soundsView = registry.view<SoundComponent, TransformComponent>();
+    auto soundsView = registry.view<SoundComponent, TransformComponent>(entt::exclude<PrefabComponent>);
     
     for(auto entity : soundsView)
     {
@@ -411,7 +415,7 @@ void Scene::UpdateSounds()
 
 void Scene::SetupCamera()
 {
-    auto cameraView = registry.view<TransformComponent, CameraComponent>();
+    auto cameraView = registry.view<TransformComponent, CameraComponent>(entt::exclude<PrefabComponent>);
 
     TransformComponent cameraTransform;
 
@@ -466,7 +470,7 @@ void Scene::SetupLights()
 {
     lights.clear();
 
-    auto lightsView = registry.view<LightComponent, TransformComponent>();
+    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
     for(auto entity : lightsView)
     {
@@ -503,7 +507,7 @@ void Scene::SetupShadows()
         AssetManager::Get().Load<TextureAsset>("empty", true)->texture
     );
 
-    auto lightsView = registry.view<LightComponent, TransformComponent>();
+    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
     for(auto entity : lightsView)
     {
@@ -536,7 +540,13 @@ void Scene::RenderMeshes()
 {
     bool empty = true;
 
-    auto view = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
+    auto view =
+        registry.view<
+            TransformComponent,
+            MeshComponent,
+            MeshRendererComponent,
+            PipelineComponent
+        >(entt::exclude<PrefabComponent>);
     
     for(auto entity : view)
     {
@@ -595,8 +605,15 @@ void Scene::RenderToShadowMap()
 {
     Renderer::Get().Begin();
 
-    auto meshesView = registry.view<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>();
-    auto lightsView = registry.view<LightComponent, TransformComponent>();
+    auto meshesView =
+        registry.view<
+            TransformComponent,
+            MeshComponent,
+            MeshRendererComponent,
+            PipelineComponent
+        >(entt::exclude<PrefabComponent>);
+
+    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
     for(auto light : lightsView)
     {
@@ -634,7 +651,7 @@ void Scene::RenderToShadowMap()
 
 void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 {
-    auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>();
+    auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>(entt::exclude<PrefabComponent>);
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
@@ -646,7 +663,7 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
         return;
     }
 
-    auto proceduralSkyView = registry.view<MeshComponent, ProceduralSkyComponent>();
+    auto proceduralSkyView = registry.view<MeshComponent, ProceduralSkyComponent>(entt::exclude<PrefabComponent>);
 
     if(proceduralSkyView.begin() != proceduralSkyView.end())
     {

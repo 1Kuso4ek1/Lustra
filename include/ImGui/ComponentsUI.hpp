@@ -270,6 +270,11 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
         ScriptManager::Get().Build();
 }
 
+inline void DrawComponentUI(PrefabComponent& component, entt::entity entity)
+{
+    // ???
+}
+
 inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
 {
     static const std::vector<const char*> algorithms =

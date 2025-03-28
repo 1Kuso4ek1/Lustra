@@ -217,6 +217,7 @@ void Editor::DrawPropertiesWindow()
             lustra::CameraComponent,
             lustra::LightComponent,
             lustra::ScriptComponent,
+            lustra::PrefabComponent,
             lustra::TonemapComponent,
             lustra::BloomComponent,
             lustra::GTAOComponent,
@@ -287,6 +288,9 @@ void Editor::DrawPropertiesWindow()
             
             if(ImGui::MenuItem("Add ScriptComponent"))
                 selectedEntity.GetOrAddComponent<lustra::ScriptComponent>();
+
+            if(ImGui::MenuItem("Add PrefabComponent"))
+                selectedEntity.GetOrAddComponent<lustra::PrefabComponent>();
             
             if(ImGui::MenuItem("Add TonemapComponent"))
                 selectedEntity.GetOrAddComponent<lustra::TonemapComponent>(LLGL::Extent2D{ 1280, 720 });

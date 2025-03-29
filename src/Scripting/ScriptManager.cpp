@@ -786,7 +786,7 @@ void ScriptManager::RegisterTextureAsset()
     AddValueType("TextureAssetPtr", sizeof(TextureAssetPtr), asGetTypeTraits<TextureAssetPtr>() | asOBJ_POD,
         {
             { "TextureAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<TextureAsset>) },
-            { "TextureAsset@ opAssign(const TextureAssetPtr& in)", WRAP_MFN_PR(TextureAssetPtr, operator=, (const TextureAssetPtr&), TextureAssetPtr&) }
+            { "TextureAssetPtr opAssign(const TextureAssetPtr& in)", WRAP_MFN_PR(TextureAssetPtr, operator=, (const TextureAssetPtr&), TextureAssetPtr&) }
         }, {}
     );
 
@@ -825,7 +825,7 @@ void ScriptManager::RegisterMaterialAsset()
     AddValueType("MaterialAssetPtr", sizeof(MaterialAssetPtr), asGetTypeTraits<MaterialAssetPtr>() | asOBJ_POD,
         {
             { "MaterialAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<MaterialAsset>) },
-            { "MaterialAsset@ opAssign(const MaterialAssetPtr& in)", WRAP_MFN_PR(MaterialAssetPtr, operator=, (const MaterialAssetPtr&), MaterialAssetPtr&) }
+            { "MaterialAssetPtr opAssign(const MaterialAssetPtr& in)", WRAP_MFN_PR(MaterialAssetPtr, operator=, (const MaterialAssetPtr&), MaterialAssetPtr&) }
         }, {}
     );
 
@@ -839,7 +839,7 @@ void ScriptManager::RegisterModelAsset()
     AddValueType("ModelAssetPtr", sizeof(ModelAssetPtr), asGetTypeTraits<ModelAssetPtr>() | asOBJ_POD,
         {
             { "ModelAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ModelAsset>) },
-            { "ModelAsset@ opAssign(const ModelAssetPtr& in)", WRAP_MFN_PR(ModelAssetPtr, operator=, (const ModelAssetPtr&), ModelAssetPtr&) }
+            { "ModelAssetPtr opAssign(const ModelAssetPtr& in)", WRAP_MFN_PR(ModelAssetPtr, operator=, (const ModelAssetPtr&), ModelAssetPtr&) }
         }, {}
     );
 
@@ -857,7 +857,7 @@ void ScriptManager::RegisterSceneAsset()
     AddValueType("SceneAssetPtr", sizeof(SceneAssetPtr), asGetTypeTraits<SceneAssetPtr>() | asOBJ_POD,
         {
             { "SceneAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SceneAsset>) },
-            { "SceneAsset@ opAssign(const SceneAssetPtr& in)", WRAP_MFN_PR(SceneAssetPtr, operator=, (const SceneAssetPtr&), SceneAssetPtr&) }
+            { "SceneAssetPtr opAssign(const SceneAssetPtr& in)", WRAP_MFN_PR(SceneAssetPtr, operator=, (const SceneAssetPtr&), SceneAssetPtr&) }
         }, {}
     );
 
@@ -871,7 +871,7 @@ void ScriptManager::RegisterScriptAsset()
     AddValueType("ScriptAssetPtr", sizeof(ScriptAssetPtr), asGetTypeTraits<ScriptAssetPtr>() | asOBJ_POD,
         {
             { "ScriptAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<ScriptAsset>) },
-            { "ScriptAsset@ opAssign(const ScriptAssetPtr& in)", WRAP_MFN_PR(ScriptAssetPtr, operator=, (const ScriptAssetPtr&), ScriptAssetPtr&) }
+            { "ScriptAssetPtr opAssign(const ScriptAssetPtr& in)", WRAP_MFN_PR(ScriptAssetPtr, operator=, (const ScriptAssetPtr&), ScriptAssetPtr&) }
         }, {}
     );
 
@@ -985,7 +985,7 @@ void ScriptManager::RegisterMeshRendererComponent()
 {
     AddType("MeshRendererComponent", sizeof(MeshRendererComponent),
         {
-            { "MaterialAssetPtr at(uint64)", WRAP_OBJ_LAST(as::MaterialListAt) }
+            { "MaterialAssetPtr& at(uint64)", WRAP_OBJ_LAST(as::MaterialListAt) }
         }, {}
     );
 }

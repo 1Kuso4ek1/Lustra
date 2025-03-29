@@ -28,8 +28,13 @@ public:
     {
         return std::uniform_int_distribution<int>(min, max)(generator);
     }
+private:
+    friend class Singleton<Random>;
+
+    Random() : generator(device()) {}
 
 private:
+    std::random_device device;
     std::mt19937 generator;
 };
 

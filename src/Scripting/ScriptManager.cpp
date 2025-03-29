@@ -578,7 +578,10 @@ void ScriptManager::RegisterSound()
             { "void Play()", WRAP_MFN(Sound, Play) },
             { "void Stop()", WRAP_MFN(Sound, Stop) },
 
+            { "void SetPosition(const glm::vec3& in)", WRAP_MFN(Sound, SetPosition) },
             { "void SetVelocity(const glm::vec3& in)", WRAP_MFN(Sound, SetVelocity) },
+            { "void SetOrientation(const glm::quat& in)", WRAP_MFN(Sound, SetOrientation) },
+            { "void SetDirection(const glm::vec3& in)", WRAP_MFN(Sound, SetDirection) },
             // { "void SetCone(const Sound::Cone& in)", WRAP_MFN(Sound, SetCone) },
 
             { "void SetDirectionalAttenuationFactor(float)", WRAP_MFN(Sound, SetDirectionalAttenuationFactor) },
@@ -886,7 +889,7 @@ void ScriptManager::RegisterSoundAsset()
     AddValueType("SoundAssetPtr", sizeof(SoundAssetPtr), asGetTypeTraits<SoundAssetPtr>() | asOBJ_POD,
         {
             { "SoundAsset@ get()", WRAP_OBJ_LAST(as::GetAssetPtr<SoundAsset>) },
-            { "SoundAsset@ opAssign(const SoundAssetPtr& in)", WRAP_MFN_PR(SoundAssetPtr, operator=, (const SoundAssetPtr&), SoundAssetPtr&) }
+            { "SoundAssetPtr opAssign(const SoundAssetPtr& in)", WRAP_MFN_PR(SoundAssetPtr, operator=, (const SoundAssetPtr&), SoundAssetPtr&) }
         }, {}
     );
 

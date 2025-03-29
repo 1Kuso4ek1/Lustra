@@ -598,7 +598,8 @@ void ScriptManager::RegisterSound()
             { "void SetPitch(float)", WRAP_MFN(Sound, SetPitch) },
             { "void SetVolume(float)", WRAP_MFN(Sound, SetVolume) },
 
-            { "void SetLooping(bool)", WRAP_MFN(Sound, SetLooping) }
+            { "void SetLooping(bool)", WRAP_MFN(Sound, SetLooping) },
+            { "void SetSpatializationEnabled(bool)", WRAP_MFN(Sound, SetSpatializationEnabled) }
         }, {}
     );
 }
@@ -922,8 +923,8 @@ void ScriptManager::RegisterCollisionEvent()
         {
             { "void SetHandled()", WRAP_MFN(CollisionEvent, SetHandled) },
             { "bool IsHandled() const", WRAP_MFN(CollisionEvent, IsHandled) },
-            { "JPH::Body@ GetBodyID1() const", WRAP_MFN(CollisionEvent, GetBody1) },
-            { "JPH::Body@ GetBodyID2() const", WRAP_MFN(CollisionEvent, GetBody2) },
+            { "JPH::Body@ GetBody1() const", WRAP_MFN(CollisionEvent, GetBody1) },
+            { "JPH::Body@ GetBody2() const", WRAP_MFN(CollisionEvent, GetBody2) },
             { "glm::vec3 GetContactPosition1() const", WRAP_MFN(CollisionEvent, GetContactPosition1) },
             { "glm::vec3 GetContactPosition2() const", WRAP_MFN(CollisionEvent, GetContactPosition2) },
             { "glm::vec3 GetNormal() const", WRAP_MFN(CollisionEvent, GetNormal) },

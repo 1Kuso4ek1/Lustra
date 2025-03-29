@@ -44,6 +44,8 @@ uniform vec3 cameraPosition;
 uniform int numLights;
 uniform int numShadows;
 
+uniform mat4 view;
+
 uniform samplerCubeArray irradiance;
 uniform samplerCubeArray prefiltered;
 
@@ -192,7 +194,7 @@ void CalculateLights(
 
 void main()
 {
-    vec4 posSample = texture(gPosition, coord);
+    vec4 posSample = inverse(view) * texture(gPosition, coord);
     if(posSample.w <= 0.001)
         discard;
 

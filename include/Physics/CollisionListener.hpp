@@ -1,6 +1,7 @@
 #pragma once
 #include <JoltInclude.hpp>
 #include <EventManager.hpp>
+#include <Multithreading.hpp>
 
 #include <glm/vec3.hpp>
 
@@ -13,8 +14,12 @@ public:
     CollisionEvent(JPH::Body* body1, JPH::Body* body2, const JPH::ContactManifold& manifold)
         : Event(Type::Collision), body1(body1), body2(body2)
     {
-        auto point1 = manifold.GetWorldSpaceContactPointOn1(0);
-        auto point2 = manifold.GetWorldSpaceContactPointOn2(0);
+        JPH::RVec3 point1, point2;
+        
+        if(manifold.mRelativeContactPointsOn1.size() > 0)
+            point1 = manifold.GetWorldSpaceContactPointOn1(0);
+        if(manifold.mRelativeContactPointsOn2.size() > 0)
+            point2 = manifold.GetWorldSpaceContactPointOn2(0);
 
         auto normal = manifold.mWorldSpaceNormal;
 
@@ -78,12 +83,19 @@ private:
         const JPH::ContactManifold& manifold
     )
     {
-        EventManager::Get().Dispatch(
-            std::make_unique<CollisionEvent>(
-                const_cast<JPH::Body*>(&body1),
-                const_cast<JPH::Body*>(&body2),
-                manifold
-            )
+        Multithreading::Get().AddJob(
+            {
+                nullptr,
+                [&]() {
+                    EventManager::Get().Dispatch(
+                        std::make_unique<CollisionEvent>(
+                            const_cast<JPH::Body*>(&body1),
+                            const_cast<JPH::Body*>(&body2),
+                            manifold
+                        )
+                    );
+                }
+            }
         );
     }
 

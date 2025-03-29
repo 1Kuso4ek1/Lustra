@@ -801,6 +801,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
         commandBuffer->SetUniforms(0, &numLights, sizeof(numLights));
         commandBuffer->SetUniforms(1, &numShadows, sizeof(numShadows));
         commandBuffer->SetUniforms(2, &cameraPosition, sizeof(cameraPosition));
+        commandBuffer->SetUniforms(3, &Renderer::Get().GetMatrices()->GetView(), sizeof(glm::mat4));
     };
 
     auto gtaoResult = ApplyGTAO();

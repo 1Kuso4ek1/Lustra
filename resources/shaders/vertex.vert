@@ -19,7 +19,7 @@ uniform vec2 uvOffset = vec2(0.0);
 
 void main()
 {
-    mPosition = (model * vec4(position, 1.0)).xyz;
+    mPosition = (view * model * vec4(position, 1.0)).xyz;
     mNormal = normalize(mat3(model) * normal);
     coord = (texCoord + uvOffset) * uvScale;
 

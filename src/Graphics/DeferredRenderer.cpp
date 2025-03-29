@@ -89,7 +89,8 @@ DeferredRenderer::DeferredRenderer()
         {
             { "numLights", LLGL::UniformType::Int1 },
             { "numShadows", LLGL::UniformType::Int1 },
-            { "cameraPosition", LLGL::UniformType::Float3 }
+            { "cameraPosition", LLGL::UniformType::Float3 },
+            { "view", LLGL::UniformType::Float4x4 }
         },
         .combinedTextureSamplers =
         {

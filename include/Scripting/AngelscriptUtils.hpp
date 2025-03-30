@@ -130,6 +130,11 @@ inline void MakeQuatFromEuler(const glm::vec3& euler, glm::quat* quat)
     new(quat) glm::quat(euler);
 }
 
+inline void MakeQuatFromMat4(const glm::mat4& mat, glm::quat* quat)
+{
+    new(quat) glm::quat(mat);
+}
+
 inline glm::vec2 Vec2AddAssign(const glm::vec2& src, glm::vec2& dst)
 {
     return dst += src;

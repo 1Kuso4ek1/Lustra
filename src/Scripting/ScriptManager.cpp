@@ -413,7 +413,11 @@ void ScriptManager::RegisterQuat()
 
     AddTypeConstructor("quat", "void f(float, float, float, float)", WRAP_OBJ_LAST(as::MakeQuat));
     AddTypeConstructor("quat", "void f(const vec3& in)", WRAP_OBJ_LAST(as::MakeQuatFromEuler));
+    AddTypeConstructor("quat", "void f(const mat4& in)", WRAP_OBJ_LAST(as::MakeQuatFromMat4));
 
+    AddFunction("quat slerp(const quat& in, const quat& in, float)", WRAP_FN_PR(glm::slerp, (const glm::quat&, const glm::quat&, float), glm::quat));
+    AddFunction("quat lerp(const quat& in, const quat& in, float)", WRAP_FN_PR(glm::lerp, (const glm::quat&, const glm::quat&, float), glm::quat));
+    
     AddFunction("vec3 rotate(const quat& in, const vec3& in)", WRAP_FN_PR(glm::rotate, (const glm::quat&, const glm::vec3&), glm::vec3));
     AddFunction("quat normalize(const quat& in)", WRAP_FN_PR(glm::normalize, (const glm::quat&), glm::quat));
 
@@ -447,8 +451,8 @@ void ScriptManager::RegisterGLM()
     RegisterVec2();
     RegisterVec3();
     RegisterVec4();
-    RegisterQuat();
     RegisterMat4();
+    RegisterQuat();
 
     AddFunction("float radians(float)", WRAP_FN_PR(glm::radians, (float), float));
     AddFunction("vec2 radians(const vec2& in)", WRAP_FN_PR(glm::radians, (const glm::vec2&), glm::vec2));

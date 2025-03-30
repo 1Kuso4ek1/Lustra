@@ -56,6 +56,8 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
 {
     RenderToShadowMap();
 
+    UpdateRigidBodies();
+
     SetupCamera();
     SetupLights();
     SetupShadows();
@@ -388,6 +390,42 @@ void Scene::UpdateShadowsBuffer()
     );
 }
 
+void Scene::UpdateRigidBodies()
+{
+    auto bodyView = registry.view<TransformComponent, RigidBodyComponent>(entt::exclude<PrefabComponent>);
+
+    for(auto entity : bodyView)
+    {
+        auto [transform, body] = bodyView.get<TransformComponent, RigidBodyComponent>(entity);
+
+        if(transform.overridePhysics)
+        {
+            auto bodyId = body.body->GetID();
+
+            auto position = transform.position;
+            auto rotation = glm::quat(glm::radians(transform.rotation));
+
+            PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
+                bodyId,
+                { position.x, position.y, position.z },
+                { rotation.x, rotation.y, rotation.z, rotation.w },
+                JPH::EActivation::Activate
+            );
+
+            body.body->SetLinearVelocity({ 0.0f, 0.0f, 0.0f });
+            body.body->SetAngularVelocity({ 0.0f, 0.0f, 0.0f });
+        }
+        else
+        {
+            auto position = body.body->GetPosition();
+            auto rotation = body.body->GetRotation().GetEulerAngles();
+
+            transform.position = { position.GetX(), position.GetY(), position.GetZ() };
+            transform.rotation = glm::degrees(glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ()));
+        }
+    }
+}
+
 void Scene::UpdateSounds()
 {
     auto soundsView = registry.view<SoundComponent, TransformComponent>(entt::exclude<PrefabComponent>);
@@ -552,37 +590,6 @@ void Scene::RenderMeshes()
     {
         auto [transform, mesh, meshRenderer, pipeline] = 
                 view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
-
-        if(registry.all_of<RigidBodyComponent>(entity))
-        {
-            auto body = registry.get<RigidBodyComponent>(entity).body;
-
-            if(transform.overridePhysics)
-            {
-                auto bodyId = body->GetID();
-
-                auto position = transform.position;
-                auto rotation = glm::quat(glm::radians(transform.rotation));
-
-                PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(
-                    bodyId,
-                    { position.x, position.y, position.z },
-                    { rotation.x, rotation.y, rotation.z, rotation.w },
-                    JPH::EActivation::Activate
-                );
-
-                body->SetLinearVelocity({ 0.0f, 0.0f, 0.0f });
-                body->SetAngularVelocity({ 0.0f, 0.0f, 0.0f });
-            }
-            else
-            {
-                auto position = body->GetPosition();
-                auto rotation = body->GetRotation().GetEulerAngles();
-
-                transform.position = { position.GetX(), position.GetY(), position.GetZ() };
-                transform.rotation = glm::degrees(glm::vec3(rotation.GetX(), rotation.GetY(), rotation.GetZ()));
-            }
-        }
 
         if(!mesh.drawable)
             continue;

@@ -60,7 +60,7 @@ void Editor::Update(float deltaTime)
 
         scene->Update(deltaTime);
     }
-    else
+    else// if(editorCamera.HasComponent<CameraComponent>())
     {
         editorCamera.GetComponent<CameraComponent>().active = true;
         editorCamera.GetComponent<ScriptComponent>().update(editorCamera, deltaTime);

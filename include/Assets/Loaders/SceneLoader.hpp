@@ -38,6 +38,8 @@ private:
             .template get<RigidBodyComponent>(archive)
             .template get<SoundComponent>(archive)
             .template get<PrefabComponent>(archive);
+
+        ScriptManager::Get().Build();
     }
 
     template<class Archive>

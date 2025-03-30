@@ -244,12 +244,10 @@ void load(Archive& archive, ScriptComponent& component)
     if(path.empty())
         return;
 
-    component.script = AssetManager::Get().Load<ScriptAsset>(path);
+    component.script = AssetManager::Get().Load<ScriptAsset>(path, false, false, false);
     component.moduleIndex = component.script->modulesCount++;
 
     ScriptManager::Get().AddScript(component.script);
-
-    ScriptManager::Get().Build();
 }
 
 template<class Archive>

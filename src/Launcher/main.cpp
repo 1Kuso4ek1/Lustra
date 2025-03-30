@@ -2,7 +2,7 @@
 
 int main()
 {
-    Launcher launcher(lustra::Config::Load("config.json"));
+    Launcher launcher(lustra::Config::Load("assets/config/config.json"));
 
     launcher.Run();
 }

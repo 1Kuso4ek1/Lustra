@@ -45,11 +45,13 @@ set(SKIP_PERFORMANCE_COMPARISON ON)
 # ----
 
 file(GLOB ENGINE_SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
+file(GLOB EDITOR_SOURCES "src/Editor/*.cpp" "src/Editor/*/*.cpp")
+file(GLOB LAUNCHER_SOURCES "src/Launcher/*.cpp")
+
 file(GLOB IMGUI_SOURCES "libraries/imgui/*.cpp")
 file(GLOB IMGUIZMO_SOURCES "libraries/ImGuizmo/*.cpp")
 
-list(REMOVE_ITEM ENGINE_SOURCES "src/Editor/main.cpp")
-list(REMOVE_ITEM ENGINE_SOURCES "src/Launcher/main.cpp")
+list(FILTER ENGINE_SOURCES EXCLUDE REGEX "src/(Editor|Launcher)/")
 
 set(
     ENGINE_INCLUDE_DIRS
@@ -159,7 +161,7 @@ target_link_libraries(
 add_executable(
     Editor
 
-    src/Editor/main.cpp
+    ${EDITOR_SOURCES}
 )
 
 add_definitions("-DEDITOR_ROOT=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
@@ -167,7 +169,7 @@ add_definitions("-DEDITOR_ROOT=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 add_executable(
     Launcher
 
-    src/Launcher/main.cpp
+    ${LAUNCHER_SOURCES}
 )
 
 set_target_properties(Editor Launcher Engine PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)

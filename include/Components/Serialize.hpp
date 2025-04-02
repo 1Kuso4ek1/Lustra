@@ -457,6 +457,8 @@ void save(Archive& archive, const SoundComponent& component)
     }
     else
         archive(cereal::make_nvp("soundPath", ""));
+    
+    archive(cereal::make_nvp("attached", component.attached));
 }
 
 template<class Archive>
@@ -490,6 +492,8 @@ void load(Archive& archive, SoundComponent& component)
         archive(enabled); component.sound->sound.SetLooping(enabled);
         archive(enabled); component.sound->sound.SetSpatializationEnabled(enabled);
     }
+
+    archive(component.attached);
 }
 
 }

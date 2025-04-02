@@ -442,7 +442,7 @@ void Scene::UpdateSounds()
 
         if(sound.sound)
         {
-            if(sound.sound->sound.GetSound().get()) // ??? :/
+            if(sound.sound->sound.GetSound().get() && sound.attached) // ??? :/
             {
                 sound.sound->sound.SetPosition(worldTransform.position);
                 sound.sound->sound.SetOrientation(glm::radians(worldTransform.rotation));

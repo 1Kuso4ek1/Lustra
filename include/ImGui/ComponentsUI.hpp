@@ -645,6 +645,8 @@ inline void DrawComponentUI(SoundComponent& component, entt::entity entity)
         ImGui::EndDragDropTarget();
     }
 
+    ImGui::Checkbox("Attached", &component.attached);
+
     if(component.sound)
     {
         ImGui::Separator();

@@ -280,6 +280,8 @@ struct SoundComponent : public ComponentBase
     }
     
     SoundAssetPtr sound;
+
+    bool attached = true;
 };
 
 struct PrefabComponent : public ComponentBase

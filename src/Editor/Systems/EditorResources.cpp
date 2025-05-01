@@ -20,8 +20,8 @@ void Editor::LoadIcons()
     buildIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/build.png", true);
 
     lightIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/light.png", true);
-
     soundIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/sound.png", true);
+    cameraIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/camera.png", true);
 
     vertexShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/vertexShader.png", true);
     fragmentShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/fragmentShader.png", true);

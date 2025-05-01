@@ -18,10 +18,9 @@ ProjectManager::ProjectManager()
 
 ProjectManager::~ProjectManager()
 {
+    lustra::AssetManager::Get().Unload(logo->path);
     lustra::AssetManager::Get().RemoveLoader<lustra::TextureAsset>();
-
-    lustra::Renderer::Get().Release(logo->texture);
-
+    
     std::ofstream file(EDITOR_ROOT"/resources/config/recent.json");
 
     if(file.is_open())

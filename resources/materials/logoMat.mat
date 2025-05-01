@@ -1,0 +1,73 @@
+{
+    "value0": {
+        "albedo": {
+            "type": 1,
+            "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "texturePath": "resources/branding/logo.png"
+        },
+        "normal": {
+            "type": 0,
+            "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "texturePath": "resources/textures/default"
+        },
+        "metallic": {
+            "type": 0,
+            "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5,
+                "w": 0.5
+            },
+            "texturePath": "resources/textures/default"
+        },
+        "roughness": {
+            "type": 0,
+            "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5,
+                "w": 0.5
+            },
+            "texturePath": "resources/textures/default"
+        },
+        "ao": {
+            "type": 0,
+            "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0,
+                "w": 1.0
+            },
+            "texturePath": "resources/textures/default"
+        },
+        "emission": {
+            "type": 0,
+            "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 0.0
+            },
+            "texturePath": "resources/textures/default"
+        },
+        "emissionStrength": 0.0,
+        "uvScale": {
+            "x": -1.0,
+            "y": 1.0
+        },
+        "uvOffset": {
+            "x": 0.0,
+            "y": 0.0
+        }
+    }
+}

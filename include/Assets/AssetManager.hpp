@@ -92,6 +92,24 @@ public:
         return assets;
     }
 
+    void Unload(const std::filesystem::path& path)
+    {
+        auto it = assets.find(path);
+
+        if(it == assets.end())
+            return;
+
+        auto loader = loaders[it->second.first];
+
+        if(loader)
+            loader->Unload(it->second.second);
+        
+        assets.erase(it);
+
+        if(fsWatch)
+            timestamps.erase(path);
+    }
+
     template<class T>
     void Write(std::shared_ptr<T> asset, const std::filesystem::path& path, bool relativeToAssetsDir = false)
     {
@@ -121,15 +139,6 @@ public:
     void SetAssetsDirectory(const std::filesystem::path& path)
     {
         assetsDirectory = path;
-    }
-
-    template<class T>
-    void Unload(const std::filesystem::path& path)
-    {
-        assets.erase(path);
-
-        if(fsWatch)
-            timestamps.erase(path);
     }
 
     template<class AssetType, class LoaderType>

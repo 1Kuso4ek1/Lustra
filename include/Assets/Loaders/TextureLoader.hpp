@@ -15,6 +15,8 @@ public:
         AssetPtr existing = nullptr,
         bool async = true
     ) override;
+
+    void Unload(const AssetPtr& asset) override;
     
     void Reset() override;
 

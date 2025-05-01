@@ -275,11 +275,11 @@ void Editor::DrawPropertiesWindow()
                 selectedEntity.GetOrAddComponent<lustra::RigidBodyComponent>().body = 
                     lustra::PhysicsManager::Get().CreateBody(
                         JPH::BodyCreationSettings(
-                        new JPH::EmptyShapeSettings(),
-                        { 0.0f, 0.0f, 0.0f },
-                        { 0.0f, 0.0f, 0.0f, 1.0f },
-                        JPH::EMotionType::Dynamic,
-                        lustra::Layers::moving
+                            new JPH::EmptyShapeSettings(),
+                            { 0.0f, 0.0f, 0.0f },
+                            { 0.0f, 0.0f, 0.0f, 1.0f },
+                            JPH::EMotionType::Dynamic,
+                            lustra::Layers::moving
                         )
                     );
 
@@ -353,7 +353,7 @@ void Editor::DrawImGuizmo()
 
             auto& transform = selectedEntity.GetComponent<lustra::TransformComponent>();
             auto modelMatrix = scene->GetWorldTransform(selectedEntity);
-            glm::mat4 deltaMatrix(1.0f);
+            //glm::mat4 deltaMatrix(1.0f);
 
             ImGuizmo::SetDrawlist();
             
@@ -371,13 +371,13 @@ void Editor::DrawImGuizmo()
                 currentOperation,
                 ImGuizmo::MODE::WORLD,
                 glm::value_ptr(modelMatrix),
-                glm::value_ptr(deltaMatrix),
+                nullptr, //glm::value_ptr(deltaMatrix),
                 lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::LeftControl) ? snap : nullptr
             );
 
-            deltaMatrix[3] = glm::clamp(deltaMatrix[3], glm::vec4(-1.0f), glm::vec4(1.0f));
+            //deltaMatrix[3] = glm::clamp(deltaMatrix[3], glm::vec4(-1.0f), glm::vec4(1.0f));
 
-            transform.SetTransform(deltaMatrix * transform.GetTransform());
+            transform.SetTransform(modelMatrix);
 
             if(selectedEntity.HasComponent<lustra::RigidBodyComponent>())
             {
@@ -543,10 +543,26 @@ void Editor::DrawViewport()
 
     canMoveCamera = ImGui::IsWindowHovered();
 
+    DrawOnScreenIcons();
+
+    DrawImGuizmo();
+
+    ImGui::End();
+
+    ImGui::PopStyleVar();
+}
+
+void Editor::DrawOnScreenIcons()
+{
     auto lights = scene->GetRegistry().view<lustra::TransformComponent, lustra::LightComponent>();
     auto sounds = scene->GetRegistry().view<lustra::TransformComponent, lustra::SoundComponent>();
+    auto cameras = scene->GetRegistry().view<lustra::TransformComponent, lustra::CameraComponent>();
 
-    auto drawOnScreen = [&](const glm::vec3& pos, int id, const glm::vec3& lightColor = glm::vec3(-1.0f))
+    auto drawOnScreen = [&](
+        const glm::vec3& pos,
+        int id,
+        lustra::TextureAssetPtr icon,
+        const glm::vec3& lightColor = glm::vec3(-1.0f))
     {
         auto screenPos = editorCamera.GetComponent<lustra::CameraComponent>().camera.WorldToScreen(pos);
 
@@ -557,7 +573,7 @@ void Editor::DrawViewport()
             ImGui::SetCursorPos({ screenPos.x - 32.0f, screenPos.y - 36.0f });
 
             ImGui::Image(
-                lightColor == glm::vec3(-1.0f) ? soundIcon->nativeHandle : lightIcon->nativeHandle,
+                icon->nativeHandle,
                 { 64, 64 },
                 { 0, 0 },
                 { 1, 1 },
@@ -578,23 +594,28 @@ void Editor::DrawViewport()
             lustra::TransformComponent transform;
             transform.SetTransform(scene->GetWorldTransform(entity));
 
-            drawOnScreen(transform.position, (int)entity, light.color);
+            drawOnScreen(transform.position, (int)entity, lightIcon, light.color);
         }
 
         for(auto entity : sounds)
         {
-            auto& sound = sounds.get<lustra::SoundComponent>(entity);
-            
             lustra::TransformComponent transform;
             transform.SetTransform(scene->GetWorldTransform(entity));
             
-            drawOnScreen(transform.position, (int)entity);
+            drawOnScreen(transform.position, (int)entity, soundIcon);
+        }
+
+        for(auto entity : cameras)
+        {
+            auto& camera = cameras.get<lustra::CameraComponent>(entity);
+
+            if(entity == editorCamera || camera.active)
+                continue;
+        
+            lustra::TransformComponent transform;
+            transform.SetTransform(scene->GetWorldTransform(entity));
+            
+            drawOnScreen(transform.position, (int)entity, cameraIcon);
         }
     }
-
-    DrawImGuizmo();
-
-    ImGui::End();
-
-    ImGui::PopStyleVar();
 }

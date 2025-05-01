@@ -113,6 +113,20 @@ AssetPtr TextureLoader::Load(
     return textureAsset;
 }
 
+void TextureLoader::Unload(const AssetPtr& asset)
+{
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::StdWarning,
+        "Unloading texture \"%s\"\n",
+        asset->path.string().c_str()
+    );
+
+    auto textureAsset = std::static_pointer_cast<TextureAsset>(asset);
+
+    if(textureAsset->texture)
+        Renderer::Get().Release(textureAsset->texture);
+}
+
 void TextureLoader::Reset()
 {
     if(defaultTexture)

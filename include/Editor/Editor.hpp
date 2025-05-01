@@ -71,6 +71,7 @@ private:
     void DrawMaterialProperty(lustra::MaterialAsset::Property& property, int id, bool singleComponent = false);
     
     void DrawViewport();
+    void DrawOnScreenIcons();
 
     void OnEvent(lustra::Event& event) override;
 
@@ -115,7 +116,8 @@ private:
                             materialIcon, modelIcon, scriptIcon,
                             playIcon, pauseIcon, stopIcon,
                             buildIcon, lightIcon, sceneIcon,
-                            soundIcon, vertexShaderIcon, fragmentShaderIcon;
+                            soundIcon, vertexShaderIcon, fragmentShaderIcon,
+                            cameraIcon;
 
     std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;
 };

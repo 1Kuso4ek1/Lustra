@@ -19,6 +19,7 @@ public:
         AssetPtr existing = nullptr,
         bool async = true
     ) = 0;
+    virtual void Unload(const AssetPtr& asset) {};
     virtual void Write(const AssetPtr& asset, const std::filesystem::path& path) {};
     virtual void Reset() {};
 };

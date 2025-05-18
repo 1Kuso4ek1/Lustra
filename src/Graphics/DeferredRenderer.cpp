@@ -160,7 +160,7 @@ void DeferredRenderer::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
         LLGL::Extent2D size = resizeEvent->GetSize();
 
@@ -180,7 +180,7 @@ void DeferredRenderer::OnEvent(Event& event)
             .samples = 1
         };
 
-        LLGL::TextureDescriptor depthAttachmentDesc =
+        const LLGL::TextureDescriptor depthAttachmentDesc =
         {
             .type = LLGL::TextureType::Texture2D,
             .bindFlags = LLGL::BindFlags::DepthStencilAttachment,
@@ -205,11 +205,11 @@ void DeferredRenderer::OnEvent(Event& event)
     }
     else if(event.GetType() == Event::Type::AssetLoaded)
     {
-        auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
+        const auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
 
         if(assetEvent->GetAsset()->type == Asset::Type::FragmentShader)
         {
-            auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
+            const auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
             if(lightingPass == shader)
                 rectPipeline = Renderer::Get().CreatePipelineState(
                     layoutDesc,
@@ -233,27 +233,27 @@ LLGL::Texture* DeferredRenderer::GetDepth()
     return gBufferDepth;
 }
 
-LLGL::Texture* DeferredRenderer::GetPosition()
+LLGL::Texture* DeferredRenderer::GetPosition() const
 {
     return gBufferPosition;
 }
 
-LLGL::Texture* DeferredRenderer::GetAlbedo()
+LLGL::Texture* DeferredRenderer::GetAlbedo() const
 {
     return gBufferAlbedo;
 }
 
-LLGL::Texture* DeferredRenderer::GetNormal()
+LLGL::Texture* DeferredRenderer::GetNormal() const
 {
     return gBufferNormal;
 }
 
-LLGL::Texture* DeferredRenderer::GetCombined()
+LLGL::Texture* DeferredRenderer::GetCombined() const
 {
     return gBufferCombined;
 }
 
-LLGL::Texture* DeferredRenderer::GetEmission()
+LLGL::Texture* DeferredRenderer::GetEmission() const
 {
     return gBufferEmission;
 }

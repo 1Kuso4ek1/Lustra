@@ -12,11 +12,11 @@ namespace lustra
 
 class Entity;
 
-class Scene : public EventListener
+class Scene final : public EventListener
 {
 public:
     Scene();
-    ~Scene();
+    ~Scene() override;
 
     void Setup();
 
@@ -34,22 +34,22 @@ public:
 
     void ReparentEntity(Entity child, Entity parent);
 
-    void RemoveEntity(Entity entity);
+    void RemoveEntity(const Entity& entity);
 
     Entity CreateEntity();
-    Entity CloneEntity(Entity entity);
+    Entity CloneEntity(const Entity& entity);
     Entity GetEntity(entt::id_type id);
     Entity GetEntity(const std::string& name); // Not using std::string_view since this function is used by Angelscript
 
-    bool IsChildOf(Entity child, Entity parent);
+    bool IsChildOf(const Entity& child, const Entity& parent);
 
     glm::mat4 GetWorldTransform(entt::entity entity);
 
     entt::registry& GetRegistry();
 
 private:
-    void StartScript(ScriptComponent& script, Entity entity);
-    void UpdateScript(ScriptComponent& script, Entity entity, float deltaTime);
+    void StartScript(const ScriptComponent& script, const Entity& entity);
+    void UpdateScript(const ScriptComponent& script, Entity entity, float deltaTime);
 
     void SetupLightsBuffer();
     void SetupShadowsBuffer();
@@ -91,7 +91,7 @@ private:
     void RenderResult(LLGL::RenderTarget* renderTarget = Renderer::Get().GetSwapChain());
 
     void ApplyPostProcessing(LLGL::RenderTarget* renderTarget);
-    
+
     std::pair<LLGL::Texture*, float> ApplyBloom(LLGL::Texture* frame);
     LLGL::Texture* ApplyGTAO();
     LLGL::Texture* ApplySSR(LLGL::Texture* frame);
@@ -103,7 +103,7 @@ private:
 private:
     Camera* camera{};
 
-    glm::vec3 cameraPosition; // Only for shaders
+    glm::vec3 cameraPosition{}; // Only for shaders
 
 private:
     struct Light
@@ -115,7 +115,7 @@ private:
         alignas(16) glm::vec3 position;
         alignas(16) glm::vec3 direction;
         alignas(16) glm::vec3 color;
-        
+
         float intensity, cutoff, outerCutoff;
     };
 
@@ -128,8 +128,8 @@ private:
 
     std::vector<Light> lights;
     std::vector<Shadow> shadows;
-    
-    std::array<LLGL::Texture*, 4> shadowSamplers;
+
+    std::array<LLGL::Texture*, 4> shadowSamplers{};
 
     LLGL::Buffer* lightsBuffer{};
     LLGL::Buffer* shadowsBuffer{};

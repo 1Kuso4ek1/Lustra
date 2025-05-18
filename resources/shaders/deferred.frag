@@ -44,6 +44,9 @@ void main()
 	else
 		gAlbedo = texture(albedoTexture, coord);
 
+	if(gAlbedo.a < 0.5)
+		discard;
+
 	if(normalType == 0)
 		gNormal = vec4(mNormal, 1.0);
 	else

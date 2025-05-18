@@ -70,7 +70,7 @@ void Scene::Draw(LLGL::RenderTarget* renderTarget)
     UpdateShadowsBuffer();
 
     RenderMeshes();
-    
+
     Renderer::Get().End();
 
     Renderer::Get().Submit();
@@ -82,7 +82,7 @@ void Scene::OnEvent(Event& event)
 {
     if(!isRunning)
         return;
-    
+
     switch(event.GetType())
     {
         case Event::Type::WindowResize:
@@ -90,7 +90,7 @@ void Scene::OnEvent(Event& event)
             auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
             registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
-                .each([&](auto entity, auto& script)
+                .each([&](auto, auto& script)
             {
                 if(script.script)
                 {
@@ -113,7 +113,7 @@ void Scene::OnEvent(Event& event)
             auto collisionEvent = dynamic_cast<CollisionEvent*>(&event);
 
             registry.view<ScriptComponent>(entt::exclude<PrefabComponent>)
-                .each([&](auto entity, auto& script)
+                .each([&](auto, auto& script)
             {
                 if(script.script)
                 {
@@ -136,7 +136,7 @@ void Scene::OnEvent(Event& event)
     }
 }
 
-void Scene::SetUpdatePhysics(bool updatePhysics)
+void Scene::SetUpdatePhysics(const bool updatePhysics)
 {
     this->updatePhysics = updatePhysics;
 }
@@ -146,7 +146,7 @@ void Scene::ToggleUpdatePhysics()
     updatePhysics = !updatePhysics;
 }
 
-void Scene::SetIsRunning(bool running)
+void Scene::SetIsRunning(const bool running)
 {
     isRunning = running;
 }
@@ -158,22 +158,18 @@ void Scene::ToggleIsRunning()
 
 void Scene::ReparentEntity(Entity child, Entity parent)
 {
-    static auto removeChild = [&](Entity child, Entity parent)
+    static auto removeChild = [&](const Entity& c, Entity p)
     {
-        if(registry.valid(parent))
+        if(registry.valid(p))
         {
-            auto& prevParentHierarchy = parent.GetComponent<HierarchyComponent>();
+            auto& prevParentHierarchy = p.GetComponent<HierarchyComponent>();
 
-            prevParentHierarchy.children.erase(
-                std::remove(prevParentHierarchy.children.begin(), 
-                            prevParentHierarchy.children.end(), child),
-                prevParentHierarchy.children.end()
-            );
+            std::erase(prevParentHierarchy.children, c);
         }
     };
 
     auto& childHierarchy = child.GetOrAddComponent<HierarchyComponent>();
-    auto prevParent = Entity(childHierarchy.parent, this);
+    const auto prevParent = Entity(childHierarchy.parent, this);
 
     if(prevParent == parent)
     {
@@ -198,13 +194,13 @@ void Scene::ReparentEntity(Entity child, Entity parent)
         if(child.HasComponent<TransformComponent>())
         {
             auto& childTransform = child.GetComponent<TransformComponent>();
-            auto parentWorld = GetWorldTransform(parent);
+            const auto parentWorld = GetWorldTransform(parent);
             childTransform.SetTransform(glm::inverse(parentWorld) * childTransform.GetTransform());
         }
     }
 }
 
-void Scene::RemoveEntity(Entity entity)
+void Scene::RemoveEntity(const Entity& entity)
 {
     registry.destroy(entity);
 }
@@ -214,7 +210,7 @@ Entity Scene::CreateEntity()
     return { registry.create(), this };
 }
 
-Entity Scene::CloneEntity(Entity entity)
+Entity Scene::CloneEntity(const Entity& entity)
 {
     auto clone = CreateEntity();
 
@@ -227,11 +223,11 @@ Entity Scene::CloneEntity(Entity entity)
     if(clone.HasComponent<ScriptComponent>() && isRunning)
     {
         auto& script = clone.GetComponent<ScriptComponent>();
-        
+
         if(script.script)
         {
             Multithreading::Get().AddJob(
-                { nullptr, [&script, clone, this]() { StartScript(script, clone); } }
+                { nullptr, [&script, clone, this] { StartScript(script, clone); } }
             );
         }
     }
@@ -241,7 +237,7 @@ Entity Scene::CloneEntity(Entity entity)
 
 Entity Scene::GetEntity(entt::id_type id)
 {
-    return { entt::entity(id), this };
+    return { static_cast<entt::entity>(id), this };
 }
 
 Entity Scene::GetEntity(const std::string& name)
@@ -257,7 +253,7 @@ Entity Scene::GetEntity(const std::string& name)
     return ret;
 }
 
-bool Scene::IsChildOf(Entity child, Entity parent)
+bool Scene::IsChildOf(const Entity& child, const Entity& parent)
 {
     if(!registry.valid(child) || !registry.valid(parent))
         return false;
@@ -266,7 +262,7 @@ bool Scene::IsChildOf(Entity child, Entity parent)
 
     while(registry.all_of<HierarchyComponent>(current))
     {
-        auto& hierarchy = registry.get<HierarchyComponent>(current);
+        const auto& hierarchy = registry.get<HierarchyComponent>(current);
         current = hierarchy.parent;
 
         if(current == parent)
@@ -276,18 +272,18 @@ bool Scene::IsChildOf(Entity child, Entity parent)
     return false;
 }
 
-glm::mat4 Scene::GetWorldTransform(entt::entity entity)
+glm::mat4 Scene::GetWorldTransform(const entt::entity entity)
 {
     entt::entity parent = entity;
 
     if(!registry.all_of<TransformComponent>(parent))
-        return glm::mat4(1.0f);
+        return { 1.0f };
 
     glm::mat4 transformMatrix = registry.get<TransformComponent>(entity).GetTransform();
 
     while(registry.all_of<HierarchyComponent>(parent))
     {
-        auto& hierarchy = registry.get<HierarchyComponent>(parent);
+        const auto& hierarchy = registry.get<HierarchyComponent>(parent);
         parent = hierarchy.parent;
 
         if(registry.valid(parent))
@@ -307,7 +303,7 @@ entt::registry& Scene::GetRegistry()
     return registry;
 }
 
-void Scene::StartScript(ScriptComponent& script, Entity entity)
+void Scene::StartScript(const ScriptComponent& script, const Entity& entity)
 {
     if(script.script)
     {
@@ -316,12 +312,12 @@ void Scene::StartScript(ScriptComponent& script, Entity entity)
         auto it = variables.find("Entity self");
 
         if(it != variables.end())
-            *((Entity*)(it->second)) = entity;
+            *static_cast<Entity*>(it->second) = entity;
 
         it = variables.find("Scene@ scene");
 
         if(it != variables.end())
-            *((Scene**)(it->second)) = this;
+            *static_cast<Scene**>(it->second) = this;
 
         ScriptManager::Get().ExecuteFunction(
             script.script,
@@ -332,7 +328,7 @@ void Scene::StartScript(ScriptComponent& script, Entity entity)
     }
 }
 
-void Scene::UpdateScript(ScriptComponent& script, Entity entity, float deltaTime)
+void Scene::UpdateScript(const ScriptComponent& script, Entity entity, float deltaTime)
 {
     if(script.script)
     {
@@ -350,10 +346,10 @@ void Scene::UpdateScript(ScriptComponent& script, Entity entity, float deltaTime
 
 void Scene::SetupLightsBuffer()
 {
-    static const uint64_t maxLights = 128;
+    static constexpr uint64_t maxLights = 128;
 
-    LLGL::BufferDescriptor lightBufferDesc = LLGL::ConstantBufferDesc(maxLights * sizeof(Light));
-    
+    const LLGL::BufferDescriptor lightBufferDesc = LLGL::ConstantBufferDesc(maxLights * sizeof(Light));
+
     lightsBuffer = Renderer::Get().CreateBuffer("sceneLightBuffer", lightBufferDesc);
 
     lights.reserve(maxLights);
@@ -361,9 +357,9 @@ void Scene::SetupLightsBuffer()
 
 void Scene::SetupShadowsBuffer()
 {
-    static const uint64_t maxShadows = 4;
+    static constexpr uint64_t maxShadows = 4;
 
-    LLGL::BufferDescriptor shadowBufferDesc = LLGL::ConstantBufferDesc(maxShadows * sizeof(Shadow));
+    const LLGL::BufferDescriptor shadowBufferDesc = LLGL::ConstantBufferDesc(maxShadows * sizeof(Shadow));
 
     shadowsBuffer = Renderer::Get().CreateBuffer("sceneShadowBuffer", shadowBufferDesc);
 
@@ -392,9 +388,9 @@ void Scene::UpdateShadowsBuffer()
 
 void Scene::UpdateRigidBodies()
 {
-    auto bodyView = registry.view<TransformComponent, RigidBodyComponent>(entt::exclude<PrefabComponent>);
+    const auto bodyView = registry.view<TransformComponent, RigidBodyComponent>(entt::exclude<PrefabComponent>);
 
-    for(auto entity : bodyView)
+    for(const auto entity : bodyView)
     {
         auto [transform, body] = bodyView.get<TransformComponent, RigidBodyComponent>(entity);
 
@@ -428,9 +424,9 @@ void Scene::UpdateRigidBodies()
 
 void Scene::UpdateSounds()
 {
-    auto soundsView = registry.view<SoundComponent, TransformComponent>(entt::exclude<PrefabComponent>);
-    
-    for(auto entity : soundsView)
+    const auto soundsView = registry.view<SoundComponent, TransformComponent>(entt::exclude<PrefabComponent>);
+
+    for(const auto entity : soundsView)
     {
         auto [sound, transform] =
             soundsView.get<SoundComponent, TransformComponent>(entity);
@@ -453,13 +449,13 @@ void Scene::UpdateSounds()
 
 void Scene::SetupCamera()
 {
-    auto cameraView = registry.view<TransformComponent, CameraComponent>(entt::exclude<PrefabComponent>);
+    const auto cameraView = registry.view<TransformComponent, CameraComponent>(entt::exclude<PrefabComponent>);
 
     TransformComponent cameraTransform;
 
     camera = nullptr;
 
-    for(auto entity : cameraView)
+    for(const auto entity : cameraView)
     {
         auto [transform, cam] = cameraView.get<TransformComponent, CameraComponent>(entity);
 
@@ -467,10 +463,10 @@ void Scene::SetupCamera()
         {
             camera = &cam.camera;
             cameraTransform = transform;
-        
+
             if(registry.all_of<HierarchyComponent>(entity))
             {
-                auto rotation = cameraTransform.rotation;
+                const auto rotation = cameraTransform.rotation;
 
                 cameraTransform.SetTransform(GetWorldTransform(entity));
 
@@ -490,7 +486,7 @@ void Scene::SetupCamera()
 
         if(camera->IsFirstPerson())
         {
-            auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
+            const auto delta = glm::quat(glm::radians(cameraTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
 
             view = glm::lookAt(cameraTransform.position, cameraTransform.position + delta, camera->GetUp());
         }
@@ -498,7 +494,7 @@ void Scene::SetupCamera()
             view = glm::lookAt(cameraTransform.position, camera->GetLookAt(), camera->GetUp());
 
         camera->SetViewMatrix(view);
-        
+
         Renderer::Get().GetMatrices()->GetView() = view;
         Renderer::Get().GetMatrices()->GetProjection() = camera->GetProjectionMatrix();
     }
@@ -508,9 +504,9 @@ void Scene::SetupLights()
 {
     lights.clear();
 
-    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
+    const auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
-    for(auto entity : lightsView)
+    for(const auto entity : lightsView)
     {
         auto [light, transform] = lightsView.get<LightComponent, TransformComponent>(entity);
 
@@ -522,7 +518,7 @@ void Scene::SetupLights()
 
         lights.push_back(
             {
-                (int)light.shadowMap,
+                static_cast<int>(light.shadowMap),
                 localTransform.position,
                 glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f),
                 light.color,
@@ -539,15 +535,14 @@ void Scene::SetupShadows()
     shadows.clear();
 
     // Fill shadowSamplers with an empty texture
-    std::fill(
-        shadowSamplers.begin(),
-        shadowSamplers.end(),
+    std::ranges::fill(
+        shadowSamplers,
         AssetManager::Get().Load<TextureAsset>("empty", true)->texture
     );
 
-    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
+    const auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
-    for(auto entity : lightsView)
+    for(const auto entity : lightsView)
     {
         auto [light, transform] =
             lightsView.get<LightComponent, TransformComponent>(entity);
@@ -560,7 +555,7 @@ void Scene::SetupShadows()
                 localTransform.SetTransform(GetWorldTransform(entity));
 
             auto delta = glm::quat(glm::radians(localTransform.rotation)) * glm::vec3(0.0f, 0.0f, -1.0f);
-        
+
             shadows.push_back(
                 {
                     light.projection *
@@ -578,15 +573,15 @@ void Scene::RenderMeshes()
 {
     bool empty = true;
 
-    auto view =
+    const auto view =
         registry.view<
             TransformComponent,
             MeshComponent,
             MeshRendererComponent,
             PipelineComponent
         >(entt::exclude<PrefabComponent>);
-    
-    for(auto entity : view)
+
+    for(const auto entity : view)
     {
         auto [transform, mesh, meshRenderer, pipeline] = 
                 view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
@@ -612,7 +607,7 @@ void Scene::RenderToShadowMap()
 {
     Renderer::Get().Begin();
 
-    auto meshesView =
+    const auto meshesView =
         registry.view<
             TransformComponent,
             MeshComponent,
@@ -620,11 +615,11 @@ void Scene::RenderToShadowMap()
             PipelineComponent
         >(entt::exclude<PrefabComponent>);
 
-    auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
+    const auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
 
-    for(auto light : lightsView)
+    for(const auto light : lightsView)
     {
-        auto [lightComponent, lightTransform] = 
+        auto [lightComponent, lightTransform] =
                 lightsView.get<LightComponent, TransformComponent>(light);
 
         if(lightComponent.shadowMap && lightComponent.renderTarget)
@@ -636,7 +631,7 @@ void Scene::RenderToShadowMap()
             Renderer::Get().GetMatrices()->GetView() = glm::lookAt(lightTransform.position, lightTransform.position + delta, glm::vec3(0.0f, 1.0f, 0.0f));
             Renderer::Get().GetMatrices()->GetProjection() = lightComponent.projection;
 
-            for(auto mesh : meshesView)
+            for(const auto mesh : meshesView)
             {
                 auto [transform, meshComp, meshRenderer, pipeline] =
                         meshesView.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(mesh);
@@ -658,7 +653,7 @@ void Scene::RenderToShadowMap()
 
 void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 {
-    auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>(entt::exclude<PrefabComponent>);
+    const auto hdriSkyView = registry.view<MeshComponent, HDRISkyComponent>(entt::exclude<PrefabComponent>);
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
@@ -670,7 +665,7 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
         return;
     }
 
-    auto proceduralSkyView = registry.view<MeshComponent, ProceduralSkyComponent>(entt::exclude<PrefabComponent>);
+    const auto proceduralSkyView = registry.view<MeshComponent, ProceduralSkyComponent>(entt::exclude<PrefabComponent>);
 
     if(proceduralSkyView.begin() != proceduralSkyView.end())
     {
@@ -730,17 +725,17 @@ void Scene::MeshRenderPass(
 
 void Scene::ShadowRenderPass(const LightComponent& light, const MeshComponent& mesh)
 {
-    for(size_t i = 0; i < mesh.model->meshes.size(); i++)
+    for(auto& i : mesh.model->meshes)
     {
         Renderer::Get().RenderPass(
             [&](auto commandBuffer)
             {
-                mesh.model->meshes[i]->BindBuffers(commandBuffer);
+                i->BindBuffers(commandBuffer);
             },
             { { 0, Renderer::Get().GetMatricesBuffer() } },
             [&](auto commandBuffer)
             {
-                mesh.model->meshes[i]->Draw(commandBuffer);
+                i->Draw(commandBuffer);
             },
             light.shadowMapPipeline,
             light.renderTarget
@@ -765,7 +760,7 @@ void Scene::ProceduralSkyRenderPass(
         [&](auto commandBuffer)
         {
             sky.setUniforms(commandBuffer);
-            
+
             mesh.model->meshes[0]->Draw(commandBuffer);
         },
         sky.pipeline,
@@ -817,18 +812,18 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
     RenderSky(renderTarget);
 
-    auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
+    const auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
     auto irradiance = defaultTexture;
     auto prefiltered = defaultTexture;
     auto brdf = defaultTexture;
 
     // Very bad, obviously
-    auto hdriSkyView = registry.view<HDRISkyComponent>();
-    auto proceduralSkyView = registry.view<ProceduralSkyComponent>();
+    const auto hdriSkyView = registry.view<HDRISkyComponent>();
+    const auto proceduralSkyView = registry.view<ProceduralSkyComponent>();
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
-        auto& sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
+        const auto& sky = hdriSkyView.get<HDRISkyComponent>(*hdriSkyView.begin());
 
         irradiance = sky.asset->irradiance;
         prefiltered = sky.asset->prefiltered;
@@ -836,7 +831,7 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
     }
     else if(proceduralSkyView.begin() != proceduralSkyView.end())
     {
-        auto& sky = proceduralSkyView.get<ProceduralSkyComponent>(*proceduralSkyView.begin());
+        const auto& sky = proceduralSkyView.get<ProceduralSkyComponent>(*proceduralSkyView.begin());
 
         irradiance = sky.asset->irradiance;
         prefiltered = sky.asset->prefiltered;
@@ -869,8 +864,8 @@ void Scene::RenderResult(LLGL::RenderTarget* renderTarget)
 
 void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
 {
-    auto tonemapView = registry.view<TonemapComponent>();
-    
+    const auto tonemapView = registry.view<TonemapComponent>();
+
     if(tonemapView->begin() == tonemapView->end())
     {
         RenderResult(renderTarget);
@@ -878,23 +873,23 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
     }
 
     auto& toneMapping = *tonemapView->begin();
-    
+
     if(!toneMapping.postProcessing)
     {
         RenderResult(renderTarget);
         return;
     }
-    
+
     RenderResult(toneMapping.postProcessing->GetRenderTarget());
 
     // Problem: reflections don't affect bloom yet
     auto ssrResult = ApplySSR(toneMapping.postProcessing->GetFrame());
-    auto bloomResult = ApplyBloom(toneMapping.postProcessing->GetFrame());
-    
+    const auto [frame, strength] = ApplyBloom(toneMapping.postProcessing->GetFrame());
+
     toneMapping.postProcessing->Apply(
         {
             { 0, toneMapping.postProcessing->GetFrame() },
-            { 1, bloomResult.first },
+            { 1, frame },
             { 2, ssrResult },
             { 3, DeferredRenderer::Get().GetAlbedo() },
             { 4, DeferredRenderer::Get().GetCombined() },
@@ -903,8 +898,8 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
         [&](auto commandBuffer)
         {
             toneMapping.setUniforms(commandBuffer);
-            
-            commandBuffer->SetUniforms(2, &bloomResult.second, sizeof(float));
+
+            commandBuffer->SetUniforms(2, &strength, sizeof(float));
         },
         renderTarget
     );
@@ -912,7 +907,7 @@ void Scene::ApplyPostProcessing(LLGL::RenderTarget* renderTarget)
 
 std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
 {
-    auto bloomView = registry.view<BloomComponent>();
+    const auto bloomView = registry.view<BloomComponent>();
 
     if(bloomView->begin() == bloomView->end())
         return { AssetManager::Get().Load<TextureAsset>("empty", true)->texture, 0.0f };
@@ -926,7 +921,7 @@ std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
         bloom.setThresholdUniforms,
         bloom.thresholdPass->GetRenderTarget()
     );
-    
+
     int horizontal = 1;
 
     auto setPingPongUniforms = [&](auto commandBuffer)
@@ -962,7 +957,7 @@ std::pair<LLGL::Texture*, float> Scene::ApplyBloom(LLGL::Texture* frame)
 
 LLGL::Texture* Scene::ApplyGTAO()
 {
-    auto gtaoView = registry.view<GTAOComponent>();
+    const auto gtaoView = registry.view<GTAOComponent>();
 
     if(gtaoView->begin() == gtaoView->end())
         return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;
@@ -1009,7 +1004,7 @@ LLGL::Texture* Scene::ApplyGTAO()
 
 LLGL::Texture* Scene::ApplySSR(LLGL::Texture* frame)
 {
-    auto ssrView = registry.view<SSRComponent>();
+    const auto ssrView = registry.view<SSRComponent>();
 
     if(ssrView->begin() == ssrView->end())
         return AssetManager::Get().Load<TextureAsset>("empty", true)->texture;

@@ -47,7 +47,7 @@ private:
 
     void DrawSceneTree();
     void DrawEntityNode(lustra::Entity entity);
-    void EntityNodeInteraction(lustra::Entity entity, std::string_view name);
+    void EntityNodeInteraction(const lustra::Entity& entity, std::string_view name);
 
     void DrawPropertiesWindow();
     void DrawImGuizmoControls();

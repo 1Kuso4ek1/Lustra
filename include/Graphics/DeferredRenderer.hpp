@@ -27,11 +27,11 @@ public:
     LLGL::RenderTarget* GetPrimaryRenderTarget() override;
     LLGL::Texture* GetDepth() override;
 
-    LLGL::Texture* GetPosition();
-    LLGL::Texture* GetAlbedo();
-    LLGL::Texture* GetNormal();
-    LLGL::Texture* GetCombined();
-    LLGL::Texture* GetEmission();
+    LLGL::Texture* GetPosition() const;
+    LLGL::Texture* GetAlbedo() const;
+    LLGL::Texture* GetNormal() const;
+    LLGL::Texture* GetCombined() const;
+    LLGL::Texture* GetEmission() const;
 
 private:
     DeferredRenderer();
@@ -51,7 +51,7 @@ private:
     LLGL::Texture* gBufferDepth;
 
     LLGL::RenderTarget* gBuffer;
-    LLGL::PipelineState* gBufferPipeline;
+    LLGL::PipelineState* gBufferPipeline{};
 
     MeshPtr rect;
     LLGL::PipelineState* rectPipeline;

@@ -19,10 +19,10 @@ PBRManager::PBRManager()
 
 EnvironmentAssetPtr PBRManager::Build(
     const LLGL::Extent2D& resolution,
-    TextureAssetPtr environmentMap,
+    const TextureAssetPtr& environmentMap,
     EnvironmentAssetPtr environmentAsset,
     LLGL::PipelineState* customConvertPipeline,
-    std::function<void(LLGL::CommandBuffer*)> setConvertUniforms
+    const std::function<void(LLGL::CommandBuffer*)>& setConvertUniforms
 )
 {
     if(!cubeMap || !environmentAsset || resolution != renderTargets[0]->GetResolution())
@@ -89,7 +89,7 @@ void PBRManager::RenderCubeMap(
 {
     ScopedTimer timer("RenderCubeMap");
 
-    auto matrices = Renderer::Get().GetMatrices();
+    const auto matrices = Renderer::Get().GetMatrices();
 
     matrices->PushMatrix();
 
@@ -97,7 +97,7 @@ void PBRManager::RenderCubeMap(
     matrices->GetProjection() = projection;
 
     auto cube = AssetManager::Get().Load<ModelAsset>("cube", true)->meshes[0];
-    
+
     for(int i = 0; i < 6; i++)
     {
         matrices->GetView() = views[i];
@@ -126,7 +126,7 @@ void PBRManager::RenderCubeMap(
         );
 
         Renderer::Get().End();
-        
+
         Renderer::Get().Submit();
     }
 
@@ -142,8 +142,8 @@ void PBRManager::RenderCubeMapMips(
 )
 {
     ScopedTimer timer("RenderCubeMapMips");
-    
-    auto matrices = Renderer::Get().GetMatrices();
+
+    const auto matrices = Renderer::Get().GetMatrices();
 
     matrices->PushMatrix();
 
@@ -152,9 +152,9 @@ void PBRManager::RenderCubeMapMips(
 
     auto cube = AssetManager::Get().Load<ModelAsset>("cube", true)->meshes[0];
 
-    auto initialResolution = renderTargets[0]->GetResolution();
+    const auto initialResolution = renderTargets[0]->GetResolution();
 
-    auto mipsNum = 
+    const auto mipsNum =
         LLGL::NumMipLevels(
             initialResolution.width,
             initialResolution.height
@@ -180,7 +180,7 @@ void PBRManager::RenderCubeMapMips(
                 },
                 [&](auto commandBuffer)
                 {
-                    float roughness = (float)i / (float)(mipsNum - 1);
+                    float roughness = static_cast<float>(i) / static_cast<float>(mipsNum - 1);
 
                     commandBuffer->SetUniforms(0, &roughness, sizeof(roughness));
                     commandBuffer->SetUniforms(1, &i, sizeof(i));
@@ -199,13 +199,13 @@ void PBRManager::RenderCubeMapMips(
         if(i == mipsNum - 1)
             break;
 
-        int mipLevel = i + 1;
+        const int mipLevel = i + 1;
 
         ReleaseRenderTargets();
         CreateRenderTargets(
             {
-                initialResolution.width / (int)std::pow(2, mipLevel),
-                initialResolution.height / (int)std::pow(2, mipLevel)
+                initialResolution.width / static_cast<int>(std::pow(2, mipLevel)),
+                initialResolution.height / static_cast<int>(std::pow(2, mipLevel))
             },
             prefiltered,
             mipLevel
@@ -315,7 +315,7 @@ void PBRManager::SetupPrefilteredPipeline()
                 { "skybox", LLGL::ResourceType::Texture, LLGL::BindFlags::Sampled, LLGL::StageFlags::FragmentStage, 2 },
                 { "samplerState", LLGL::ResourceType::Sampler, 0, LLGL::StageFlags::FragmentStage, 2 }
             },
-            .uniforms = 
+            .uniforms =
             {
                 { "roughness", LLGL::UniformType::Float1 },
                 { "mip", LLGL::UniformType::Int1 }
@@ -372,7 +372,7 @@ void PBRManager::CreateCubemaps(const LLGL::Extent2D& resolution)
     Renderer::Get().GenerateMips(prefiltered);
 }
 
-void PBRManager::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, int mipLevel)
+void PBRManager::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Texture* cubeMap, const int mipLevel)
 {
     for(int i = 0; i < 6; i++)
     {
@@ -385,7 +385,7 @@ void PBRManager::CreateRenderTargets(const LLGL::Extent2D& resolution, LLGL::Tex
 
 void PBRManager::CreateBRDFTexture(const LLGL::Extent2D& resolution)
 {
-    LLGL::TextureDescriptor textureDesc
+    const LLGL::TextureDescriptor textureDesc
     {
         .type = LLGL::TextureType::Texture2D,
         .bindFlags = LLGL::BindFlags::ColorAttachment | LLGL::BindFlags::Sampled,
@@ -402,7 +402,7 @@ void PBRManager::CreateBRDFRenderTarget(const LLGL::Extent2D& resolution)
     brdfRenderTarget = Renderer::Get().CreateRenderTarget(resolution, { brdf });
 }
 
-void PBRManager::ReleaseCubeMaps()
+void PBRManager::ReleaseCubeMaps() const
 {
     if(cubeMap)
     {
@@ -412,9 +412,9 @@ void PBRManager::ReleaseCubeMaps()
     }
 }
 
-void PBRManager::ReleaseRenderTargets()
+void PBRManager::ReleaseRenderTargets() const
 {
-    for(auto renderTarget : renderTargets)
+    for(const auto renderTarget : renderTargets)
         if(renderTarget)
             Renderer::Get().Release(renderTarget);
 }

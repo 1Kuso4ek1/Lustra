@@ -9,15 +9,15 @@
 namespace lustra
 {
 
-class EventManager : public Singleton<EventManager>
+class EventManager final : public Singleton<EventManager>
 {
 public:
-    ~EventManager();
-    
+    ~EventManager() override;
+
     void AddListener(Event::Type eventType, EventListener* listener);
     void RemoveListener(Event::Type eventType, EventListener* listener);
 
-    void Dispatch(std::unique_ptr<Event> event);
+    void Dispatch(const std::unique_ptr<Event>& event);
 
 private:
     std::unordered_map<Event::Type, std::vector<EventListener*>> listeners;

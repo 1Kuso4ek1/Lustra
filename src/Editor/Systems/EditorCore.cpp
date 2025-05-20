@@ -11,7 +11,7 @@ void Editor::Init()
         window->Maximize();
 
     SetupAssetManager();
-    
+
     lustra::AssetManager::Get().LaunchWatch();
 
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowResize, this);
@@ -22,7 +22,7 @@ void Editor::Init()
 
     LoadIcons();
 
-    auto mainScenePath = 
+    const auto mainScenePath =
         lustra::AssetManager::Get().GetAssetPath<lustra::SceneAsset>(config.mainScene, true);
 
     lustra::PhysicsManager::Get().Init();
@@ -43,7 +43,7 @@ void Editor::Init()
         SwitchScene(lustra::AssetManager::Get().Load<lustra::SceneAsset>(mainScenePath));
 }
 
-void Editor::Update(float deltaTime)
+void Editor::Update(const float deltaTime)
 {
     using namespace lustra;
 
@@ -103,7 +103,7 @@ void Editor::OnEvent(lustra::Event& event)
 {
     if(event.GetType() == lustra::Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<lustra::WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<lustra::WindowResizeEvent*>(&event);
 
         lustra::Renderer::Get().SetViewportResolution(resizeEvent->GetSize());
 
@@ -111,7 +111,7 @@ void Editor::OnEvent(lustra::Event& event)
     }
     else if(event.GetType() == lustra::Event::Type::WindowFocus)
     {
-        auto focusEvent = dynamic_cast<lustra::WindowFocusEvent*>(&event);
+        const auto focusEvent = dynamic_cast<lustra::WindowFocusEvent*>(&event);
 
         if(focusEvent->IsFocused())
             lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);
@@ -120,7 +120,7 @@ void Editor::OnEvent(lustra::Event& event)
     }
     else if(event.GetType() == lustra::Event::Type::AssetLoaded)
     {
-        auto assetLoadedEvent = dynamic_cast<lustra::AssetLoadedEvent*>(&event);
+        const auto assetLoadedEvent = dynamic_cast<lustra::AssetLoadedEvent*>(&event);
 
         if(assetLoadedEvent->GetAsset() == sceneAsset)
             SwitchScene(sceneAsset);

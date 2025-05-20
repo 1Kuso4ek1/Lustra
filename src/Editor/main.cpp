@@ -8,7 +8,7 @@ int main()
     std::filesystem::current_path(EDITOR_ROOT);
 
     ProjectManager().Run();
-    
+
     if(ProjectManager::IsProjectOpened())
     {
         Editor(

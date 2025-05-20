@@ -3,7 +3,7 @@
 namespace lustra
 {
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, bool setupBuffers)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const bool setupBuffers)
             : vertices(vertices), indices(indices)
 {
     if(setupBuffers)
@@ -82,15 +82,15 @@ void Mesh::CreatePlane()
     SetupBuffers();
 }
 
-void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer, bool bindMatrices) const
+void Mesh::BindBuffers(LLGL::CommandBuffer* commandBuffer, const bool bindMatrices) const
 {
     commandBuffer->SetVertexBuffer(*vertexBuffer);
     commandBuffer->SetIndexBuffer(*indexBuffer);
-    
+
     if(bindMatrices)
     {
-        auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
-        
+        const auto matricesBinding = Renderer::Get().GetMatrices()->GetBinding();
+
         commandBuffer->UpdateBuffer(*matricesBuffer, 0, &matricesBinding, sizeof(Matrices::Binding));
     }
 }
@@ -112,14 +112,14 @@ std::vector<uint32_t> Mesh::GetIndices() const
 
 void Mesh::CreateVertexBuffer()
 {
-    LLGL::BufferDescriptor bufferDesc = LLGL::VertexBufferDesc(vertices.size() * sizeof(Vertex), vertexFormat);
-    
+    const auto bufferDesc = LLGL::VertexBufferDesc(vertices.size() * sizeof(Vertex), vertexFormat);
+
     vertexBuffer = Renderer::Get().CreateBuffer(bufferDesc, vertices.data());
 }
 
 void Mesh::CreateIndexBuffer()
 {
-    LLGL::BufferDescriptor bufferDesc = LLGL::IndexBufferDesc(indices.size() * sizeof(uint32_t), LLGL::Format::R32UInt);
+    const auto bufferDesc = LLGL::IndexBufferDesc(indices.size() * sizeof(uint32_t), LLGL::Format::R32UInt);
 
     indexBuffer = Renderer::Get().CreateBuffer(bufferDesc, indices.data());
 }

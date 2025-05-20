@@ -1,19 +1,21 @@
 #include <PostProcessing.hpp>
 
+#include <ModelAsset.hpp>
+
 namespace lustra
 {
 
 PostProcessing::PostProcessing(
     const LLGL::PipelineLayoutDescriptor& layoutDesc,
     //const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
-    VertexShaderAssetPtr vertexShader,
-    FragmentShaderAssetPtr fragmentShader,
+    const VertexShaderAssetPtr& vertexShader,
+    const FragmentShaderAssetPtr& fragmentShader,
     const LLGL::Extent2D& resolution,
 
-    bool newRenderTarget,
-    bool registerEvent,
-    bool mipMaps,
-    
+    const bool newRenderTarget,
+    const bool registerEvent,
+    const bool mipMaps,
+
     const LLGL::Format& format
 ) : layoutDesc(layoutDesc), vertexShader(vertexShader), fragmentShader(fragmentShader)
 {
@@ -30,7 +32,7 @@ PostProcessing::PostProcessing(
             .bindFlags = LLGL::BindFlags::ColorAttachment,
             .format = format,
             .extent = { resolution.width, resolution.height, 1 },
-            .mipLevels = (uint32_t)(mipMaps ? 0 : 1),
+            .mipLevels = static_cast<uint32_t>(mipMaps ? 0 : 1),
             .samples = 1
         };
 
@@ -60,7 +62,7 @@ void PostProcessing::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
         LLGL::Extent2D size = resizeEvent->GetSize();
 
@@ -74,11 +76,11 @@ void PostProcessing::OnEvent(Event& event)
     }
     else if(event.GetType() == Event::Type::AssetLoaded)
     {
-        auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
+        const auto assetEvent = dynamic_cast<AssetLoadedEvent*>(&event);
 
         if(assetEvent->GetAsset()->type == Asset::Type::FragmentShader)
         {
-            auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
+            const auto shader = std::static_pointer_cast<FragmentShaderAsset>(assetEvent->GetAsset());
             if(fragmentShader == shader)
             {
                 rectPipeline =
@@ -118,7 +120,7 @@ LLGL::Texture* PostProcessing::Apply(
         [&](auto commandBuffer)
         {
             setUniforms(commandBuffer);
-            
+
             rect->Draw(commandBuffer);
         },
         rectPipeline,
@@ -132,12 +134,12 @@ LLGL::Texture* PostProcessing::Apply(
     return frame;
 }
 
-LLGL::Texture* PostProcessing::GetFrame()
+LLGL::Texture* PostProcessing::GetFrame() const
 {
     return frame;
 }
 
-LLGL::RenderTarget* PostProcessing::GetRenderTarget()
+LLGL::RenderTarget* PostProcessing::GetRenderTarget() const
 {
     return renderTarget;
 }

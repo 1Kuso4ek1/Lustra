@@ -2,8 +2,8 @@
 #include <EventManager.hpp>
 #include <Window.hpp>
 
-#include <LLGL/Types.h>
 #include <entt/fwd.hpp>
+#include <LLGL/Types.h>
 
 #include <cereal/access.hpp>
 
@@ -15,13 +15,13 @@ namespace lustra
 
 struct CameraComponent;
 
-class Camera : public EventListener
+class Camera final : public EventListener
 {
 public:
     Camera();
-    Camera(Camera&& other);
+    Camera(Camera&& other) noexcept;
     Camera(const Camera& other);
-    ~Camera();
+    ~Camera() override;
 
     void SetPerspective();
     void SetOrthographic(float left, float right, float bottom, float top);
@@ -48,7 +48,7 @@ public:
     glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix() const;
     glm::vec2 GetViewport() const;
-    
+
     float GetFov() const;
     float GetNear() const;
     float GetFar() const;
@@ -56,7 +56,7 @@ public:
     float GetAspect() const;
 
     bool IsFirstPerson() const;
-    
+
 private:
     float fov = 90.0f;
     float near = 0.1f;
@@ -94,7 +94,7 @@ private:
         archive(fov, near, far, aspect, firstPerson, up, lookAtPos, viewportSize);
 
         SetPerspective();
-        SetViewport({ (uint32_t)viewportSize.x, (uint32_t)viewportSize.y });
+        SetViewport({ static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y) });
     }
 };
 

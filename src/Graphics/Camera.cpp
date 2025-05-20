@@ -8,7 +8,7 @@ Camera::Camera()
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 }
 
-Camera::Camera(Camera&& other)
+Camera::Camera(Camera&& other) noexcept
     : fov(other.fov), near(other.near), far(other.far), aspect(other.aspect),
       firstPerson(other.firstPerson), up(other.up), lookAtPos(other.lookAtPos),
       viewMatrix(other.viewMatrix), projectionMatrix(other.projectionMatrix), viewportSize(other.viewportSize)
@@ -34,7 +34,7 @@ void Camera::SetPerspective()
     projectionMatrix = glm::perspective(glm::radians(fov), aspect, near, far);
 }
 
-void Camera::SetOrthographic(float left, float right, float bottom, float top)
+void Camera::SetOrthographic(const float left, const float right, const float bottom, const float top)
 {
     projectionMatrix = glm::ortho(left, right, bottom, top, near, far);
 }
@@ -42,30 +42,30 @@ void Camera::SetOrthographic(float left, float right, float bottom, float top)
 void Camera::SetViewport(const LLGL::Extent2D& resolution)
 {
     viewportSize = { resolution.width, resolution.height };
-    aspect = (float)resolution.width / resolution.height;
+    aspect = static_cast<float>(resolution.width) / resolution.height;
 
     SetPerspective();
 }
 
-void Camera::SetFov(float fov)
+void Camera::SetFov(const float fov)
 {
     this->fov = fov;
     SetPerspective();
 }
 
-void Camera::SetNear(float near)
+void Camera::SetNear(const float near)
 {
     this->near = near;
     SetPerspective();
 }
 
-void Camera::SetFar(float far)
+void Camera::SetFar(const float far)
 {
     this->far = far;
     SetPerspective();
 }
 
-void Camera::SetFirstPerson(bool firstPerson)
+void Camera::SetFirstPerson(const bool firstPerson)
 {
     this->firstPerson = firstPerson;
 }
@@ -89,7 +89,7 @@ void Camera::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
         SetViewport(resizeEvent->GetSize());
     }
@@ -97,7 +97,7 @@ void Camera::OnEvent(Event& event)
 
 glm::vec2 Camera::WorldToScreen(const glm::vec3& pos) const
 {
-    auto viewPos = viewMatrix * glm::vec4(pos, 1.0f);
+    const auto viewPos = viewMatrix * glm::vec4(pos, 1.0f);
 
     // Not in front of the camera
     if(viewPos.z > 0.0)
@@ -107,11 +107,11 @@ glm::vec2 Camera::WorldToScreen(const glm::vec3& pos) const
 
     clipPos /= clipPos.w;
 
-    glm::vec2 res = {
+    const glm::vec2 res = {
         (clipPos.x + 1.0f) * viewportSize.x / 2.0f,
         (1.0f - clipPos.y) * viewportSize.y / 2.0f
     };
-    
+
     return (
         glm::all(
             glm::lessThanEqual(glm::abs(res), viewportSize)
@@ -121,16 +121,16 @@ glm::vec2 Camera::WorldToScreen(const glm::vec3& pos) const
 
 glm::vec3 Camera::ScreenToWorld(const glm::vec2& pos) const
 {
-    auto clipPos = glm::vec4(
+    const auto clipPos = glm::vec4(
         (pos.x / viewportSize.x) * 2.0f - 1.0f,
         1.0f - (pos.y / viewportSize.y) * 2.0f,
         0.0f,
         1.0f
     );
 
-    auto inv = glm::inverse(projectionMatrix * viewMatrix);
+    const auto inv = glm::inverse(projectionMatrix * viewMatrix);
 
-    auto worldPos = inv * clipPos;
+    const auto worldPos = inv * clipPos;
 
     return worldPos / worldPos.w;
 }

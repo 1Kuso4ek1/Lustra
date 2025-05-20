@@ -22,18 +22,18 @@ namespace lustra
 static void OnWindowResize(GLFWwindow* window, int width, int height);
 static void OnWindowFocus(GLFWwindow* window, int focused);
 
-class Window : public LLGL::Surface
+class Window final : public LLGL::Surface
 {
 public:
     Window(const LLGL::Extent2D& size, const std::string_view& title, int samples = 1, bool fullscreen = false);
-    ~Window();
+    ~Window() override;
 
-    void Close();
+    void Close() const;
 
     void SetFullscreen(bool fullscreen);
-    void Maximize();
-    void Minimize();
-    void Restore();    
+    void Maximize() const;
+    void Minimize() const;
+    void Restore() const;
 
     GLFWwindow* GetGLFWWindow() const;
     static GLFWwindow* GetLastCreatedGLFWWindow();
@@ -44,12 +44,12 @@ public:
 public: // Interface implementation
     bool GetNativeHandle(void* nativeHandle, size_t size) override;
     bool AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen) override;
-    
+
     LLGL::Extent2D GetContentSize() const override;
     LLGL::Display* FindResidentDisplay() const override;
-    
+
 private:
-    GLFWwindow* CreateWindow();
+    GLFWwindow* CreateWindow() const;
 
 private:
     static bool glfwInitialized;
@@ -65,10 +65,10 @@ private:
     GLFWwindow* window{};
 };
 
-class WindowResizeEvent : public Event
+class WindowResizeEvent final : public Event
 {
 public:
-    WindowResizeEvent(const LLGL::Extent2D& size)
+    explicit WindowResizeEvent(const LLGL::Extent2D& size)
         : Event(Type::WindowResize), size(size) {}
 
     LLGL::Extent2D GetSize() const { return size; }
@@ -77,10 +77,10 @@ private:
     LLGL::Extent2D size;
 };
 
-class WindowFocusEvent : public Event
+class WindowFocusEvent final : public Event
 {
 public:
-    WindowFocusEvent(bool focused)
+    explicit WindowFocusEvent(const bool focused)
         : Event(Type::WindowFocus), focused(focused) {}
 
     bool IsFocused() const { return focused; }

@@ -1,4 +1,5 @@
 #include <EventManager.hpp>
+
 #include <algorithm>
 
 namespace lustra
@@ -9,32 +10,32 @@ EventManager::~EventManager()
     listeners.clear();
 }
 
-void EventManager::AddListener(Event::Type eventType, EventListener* listener)
+void EventManager::AddListener(const Event::Type eventType, EventListener* listener)
 {
     auto& vec = listeners[eventType];
-    if(std::find(vec.begin(), vec.end(), listener) != vec.end())
+    if(std::ranges::find(vec, listener) != vec.end())
         return;
 
     vec.push_back(listener);
 }
 
-void EventManager::RemoveListener(Event::Type eventType, EventListener* listener)
+void EventManager::RemoveListener(const Event::Type eventType, EventListener* listener)
 {
     if(listeners.empty())
         return;
-    
+
     auto& vec = listeners[eventType];
-    vec.erase(std::remove(vec.begin(), vec.end(), listener), vec.end());
+    std::erase(vec, listener);
 }
 
-void EventManager::Dispatch(std::unique_ptr<Event> event)
+void EventManager::Dispatch(const std::unique_ptr<Event>& event)
 {
-    auto& vec = listeners[event->GetType()];
+    const auto& vec = listeners[event->GetType()];
 
-    for(auto listener : vec)
+    for(const auto listener : vec)
     {
         listener->OnEvent(*event);
-        
+
         if(event->IsHandled())
             break;
     }

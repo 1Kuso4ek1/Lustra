@@ -30,17 +30,17 @@ void Matrices::PopMatrix()
     }
 }
 
-void Matrices::Scale(glm::vec3 size)
+void Matrices::Scale(const glm::vec3 size)
 {
     model.back() = glm::scale(model.back(), size);
 }
 
-void Matrices::Translate(glm::vec3 pos)
+void Matrices::Translate(const glm::vec3 pos)
 {
     model.back() = glm::translate(model.back(), pos);
 }
 
-void Matrices::Rotate(float angle, glm::vec3 axis)
+void Matrices::Rotate(const float angle, const glm::vec3 axis)
 {
     model.back() = glm::rotate(model.back(), angle, axis);
 }

@@ -1,24 +1,23 @@
 #pragma once
-#include <Renderer.hpp>
-#include <EventManager.hpp>
-#include <TextureAsset.hpp>
-#include <EnvironmentAsset.hpp>
-#include <ModelAsset.hpp>
 #include <AssetManager.hpp>
+#include <EnvironmentAsset.hpp>
+#include <EventManager.hpp>
+#include <ModelAsset.hpp>
+#include <TextureAsset.hpp>
 
 namespace lustra
 {
 
 // Needs some improvements
-class PBRManager : public Singleton<PBRManager>
+class PBRManager final : public Singleton<PBRManager>
 {
 public:
     EnvironmentAssetPtr Build(
         const LLGL::Extent2D& resolution,
-        TextureAssetPtr environmentMap,
+        const TextureAssetPtr& environmentMap,
         EnvironmentAssetPtr environmentAsset = nullptr,
         LLGL::PipelineState* customConvertPipeline = nullptr,
-        std::function<void(LLGL::CommandBuffer*)> setConvertUniforms = nullptr
+        const std::function<void(LLGL::CommandBuffer*)>& setConvertUniforms = nullptr
     );
 
 private: // Singleton-related
@@ -53,8 +52,8 @@ private:
     void CreateBRDFTexture(const LLGL::Extent2D& resolution);
     void CreateBRDFRenderTarget(const LLGL::Extent2D& resolution);
 
-    void ReleaseCubeMaps();
-    void ReleaseRenderTargets();
+    void ReleaseCubeMaps() const;
+    void ReleaseRenderTargets() const;
 
 private:
     LLGL::Texture* cubeMap{};

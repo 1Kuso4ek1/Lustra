@@ -1,24 +1,23 @@
 #pragma once
-#include <Renderer.hpp>
-#include <Mesh.hpp>
-#include <EventManager.hpp>
 #include <AssetManager.hpp>
-#include <ModelAsset.hpp>
-#include <Window.hpp>
+#include <EventManager.hpp>
+#include <Mesh.hpp>
+#include <Renderer.hpp>
 #include <ShaderAsset.hpp>
+#include <Window.hpp>
 
 namespace lustra
 {
 
-class PostProcessing : public EventListener
+class PostProcessing final : public EventListener
 {
 public:
     // Make it use something like PostProcessingDescriptor?
     PostProcessing(
         const LLGL::PipelineLayoutDescriptor& layoutDesc,
         //const LLGL::GraphicsPipelineDescriptor& pipelineDesc,
-        VertexShaderAssetPtr vertexShader,
-        FragmentShaderAssetPtr fragmentShader,
+        const VertexShaderAssetPtr& vertexShader,
+        const FragmentShaderAssetPtr& fragmentShader,
         const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution(),
 
         bool newRenderTarget = true,
@@ -27,7 +26,7 @@ public:
 
         const LLGL::Format& format = LLGL::Format::RGBA16Float
     );
-    ~PostProcessing();
+    ~PostProcessing() override;
 
     void OnEvent(Event& event) override;
 
@@ -38,12 +37,12 @@ public:
         bool bindMatrices = false
     );
 
-    LLGL::Texture* GetFrame();
-    LLGL::RenderTarget* GetRenderTarget();
+    LLGL::Texture* GetFrame() const;
+    LLGL::RenderTarget* GetRenderTarget() const;
 
 protected:
     LLGL::TextureDescriptor frameDesc;
-    
+
     LLGL::Texture* frame;
     LLGL::RenderTarget* renderTarget;
 

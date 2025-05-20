@@ -482,7 +482,7 @@ void Scene::SetupCamera()
 
     if(camera)
     {
-        glm::mat4 view(1.0f);
+        glm::mat4 view;
 
         if(camera->IsFirstPerson())
         {
@@ -583,7 +583,7 @@ void Scene::RenderMeshes()
 
     for(const auto entity : view)
     {
-        auto [transform, mesh, meshRenderer, pipeline] = 
+        auto [transform, mesh, meshRenderer, pipeline] =
                 view.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(entity);
 
         if(!mesh.drawable)

@@ -1,23 +1,17 @@
 #pragma once
 #include <Application.hpp>
-#include <Scene.hpp>
-#include <Entity.hpp>
-
-#include <Keyboard.hpp>
-#include <Mouse.hpp>
-
-#include <ImGuizmo.h>
-
 #include <ComponentsUI.hpp>
-
-#include <ScriptManager.hpp>
+#include <Entity.hpp>
+#include <ImGuizmo.h>
+#include <Keyboard.hpp>
+#include <Scene.hpp>
 
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
 
-class Editor : public lustra::Application, public lustra::EventListener
+class Editor final : public lustra::Application, public lustra::EventListener
 {
 public:
-    Editor(const lustra::Config& config);
+    explicit Editor(const lustra::Config& config);
 
     void Init() override;
     void Update(float deltaTime) override;
@@ -31,17 +25,17 @@ private:
 
     void CreateDefaultEntities();
 
-    void CreateCameraEntity();
+    void CreateCameraEntity() const;
     void CreateEditorCameraEntity();
-    void CreatePostProcessingEntity();
-    void CreateSkyEntity();
+    void CreatePostProcessingEntity() const;
+    void CreateSkyEntity() const;
 
     void UpdateList();
     void UpdateEditorCameraScript();
 
-    void SwitchScene(lustra::SceneAssetPtr scene);
+    void SwitchScene(const lustra::SceneAssetPtr& scene);
 
-    void CreateModelEntity(lustra::ModelAssetPtr model, bool relativeToCamera = false);
+    void CreateModelEntity(const lustra::ModelAssetPtr& model, bool relativeToCamera = false);
 
     void CreateRenderTarget(const LLGL::Extent2D& resolution = lustra::Renderer::Get().GetViewportResolution());
 
@@ -56,20 +50,19 @@ private:
 
     void DrawLog();
 
-    void DrawMaterialPreview(lustra::MaterialAssetPtr material, const ImVec2& size);
+    void DrawMaterialPreview(const lustra::MaterialAssetPtr& material, const ImVec2& size);
 
     void DrawAssetBrowser();
-    void DrawAsset(const std::filesystem::path& entry, lustra::AssetPtr asset);
+    void DrawAsset(const std::filesystem::path& entry, const lustra::AssetPtr& asset);
     void DrawUnloadedAsset(const std::filesystem::path& entry);
 
-    void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
-    bool DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory);
-    bool DrawCreateScriptMenu(const std::filesystem::path& currentDirectory);
-    bool DrawCreateSceneMenu(const std::filesystem::path& currentDirectory);
+    static void DrawCreateAssetMenu(const std::filesystem::path& currentDirectory);
+    static bool DrawCreateMaterialMenu(const std::filesystem::path& currentDirectory);
+    static bool DrawCreateScriptMenu(const std::filesystem::path& currentDirectory);
+    static bool DrawCreateSceneMenu(const std::filesystem::path& currentDirectory);
+    static void DrawMaterialEditor(const lustra::MaterialAssetPtr& material);
+    static void DrawMaterialProperty(lustra::MaterialAsset::Property& property, int id, bool singleComponent = false);
 
-    void DrawMaterialEditor(lustra::MaterialAssetPtr material);
-    void DrawMaterialProperty(lustra::MaterialAsset::Property& property, int id, bool singleComponent = false);
-    
     void DrawViewport();
     void DrawOnScreenIcons();
 

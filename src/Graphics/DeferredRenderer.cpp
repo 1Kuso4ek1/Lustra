@@ -39,13 +39,13 @@ DeferredRenderer::DeferredRenderer()
 
         .mipMapEnabled = false,
         .compareEnabled = true,
-        
+
         .borderColor = { 1.0f, 1.0f, 1.0f, 1.0f },
     };
 
     gBufferPosition = Renderer::Get().CreateTexture(colorAttachmentDesc);
     gBufferAlbedo = Renderer::Get().CreateTexture(colorAttachmentDesc);
-    
+
     colorAttachmentDesc.format = LLGL::Format::RGB16Float;
 
     gBufferNormal = Renderer::Get().CreateTexture(colorAttachmentDesc);
@@ -192,7 +192,7 @@ void DeferredRenderer::OnEvent(Event& event)
 
         gBufferPosition = Renderer::Get().CreateTexture(colorAttachmentDesc);
         gBufferAlbedo = Renderer::Get().CreateTexture(colorAttachmentDesc);
-        
+
         colorAttachmentDesc.format = LLGL::Format::RGB16Float;
 
         gBufferNormal = Renderer::Get().CreateTexture(colorAttachmentDesc);
@@ -218,7 +218,7 @@ void DeferredRenderer::OnEvent(Event& event)
                         .vertexShader = AssetManager::Get().Load<VertexShaderAsset>("screenRect.vert", true)->shader,
                         .fragmentShader = lightingPass->shader
                     }
-                );       
+                );
         }
     }
 }

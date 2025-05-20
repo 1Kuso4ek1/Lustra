@@ -3,11 +3,6 @@
 namespace lustra
 {
 
-Renderer::Renderer()
-{
-    
-}
-
 void Renderer::Init()
 {
     if(renderSystem)
@@ -37,8 +32,9 @@ void Renderer::Init()
 
     LLGL::Log::Printf(
         LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue,
-        "Render system:\n");
-    
+        "Render system:\n"
+    );
+
     LLGL::Log::Printf(
         LLGL::Log::ColorFlags::Blue,
         "*  Graphics API:       %s\n"
@@ -56,7 +52,7 @@ void Renderer::Init()
         matrices = std::make_shared<Matrices>();
 }
 
-void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, int samples)
+void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, const bool fullscreen, const int samples)
 {
     LLGL::SwapChainDescriptor swapChainDesc;
 
@@ -71,8 +67,8 @@ void Renderer::InitSwapChain(const LLGL::Extent2D& resolution, bool fullscreen, 
     SetupBuffers();
 }
 
-void Renderer::InitSwapChain(std::shared_ptr<LLGL::Surface> surface)
-{   
+void Renderer::InitSwapChain(const std::shared_ptr<LLGL::Surface>& surface)
+{
     swapChain = renderSystem->CreateSwapChain({}, surface);
 
     viewportResolution = swapChain->GetResolution();
@@ -87,15 +83,15 @@ void Renderer::Begin()
     commandBuffer->Begin();
 }
 
-void Renderer::End()
+void Renderer::End() const
 {
     commandBuffer->End();
 }
 
 void Renderer::RenderPass(
-    std::function<void(LLGL::CommandBuffer*)> setupBuffers,
+    const std::function<void(LLGL::CommandBuffer*)>& setupBuffers,
     const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
-    std::function<void(LLGL::CommandBuffer*)> draw,
+    const std::function<void(LLGL::CommandBuffer*)>& draw,
     LLGL::PipelineState* pipeline,
     LLGL::RenderTarget* renderTarget
 )
@@ -105,7 +101,7 @@ void Renderer::RenderPass(
     commandBuffer->BeginRenderPass(renderTarget ? *renderTarget : *swapChain);
     {
         swapChain->ResizeBuffers(swapChain->GetSurface().GetContentSize());
-        
+
         if(pipeline)
         {
             commandBuffer->SetViewport(renderTarget ? renderTarget->GetResolution() : swapChain->GetResolution());
@@ -126,23 +122,23 @@ void Renderer::RenderPass(
     commandBuffer->EndRenderPass();
 }
 
-void Renderer::Submit()
+void Renderer::Submit() const
 {
     commandQueue->Submit(*commandBuffer);
 }
 
-void Renderer::Present()
+void Renderer::Present() const
 {
     swapChain->Present();
 }
 
-void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget, bool begin)
+void Renderer::ClearRenderTarget(LLGL::RenderTarget* renderTarget, const bool begin)
 {
     if(begin)
         Begin();
 
     RenderPass(
-        [](auto){}, {}, 
+        [](auto){}, {},
         [](auto commandBuffer)
         {
             commandBuffer->Clear(LLGL::ClearFlags::ColorDepth);
@@ -187,7 +183,7 @@ void Renderer::Unload()
     LLGL::RenderSystem::Unload(std::move(renderSystem));
 }
 
-void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView)
+void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& textureRegion, const LLGL::ImageView& srcImageView) const
 {
     renderSystem->WriteTexture(texture, textureRegion, srcImageView);
 }
@@ -202,42 +198,42 @@ LLGL::Extent2D Renderer::GetViewportResolution() const
     return viewportResolution;
 }
 
-LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData)
+LLGL::Buffer* Renderer::CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData) const
 {
     return renderSystem->CreateBuffer(bufferDesc, initialData);
 }
 
 LLGL::Buffer* Renderer::CreateBuffer(const std::string& name, const LLGL::BufferDescriptor& bufferDesc, const void* initialData)
 {
-    auto it = globalBuffers.find(name);
+    const auto it = globalBuffers.find(name);
 
     if(it != globalBuffers.end())
         return it->second;
 
-    auto buffer = renderSystem->CreateBuffer(bufferDesc, initialData);
+    const auto buffer = renderSystem->CreateBuffer(bufferDesc, initialData);
 
     globalBuffers[name] = buffer;
 
     return buffer;
 }
 
-LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes)
+LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes) const
 {
     LLGL::ShaderDescriptor shaderDesc = { type, path.c_str() };
 
     if(type == LLGL::ShaderType::Vertex)
         shaderDesc.vertex.inputAttribs = attributes.empty() ? defaultVertexFormat.attributes : attributes;
 
-    auto shader = renderSystem->CreateShader(shaderDesc);
+    const auto shader = renderSystem->CreateShader(shaderDesc);
 
     if(const LLGL::Report* report = shader->GetReport())
     {
         if(report->HasErrors())
-            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError, 
+            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdError,
                               "Shader compile errors:\n\t%s\n%s",
                                       path.filename().string().c_str(), report->GetText());
         else
-            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdWarning, 
+            LLGL::Log::Errorf(LLGL::Log::ColorFlags::StdWarning,
                               "Shader compile warnings:\n\t%s\n%s",
                                       path.filename().string().c_str(), report->GetText());
     }
@@ -245,22 +241,22 @@ LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::fi
     return shader;
 }
 
-LLGL::Texture* Renderer::CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage)
+LLGL::Texture* Renderer::CreateTexture(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* initialImage) const
 {
     return renderSystem->CreateTexture(textureDesc, initialImage);
 }
 
-LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDesc)
+LLGL::Sampler* Renderer::CreateSampler(const LLGL::SamplerDescriptor& samplerDesc) const
 {
     return renderSystem->CreateSampler(samplerDesc);
 }
 
-LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::AttachmentDescriptor>& colorAttachments, LLGL::Texture* depthTexture)
+LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolution, const std::vector<LLGL::AttachmentDescriptor>& colorAttachments, LLGL::Texture* depthTexture) const
 {
     LLGL::RenderTargetDescriptor renderTargetDesc;
     renderTargetDesc.resolution = resolution;
 
-    const auto max = LLGL_MAX_NUM_COLOR_ATTACHMENTS;
+    constexpr auto max = LLGL_MAX_NUM_COLOR_ATTACHMENTS;
 
     for(int i = 0; i < (colorAttachments.size() > max ? max : colorAttachments.size()); i++)
         renderTargetDesc.colorAttachments[i] = colorAttachments[i];
@@ -273,7 +269,7 @@ LLGL::RenderTarget* Renderer::CreateRenderTarget(const LLGL::Extent2D& resolutio
 
 LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, LLGL::Shader* fragmentShader)
 {
-    uint64_t key = (uint64_t)vertexShader ^ (uint64_t)fragmentShader;
+    uint64_t key = reinterpret_cast<uint64_t>(vertexShader) ^ reinterpret_cast<uint64_t>(fragmentShader);
 
     auto it = pipelineCache.find(key);
     if(it != pipelineCache.end())
@@ -343,16 +339,16 @@ LLGL::PipelineState* Renderer::CreatePipelineState(LLGL::Shader* vertexShader, L
 LLGL::PipelineState* Renderer::CreatePipelineState(
     const LLGL::PipelineLayoutDescriptor& layoutDesc,
     LLGL::GraphicsPipelineDescriptor pipelineDesc
-)
+) const
 {
-    LLGL::PipelineLayout* pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
+    const auto pipelineLayout = renderSystem->CreatePipelineLayout(layoutDesc);
 
     pipelineDesc.pipelineLayout = pipelineLayout;
 
     return renderSystem->CreatePipelineState(pipelineDesc);
 }
 
-LLGL::PipelineState* Renderer::CreateRenderTargetPipeline(LLGL::RenderTarget* renderTarget)
+LLGL::PipelineState* Renderer::CreateRenderTargetPipeline(const LLGL::RenderTarget* renderTarget) const
 {
     LLGL::GraphicsPipelineDescriptor pipelineStateDesc;
     pipelineStateDesc.renderPass = renderTarget->GetRenderPass();
@@ -387,7 +383,7 @@ std::shared_ptr<Matrices> Renderer::GetMatrices() const
     return matrices;
 }
 
-bool Renderer::IsInit()
+bool Renderer::IsInit() const
 {
     return renderSystem != nullptr;// && swapChain != nullptr;
 }
@@ -418,7 +414,7 @@ void Renderer::SetupCommandBuffer()
 
 void Renderer::CreateMatricesBuffer()
 {
-    LLGL::BufferDescriptor bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::Binding));
+    const auto bufferDesc = LLGL::ConstantBufferDesc(sizeof(Matrices::Binding));
 
     matricesBuffer = renderSystem->CreateBuffer(bufferDesc);
 }

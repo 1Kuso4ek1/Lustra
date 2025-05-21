@@ -14,8 +14,8 @@ public:
 
     void Reset();
 
-    float GetElapsedSeconds();
-    float GetElapsedMilliseconds();
+    float GetElapsedSeconds() const;
+    float GetElapsedMilliseconds() const;
 
 private:
     std::chrono::high_resolution_clock::time_point start;
@@ -24,7 +24,7 @@ private:
 class ScopedTimer
 {
 public:
-    ScopedTimer(std::string_view name);
+    explicit ScopedTimer(std::string_view name);
     ~ScopedTimer();
 
 private:

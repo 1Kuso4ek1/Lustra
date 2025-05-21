@@ -25,7 +25,7 @@ public:
     bool IsHandled() const { return handled; }
 
 protected:
-    Event(Type type) : type(type) {}
+    explicit Event(const Type type) : type(type) {}
 
 private:
     Type type = Event::Type::Undefined;

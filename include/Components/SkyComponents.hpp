@@ -41,14 +41,14 @@ struct ProceduralSkyComponent : public ComponentBase
     LLGL::PipelineState* pipeline{};
 
 private:
-    void DefaultTextures();
+    void DefaultTextures() const;
 };
 
 struct HDRISkyComponent : public ComponentBase, public EventListener
 {
 public:
     HDRISkyComponent(
-        TextureAssetPtr hdri = AssetManager::Get().Load<TextureAsset>("empty", true),
+        const TextureAssetPtr& hdri = AssetManager::Get().Load<TextureAsset>("empty", true),
         const LLGL::Extent2D& resolution = { 1024, 1024 }
     );
     HDRISkyComponent(HDRISkyComponent&& other);
@@ -85,7 +85,7 @@ public:
 
 private:
     void SetupSkyPipeline();
-    void DefaultTextures();
+    void DefaultTextures() const;
 };
 
 }

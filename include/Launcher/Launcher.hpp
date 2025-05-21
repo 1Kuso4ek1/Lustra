@@ -1,9 +1,10 @@
+#pragma once
 #include <Application.hpp>
 
-class Launcher : public lustra::Application, public lustra::EventListener
+class Launcher final : public lustra::Application, public lustra::EventListener
 {
 public:
-    Launcher(const lustra::Config& config);
+    explicit Launcher(const lustra::Config& config);
 
     void Init() override;
     void Update(float deltaTime) override;

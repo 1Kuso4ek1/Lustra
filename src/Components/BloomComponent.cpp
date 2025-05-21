@@ -8,13 +8,13 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
 {
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 
-    LLGL::Extent2D scaledResolution =
+    const LLGL::Extent2D scaledResolution =
     {
-        (uint32_t)(resolution.width / resolutionScale),
-        (uint32_t)(resolution.height / resolutionScale)
+        static_cast<uint32_t>(static_cast<float>(resolution.width) / resolutionScale),
+        static_cast<uint32_t>(static_cast<float>(resolution.height) / resolutionScale)
     };
 
-    LLGL::PipelineLayoutDescriptor pingPongLayout = 
+    LLGL::PipelineLayoutDescriptor pingPongLayout =
     {
         .bindings =
         {
@@ -78,10 +78,10 @@ BloomComponent::BloomComponent(const LLGL::Extent2D& resolution)
     };
 }
 
-BloomComponent::BloomComponent(BloomComponent&& other)
+BloomComponent::BloomComponent(BloomComponent&& other) noexcept
     : ComponentBase("BloomComponent"),
-      resolution(other.resolution), threshold(other.threshold), strength(other.strength),
-      resolutionScale(other.resolutionScale), sampler(other.sampler), thresholdPass(std::move(other.thresholdPass)),
+      threshold(other.threshold), strength(other.strength), resolutionScale(other.resolutionScale),
+      resolution(other.resolution), sampler(other.sampler), thresholdPass(std::move(other.thresholdPass)),
       pingPong(std::move(other.pingPong))
 {
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
@@ -97,12 +97,12 @@ BloomComponent::~BloomComponent()
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
 }
 
-void BloomComponent::SetupPostProcessing()
+void BloomComponent::SetupPostProcessing() const
 {
-    LLGL::Extent2D scaledResolution = 
+    const LLGL::Extent2D scaledResolution =
     {
-        (uint32_t)(resolution.width / resolutionScale),
-        (uint32_t)(resolution.height / resolutionScale)
+        static_cast<uint32_t>(static_cast<float>(resolution.width) / resolutionScale),
+        static_cast<uint32_t>(static_cast<float>(resolution.height) / resolutionScale)
     };
 
     WindowResizeEvent newEvent(scaledResolution);
@@ -116,7 +116,7 @@ void BloomComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
         resolution = resizeEvent->GetSize();
 

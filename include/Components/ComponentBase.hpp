@@ -22,7 +22,7 @@ class Entity;
 
 struct ComponentBase
 {
-    ComponentBase(const std::string_view& componentName) : componentName(componentName) {}
+    explicit ComponentBase(const std::string_view& componentName) : componentName(componentName) {}
     virtual ~ComponentBase() = default;
 
     std::string_view componentName;

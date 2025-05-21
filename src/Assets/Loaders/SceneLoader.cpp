@@ -12,7 +12,7 @@ namespace lustra
 
 AssetPtr SceneLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
+    const AssetPtr existing,
     bool async
 )
 {
@@ -23,10 +23,10 @@ AssetPtr SceneLoader::Load(
     if(existing)
         asset->scene->GetRegistry().clear<>();
 
-    bool binaryFile = path.extension() == ".scn";
+    const bool binaryFile = path.extension() == ".scn";
 
     std::ifstream file(path, binaryFile ? std::ios::binary : std::ios::in);
-    
+
     if(binaryFile)
     {
         cereal::BinaryInputArchive binary(file);
@@ -53,9 +53,9 @@ AssetPtr SceneLoader::Load(
 
 void SceneLoader::Write(const AssetPtr& asset, const std::filesystem::path& path)
 {
-    auto sceneAsset = std::static_pointer_cast<SceneAsset>(asset);
+    const auto sceneAsset = std::static_pointer_cast<SceneAsset>(asset);
 
-    bool binaryFile = path.extension() == ".scn";
+    const bool binaryFile = path.extension() == ".scn";
 
     std::ofstream file(path, binaryFile ? std::ios::binary : std::ios::out);
 

@@ -48,7 +48,7 @@ TonemapComponent::TonemapComponent(const LLGL::Extent2D& resolution)
     lut = AssetManager::Get().Load<TextureAsset>("empty");
 }
 
-TonemapComponent::TonemapComponent(TonemapComponent&& other)
+TonemapComponent::TonemapComponent(TonemapComponent&& other) noexcept
     : ComponentBase("TonemapComponent"),
       resolution(other.resolution), algorithm(other.algorithm), exposure(other.exposure),
       colorGrading(other.colorGrading), colorGradingIntensity(other.colorGradingIntensity),

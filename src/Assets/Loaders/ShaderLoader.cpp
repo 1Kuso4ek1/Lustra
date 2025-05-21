@@ -6,12 +6,12 @@ namespace lustra
 
 AssetPtr VertexShaderLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
+    const AssetPtr existing,
     bool async
 )
 {
     auto shader = Renderer::Get().CreateShader(LLGL::ShaderType::Vertex, path);
-    
+
     auto asset = existing
         ? std::static_pointer_cast<VertexShaderAsset>(existing)
         : std::make_shared<VertexShaderAsset>(shader);
@@ -31,7 +31,7 @@ AssetPtr VertexShaderLoader::Load(
 
 AssetPtr FragmentShaderLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
+    const AssetPtr existing,
     bool async
 )
 {

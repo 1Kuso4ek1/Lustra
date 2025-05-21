@@ -5,7 +5,7 @@
 namespace lustra
 {
 
-class ScriptLoader : public AssetLoader, public Singleton<ScriptLoader>
+class ScriptLoader final : public AssetLoader, public Singleton<ScriptLoader>
 {
 public:
     AssetPtr Load(

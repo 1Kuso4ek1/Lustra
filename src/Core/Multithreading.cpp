@@ -12,13 +12,13 @@ void Multithreading::Update()
             if(jobs[i].second)
                 jobs[i].second();
 
-            jobs.erase(jobs.begin() + i);
+            jobs.erase(jobs.begin() + static_cast<long>(i));
         }
         else if(jobs[i].first.wait_for(0ms) == std::future_status::ready)
         {
             jobs[i].second();
 
-            jobs.erase(jobs.begin() + i);
+            jobs.erase(jobs.begin() + static_cast<long>(i));
         }
     }
 }
@@ -26,8 +26,8 @@ void Multithreading::Update()
 void Multithreading::AddJob(const Job& job)
 {
     auto task = job.first ? std::async(std::launch::async, job.first) : std::future<void>();
-    
-    jobs.emplace_back(std::make_pair(std::move(task), job.second));
+
+    jobs.emplace_back(std::move(task), job.second);
 }
 
 size_t Multithreading::GetJobsNum() const

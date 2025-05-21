@@ -10,7 +10,7 @@
 namespace lustra
 {
 
-struct MaterialAsset : public Asset
+struct MaterialAsset final : public Asset
 {
     struct Property
     {
@@ -70,7 +70,7 @@ struct MaterialAsset : public Asset
         emission = glm::vec4(0.0f);
     }
 
-    void SetUniforms(LLGL::CommandBuffer* commandBuffer)
+    void SetUniforms(LLGL::CommandBuffer* commandBuffer) const
     {
         commandBuffer->SetUniforms(0, &albedo.type, sizeof(albedo.type));
         commandBuffer->SetUniforms(2, &normal.type, sizeof(normal.type));

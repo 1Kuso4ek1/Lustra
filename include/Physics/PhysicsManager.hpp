@@ -1,28 +1,28 @@
 #pragma once
 #include <Singleton.hpp>
 
-#include <LayerFilters.hpp>
 #include <BroadPhaseLayer.hpp>
 #include <CollisionListener.hpp>
+#include <LayerFilters.hpp>
 
 namespace lustra
 {
 
-class PhysicsManager : public Singleton<PhysicsManager>
+class PhysicsManager final : public Singleton<PhysicsManager>
 {
 public:
-    ~PhysicsManager();
+    ~PhysicsManager() override;
 
     void Init();
-    void Update(float deltaTime);
-    void DestroyBody(const JPH::BodyID& bodyId);
+    void Update(float deltaTime) const;
+    void DestroyBody(const JPH::BodyID& bodyId) const;
 
-    JPH::Shape* CreateBoxShape(const JPH::BoxShapeSettings& settings);
+    static JPH::Shape* CreateBoxShape(const JPH::BoxShapeSettings& settings);
 
-    JPH::Body* CreateBody(const JPH::BodyCreationSettings& settings);
+    JPH::Body* CreateBody(const JPH::BodyCreationSettings& settings) const;
 
-    JPH::PhysicsSystem& GetPhysicsSystem();
-    JPH::BodyInterface& GetBodyInterface();
+    JPH::PhysicsSystem& GetPhysicsSystem() const;
+    JPH::BodyInterface& GetBodyInterface() const;
 
 private:
     PhysicsManager();

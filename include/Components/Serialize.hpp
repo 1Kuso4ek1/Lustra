@@ -99,7 +99,7 @@ void save(Archive& archive, const std::vector<entity>& entities)
     archive(cereal::make_nvp("size", entities.size()));
 
     for(auto& entity : entities)
-        archive(cereal::make_nvp("entity", (uint32_t)entity));
+        archive(cereal::make_nvp("entity", static_cast<uint32_t>(entity)));
 }
 
 template<class Archive>
@@ -206,7 +206,7 @@ void load(Archive& archive, PipelineComponent& component)
     component.vertexShader = AssetManager::Get().Load<VertexShaderAsset>(vertexShaderPath);
     component.fragmentShader = AssetManager::Get().Load<FragmentShaderAsset>(fragmentShaderPath);
 
-    component.pipeline = 
+    component.pipeline =
         Renderer::Get().CreatePipelineState(
             component.vertexShader->shader,
             component.fragmentShader->shader
@@ -320,7 +320,7 @@ void load(Archive& archive, RigidBodyComponent& component)
 
             shapeSettings = new JPH::EmptyShapeSettings();
             static_cast<JPH::EmptyShapeSettings*>(shapeSettings)->
-                mCenterOfMass = { 
+                mCenterOfMass = {
                     component.settings.centerOfMass.x,
                     component.settings.centerOfMass.y,
                     component.settings.centerOfMass.z
@@ -333,7 +333,7 @@ void load(Archive& archive, RigidBodyComponent& component)
 
             shapeSettings = new JPH::BoxShapeSettings();
             static_cast<JPH::BoxShapeSettings*>(shapeSettings)->
-                mHalfExtent = { 
+                mHalfExtent = {
                     component.settings.halfExtent.x,
                     component.settings.halfExtent.y,
                     component.settings.halfExtent.z
@@ -397,7 +397,7 @@ void load(Archive& archive, RigidBodyComponent& component)
             }
 
             shapeSettings = new JPH::MeshShapeSettings(list);
-            
+
             break;
         }
     }
@@ -457,7 +457,7 @@ void save(Archive& archive, const SoundComponent& component)
     }
     else
         archive(cereal::make_nvp("soundPath", ""));
-    
+
     archive(cereal::make_nvp("attached", component.attached));
 }
 
@@ -488,7 +488,7 @@ void load(Archive& archive, SoundComponent& component)
         archive(data); component.sound->sound.SetPan(data);
         archive(data); component.sound->sound.SetPitch(data);
         archive(data); component.sound->sound.SetVolume(data);
-        
+
         archive(enabled); component.sound->sound.SetLooping(enabled);
         archive(enabled); component.sound->sound.SetSpatializationEnabled(enabled);
     }

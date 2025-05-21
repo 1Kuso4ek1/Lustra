@@ -16,34 +16,34 @@ public:
     Sound();
     ~Sound();
 
-    void Play();
-    void Stop();
+    void Play() const;
+    void Stop() const;
 
-    void SetPosition(const glm::vec3& position);
-    void SetVelocity(const glm::vec3& velocity);
-    void SetOrientation(const glm::quat& orientation);
-    void SetDirection(const glm::vec3& direction);
-    void SetCone(const Cone& cone);
+    void SetPosition(const glm::vec3& position) const;
+    void SetVelocity(const glm::vec3& velocity) const;
+    void SetOrientation(const glm::quat& orientation) const;
+    void SetDirection(const glm::vec3& direction) const;
+    void SetCone(const Cone& cone) const;
 
-    void SetDirectionalAttenuationFactor(float factor);
-    void SetDopplerFactor(float factor);
-    void SetFade(float volumeBegin, float volumeEnd, uint64_t lengthMillis);
-    void SetRolloff(float rolloff);
+    void SetDirectionalAttenuationFactor(float factor) const;
+    void SetDopplerFactor(float factor) const;
+    void SetFade(float volumeBegin, float volumeEnd, uint64_t lengthMillis) const;
+    void SetRolloff(float rolloff) const;
 
-    void SetStartTime(uint64_t millis);
-    void SetStopTime(uint64_t millis);
-    
-    void SetMaxDistance(float distance);
-    void SetMinDistance(float distance);
-    void SetMaxGain(float gain);
-    void SetMinGain(float gain);
+    void SetStartTime(uint64_t millis) const;
+    void SetStopTime(uint64_t millis) const;
 
-    void SetPan(float pan);
-    void SetPitch(float pitch);
-    void SetVolume(float volume);
+    void SetMaxDistance(float distance) const;
+    void SetMinDistance(float distance) const;
+    void SetMaxGain(float gain) const;
+    void SetMinGain(float gain) const;
 
-    void SetLooping(bool looping);
-    void SetSpatializationEnabled(bool enabled);
+    void SetPan(float pan) const;
+    void SetPitch(float pitch) const;
+    void SetVolume(float volume) const;
+
+    void SetLooping(bool looping) const;
+    void SetSpatializationEnabled(bool enabled) const;
 
     glm::vec3 GetPosition() const;
     glm::vec3 GetVelocity() const;
@@ -54,12 +54,12 @@ public:
     float GetDirectionalAttenuationFactor() const;
     float GetDopplerFactor() const;
     float GetRolloff() const;
-    
+
     float GetMaxDistance() const;
     float GetMinDistance() const;
     float GetMaxGain() const;
     float GetMinGain() const;
-    
+
     float GetPan() const;
     float GetPitch() const;
     float GetVolume() const;

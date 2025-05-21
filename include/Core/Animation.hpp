@@ -9,7 +9,7 @@ public:
     struct Keyframe
     {
         float timestamp;
-        
+
     };
 };
 

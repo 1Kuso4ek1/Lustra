@@ -1,9 +1,9 @@
 #pragma once
 #include <Event.hpp>
 
+#include <filesystem>
 #include <memory>
 #include <unordered_map>
-#include <filesystem>
 
 namespace lustra
 {
@@ -24,7 +24,7 @@ struct Asset
         Sound
     };
 
-    Asset(Type type) : type(type) {}
+    explicit Asset(const Type type) : type(type) {}
     virtual ~Asset() = default;
 
     Type type = Type::Unknown;
@@ -71,17 +71,17 @@ inline Asset::Type GetAssetType(const std::string& extension)
         { ".fs", Asset::Type::FragmentShader }
     };
 
-    auto it = extensionMap.find(extension);
+    const auto it = extensionMap.find(extension);
     if(it != extensionMap.end())
         return it->second;
 
-    return Asset::Type::Unknown; 
+    return Asset::Type::Unknown;
 }
 
-class AssetLoadedEvent : public Event
+class AssetLoadedEvent final : public Event
 {
 public:
-    AssetLoadedEvent(AssetPtr asset) : Event(Type::AssetLoaded), asset(asset) {}
+    explicit AssetLoadedEvent(const AssetPtr& asset) : Event(Type::AssetLoaded), asset(asset) {}
 
     AssetPtr GetAsset() const { return asset; }
 

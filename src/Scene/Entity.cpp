@@ -3,7 +3,7 @@
 namespace lustra
 {
 
-Entity::Entity(entt::entity entity, Scene* scene)
-    : scene(scene), entity(entity) {}
+Entity::Entity(const entt::entity entity, Scene* scene)
+    : entity(entity), scene(scene) {}
 
 }

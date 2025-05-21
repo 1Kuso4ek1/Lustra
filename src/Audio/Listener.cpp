@@ -23,8 +23,8 @@ void Listener::SetVelocity(const glm::vec3& velocity)
 
 void Listener::SetOrientation(const glm::quat& orientation)
 {
-    glm::vec3 forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 up = orientation * glm::vec3(0.0f, 1.0f, 0.0f);
+    const auto forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
+    const auto up = orientation * glm::vec3(0.0f, 1.0f, 0.0f);
 
     ma_engine_listener_set_direction(
         AudioManager::Get().GetEngine(), 0,
@@ -53,7 +53,7 @@ void Listener::SetWorldUp(const glm::vec3& up)
     );
 }
 
-void Listener::SetCone(float inner, float outer, float outerGain)
+void Listener::SetCone(const float inner, const float outer, const float outerGain)
 {
     ma_engine_listener_set_cone(
         AudioManager::Get().GetEngine(), 0,
@@ -63,30 +63,30 @@ void Listener::SetCone(float inner, float outer, float outerGain)
 
 glm::vec3 Listener::GetPosition()
 {
-    auto position = ma_engine_listener_get_position(AudioManager::Get().GetEngine(), 0);
+    const auto [x, y, z] = ma_engine_listener_get_position(AudioManager::Get().GetEngine(), 0);
 
-    return { position.x, position.y, position.z };
+    return { x, y, z };
 }
 
 glm::vec3 Listener::GetVelocity()
 {
-    auto velocity = ma_engine_listener_get_velocity(AudioManager::Get().GetEngine(), 0);
+    const auto [x, y, z] = ma_engine_listener_get_velocity(AudioManager::Get().GetEngine(), 0);
 
-    return { velocity.x, velocity.y, velocity.z };
+    return { x, y, z };
 }
 
 glm::vec3 Listener::GetDirection()
 {
-    auto direction = ma_engine_listener_get_direction(AudioManager::Get().GetEngine(), 0);
+    const auto [x, y, z] = ma_engine_listener_get_direction(AudioManager::Get().GetEngine(), 0);
 
-    return { direction.x, direction.y, direction.z };
+    return { x, y, z };
 }
 
 glm::vec3 Listener::GetWorldUp()
 {
-    auto up = ma_engine_listener_get_world_up(AudioManager::Get().GetEngine(), 0);
+    const auto [x, y, z] = ma_engine_listener_get_world_up(AudioManager::Get().GetEngine(), 0);
 
-    return { up.x, up.y, up.z };
+    return { x, y, z };
 }
 
 }

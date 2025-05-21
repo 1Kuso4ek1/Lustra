@@ -1,9 +1,9 @@
 #include <AngelscriptUtils.hpp>
-#include <Timer.hpp>
 #include <Entity.hpp>
 #include <Keyboard.hpp>
 #include <Mouse.hpp>
 #include <SceneAsset.hpp>
+#include <Timer.hpp>
 
 namespace lustra
 {
@@ -12,7 +12,7 @@ ScriptManager::ScriptManager()
 {
     engine = asCreateScriptEngine();
 
-    engine->SetMessageCallback(asFUNCTION(as::MessageCallback), 0, asCALL_CDECL);
+    engine->SetMessageCallback(asFUNCTION(as::MessageCallback), nullptr, asCALL_CDECL);
     engine->SetEngineProperty(asEP_ALLOW_MULTILINE_STRINGS, true);
 
     context = engine->CreateContext();
@@ -44,7 +44,7 @@ ScriptManager::ScriptManager()
 
     SetDefaultNamespace("Mouse");
     RegisterMouse();
-    
+
     SetDefaultNamespace("InputManager");
     RegisterInputManager();
 
@@ -56,7 +56,7 @@ ScriptManager::ScriptManager()
     RegisterModelAsset();
     RegisterScriptAsset();
     RegisterSoundAsset();
-    
+
     SetDefaultNamespace("AssetManager");
     RegisterAssetManager();
 
@@ -114,7 +114,7 @@ void ScriptManager::Build()
 
     bool buildSucceded = true;
 
-    for(auto& i : scripts)
+    for(const auto& i : scripts)
     {
         for(int j = 0; j < i->modulesCount; j++)
         {
@@ -129,23 +129,22 @@ void ScriptManager::Build()
 }
 
 void ScriptManager::ExecuteFunction(
-    ScriptAssetPtr script,
-    std::string_view declaration,
-    std::function<void(asIScriptContext*)> setArgs,
-    uint32_t moduleIndex
-)
+    const ScriptAssetPtr& script,
+    const std::string_view declaration,
+    const std::function<void(asIScriptContext*)>& setArgs,
+    const uint32_t moduleIndex
+) const
 {
-    auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
-    auto func = module->GetFunctionByDecl(declaration.data());
+    const auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
 
-    if(func)
+    if(const auto func = module->GetFunctionByDecl(declaration.data()))
     {
         if(context->GetState() == asEContextState::asEXECUTION_ACTIVE)
             LLGL::Log::Printf(
                 LLGL::Log::ColorFlags::StdError,
                 "Context is already in use\n"
             );
-            
+
         context->Prepare(func);
 
         if(setArgs)
@@ -156,15 +155,15 @@ void ScriptManager::ExecuteFunction(
     }
 }
 
-void ScriptManager::AddScript(ScriptAssetPtr script)
+void ScriptManager::AddScript(const ScriptAssetPtr& script)
 {
-    if(std::find(scripts.begin(), scripts.end(), script) == scripts.end())
+    if(std::ranges::find(scripts, script) == scripts.end())
         scripts.push_back(script);
 }
 
-void ScriptManager::RemoveScript(ScriptAssetPtr script)
+void ScriptManager::RemoveScript(const ScriptAssetPtr& script)
 {
-    auto it = std::find(scripts.begin(), scripts.end(), script);
+    const auto it = std::ranges::find(scripts, script);
 
     if(it != scripts.end())
     {
@@ -175,101 +174,101 @@ void ScriptManager::RemoveScript(ScriptAssetPtr script)
     }
 }
 
-std::unordered_map<std::string, void*> ScriptManager::GetGlobalVariables(ScriptAssetPtr script, uint32_t moduleIndex)
+std::unordered_map<std::string, void*> ScriptManager::GetGlobalVariables(const ScriptAssetPtr& script, const uint32_t moduleIndex) const
 {
     std::unordered_map<std::string, void*> variables;
 
-    auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
-    auto count = module->GetGlobalVarCount();
-    
+    const auto module = engine->GetModule((script->path.stem().string() + std::to_string(moduleIndex)).c_str());
+    const auto count = module->GetGlobalVarCount();
+
     for(int i = 0; i < count; i++)
     {
-        auto var = module->GetGlobalVarDeclaration(i);
+        const auto var = module->GetGlobalVarDeclaration(i);
         variables[var] = module->GetAddressOfGlobalVar(i);
     }
-    
+
     return variables;
 }
 
-void ScriptManager::AddModule(std::string_view name)
+void ScriptManager::AddModule(const std::string_view name)
 {
     builder.StartNewModule(engine, name.data());
 }
 
-void ScriptManager::AddFunction(std::string_view declaration, const asSFuncPtr& ptr, asECallConvTypes callType)
+void ScriptManager::AddFunction(const std::string_view declaration, const asSFuncPtr& ptr, const asECallConvTypes callType) const
 {
     engine->RegisterGlobalFunction(declaration.data(), ptr, callType);
 }
 
-void ScriptManager::AddProperty(std::string_view declaration, void* ptr)
+void ScriptManager::AddProperty(const std::string_view declaration, void* ptr) const
 {
     engine->RegisterGlobalProperty(declaration.data(), ptr);
 }
 
-void ScriptManager::AddEnum(std::string_view name, std::vector<std::string_view> values)
+void ScriptManager::AddEnum(const std::string_view name, const std::vector<std::string_view>& values) const
 {
     engine->RegisterEnum(name.data());
     for(int i = 0; i < values.size(); i++)
         engine->RegisterEnumValue(name.data(), values[i].data(), i);
 }
 
-void ScriptManager::AddEnumValues(std::string_view name, std::unordered_map<std::string_view, int> values)
+void ScriptManager::AddEnumValues(const std::string_view name, const std::unordered_map<std::string_view, int>& values) const
 {
     engine->RegisterEnum(name.data());
-    for(auto& i : values)
-        engine->RegisterEnumValue(name.data(), i.first.data(), i.second);
+    for(const auto& [entry, value] : values)
+        engine->RegisterEnumValue(name.data(), entry.data(), value);
 }
 
 void ScriptManager::AddValueType(
-    std::string_view name,
-    int size,
-    int traits,
-    std::unordered_map<std::string_view, asSFuncPtr> methods,
-    std::unordered_map<std::string_view, int> properties
-)
+    const std::string_view name,
+    const int size,
+    const uint32_t traits,
+    const std::unordered_map<std::string_view, asSFuncPtr>& methods,
+    const std::unordered_map<std::string_view, int>& properties
+) const
 {
     engine->RegisterObjectType(name.data(), size, asOBJ_VALUE | traits);
-    for(auto& i : methods)
-        engine->RegisterObjectMethod(name.data(), i.first.data(), i.second, asCALL_GENERIC);
-    for(auto& i : properties)
-        engine->RegisterObjectProperty(name.data(), i.first.data(), i.second);
+    for(const auto& [entry, method] : methods)
+        engine->RegisterObjectMethod(name.data(), entry.data(), method, asCALL_GENERIC);
+    for(const auto& [entry, property] : properties)
+        engine->RegisterObjectProperty(name.data(), entry.data(), property);
 }
 
 void ScriptManager::AddType(
-    std::string_view name,
-    int size,
-    std::unordered_map<std::string_view, asSFuncPtr> methods,
-    std::unordered_map<std::string_view, int> properties
-)
+    const std::string_view name,
+    const int size,
+    const std::unordered_map<std::string_view, asSFuncPtr>& methods,
+    const std::unordered_map<std::string_view, int>& properties
+) const
 {
     engine->RegisterObjectType(name.data(), size, asOBJ_REF | asOBJ_NOCOUNT);
-    for(auto& i : methods)
-        engine->RegisterObjectMethod(name.data(), i.first.data(), i.second, asCALL_GENERIC);
-    for(auto& i : properties)
-        engine->RegisterObjectProperty(name.data(), i.first.data(), i.second);
+    for(const auto& [entry, method] : methods)
+        engine->RegisterObjectMethod(name.data(), entry.data(), method, asCALL_GENERIC);
+    for(const auto& [entry, property] : properties)
+        engine->RegisterObjectProperty(name.data(), entry.data(), property);
 }
 
-void ScriptManager::AddTypeConstructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr)
+void ScriptManager::AddTypeConstructor(const std::string_view name, const std::string_view declaration, const asSFuncPtr& ptr) const
 {
     engine->RegisterObjectBehaviour(name.data(), asBEHAVE_CONSTRUCT, declaration.data(), ptr, asCALL_GENERIC);
 }
 
-void ScriptManager::AddTypeDestructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr)
+void ScriptManager::AddTypeDestructor(const std::string_view name, const std::string_view declaration, const asSFuncPtr& ptr) const
 {
     engine->RegisterObjectBehaviour(name.data(), asBEHAVE_DESTRUCT, declaration.data(), ptr, asCALL_GENERIC);
 }
 
-void ScriptManager::AddTypeFactory(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr)
+void ScriptManager::AddTypeFactory(const std::string_view name, const std::string_view declaration, const asSFuncPtr& ptr) const
 {
     engine->RegisterObjectBehaviour(name.data(), asBEHAVE_FACTORY, declaration.data(), ptr, asCALL_GENERIC);
 }
 
-void ScriptManager::SetDefaultNamespace(std::string_view name)
+void ScriptManager::SetDefaultNamespace(const std::string_view name) const
 {
     engine->SetDefaultNamespace(name.data());
 }
 
-bool ScriptManager::BuildModule(ScriptAssetPtr script, std::string_view name)
+bool ScriptManager::BuildModule(const ScriptAssetPtr& script, const std::string_view name)
 {
     AddModule(name);
     builder.AddSectionFromFile(script->path.string().c_str());
@@ -277,19 +276,19 @@ bool ScriptManager::BuildModule(ScriptAssetPtr script, std::string_view name)
     return (builder.BuildModule() >= 0);
 }
 
-void ScriptManager::DiscardModules()
+void ScriptManager::DiscardModules() const
 {
     for(auto& i : scripts)
         for(int j = 0; j < i->modulesCount; j++)
             engine->DiscardModule((i->path.stem().string() + std::to_string(j)).c_str());
 }
 
-void ScriptManager::RegisterLog()
+void ScriptManager::RegisterLog() const
 {
     AddFunction("void Write(const string& in)", WRAP_FN(as::Write));
 }
 
-void ScriptManager::RegisterRandom()
+void ScriptManager::RegisterRandom() const
 {
     AddFunction("void SetSeed(uint32)", WRAP_FN(as::RandomSetSeed));
     AddFunction("float Value()", WRAP_FN(as::RandomValue));
@@ -297,7 +296,7 @@ void ScriptManager::RegisterRandom()
     AddFunction("int Range(int, int)", WRAP_FN_PR(as::RandomRange, (int, int), int));
 }
 
-void ScriptManager::RegisterVec2()
+void ScriptManager::RegisterVec2() const
 {
     AddValueType("vec2", sizeof(glm::vec2), asGetTypeTraits<glm::vec2>() | asOBJ_POD,
         {
@@ -328,7 +327,7 @@ void ScriptManager::RegisterVec2()
     AddFunction("float dot(const vec2& in, const vec2& in)", WRAP_FN_PR(glm::dot, (const glm::vec2&, const glm::vec2&), float));
 }
 
-void ScriptManager::RegisterVec3()
+void ScriptManager::RegisterVec3() const
 {
     AddValueType("vec3", sizeof(glm::vec3), asGetTypeTraits<glm::vec3>() | asOBJ_POD,
         {
@@ -363,7 +362,7 @@ void ScriptManager::RegisterVec3()
     AddFunction("vec3 reflect(const vec3& in, const vec3& in)", WRAP_FN_PR(glm::reflect, (const glm::vec3&, const glm::vec3&), glm::vec3));
 }
 
-void ScriptManager::RegisterVec4()
+void ScriptManager::RegisterVec4() const
 {
     AddValueType("vec4", sizeof(glm::vec4), asGetTypeTraits<glm::vec4>() | asOBJ_POD,
         {
@@ -396,7 +395,7 @@ void ScriptManager::RegisterVec4()
     AddFunction("float dot(const vec4& in, const vec4& in)", WRAP_FN_PR(glm::dot, (const glm::vec4&, const glm::vec4&), float));
 }
 
-void ScriptManager::RegisterQuat()
+void ScriptManager::RegisterQuat() const
 {
     AddValueType("quat", sizeof(glm::quat), asGetTypeTraits<glm::quat>() | asOBJ_POD,
         {
@@ -417,7 +416,7 @@ void ScriptManager::RegisterQuat()
 
     AddFunction("quat slerp(const quat& in, const quat& in, float)", WRAP_FN_PR(glm::slerp, (const glm::quat&, const glm::quat&, float), glm::quat));
     AddFunction("quat lerp(const quat& in, const quat& in, float)", WRAP_FN_PR(glm::lerp, (const glm::quat&, const glm::quat&, float), glm::quat));
-    
+
     AddFunction("vec3 rotate(const quat& in, const vec3& in)", WRAP_FN_PR(glm::rotate, (const glm::quat&, const glm::vec3&), glm::vec3));
     AddFunction("quat normalize(const quat& in)", WRAP_FN_PR(glm::normalize, (const glm::quat&), glm::quat));
 
@@ -428,7 +427,7 @@ void ScriptManager::RegisterQuat()
     AddFunction("float dot(const quat& in, const quat& in)", WRAP_FN_PR(glm::dot, (const glm::quat&, const glm::quat&), float));
 }
 
-void ScriptManager::RegisterMat4()
+void ScriptManager::RegisterMat4() const
 {
     AddValueType("mat4", sizeof(glm::mat4), asGetTypeTraits<glm::mat4>() | asOBJ_POD,
         {
@@ -446,7 +445,7 @@ void ScriptManager::RegisterMat4()
     AddFunction("mat4 inverse(const mat4& in)", WRAP_FN_PR(glm::inverse, (const glm::mat4&), glm::mat4));
 }
 
-void ScriptManager::RegisterGLM()
+void ScriptManager::RegisterGLM() const
 {
     RegisterVec2();
     RegisterVec3();
@@ -484,7 +483,7 @@ void ScriptManager::RegisterGLM()
     AddFunction("bool isinf(float)", WRAP_FN_PR(std::isinf, (float), bool));
 }
 
-void ScriptManager::RegisterBody()
+void ScriptManager::RegisterBody() const
 {
     AddValueType("BodyID", sizeof(JPH::BodyID), asGetTypeTraits<JPH::BodyID>() | asOBJ_POD, {}, {});
 
@@ -513,7 +512,7 @@ void ScriptManager::RegisterBody()
     );
 }
 
-void ScriptManager::RegisterRayCast()
+void ScriptManager::RegisterRayCast() const
 {
     AddValueType("RayCastResult", sizeof(as::RayCastResult), asGetTypeTraits<as::RayCastResult>() | asOBJ_POD, {},
         {
@@ -526,7 +525,7 @@ void ScriptManager::RegisterRayCast()
     AddFunction("RayCastResult CastRay(const glm::vec3& in, const glm::vec3& in)", WRAP_FN(as::CastRay));
 }
 
-void ScriptManager::RegisterExtent2D()
+void ScriptManager::RegisterExtent2D() const
 {
     AddValueType("Extent2D", sizeof(LLGL::Extent2D), asGetTypeTraits<LLGL::Extent2D>() | asOBJ_POD, {},
         {
@@ -538,7 +537,7 @@ void ScriptManager::RegisterExtent2D()
     AddTypeConstructor("Extent2D", "void f(uint32, uint32)", WRAP_OBJ_LAST(as::MakeExtent2D));
 }
 
-void ScriptManager::RegisterCamera()
+void ScriptManager::RegisterCamera() const
 {
     AddType("Camera", sizeof(Camera),
         {
@@ -563,7 +562,7 @@ void ScriptManager::RegisterCamera()
             { "glm::mat4 GetViewMatrix() const", WRAP_MFN(Camera, GetViewMatrix) },
             { "glm::mat4 GetProjectionMatrix() const", WRAP_MFN(Camera, GetProjectionMatrix) },
             { "glm::vec2 GetViewport() const", WRAP_MFN(Camera, GetViewport) },
-            
+
             { "float GetFov() const", WRAP_MFN(Camera, GetFov) },
             { "float GetNear() const", WRAP_MFN(Camera, GetNear) },
             { "float GetFar() const", WRAP_MFN(Camera, GetFar) },
@@ -575,7 +574,7 @@ void ScriptManager::RegisterCamera()
     );
 }
 
-void ScriptManager::RegisterSound()
+void ScriptManager::RegisterSound() const
 {
     AddValueType("Sound", sizeof(Sound), asGetTypeTraits<Sound>() | asOBJ_POD,
         {
@@ -611,141 +610,141 @@ void ScriptManager::RegisterSound()
     );
 }
 
-void ScriptManager::RegisterKeyboard()
+void ScriptManager::RegisterKeyboard() const
 {
     AddFunction("bool IsKeyPressed(int)", WRAP_FN(Keyboard::IsKeyPressed));
     AddFunction("bool IsKeyReleased(int)", WRAP_FN(Keyboard::IsKeyReleased));
     AddFunction("bool IsKeyRepeated(int)", WRAP_FN(Keyboard::IsKeyRepeated));
 
     AddEnumValues("Key",
-        { 
-            { "Unknown", (int)(Keyboard::Key::Unknown) },
-            { "Space", (int)(Keyboard::Key::Space) },
-            { "Apostrophe", (int)(Keyboard::Key::Apostrophe) },
-            { "Comma", (int)(Keyboard::Key::Comma) },
-            { "Minus", (int)(Keyboard::Key::Minus) },
-            { "Period", (int)(Keyboard::Key::Period) },
-            { "Slash", (int)(Keyboard::Key::Slash) },
-            { "Num0", (int)(Keyboard::Key::Num0) },
-            { "Num1", (int)(Keyboard::Key::Num1) },
-            { "Num2", (int)(Keyboard::Key::Num2) },
-            { "Num3", (int)(Keyboard::Key::Num3) },
-            { "Num4", (int)(Keyboard::Key::Num4) },
-            { "Num5", (int)(Keyboard::Key::Num5) },
-            { "Num6", (int)(Keyboard::Key::Num6) },
-            { "Num7", (int)(Keyboard::Key::Num7) },
-            { "Num8", (int)(Keyboard::Key::Num8) },
-            { "Num9", (int)(Keyboard::Key::Num9) },
-            { "Semicolon", (int)(Keyboard::Key::Semicolon) },
-            { "Equal", (int)(Keyboard::Key::Equal) },
-            { "A", (int)(Keyboard::Key::A) },
-            { "B", (int)(Keyboard::Key::B) },
-            { "C", (int)(Keyboard::Key::C) },
-            { "D", (int)(Keyboard::Key::D) },
-            { "E", (int)(Keyboard::Key::E) },
-            { "F", (int)(Keyboard::Key::F) },
-            { "G", (int)(Keyboard::Key::G) },
-            { "H", (int)(Keyboard::Key::H) },
-            { "I", (int)(Keyboard::Key::I) },
-            { "J", (int)(Keyboard::Key::J) },
-            { "K", (int)(Keyboard::Key::K) },
-            { "L", (int)(Keyboard::Key::L) },
-            { "M", (int)(Keyboard::Key::M) },
-            { "N", (int)(Keyboard::Key::N) },
-            { "O", (int)(Keyboard::Key::O) },
-            { "P", (int)(Keyboard::Key::P) },
-            { "Q", (int)(Keyboard::Key::Q) },
-            { "R", (int)(Keyboard::Key::R) },
-            { "S", (int)(Keyboard::Key::S) },
-            { "T", (int)(Keyboard::Key::T) },
-            { "U", (int)(Keyboard::Key::U) },
-            { "V", (int)(Keyboard::Key::V) },
-            { "W", (int)(Keyboard::Key::W) },
-            { "X", (int)(Keyboard::Key::X) },
-            { "Y", (int)(Keyboard::Key::Y) },
-            { "Z", (int)(Keyboard::Key::Z) },
-            { "LeftBracket", (int)(Keyboard::Key::LeftBracket) },
-            { "Backslash", (int)(Keyboard::Key::Backslash) },
-            { "RightBracket", (int)(Keyboard::Key::RightBracket) },
-            { "GraveAccent", (int)(Keyboard::Key::GraveAccent) },
-            { "World1", (int)(Keyboard::Key::World1) },
-            { "World2", (int)(Keyboard::Key::World2) },
-            { "Escape", (int)(Keyboard::Key::Escape) },
-            { "Enter", (int)(Keyboard::Key::Enter) },
-            { "Tab", (int)(Keyboard::Key::Tab) },
-            { "Backspace", (int)(Keyboard::Key::Backspace) },
-            { "Insert", (int)(Keyboard::Key::Insert) },
-            { "Delete", (int)(Keyboard::Key::Delete) },
-            { "Right", (int)(Keyboard::Key::Right) },
-            { "Left", (int)(Keyboard::Key::Left) },
-            { "Down", (int)(Keyboard::Key::Down) },
-            { "Up", (int)(Keyboard::Key::Up) },
-            { "PageUp", (int)(Keyboard::Key::PageUp) },
-            { "PageDown", (int)(Keyboard::Key::PageDown) },
-            { "Home", (int)(Keyboard::Key::Home) },
-            { "End", (int)(Keyboard::Key::End) },
-            { "CapsLock", (int)(Keyboard::Key::CapsLock) },
-            { "ScrollLock", (int)(Keyboard::Key::ScrollLock) },
-            { "NumLock", (int)(Keyboard::Key::NumLock) },
-            { "PrintScreen", (int)(Keyboard::Key::PrintScreen) },
-            { "Pause", (int)(Keyboard::Key::Pause) },
-            { "F1", (int)(Keyboard::Key::F1) },
-            { "F2", (int)(Keyboard::Key::F2) },
-            { "F3", (int)(Keyboard::Key::F3) },
-            { "F4", (int)(Keyboard::Key::F4) },
-            { "F5", (int)(Keyboard::Key::F5) },
-            { "F6", (int)(Keyboard::Key::F6) },
-            { "F7", (int)(Keyboard::Key::F7) },
-            { "F8", (int)(Keyboard::Key::F8) },
-            { "F9", (int)(Keyboard::Key::F9) },
-            { "F10", (int)(Keyboard::Key::F10) },
-            { "F11", (int)(Keyboard::Key::F11) },
-            { "F12", (int)(Keyboard::Key::F12) },
-            { "F13", (int)(Keyboard::Key::F13) },
-            { "F14", (int)(Keyboard::Key::F14) },
-            { "F15", (int)(Keyboard::Key::F15) },
-            { "F16", (int)(Keyboard::Key::F16) },
-            { "F17", (int)(Keyboard::Key::F17) },
-            { "F18", (int)(Keyboard::Key::F18) },
-            { "F19", (int)(Keyboard::Key::F19) },
-            { "F20", (int)(Keyboard::Key::F20) },
-            { "F21", (int)(Keyboard::Key::F21) },
-            { "F22", (int)(Keyboard::Key::F22) },
-            { "F23", (int)(Keyboard::Key::F23) },
-            { "F24", (int)(Keyboard::Key::F24) },
-            { "F25", (int)(Keyboard::Key::F25) },
-            { "Kp0", (int)(Keyboard::Key::Kp0) },
-            { "Kp1", (int)(Keyboard::Key::Kp1) },
-            { "Kp2", (int)(Keyboard::Key::Kp2) },
-            { "Kp3", (int)(Keyboard::Key::Kp3) },
-            { "Kp4", (int)(Keyboard::Key::Kp4) },
-            { "Kp5", (int)(Keyboard::Key::Kp5) },
-            { "Kp6", (int)(Keyboard::Key::Kp6) },
-            { "Kp7", (int)(Keyboard::Key::Kp7) },
-            { "Kp8", (int)(Keyboard::Key::Kp8) },
-            { "Kp9", (int)(Keyboard::Key::Kp9) },
-            { "KpDecimal", (int)(Keyboard::Key::KpDecimal) },
-            { "KpDivide", (int)(Keyboard::Key::KpDivide) },
-            { "KpMultiply", (int)(Keyboard::Key::KpMultiply) },
-            { "KpSubtract", (int)(Keyboard::Key::KpSubtract) },
-            { "KpAdd", (int)(Keyboard::Key::KpAdd) },
-            { "KpEnter", (int)(Keyboard::Key::KpEnter) },
-            { "KpEqual", (int)(Keyboard::Key::KpEqual) },
-            { "LeftShift", (int)(Keyboard::Key::LeftShift) },
-            { "LeftControl", (int)(Keyboard::Key::LeftControl) },
-            { "LeftAlt", (int)(Keyboard::Key::LeftAlt) },
-            { "LeftSuper", (int)(Keyboard::Key::LeftSuper) },
-            { "RightShift", (int)(Keyboard::Key::RightShift) },
-            { "RightControl", (int)(Keyboard::Key::RightControl) },
-            { "RightAlt", (int)(Keyboard::Key::RightAlt) },
-            { "RightSuper", (int)(Keyboard::Key::RightSuper) },
-            { "Menu", (int)(Keyboard::Key::Menu) },
-            { "Last", (int)(Keyboard::Key::Last) }
+        {
+            { "Unknown", static_cast<int>(Keyboard::Key::Unknown) },
+            { "Space", static_cast<int>(Keyboard::Key::Space) },
+            { "Apostrophe", static_cast<int>(Keyboard::Key::Apostrophe) },
+            { "Comma", static_cast<int>(Keyboard::Key::Comma) },
+            { "Minus", static_cast<int>(Keyboard::Key::Minus) },
+            { "Period", static_cast<int>(Keyboard::Key::Period) },
+            { "Slash", static_cast<int>(Keyboard::Key::Slash) },
+            { "Num0", static_cast<int>(Keyboard::Key::Num0) },
+            { "Num1", static_cast<int>(Keyboard::Key::Num1) },
+            { "Num2", static_cast<int>(Keyboard::Key::Num2) },
+            { "Num3", static_cast<int>(Keyboard::Key::Num3) },
+            { "Num4", static_cast<int>(Keyboard::Key::Num4) },
+            { "Num5", static_cast<int>(Keyboard::Key::Num5) },
+            { "Num6", static_cast<int>(Keyboard::Key::Num6) },
+            { "Num7", static_cast<int>(Keyboard::Key::Num7) },
+            { "Num8", static_cast<int>(Keyboard::Key::Num8) },
+            { "Num9", static_cast<int>(Keyboard::Key::Num9) },
+            { "Semicolon", static_cast<int>(Keyboard::Key::Semicolon) },
+            { "Equal", static_cast<int>(Keyboard::Key::Equal) },
+            { "A", static_cast<int>(Keyboard::Key::A) },
+            { "B", static_cast<int>(Keyboard::Key::B) },
+            { "C", static_cast<int>(Keyboard::Key::C) },
+            { "D", static_cast<int>(Keyboard::Key::D) },
+            { "E", static_cast<int>(Keyboard::Key::E) },
+            { "F", static_cast<int>(Keyboard::Key::F) },
+            { "G", static_cast<int>(Keyboard::Key::G) },
+            { "H", static_cast<int>(Keyboard::Key::H) },
+            { "I", static_cast<int>(Keyboard::Key::I) },
+            { "J", static_cast<int>(Keyboard::Key::J) },
+            { "K", static_cast<int>(Keyboard::Key::K) },
+            { "L", static_cast<int>(Keyboard::Key::L) },
+            { "M", static_cast<int>(Keyboard::Key::M) },
+            { "N", static_cast<int>(Keyboard::Key::N) },
+            { "O", static_cast<int>(Keyboard::Key::O) },
+            { "P", static_cast<int>(Keyboard::Key::P) },
+            { "Q", static_cast<int>(Keyboard::Key::Q) },
+            { "R", static_cast<int>(Keyboard::Key::R) },
+            { "S", static_cast<int>(Keyboard::Key::S) },
+            { "T", static_cast<int>(Keyboard::Key::T) },
+            { "U", static_cast<int>(Keyboard::Key::U) },
+            { "V", static_cast<int>(Keyboard::Key::V) },
+            { "W", static_cast<int>(Keyboard::Key::W) },
+            { "X", static_cast<int>(Keyboard::Key::X) },
+            { "Y", static_cast<int>(Keyboard::Key::Y) },
+            { "Z", static_cast<int>(Keyboard::Key::Z) },
+            { "LeftBracket", static_cast<int>(Keyboard::Key::LeftBracket) },
+            { "Backslash", static_cast<int>(Keyboard::Key::Backslash) },
+            { "RightBracket", static_cast<int>(Keyboard::Key::RightBracket) },
+            { "GraveAccent", static_cast<int>(Keyboard::Key::GraveAccent) },
+            { "World1", static_cast<int>(Keyboard::Key::World1) },
+            { "World2", static_cast<int>(Keyboard::Key::World2) },
+            { "Escape", static_cast<int>(Keyboard::Key::Escape) },
+            { "Enter", static_cast<int>(Keyboard::Key::Enter) },
+            { "Tab", static_cast<int>(Keyboard::Key::Tab) },
+            { "Backspace", static_cast<int>(Keyboard::Key::Backspace) },
+            { "Insert", static_cast<int>(Keyboard::Key::Insert) },
+            { "Delete", static_cast<int>(Keyboard::Key::Delete) },
+            { "Right", static_cast<int>(Keyboard::Key::Right) },
+            { "Left", static_cast<int>(Keyboard::Key::Left) },
+            { "Down", static_cast<int>(Keyboard::Key::Down) },
+            { "Up", static_cast<int>(Keyboard::Key::Up) },
+            { "PageUp", static_cast<int>(Keyboard::Key::PageUp) },
+            { "PageDown", static_cast<int>(Keyboard::Key::PageDown) },
+            { "Home", static_cast<int>(Keyboard::Key::Home) },
+            { "End", static_cast<int>(Keyboard::Key::End) },
+            { "CapsLock", static_cast<int>(Keyboard::Key::CapsLock) },
+            { "ScrollLock", static_cast<int>(Keyboard::Key::ScrollLock) },
+            { "NumLock", static_cast<int>(Keyboard::Key::NumLock) },
+            { "PrintScreen", static_cast<int>(Keyboard::Key::PrintScreen) },
+            { "Pause", static_cast<int>(Keyboard::Key::Pause) },
+            { "F1", static_cast<int>(Keyboard::Key::F1) },
+            { "F2", static_cast<int>(Keyboard::Key::F2) },
+            { "F3", static_cast<int>(Keyboard::Key::F3) },
+            { "F4", static_cast<int>(Keyboard::Key::F4) },
+            { "F5", static_cast<int>(Keyboard::Key::F5) },
+            { "F6", static_cast<int>(Keyboard::Key::F6) },
+            { "F7", static_cast<int>(Keyboard::Key::F7) },
+            { "F8", static_cast<int>(Keyboard::Key::F8) },
+            { "F9", static_cast<int>(Keyboard::Key::F9) },
+            { "F10", static_cast<int>(Keyboard::Key::F10) },
+            { "F11", static_cast<int>(Keyboard::Key::F11) },
+            { "F12", static_cast<int>(Keyboard::Key::F12) },
+            { "F13", static_cast<int>(Keyboard::Key::F13) },
+            { "F14", static_cast<int>(Keyboard::Key::F14) },
+            { "F15", static_cast<int>(Keyboard::Key::F15) },
+            { "F16", static_cast<int>(Keyboard::Key::F16) },
+            { "F17", static_cast<int>(Keyboard::Key::F17) },
+            { "F18", static_cast<int>(Keyboard::Key::F18) },
+            { "F19", static_cast<int>(Keyboard::Key::F19) },
+            { "F20", static_cast<int>(Keyboard::Key::F20) },
+            { "F21", static_cast<int>(Keyboard::Key::F21) },
+            { "F22", static_cast<int>(Keyboard::Key::F22) },
+            { "F23", static_cast<int>(Keyboard::Key::F23) },
+            { "F24", static_cast<int>(Keyboard::Key::F24) },
+            { "F25", static_cast<int>(Keyboard::Key::F25) },
+            { "Kp0", static_cast<int>(Keyboard::Key::Kp0) },
+            { "Kp1", static_cast<int>(Keyboard::Key::Kp1) },
+            { "Kp2", static_cast<int>(Keyboard::Key::Kp2) },
+            { "Kp3", static_cast<int>(Keyboard::Key::Kp3) },
+            { "Kp4", static_cast<int>(Keyboard::Key::Kp4) },
+            { "Kp5", static_cast<int>(Keyboard::Key::Kp5) },
+            { "Kp6", static_cast<int>(Keyboard::Key::Kp6) },
+            { "Kp7", static_cast<int>(Keyboard::Key::Kp7) },
+            { "Kp8", static_cast<int>(Keyboard::Key::Kp8) },
+            { "Kp9", static_cast<int>(Keyboard::Key::Kp9) },
+            { "KpDecimal", static_cast<int>(Keyboard::Key::KpDecimal) },
+            { "KpDivide", static_cast<int>(Keyboard::Key::KpDivide) },
+            { "KpMultiply", static_cast<int>(Keyboard::Key::KpMultiply) },
+            { "KpSubtract", static_cast<int>(Keyboard::Key::KpSubtract) },
+            { "KpAdd", static_cast<int>(Keyboard::Key::KpAdd) },
+            { "KpEnter", static_cast<int>(Keyboard::Key::KpEnter) },
+            { "KpEqual", static_cast<int>(Keyboard::Key::KpEqual) },
+            { "LeftShift", static_cast<int>(Keyboard::Key::LeftShift) },
+            { "LeftControl", static_cast<int>(Keyboard::Key::LeftControl) },
+            { "LeftAlt", static_cast<int>(Keyboard::Key::LeftAlt) },
+            { "LeftSuper", static_cast<int>(Keyboard::Key::LeftSuper) },
+            { "RightShift", static_cast<int>(Keyboard::Key::RightShift) },
+            { "RightControl", static_cast<int>(Keyboard::Key::RightControl) },
+            { "RightAlt", static_cast<int>(Keyboard::Key::RightAlt) },
+            { "RightSuper", static_cast<int>(Keyboard::Key::RightSuper) },
+            { "Menu", static_cast<int>(Keyboard::Key::Menu) },
+            { "Last", static_cast<int>(Keyboard::Key::Last) }
         }
     );
 }
 
-void ScriptManager::RegisterMouse()
+void ScriptManager::RegisterMouse() const
 {
     AddFunction("glm::vec2 GetPosition()", WRAP_FN(Mouse::GetPosition));
     AddFunction("void SetPosition(const glm::vec2& in)", WRAP_FN(Mouse::SetPosition));
@@ -755,27 +754,27 @@ void ScriptManager::RegisterMouse()
 
     AddEnumValues("Button",
         {
-            { "Left", (int)(Mouse::Button::Left) },
-            { "Right", (int)(Mouse::Button::Right) },
-            { "Middle", (int)(Mouse::Button::Middle) },
-            { "MButton4", (int)(Mouse::Button::MButton4) },
-            { "MButton5", (int)(Mouse::Button::MButton5) },
-            { "MButton6", (int)(Mouse::Button::MButton6) },
-            { "MButton7", (int)(Mouse::Button::MButton7) },
-            { "MButton8", (int)(Mouse::Button::MButton8) },
-            { "Last", (int)(Mouse::Button::Last) }
+            { "Left", static_cast<int>(Mouse::Button::Left) },
+            { "Right", static_cast<int>(Mouse::Button::Right) },
+            { "Middle", static_cast<int>(Mouse::Button::Middle) },
+            { "MButton4", static_cast<int>(Mouse::Button::MButton4) },
+            { "MButton5", static_cast<int>(Mouse::Button::MButton5) },
+            { "MButton6", static_cast<int>(Mouse::Button::MButton6) },
+            { "MButton7", static_cast<int>(Mouse::Button::MButton7) },
+            { "MButton8", static_cast<int>(Mouse::Button::MButton8) },
+            { "Last", static_cast<int>(Mouse::Button::Last) }
         }
     );
 }
 
-void ScriptManager::RegisterInputManager()
+void ScriptManager::RegisterInputManager() const
 {
     AddFunction("void MapKeyboardAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Keyboard::Key), void));
     AddFunction("void MapMouseAction(const string& in, int)", WRAP_FN_PR(as::MapAction, (const std::string&, Mouse::Button), void));
     AddFunction("bool IsActionPressed(const string& in)", WRAP_FN(as::IsActionPressed));
 }
 
-void ScriptManager::RegisterScriptManager()
+void ScriptManager::RegisterScriptManager() const
 {
     AddFunction("void AddScript(ScriptAssetPtr)", WRAP_MFN(ScriptManager, AddScript));
     AddFunction("void RemoveScript(ScriptAssetPtr)", WRAP_MFN(ScriptManager, RemoveScript));
@@ -783,7 +782,7 @@ void ScriptManager::RegisterScriptManager()
     AddFunction("void ExecuteFunction(ScriptAssetPtr, const string& in, uint32 = 0)", WRAP_OBJ_LAST(as::ExecuteFunction));
 }
 
-void ScriptManager::RegisterTextureAsset()
+void ScriptManager::RegisterTextureAsset() const
 {
     AddType("TextureAsset", sizeof(TextureAsset), {}, {});
 
@@ -797,7 +796,7 @@ void ScriptManager::RegisterTextureAsset()
     AddTypeConstructor("TextureAssetPtr", "void f(const TextureAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<TextureAssetPtr>));
 }
 
-void ScriptManager::RegisterMaterialAsset()
+void ScriptManager::RegisterMaterialAsset() const
 {
     AddValueType("MaterialProperty", sizeof(MaterialAsset::Property), asGetTypeTraits<MaterialAsset::Property>() | asOBJ_POD,
         {
@@ -836,7 +835,7 @@ void ScriptManager::RegisterMaterialAsset()
     AddTypeConstructor("MaterialAssetPtr", "void f(const MaterialAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<MaterialAssetPtr>));
 }
 
-void ScriptManager::RegisterModelAsset()
+void ScriptManager::RegisterModelAsset() const
 {
     AddType("ModelAsset", sizeof(ModelAsset), {}, {});
 
@@ -850,7 +849,7 @@ void ScriptManager::RegisterModelAsset()
     AddTypeConstructor("ModelAssetPtr", "void f(const ModelAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<ModelAssetPtr>));
 }
 
-void ScriptManager::RegisterSceneAsset()
+void ScriptManager::RegisterSceneAsset() const
 {
     AddType("SceneAsset", sizeof(SceneAsset), {},
         {
@@ -868,7 +867,7 @@ void ScriptManager::RegisterSceneAsset()
     AddTypeConstructor("SceneAssetPtr", "void f(const SceneAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SceneAssetPtr>));
 }
 
-void ScriptManager::RegisterScriptAsset()
+void ScriptManager::RegisterScriptAsset() const
 {
     AddType("ScriptAsset", sizeof(ScriptAsset), {}, {});
 
@@ -882,7 +881,7 @@ void ScriptManager::RegisterScriptAsset()
     AddTypeConstructor("ScriptAssetPtr", "void f(const ScriptAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<ScriptAssetPtr>));
 }
 
-void ScriptManager::RegisterSoundAsset()
+void ScriptManager::RegisterSoundAsset() const
 {
     AddType("SoundAsset", sizeof(SoundAsset), {},
         {
@@ -900,7 +899,7 @@ void ScriptManager::RegisterSoundAsset()
     AddTypeConstructor("SoundAssetPtr", "void f(const SoundAssetPtr& in)", WRAP_OBJ_LAST(as::CopyType<SoundAssetPtr>));
 }
 
-void ScriptManager::RegisterAssetManager()
+void ScriptManager::RegisterAssetManager() const
 {
     AddFunction("TextureAssetPtr LoadTexture(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<TextureAsset>));
     AddFunction("MaterialAssetPtr LoadMaterial(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<MaterialAsset>));
@@ -908,7 +907,7 @@ void ScriptManager::RegisterAssetManager()
     AddFunction("SoundAssetPtr LoadSound(const string& in, bool = false, bool = true, bool = true)", WRAP_FN(as::Load<SoundAsset>));
 }
 
-void ScriptManager::RegisterWindowResizeEvent()
+void ScriptManager::RegisterWindowResizeEvent() const
 {
     AddType("WindowResizeEvent", sizeof(WindowResizeEvent),
         {
@@ -924,7 +923,7 @@ void ScriptManager::RegisterAssetLoadedEvent()
     // TODO ...
 }
 
-void ScriptManager::RegisterCollisionEvent()
+void ScriptManager::RegisterCollisionEvent() const
 {
     AddType("CollisionEvent", sizeof(CollisionEvent),
         {
@@ -940,7 +939,7 @@ void ScriptManager::RegisterCollisionEvent()
     );
 }
 
-void ScriptManager::RegisterTimer()
+void ScriptManager::RegisterTimer() const
 {
     AddValueType("Timer", sizeof(Timer), asGetTypeTraits<Timer>() | asOBJ_POD,
         {
@@ -951,7 +950,7 @@ void ScriptManager::RegisterTimer()
     );
 }
 
-void ScriptManager::RegisterNameComponent()
+void ScriptManager::RegisterNameComponent() const
 {
     AddType("NameComponent", sizeof(NameComponent), {},
         {
@@ -960,7 +959,7 @@ void ScriptManager::RegisterNameComponent()
     );
 }
 
-void ScriptManager::RegisterTransformComponent()
+void ScriptManager::RegisterTransformComponent() const
 {
     AddType("TransformComponent", sizeof(TransformComponent),
         {
@@ -976,7 +975,7 @@ void ScriptManager::RegisterTransformComponent()
     );
 }
 
-void ScriptManager::RegisterMeshComponent()
+void ScriptManager::RegisterMeshComponent() const
 {
     AddType("MeshComponent", sizeof(MeshComponent), {},
         {
@@ -985,7 +984,7 @@ void ScriptManager::RegisterMeshComponent()
     );
 }
 
-void ScriptManager::RegisterMeshRendererComponent()
+void ScriptManager::RegisterMeshRendererComponent() const
 {
     AddType("MeshRendererComponent", sizeof(MeshRendererComponent),
         {
@@ -994,7 +993,7 @@ void ScriptManager::RegisterMeshRendererComponent()
     );
 }
 
-void ScriptManager::RegisterCameraComponent()
+void ScriptManager::RegisterCameraComponent() const
 {
     AddType("CameraComponent", sizeof(CameraComponent),
         {
@@ -1003,7 +1002,7 @@ void ScriptManager::RegisterCameraComponent()
     );
 }
 
-void ScriptManager::RegisterLightComponent()
+void ScriptManager::RegisterLightComponent() const
 {
     AddType("LightComponent", sizeof(LightComponent),
         {
@@ -1019,7 +1018,7 @@ void ScriptManager::RegisterLightComponent()
     );
 }
 
-void ScriptManager::RegisterScriptComponent()
+void ScriptManager::RegisterScriptComponent() const
 {
     AddType("ScriptComponent", sizeof(ScriptComponent), {},
         {
@@ -1029,7 +1028,7 @@ void ScriptManager::RegisterScriptComponent()
     );
 }
 
-void ScriptManager::RegisterBodyComponent()
+void ScriptManager::RegisterBodyComponent() const
 {
     AddType("RigidBodyComponent", sizeof(RigidBodyComponent), {},
         {
@@ -1038,7 +1037,7 @@ void ScriptManager::RegisterBodyComponent()
     );
 }
 
-void ScriptManager::RegisterSoundComponent()
+void ScriptManager::RegisterSoundComponent() const
 {
     AddType("SoundComponent", sizeof(SoundComponent), {},
         {
@@ -1047,7 +1046,7 @@ void ScriptManager::RegisterSoundComponent()
     );
 }
 
-void ScriptManager::RegisterProceduralSkyComponent()
+void ScriptManager::RegisterProceduralSkyComponent() const
 {
     AddType("ProceduralSkyComponent", sizeof(ProceduralSkyComponent),
         {
@@ -1062,7 +1061,7 @@ void ScriptManager::RegisterProceduralSkyComponent()
     );
 }
 
-void ScriptManager::RegisterHDRISkyComponent()
+void ScriptManager::RegisterHDRISkyComponent() const
 {
     AddType("HDRISkyComponent", sizeof(HDRISkyComponent),
         {
@@ -1075,7 +1074,7 @@ void ScriptManager::RegisterHDRISkyComponent()
     );
 }
 
-void ScriptManager::RegisterTonemapComponent()
+void ScriptManager::RegisterTonemapComponent() const
 {
     AddType("TonemapComponent", sizeof(TonemapComponent), {},
         {
@@ -1094,7 +1093,7 @@ void ScriptManager::RegisterTonemapComponent()
     );
 }
 
-void ScriptManager::RegisterBloomComponent()
+void ScriptManager::RegisterBloomComponent() const
 {
     AddType("BloomComponent", sizeof(BloomComponent),
         {
@@ -1108,7 +1107,7 @@ void ScriptManager::RegisterBloomComponent()
     );
 }
 
-void ScriptManager::RegisterGTAOComponent()
+void ScriptManager::RegisterGTAOComponent() const
 {
     AddType("GTAOComponent", sizeof(GTAOComponent),
         {
@@ -1120,7 +1119,7 @@ void ScriptManager::RegisterGTAOComponent()
     );
 }
 
-void ScriptManager::RegisterSSRComponent()
+void ScriptManager::RegisterSSRComponent() const
 {
     AddType("SSRComponent", sizeof(SSRComponent),
         {
@@ -1135,7 +1134,7 @@ void ScriptManager::RegisterSSRComponent()
     );
 }
 
-void ScriptManager::RegisterEntity()
+void ScriptManager::RegisterEntity() const
 {
     // It will be updated as soon as the Angelscript developer writes some docs on function templates
     AddValueType("Entity", sizeof(Entity), asGetTypeTraits<Entity>() | asOBJ_POD,
@@ -1149,7 +1148,7 @@ void ScriptManager::RegisterEntity()
             { "CameraComponent@ GetCameraComponent()", WRAP_MFN(Entity, GetComponent<CameraComponent>) },
             { "RigidBodyComponent@ GetRigidBodyComponent()", WRAP_MFN(Entity, GetComponent<RigidBodyComponent>) },
             { "SoundComponent@ GetSoundComponent()", WRAP_MFN(Entity, GetComponent<SoundComponent>) },
-            
+
             { "ProceduralSkyComponent@ GetProceduralSkyComponent()", WRAP_MFN(Entity, GetComponent<ProceduralSkyComponent>) },
             { "HDRISkyComponent@ GetHDRISkyComponent()", WRAP_MFN(Entity, GetComponent<HDRISkyComponent>) },
 
@@ -1182,19 +1181,19 @@ void ScriptManager::RegisterEntity()
     );
 }
 
-void ScriptManager::RegisterScene()
+void ScriptManager::RegisterScene() const
 {
     AddType("Scene", sizeof(Scene),
         {
             { "void Start()", WRAP_MFN(Scene, Start) },
             { "void Update(float deltaTime)", WRAP_MFN(Scene, Update) },
             { "Entity CreateEntity()", WRAP_MFN(Scene, CreateEntity) },
-            { "void RemoveEntity(Entity)", WRAP_MFN(Scene, RemoveEntity) },
+            { "void RemoveEntity(const Entity& in)", WRAP_MFN(Scene, RemoveEntity) },
             { "void ReparentEntity(Entity, Entity)", WRAP_MFN(Scene, ReparentEntity) },
-            { "Entity CloneEntity(Entity)", WRAP_MFN(Scene, CloneEntity) },
+            { "Entity CloneEntity(const Entity& in)", WRAP_MFN(Scene, CloneEntity) },
             { "Entity GetEntity(uint32)", WRAP_MFN_PR(Scene, GetEntity, (entt::id_type), Entity) },
             { "Entity GetEntity(const string& in)", WRAP_MFN_PR(Scene, GetEntity, (const std::string&), Entity) },
-            { "bool IsChildOf(Entity, Entity)", WRAP_MFN(Scene, IsChildOf) },
+            { "bool IsChildOf(const Entity& in, const Entity& in)", WRAP_MFN(Scene, IsChildOf) },
             { "glm::mat4 GetWorldTransform(Entity)", WRAP_OBJ_LAST(as::GetWorldTransform) }
         }, {}
     );

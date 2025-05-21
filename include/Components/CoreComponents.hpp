@@ -5,14 +5,14 @@
 namespace lustra
 {
 
-struct NameComponent : public ComponentBase
+struct NameComponent final : public ComponentBase
 {
     NameComponent() : ComponentBase("NameComponent") {}
 
     std::string name;
 };
 
-struct TransformComponent : public ComponentBase
+struct TransformComponent final : public ComponentBase
 {
     TransformComponent() : ComponentBase("TransformComponent") {}
 
@@ -23,11 +23,11 @@ struct TransformComponent : public ComponentBase
     bool overridePhysics = false;
 
     void SetTransform(const glm::mat4& transform);
-    
+
     glm::mat4 GetTransform() const;
 };
 
-struct MeshComponent : public ComponentBase
+struct MeshComponent final : public ComponentBase
 {
     MeshComponent()
         : ComponentBase("MeshComponent"),
@@ -38,7 +38,7 @@ struct MeshComponent : public ComponentBase
     bool drawable = true;
 };
 
-struct MeshRendererComponent : public ComponentBase
+struct MeshRendererComponent final : public ComponentBase
 {
     MeshRendererComponent() : ComponentBase("MeshRendererComponent")
     {
@@ -48,11 +48,11 @@ struct MeshRendererComponent : public ComponentBase
     std::vector<MaterialAssetPtr> materials;
 };
 
-struct PipelineComponent : public ComponentBase, public EventListener
+struct PipelineComponent final : public ComponentBase, public EventListener
 {
-    PipelineComponent(
-        VertexShaderAssetPtr vertexShader = {},
-        FragmentShaderAssetPtr fragmentShader = {}
+    explicit PipelineComponent(
+        const VertexShaderAssetPtr& vertexShader = {},
+        const FragmentShaderAssetPtr& fragmentShader = {}
     ) : ComponentBase("PipelineComponent"),
         vertexShader(vertexShader),
         fragmentShader(fragmentShader)
@@ -63,7 +63,7 @@ struct PipelineComponent : public ComponentBase, public EventListener
             SetupPipeline();
     }
 
-    PipelineComponent(PipelineComponent&& other)
+    PipelineComponent(PipelineComponent&& other) noexcept
         : ComponentBase("PipelineComponent"),
           vertexShader(std::move(other.vertexShader)),
           fragmentShader(std::move(other.fragmentShader)),
@@ -80,17 +80,17 @@ struct PipelineComponent : public ComponentBase, public EventListener
     {
         EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
     }
-    
-    ~PipelineComponent()
+
+    ~PipelineComponent() override
     {
         EventManager::Get().RemoveListener(Event::Type::AssetLoaded, this);
     }
 
     void OnEvent(Event& event) override
     {
-        if(event.GetType() == Event::Type::AssetLoaded)
+        if(event.GetType() == Event::Type::AssetLoaded) // Redundant
         {
-            auto& assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
+            const auto& assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
 
             if(assetLoadedEvent.GetAsset() == vertexShader || assetLoadedEvent.GetAsset() == fragmentShader)
                 SetupPipeline();
@@ -112,22 +112,22 @@ struct PipelineComponent : public ComponentBase, public EventListener
     LLGL::PipelineState* pipeline{};
 };
 
-struct HierarchyComponent : public ComponentBase
+struct HierarchyComponent final : public ComponentBase
 {
     HierarchyComponent() : ComponentBase("HierarchyComponent") {}
     HierarchyComponent(const HierarchyComponent& other) = delete; // !
     HierarchyComponent(HierarchyComponent&& other) = default;
-    
+
     entt::entity parent = entt::null;
     std::vector<entt::entity> children;
 };
 
-struct CameraComponent : public ComponentBase
+struct CameraComponent final : public ComponentBase
 {
     CameraComponent() : ComponentBase("CameraComponent") {}
-    CameraComponent(CameraComponent&& other)
+    CameraComponent(CameraComponent&& other) noexcept
         : ComponentBase("CameraComponent"), camera(std::move(other.camera))
-    {  }
+    {}
     CameraComponent(const CameraComponent& other) = default;
 
     Camera camera;
@@ -135,7 +135,7 @@ struct CameraComponent : public ComponentBase
     bool active = false;
 };
 
-struct LightComponent : public ComponentBase
+struct LightComponent final : public ComponentBase
 {
 public:
     LightComponent();
@@ -193,7 +193,7 @@ private:
     void CreatePipeline();
 };
 
-struct ScriptComponent : public ComponentBase
+struct ScriptComponent final : public ComponentBase
 {
     ScriptComponent() : ComponentBase("ScriptComponent") {}
     ScriptComponent(const ScriptComponent& other) : ComponentBase("ScriptComponent")
@@ -205,12 +205,12 @@ struct ScriptComponent : public ComponentBase
 
         ScriptManager::Get().BuildModule(script, (script->path.stem().string() + std::to_string(moduleIndex)));
     }
-    ScriptComponent(ScriptComponent&& other) : ComponentBase("ScriptComponent")
+    ScriptComponent(ScriptComponent&& other) noexcept : ComponentBase("ScriptComponent")
     {
         script = other.script;
         moduleIndex = other.moduleIndex;
     }
-    
+
     ScriptAssetPtr script;
     uint32_t moduleIndex = 0;
 
@@ -218,14 +218,14 @@ struct ScriptComponent : public ComponentBase
     std::function<void(Entity self, float)> update;
 };
 
-struct RigidBodyComponent : public ComponentBase
+struct RigidBodyComponent final : public ComponentBase
 {
     RigidBodyComponent() : ComponentBase("RigidBodyComponent") {}
-    RigidBodyComponent(RigidBodyComponent&& other) : ComponentBase("RigidBodyComponent")
+    RigidBodyComponent(RigidBodyComponent&& other) noexcept : ComponentBase("RigidBodyComponent")
     {
         body = other.body;
         settings = other.settings;
-        
+
         other.body = nullptr;
     }
     RigidBodyComponent(const RigidBodyComponent& other) : ComponentBase("RigidBodyComponent")
@@ -237,7 +237,7 @@ struct RigidBodyComponent : public ComponentBase
 
         settings = other.settings;
     }
-    ~RigidBodyComponent()
+    ~RigidBodyComponent() override
     {
         if(body)
             PhysicsManager::Get().DestroyBody(body->GetID());
@@ -261,30 +261,30 @@ struct RigidBodyComponent : public ComponentBase
 
         glm::vec3 centerOfMass;
         glm::vec3 halfExtent;
-        
+
         float radius;
         float halfHeight;
 
         ModelAssetPtr meshShape;
-        
-    } settings;
+
+    } settings{};
 };
 
-struct SoundComponent : public ComponentBase
+struct SoundComponent final : public ComponentBase
 {
     SoundComponent() : ComponentBase("SoundComponent") {}
-    ~SoundComponent()
+    ~SoundComponent() override
     {
         if(sound)
             sound->sound.Stop();
     }
-    
+
     SoundAssetPtr sound;
 
     bool attached = true;
 };
 
-struct PrefabComponent : public ComponentBase
+struct PrefabComponent final : public ComponentBase
 {
     PrefabComponent() : ComponentBase("PrefabComponent") {}
     PrefabComponent(const PrefabComponent& other) = delete;

@@ -6,7 +6,7 @@
 namespace lustra
 {
 
-struct EnvironmentAsset : public Asset
+struct EnvironmentAsset final : public Asset
 {
     EnvironmentAsset() : Asset(Type::Environment) {}
 
@@ -15,7 +15,7 @@ struct EnvironmentAsset : public Asset
         LLGL::Texture* irradiance,
         LLGL::Texture* prefiltered,
         LLGL::Texture* brdf
-    ) : Asset(Type::Environment), 
+    ) : Asset(Type::Environment),
         cubeMap(cubeMap),
         irradiance(irradiance),
         prefiltered(prefiltered),

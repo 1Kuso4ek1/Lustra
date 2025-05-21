@@ -7,15 +7,15 @@
 namespace lustra
 {
 
-class AudioManager : public Singleton<AudioManager>
+class AudioManager final : public Singleton<AudioManager>
 {
 public:
-    ~AudioManager();
+    ~AudioManager() override;
 
 public:
     void Init();
 
-    void RemoveSound(Sound& sound);
+    static void RemoveSound(Sound& sound);
 
     Sound LoadSound(const std::filesystem::path& path);
     Sound CopySound(Sound& sound);
@@ -23,8 +23,8 @@ public:
     ma_engine* GetEngine();
 
 private:
-    ma_engine engine;
-    ma_result result;
+    ma_engine engine{};
+    ma_result result{};
 
     bool initialized = false;
 };

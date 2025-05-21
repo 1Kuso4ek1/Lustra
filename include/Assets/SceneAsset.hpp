@@ -4,9 +4,9 @@
 namespace lustra
 {
 
-struct SceneAsset : public Asset
+struct SceneAsset final : public Asset
 {
-    SceneAsset(std::shared_ptr<Scene> scene)
+    explicit SceneAsset(const std::shared_ptr<Scene>& scene)
         : Asset(Type::Scene), scene(scene) {}
 
     std::shared_ptr<Scene> scene;

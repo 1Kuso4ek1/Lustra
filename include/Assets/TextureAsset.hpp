@@ -10,7 +10,7 @@
 namespace lustra
 {
 
-struct TextureAsset : public Asset
+struct TextureAsset final : public Asset
 {
     TextureAsset(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* imageView)
         : Asset(Type::Texture), textureDesc(textureDesc)
@@ -19,18 +19,18 @@ struct TextureAsset : public Asset
             this->imageView = *imageView;
     }
 
-    TextureAsset(LLGL::Texture* texture = {})
+    explicit TextureAsset(LLGL::Texture* texture = {})
         : Asset(Type::Texture), texture(texture)
     {
         textureDesc.type = LLGL::TextureType::Texture2D;
         textureDesc.format = LLGL::Format::RGBA8UNorm;
         textureDesc.miscFlags = LLGL::MiscFlags::GenerateMips;
-        
+
         imageView.format = LLGL::ImageFormat::RGBA;
         imageView.dataType = LLGL::DataType::UInt8;
     };
 
-    GLuint nativeHandle;
+    GLuint nativeHandle{};
 
     LLGL::Texture* texture{};
     LLGL::Sampler* sampler{};

@@ -1,10 +1,11 @@
+#pragma once
 #include <Application.hpp>
 
-class ProjectManager : public lustra::Application
+class ProjectManager final : public lustra::Application
 {
 public:
     ProjectManager();
-    ~ProjectManager();
+    ~ProjectManager() override;
 
     void Stop() override;
 

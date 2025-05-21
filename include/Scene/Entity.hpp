@@ -19,7 +19,7 @@ public:
     }
 
     template<class T>
-    void RemoveComponent()
+    void RemoveComponent() const
     {
         scene->registry.remove<T>(entity);
     }
@@ -35,8 +35,7 @@ public:
     {
         if(scene->registry.all_of<T>(entity))
             return scene->registry.get<T>(entity);
-        else
-            return scene->registry.emplace<T>(entity, std::forward<Args>(args)...);
+        return scene->registry.emplace<T>(entity, std::forward<Args>(args)...);
     }
 
     template<class T>
@@ -45,7 +44,7 @@ public:
         return scene->registry.all_of<T>(entity);
     }
 
-    Entity& operator=(Entity entity)
+    Entity& operator=(const Entity entity)
     {
         this->entity = entity.entity;
         this->scene = entity.scene;

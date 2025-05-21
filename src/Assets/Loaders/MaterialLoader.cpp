@@ -12,13 +12,13 @@ namespace lustra
 
 AssetPtr MaterialLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
+    const AssetPtr existing,
     bool async
 )
 {
     if(!defaultMaterial)
         LoadDefaultData();
-    
+
     if(path.filename() == "default")
         return defaultMaterial;
 
@@ -38,7 +38,7 @@ AssetPtr MaterialLoader::Load(
     auto material = existing
         ? std::static_pointer_cast<MaterialAsset>(existing)
         : std::make_shared<MaterialAsset>();
-    
+
     cereal::JSONInputArchive archive(file);
 
     archive(*material);
@@ -52,7 +52,7 @@ AssetPtr MaterialLoader::Load(
 
 void MaterialLoader::Write(const AssetPtr& asset, const std::filesystem::path& path)
 {
-    auto material = std::static_pointer_cast<MaterialAsset>(asset);
+    const auto material = std::static_pointer_cast<MaterialAsset>(asset);
 
     std::ofstream file(path);
 

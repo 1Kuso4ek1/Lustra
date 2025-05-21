@@ -5,7 +5,7 @@ namespace lustra
 
 AssetPtr SoundLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
+    const AssetPtr existing,
     bool async
 )
 {

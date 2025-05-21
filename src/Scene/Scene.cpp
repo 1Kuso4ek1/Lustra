@@ -214,7 +214,7 @@ Entity Scene::CloneEntity(const Entity& entity)
 {
     auto clone = CreateEntity();
 
-    for(auto [id, storage] : registry.storage())
+    for(const auto& [id, storage] : registry.storage())
     {
         if(storage.contains(entity))
             storage.push(clone, storage.value(entity));
@@ -657,7 +657,7 @@ void Scene::RenderSky(LLGL::RenderTarget* renderTarget)
 
     if(hdriSkyView.begin() != hdriSkyView.end())
     {
-        auto [mesh, sky] = 
+        auto [mesh, sky] =
             hdriSkyView.get<MeshComponent, HDRISkyComponent>(*hdriSkyView.begin());
 
         HDRISkyRenderPass(mesh, sky, renderTarget);

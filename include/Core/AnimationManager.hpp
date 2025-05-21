@@ -6,7 +6,7 @@ namespace lustra
 
 class Entity;
 
-class AnimationManager : public Singleton<AnimationManager>
+class AnimationManager final : public Singleton<AnimationManager>
 {
 public:
     void Update(Entity& entity, float deltaTime);

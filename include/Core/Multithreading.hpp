@@ -1,15 +1,15 @@
 #pragma once
 #include <Singleton.hpp>
 
-#include <vector>
 #include <future>
+#include <vector>
 
 using namespace std::chrono_literals;
 
 namespace lustra
 {
 
-class Multithreading : public Singleton<Multithreading>
+class Multithreading final : public Singleton<Multithreading>
 {
 public:
     using Job = std::pair<std::function<void()>, std::function<void()>>;

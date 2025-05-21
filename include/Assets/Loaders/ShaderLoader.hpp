@@ -5,7 +5,7 @@
 namespace lustra
 {
 
-class VertexShaderLoader : public AssetLoader, public Singleton<VertexShaderLoader>
+class VertexShaderLoader final : public AssetLoader, public Singleton<VertexShaderLoader>
 {
 public:
     AssetPtr Load(
@@ -15,7 +15,7 @@ public:
     ) override;
 };
 
-class FragmentShaderLoader : public AssetLoader, public Singleton<FragmentShaderLoader>
+class FragmentShaderLoader final : public AssetLoader, public Singleton<FragmentShaderLoader>
 {
 public:
     AssetPtr Load(

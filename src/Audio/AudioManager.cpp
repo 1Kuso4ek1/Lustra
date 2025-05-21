@@ -39,7 +39,7 @@ Sound AudioManager::LoadSound(const std::filesystem::path& path)
             "Audio engine not initialized\n"
         );
 
-        return Sound();
+        return {};
     }
 
     Sound sound;
@@ -64,7 +64,7 @@ Sound AudioManager::CopySound(Sound& sound)
             "Audio engine not initialized\n"
         );
 
-        return Sound();
+        return {};
     }
 
     Sound newSound;

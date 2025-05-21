@@ -5,10 +5,10 @@
 namespace lustra
 {
 
-struct SoundAsset : public Asset
+struct SoundAsset final : public Asset
 {
     SoundAsset() : Asset(Asset::Type::Sound) {}
-    SoundAsset(const Sound& sound)
+    explicit SoundAsset(const Sound& sound)
         : Asset(Asset::Type::Sound), sound(sound)
     {}
 

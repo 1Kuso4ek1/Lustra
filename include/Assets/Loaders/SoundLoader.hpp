@@ -5,7 +5,7 @@
 namespace lustra
 {
 
-class SoundLoader : public AssetLoader, public Singleton<SoundLoader>
+class SoundLoader final : public AssetLoader, public Singleton<SoundLoader>
 {
 public:
     AssetPtr Load(

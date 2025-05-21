@@ -47,7 +47,7 @@ ProceduralSkyComponent::ProceduralSkyComponent(const LLGL::Extent2D& resolution)
 ProceduralSkyComponent::ProceduralSkyComponent(ProceduralSkyComponent&& other)
     : ComponentBase("ProceduralSkyComponent"),
       time(other.time), cirrus(other.cirrus), cumulus(other.cumulus), flip(other.flip),
-      resolution(other.resolution), asset(std::move(other.asset)), pipeline(other.pipeline)
+      asset(std::move(other.asset)), resolution(other.resolution), pipeline(other.pipeline)
 {
     MakeSetUniforms();
 }
@@ -90,9 +90,9 @@ void ProceduralSkyComponent::MakeSetUniforms()
     };
 }
 
-void ProceduralSkyComponent::DefaultTextures()
+void ProceduralSkyComponent::DefaultTextures() const
 {
-    auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
+    const auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
 
     asset->cubeMap = defaultTexture;
     asset->irradiance = defaultTexture;
@@ -100,7 +100,7 @@ void ProceduralSkyComponent::DefaultTextures()
     asset->brdf = defaultTexture;
 }
 
-HDRISkyComponent::HDRISkyComponent(TextureAssetPtr hdri, const LLGL::Extent2D& resolution)
+HDRISkyComponent::HDRISkyComponent(const TextureAssetPtr& hdri, const LLGL::Extent2D& resolution)
     : ComponentBase("HDRISkyComponent"), environmentMap(hdri), resolution(resolution)
 {
     EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
@@ -112,15 +112,15 @@ HDRISkyComponent::HDRISkyComponent(TextureAssetPtr hdri, const LLGL::Extent2D& r
     else
     {
         asset = std::make_shared<EnvironmentAsset>();
-        
+
         DefaultTextures();
     }
 }
 
 HDRISkyComponent::HDRISkyComponent(HDRISkyComponent&& other)
     : ComponentBase("HDRISkyComponent"),
-      environmentMap(std::move(other.environmentMap)), resolution(other.resolution),
-      asset(std::move(other.asset)), pipelineSky(other.pipelineSky)
+      environmentMap(std::move(other.environmentMap)), asset(std::move(other.asset)),
+      resolution(other.resolution), pipelineSky(other.pipelineSky)
 {
     EventManager::Get().AddListener(Event::Type::AssetLoaded, this);
 }
@@ -134,7 +134,7 @@ void HDRISkyComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::AssetLoaded)
     {
-        auto assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
+        const auto assetLoadedEvent = static_cast<AssetLoadedEvent&>(event);
 
         if(assetLoadedEvent.GetAsset() == environmentMap)
             Build();
@@ -188,9 +188,9 @@ void HDRISkyComponent::SetupSkyPipeline()
     );
 }
 
-void HDRISkyComponent::DefaultTextures()
+void HDRISkyComponent::DefaultTextures() const
 {
-    auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
+    const auto defaultTexture = AssetManager::Get().Load<TextureAsset>("default", true)->texture;
 
     asset->cubeMap = defaultTexture;
     asset->irradiance = defaultTexture;

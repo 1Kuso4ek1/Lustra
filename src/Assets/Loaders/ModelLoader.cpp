@@ -7,8 +7,8 @@ namespace lustra
 
 AssetPtr ModelLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
-    bool async
+    const AssetPtr existing,
+    const bool async
 )
 {
     if(!plane)
@@ -39,7 +39,7 @@ AssetPtr ModelLoader::Load(
         modelAsset->meshes = modelAsset->temporaryMeshes;
         modelAsset->temporaryMeshes.clear();
 
-        for(auto& mesh : modelAsset->meshes)
+        for(const auto& mesh : modelAsset->meshes)
             mesh->SetupBuffers();
 
         modelAsset->loaded = true;
@@ -54,7 +54,7 @@ AssetPtr ModelLoader::Load(
         load();
         create();
     }
-   
+
     return modelAsset;
 }
 
@@ -64,14 +64,14 @@ void ModelLoader::LoadDefaultData()
     (cube = std::make_shared<Mesh>())->CreateCube();
 }
 
-void ModelLoader::ImportModel(const std::filesystem::path& path, ModelAssetPtr modelAsset)
+void ModelLoader::ImportModel(const std::filesystem::path& path, const ModelAssetPtr& modelAsset)
 {
-    auto flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights;
+    constexpr auto flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights;
 
     Assimp::Importer importer;
     importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
 
-    auto scene = importer.ReadFile(path.string(), flags);
+    const auto scene = importer.ReadFile(path.string(), flags);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -95,7 +95,7 @@ void ModelLoader::ImportModel(const std::filesystem::path& path, ModelAssetPtr m
     );
 }
 
-void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::shared_ptr<ModelAsset> modelAsset)
+void ModelLoader::ProcessNode(const aiNode* node, const aiScene* scene, const ModelAssetPtr& modelAsset)
 {
     for(uint32_t i = 0; i < node->mNumMeshes; i++)
         modelAsset->temporaryMeshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene));
@@ -107,12 +107,12 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::shared_pt
         ProcessNode(node->mChildren[i], scene, modelAsset);
 }
 
-void ModelLoader::ProcessMaterial(aiMaterial* material, std::shared_ptr<ModelAsset> modelAsset)
+void ModelLoader::ProcessMaterial(aiMaterial* material, const ModelAssetPtr& modelAsset)
 {
     // TODO ...
 }
 
-MeshPtr ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+MeshPtr ModelLoader::ProcessMesh(const aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -120,7 +120,7 @@ MeshPtr ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
-        
+
         vertex.position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
         vertex.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 
@@ -134,12 +134,12 @@ MeshPtr ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
-        aiFace face = mesh->mFaces[i];
+        const auto face = mesh->mFaces[i];
 
         for(unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-    
+
     return std::make_shared<Mesh>(vertices, indices, false);
 }
 

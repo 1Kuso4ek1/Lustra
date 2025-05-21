@@ -15,9 +15,9 @@ void ImGuiManager::Init(
     initialized = true;
 
     IMGUI_CHECKVERSION();
-    
+
     ImGui::CreateContext();
-    
+
     SetupStyle();
 
     this->iniPath = iniPath.string();
@@ -74,7 +74,7 @@ void ImGuiManager::SetIniPath(const std::filesystem::path& path)
 void ImGuiManager::SetupStyle()
 {
     ImGuiStyle& style = ImGui::GetStyle();
-    
+
     style.WindowPadding = ImVec2(15, 15);
     style.WindowRounding = 5.0f;
     style.FramePadding = ImVec2(5, 5);
@@ -86,13 +86,13 @@ void ImGuiManager::SetupStyle()
     style.ScrollbarRounding = 9.0f;
     style.GrabMinSize = 5.0f;
     style.GrabRounding = 3.0f;
-    
+
     style.Colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
 
     style.Colors[ImGuiCol_Header] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
     style.Colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
     style.Colors[ImGuiCol_HeaderActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-    
+
     style.Colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
     style.Colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
     style.Colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };

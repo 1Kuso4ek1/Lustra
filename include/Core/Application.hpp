@@ -36,7 +36,7 @@ public:
     virtual void RenderImGui() {};
 
 protected:
-    void SetupAssetManager();
+    void SetupAssetManager() const;
 
 protected:
     Config config;

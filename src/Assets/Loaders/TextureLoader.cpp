@@ -9,8 +9,8 @@ namespace lustra
 
 AssetPtr TextureLoader::Load(
     const std::filesystem::path& path,
-    AssetPtr existing,
-    bool async
+    const AssetPtr existing,
+    const bool async
 )
 {
     if(!defaultTexture)
@@ -36,14 +36,13 @@ AssetPtr TextureLoader::Load(
     auto loadUint = [textureAsset, path]()
     {
         int width, height, channels;
-        unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
 
-        if(data)
+        if(const auto data = stbi_load(path.string().c_str(), &width, &height, &channels, 4))
         {
             textureAsset->imageView.data = data;
             textureAsset->imageView.dataSize = width * height * 4 * sizeof(unsigned char);
-            
-            textureAsset->textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
+
+            textureAsset->textureDesc.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
         }
         else
             LLGL::Log::Errorf(
@@ -55,16 +54,15 @@ AssetPtr TextureLoader::Load(
     auto loadFloat = [textureAsset, path]()
     {
         int width, height, channels;
-        float* data = stbi_loadf(path.string().c_str(), &width, &height, &channels, 3);
 
-        if(data)
+        if(const auto data = stbi_loadf(path.string().c_str(), &width, &height, &channels, 3))
         {
             textureAsset->imageView.data = data;
             textureAsset->imageView.dataSize = width * height * 3;
             textureAsset->imageView.dataType = LLGL::DataType::Float32;
             textureAsset->imageView.format = LLGL::ImageFormat::RGB;
-            
-            textureAsset->textureDesc.extent = { (uint32_t)width, (uint32_t)height, 1 };
+
+            textureAsset->textureDesc.extent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1 };
             textureAsset->textureDesc.format = LLGL::Format::RGB16Float;
         }
         else
@@ -83,7 +81,7 @@ AssetPtr TextureLoader::Load(
             LLGL::OpenGL::ResourceNativeHandle nativeHandle;
             textureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
             textureAsset->nativeHandle = nativeHandle.id;
-          
+
             LLGL::Log::Printf(
                 LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Green,
                 "Texture \"%s\" loaded.\n",
@@ -95,7 +93,7 @@ AssetPtr TextureLoader::Load(
             EventManager::Get().Dispatch(std::make_unique<AssetLoadedEvent>(textureAsset));
         }
 
-        stbi_image_free((void*)textureAsset->imageView.data);
+        stbi_image_free(const_cast<void*>(textureAsset->imageView.data));
     };
 
     if(async)
@@ -121,7 +119,7 @@ void TextureLoader::Unload(const AssetPtr& asset)
         asset->path.string().c_str()
     );
 
-    auto textureAsset = std::static_pointer_cast<TextureAsset>(asset);
+    const auto textureAsset = std::static_pointer_cast<TextureAsset>(asset);
 
     if(textureAsset->texture)
         Renderer::Get().Release(textureAsset->texture);
@@ -149,9 +147,9 @@ void TextureLoader::LoadDefaultData()
 
     LLGL::TextureDescriptor textureDesc;
     textureDesc.extent = { 1, 1, 1 };
-    
-    unsigned char defaultData[] = { 255, 20, 147, 255 };
-    unsigned char emptyData[] = { 0, 0, 0, 255 };
+
+    constexpr unsigned char defaultData[] = { 255, 20, 147, 255 };
+    constexpr unsigned char emptyData[] = { 0, 0, 0, 255 };
 
     LLGL::ImageView imageView;
     imageView.dataSize = 4;

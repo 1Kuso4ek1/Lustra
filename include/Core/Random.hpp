@@ -6,10 +6,10 @@
 namespace lustra
 {
 
-class Random : public Singleton<Random>
+class Random final : public Singleton<Random>
 {
 public:
-    void SetSeed(uint32_t seed)
+    void SetSeed(const uint32_t seed)
     {
         generator.seed(seed);
     }
@@ -19,14 +19,14 @@ public:
         return std::uniform_real_distribution<float>(0, 1)(generator);
     }
 
-    float Range(float min, float max)
+    float Range(const float min, const float max)
     {
-        return std::uniform_real_distribution<float>(min, max)(generator);
+        return std::uniform_real_distribution(min, max)(generator);
     }
 
-    int Range(int min, int max)
+    int Range(const int min, const int max)
     {
-        return std::uniform_int_distribution<int>(min, max)(generator);
+        return std::uniform_int_distribution(min, max)(generator);
     }
 private:
     friend class Singleton<Random>;

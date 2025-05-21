@@ -4,7 +4,7 @@
 namespace lustra
 {
 
-struct AnimationAsset : public Asset
+struct AnimationAsset final : public Asset
 {
     
 };

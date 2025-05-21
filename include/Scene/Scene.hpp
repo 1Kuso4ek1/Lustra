@@ -49,7 +49,7 @@ public:
 
 private:
     void StartScript(const ScriptComponent& script, const Entity& entity);
-    void UpdateScript(const ScriptComponent& script, Entity entity, float deltaTime);
+    static void UpdateScript(const ScriptComponent& script, Entity entity, float deltaTime);
 
     void SetupLightsBuffer();
     void SetupShadowsBuffer();
@@ -67,22 +67,22 @@ private:
     void RenderToShadowMap();
     void RenderSky(LLGL::RenderTarget* renderTarget);
 
-    void MeshRenderPass(
+    static void MeshRenderPass(
         const MeshComponent& mesh,
         const MeshRendererComponent& meshRenderer,
         const PipelineComponent& pipeline,
         LLGL::RenderTarget* renderTarget
     );
-    void ShadowRenderPass(
+    static void ShadowRenderPass(
         const LightComponent& light,
         const MeshComponent& mesh
     );
-    void ProceduralSkyRenderPass(
+    static void ProceduralSkyRenderPass(
         const MeshComponent& mesh,
         const ProceduralSkyComponent& sky,
         LLGL::RenderTarget* renderTarget
     );
-    void HDRISkyRenderPass(
+    static void HDRISkyRenderPass(
         const MeshComponent& mesh,
         const HDRISkyComponent& sky,
         LLGL::RenderTarget* renderTarget

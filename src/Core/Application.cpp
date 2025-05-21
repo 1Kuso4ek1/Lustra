@@ -37,7 +37,7 @@ Application::~Application()
     if(Renderer::Get().IsInit())
     {
         ImGuiManager::Get().Destroy();
-        
+
         Renderer::Get().Unload();
     }
 
@@ -56,7 +56,7 @@ void Application::Run()
     while(window->PollEvents())
     {
         LLGL::Surface::ProcessEvents();
-        
+
         Multithreading::Get().Update();
 
         Update(deltaTimeTimer.GetElapsedSeconds());
@@ -75,7 +75,7 @@ void Application::Stop()
     window->Close();
 }
 
-void Application::SetupAssetManager()
+void Application::SetupAssetManager() const
 {
     AssetManager::Get().SetAssetsDirectory(config.assetsRoot);
 

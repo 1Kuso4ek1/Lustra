@@ -3,7 +3,6 @@
 #include <Multithreading.hpp>
 
 #include <LLGL/Log.h>
-#include <LLGL/Texture.h>
 
 #include <filesystem>
 #include <typeindex>
@@ -11,12 +10,12 @@
 namespace lustra
 {
 
-class AssetManager : public Singleton<AssetManager>
+class AssetManager final : public Singleton<AssetManager>
 {
 public:
     using AssetStorage = std::unordered_map<std::filesystem::path, std::pair<std::type_index, AssetPtr>>;
 
-    ~AssetManager()
+    ~AssetManager() override
     {
         StopWatch();
     }
@@ -24,9 +23,9 @@ public:
     template<class T>
     std::shared_ptr<T> Load(
         const std::filesystem::path& path,
-        bool relativeToAssetsDir = false,
-        bool useCache = true,
-        bool async = true
+        const bool relativeToAssetsDir = false,
+        const bool useCache = true,
+        const bool async = true
     )
     {
         auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
@@ -65,13 +64,13 @@ public:
     }
 
     template<class T>
-    auto GetAssetPath(const std::filesystem::path& path, bool relativeToAssetsDir) const
+    auto GetAssetPath(const std::filesystem::path& path, const bool relativeToAssetsDir) const
     {
         auto assetPath = path;
 
         if(relativeToAssetsDir)
         {
-            auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
+            const auto relativeAssetPath = assetsRelativePaths.find(std::type_index(typeid(T)));
 
             if(relativeAssetPath != assetsRelativePaths.end())
                 assetPath = assetsDirectory / relativeAssetPath->second / path;
@@ -94,16 +93,14 @@ public:
 
     void Unload(const std::filesystem::path& path)
     {
-        auto it = assets.find(path);
+        const auto it = assets.find(path);
 
         if(it == assets.end())
             return;
 
-        auto loader = loaders[it->second.first];
-
-        if(loader)
+        if(const auto loader = loaders[it->second.first])
             loader->Unload(it->second.second);
-        
+
         assets.erase(it);
 
         if(fsWatch)
@@ -111,7 +108,7 @@ public:
     }
 
     template<class T>
-    void Write(std::shared_ptr<T> asset, const std::filesystem::path& path, bool relativeToAssetsDir = false)
+    void Write(std::shared_ptr<T> asset, const std::filesystem::path& path, const bool relativeToAssetsDir = false)
     {
         auto assetPath = GetAssetPath<T>(path, relativeToAssetsDir);
 
@@ -142,9 +139,9 @@ public:
     }
 
     template<class AssetType, class LoaderType>
-    void AddLoader(std::filesystem::path relativePath = "")
+    void AddLoader(const std::filesystem::path relativePath = "")
     {
-        if(loaders.find(typeid(AssetType)) != loaders.end())
+        if(loaders.contains(typeid(AssetType)))
             return;
 
         loaders[typeid(AssetType)] = &LoaderType::Get();
@@ -155,7 +152,7 @@ public:
     void RemoveLoader()
     {
         loaders[typeid(T)]->Reset();
-        
+
         loaders.erase(typeid(T));
         assetsRelativePaths.erase(typeid(T));
     }
@@ -171,27 +168,27 @@ public:
         {
             while(fsWatch)
             {
-                for(auto& i : timestamps)
+                for(auto& [path, time] : timestamps)
                 {
-                    if(std::filesystem::last_write_time(i.first) > i.second)
+                    if(std::filesystem::last_write_time(path) > time)
                     {
                         LLGL::Log::Printf(
                             LLGL::Log::ColorFlags::Blue,
                             "File %s modified\n",
-                            i.first.string().c_str()
+                            path.string().c_str()
                         );
 
-                        auto& asset = assets.at(i.first);
-                        auto loader = loaders[std::type_index(asset.first)];
+                        auto& [type, asset] = assets.at(path);
+                        auto loader = loaders[std::type_index(type)];
 
                         std::this_thread::sleep_for(1s);
 
-                        Multithreading::Get().AddJob({ nullptr, [&]()
+                        Multithreading::Get().AddJob({ nullptr, [&]
                         {
-                            loader->Load(i.first, asset.second);
+                            loader->Load(path, asset);
                         } });
 
-                        timestamps[i.first] = std::filesystem::last_write_time(i.first);
+                        timestamps[path] = std::filesystem::last_write_time(path);
                     }
                 }
 
@@ -212,7 +209,7 @@ private:
     template<class T>
     AssetLoader* GetAssetLoader()
     {
-        auto loader = loaders[std::type_index(typeid(T))];
+        const auto loader = loaders[std::type_index(typeid(T))];
 
         if(!loader)
         {
@@ -237,7 +234,7 @@ private:
     AssetStorage assets;
 
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type> timestamps;
-    
+
     std::unordered_map<std::type_index, std::filesystem::path> assetsRelativePaths;
     std::unordered_map<std::type_index, AssetLoader*> loaders;
 };

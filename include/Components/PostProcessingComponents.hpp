@@ -4,16 +4,16 @@
 namespace lustra
 {
 
-struct TonemapComponent : public ComponentBase, public EventListener
+struct TonemapComponent final : public ComponentBase, public EventListener
 {
-    TonemapComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
+    explicit TonemapComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
     // All these move constructors are required since:
     // 1. they're being used by entt::snapshot
     // 1.1. destructor removes listener
     // 1.2. setUniforms captures everything by reference and cannot be copied/moved
-    // 1.3. i can't even think of a better way to do it...
-    TonemapComponent(TonemapComponent&& other);
-    ~TonemapComponent();
+    // 1.3. I can't even think of a better way to do it...
+    TonemapComponent(TonemapComponent&& other) noexcept;
+    ~TonemapComponent() override;
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;
@@ -39,7 +39,7 @@ struct TonemapComponent : public ComponentBase, public EventListener
             algorithm, exposure, colorGrading, colorGradingIntensity, vignetteIntensity,
             vignetteRoundness, filmGrain, contrast, saturation, brightness, lutPath, resolution
         );
-        
+
         lut = AssetManager::Get().Load<TextureAsset>(lutPath);
 
         SetupPostProcessing();
@@ -67,13 +67,13 @@ struct TonemapComponent : public ComponentBase, public EventListener
     std::function<void(LLGL::CommandBuffer*)> setUniforms;
 };
 
-struct BloomComponent : public ComponentBase, public EventListener
+struct BloomComponent final : public ComponentBase, public EventListener
 {
-    BloomComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
-    BloomComponent(BloomComponent&& other);
-    ~BloomComponent();
+    explicit BloomComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
+    BloomComponent(BloomComponent&& other) noexcept;
+    ~BloomComponent() override;
 
-    void SetupPostProcessing();
+    void SetupPostProcessing() const;
     void OnEvent(Event& event) override;
 
     template<class Archive>
@@ -89,7 +89,7 @@ struct BloomComponent : public ComponentBase, public EventListener
     void load(Archive& archive)
     {
         archive(threshold, strength, resolutionScale, resolution);
-        
+
         SetupPostProcessing();
     }
 
@@ -106,13 +106,13 @@ struct BloomComponent : public ComponentBase, public EventListener
     std::function<void(LLGL::CommandBuffer*)> setThresholdUniforms;
 };
 
-struct GTAOComponent : public ComponentBase, public EventListener
+struct GTAOComponent final : public ComponentBase, public EventListener
 {
-    GTAOComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
-    GTAOComponent(GTAOComponent&& other);
-    ~GTAOComponent();
+    explicit GTAOComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
+    GTAOComponent(GTAOComponent&& other) noexcept;
+    ~GTAOComponent() override;
 
-    void SetupPostProcessing();
+    void SetupPostProcessing() const;
     void OnEvent(Event& event) override;
 
     template<class Archive>
@@ -136,7 +136,7 @@ struct GTAOComponent : public ComponentBase, public EventListener
     float resolutionScale = 2.0f;
 
     int samples = 4.0f;
-    
+
     float limit = 100.0f;
     float radius = 2.0f;
     float falloff = 1.5f;
@@ -148,11 +148,11 @@ struct GTAOComponent : public ComponentBase, public EventListener
     PostProcessingPtr gtao, boxBlur;
 };
 
-struct SSRComponent : public ComponentBase, public EventListener
+struct SSRComponent final : public ComponentBase, public EventListener
 {
-    SSRComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
-    SSRComponent(SSRComponent&& other);
-    ~SSRComponent();
+    explicit SSRComponent(const LLGL::Extent2D& resolution = Renderer::Get().GetViewportResolution());
+    SSRComponent(SSRComponent&& other) noexcept;
+    ~SSRComponent() override;
 
     void SetupPostProcessing();
     void OnEvent(Event& event) override;

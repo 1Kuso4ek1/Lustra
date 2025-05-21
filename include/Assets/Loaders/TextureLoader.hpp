@@ -7,7 +7,7 @@
 namespace lustra
 {
 
-class TextureLoader : public AssetLoader, public Singleton<TextureLoader>
+class TextureLoader final : public AssetLoader, public Singleton<TextureLoader>
 {
 public:
     AssetPtr Load(
@@ -17,7 +17,7 @@ public:
     ) override;
 
     void Unload(const AssetPtr& asset) override;
-    
+
     void Reset() override;
 
 private:

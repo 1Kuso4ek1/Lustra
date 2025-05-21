@@ -10,125 +10,125 @@
 namespace lustra
 {
 
-class ScriptManager : public Singleton<ScriptManager>
+class ScriptManager final : public Singleton<ScriptManager>
 {
 public:
-    ~ScriptManager();
+    ~ScriptManager() override;
 
     void Build();
 
     void ExecuteFunction(
-        ScriptAssetPtr script,
+        const ScriptAssetPtr& script,
         std::string_view declaration,
-        std::function<void(asIScriptContext*)> setArgs = nullptr,
+        const std::function<void(asIScriptContext*)>& setArgs = nullptr,
         uint32_t moduleIndex = 0
-    );
+    ) const;
 
-    void AddScript(ScriptAssetPtr script);
-    void RemoveScript(ScriptAssetPtr script);
+    void AddScript(const ScriptAssetPtr& script);
+    void RemoveScript(const ScriptAssetPtr& script);
 
-    std::unordered_map<std::string, void*> GetGlobalVariables(ScriptAssetPtr script, uint32_t moduleIndex = 0);
+    std::unordered_map<std::string, void*> GetGlobalVariables(const ScriptAssetPtr& script, uint32_t moduleIndex = 0) const;
 
 public:
     void AddModule(std::string_view name);
 
-    void AddFunction(std::string_view declaration, const asSFuncPtr& ptr, asECallConvTypes callType = asCALL_GENERIC);
-    void AddProperty(std::string_view declaration, void* ptr);
-    
+    void AddFunction(std::string_view declaration, const asSFuncPtr& ptr, asECallConvTypes callType = asCALL_GENERIC) const;
+    void AddProperty(std::string_view declaration, void* ptr) const;
+
     void AddValueType(
         std::string_view name,
         int size,
-        int traits,
-        std::unordered_map<std::string_view, asSFuncPtr> methods,
-        std::unordered_map<std::string_view, int> properties
-    );
-    
+        uint32_t traits,
+        const std::unordered_map<std::string_view, asSFuncPtr>& methods,
+        const std::unordered_map<std::string_view, int>& properties
+    ) const;
+
     void AddType(
         std::string_view name,
         int size,
-        std::unordered_map<std::string_view, asSFuncPtr> methods,
-        std::unordered_map<std::string_view, int> properties
-    );
+        const std::unordered_map<std::string_view, asSFuncPtr>& methods,
+        const std::unordered_map<std::string_view, int>& properties
+    ) const;
 
-    void AddTypeConstructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr);
-    void AddTypeDestructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr);
-    void AddTypeFactory(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr);
-    void AddEnum(std::string_view name, std::vector<std::string_view> values);
-    void AddEnumValues(std::string_view name, std::unordered_map<std::string_view, int> values);
-    
-    void SetDefaultNamespace(std::string_view name);
+    void AddTypeConstructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr) const;
+    void AddTypeDestructor(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr) const;
+    void AddTypeFactory(std::string_view name, std::string_view declaration, const asSFuncPtr& ptr) const;
+    void AddEnum(std::string_view name, const std::vector<std::string_view>& values) const;
+    void AddEnumValues(std::string_view name, const std::unordered_map<std::string_view, int>& values) const;
 
-    bool BuildModule(ScriptAssetPtr script, std::string_view name);
+    void SetDefaultNamespace(std::string_view name) const;
+
+    bool BuildModule(const ScriptAssetPtr& script, std::string_view name);
 
 private:
     ScriptManager();
-    
+
     friend class Singleton<ScriptManager>;
 
 private:
-    void DiscardModules();
+    void DiscardModules() const;
 
 private:
-    void RegisterLog();
+    void RegisterLog() const;
 
-    void RegisterRandom();
-    
-    void RegisterVec2();
-    void RegisterVec3();
-    void RegisterVec4();
-    void RegisterQuat();
-    void RegisterMat4();
-    void RegisterGLM();
+    void RegisterRandom() const;
 
-    void RegisterBody();
-    void RegisterRayCast();
+    void RegisterVec2() const;
+    void RegisterVec3() const;
+    void RegisterVec4() const;
+    void RegisterQuat() const;
+    void RegisterMat4() const;
+    void RegisterGLM() const;
 
-    void RegisterExtent2D();
+    void RegisterBody() const;
+    void RegisterRayCast() const;
 
-    void RegisterCamera();
-    void RegisterSound();
+    void RegisterExtent2D() const;
 
-    void RegisterKeyboard();
-    void RegisterMouse();
-    void RegisterInputManager();
+    void RegisterCamera() const;
+    void RegisterSound() const;
 
-    void RegisterScriptManager();
+    void RegisterKeyboard() const;
+    void RegisterMouse() const;
+    void RegisterInputManager() const;
 
-    void RegisterTextureAsset();
-    void RegisterMaterialAsset();
-    void RegisterModelAsset();
-    void RegisterSceneAsset();
-    void RegisterScriptAsset();
-    void RegisterSoundAsset();
-    void RegisterAssetManager();
+    void RegisterScriptManager() const;
 
-    void RegisterWindowResizeEvent();
+    void RegisterTextureAsset() const;
+    void RegisterMaterialAsset() const;
+    void RegisterModelAsset() const;
+    void RegisterSceneAsset() const;
+    void RegisterScriptAsset() const;
+    void RegisterSoundAsset() const;
+    void RegisterAssetManager() const;
+
+    void RegisterWindowResizeEvent() const;
     void RegisterAssetLoadedEvent();
-    void RegisterCollisionEvent();
+    void RegisterCollisionEvent() const;
 
-    void RegisterTimer();
+    void RegisterTimer() const;
 
-    void RegisterNameComponent();
-    void RegisterTransformComponent();
-    void RegisterMeshComponent();
-    void RegisterMeshRendererComponent();
-    void RegisterCameraComponent();
-    void RegisterLightComponent();
-    void RegisterScriptComponent();
-    void RegisterBodyComponent();
-    void RegisterSoundComponent();
+    void RegisterNameComponent() const;
+    void RegisterTransformComponent() const;
+    void RegisterMeshComponent() const;
+    void RegisterMeshRendererComponent() const;
+    void RegisterCameraComponent() const;
+    void RegisterLightComponent() const;
+    void RegisterScriptComponent() const;
+    void RegisterBodyComponent() const;
+    void RegisterSoundComponent() const;
 
-    void RegisterProceduralSkyComponent();
-    void RegisterHDRISkyComponent();
+    void RegisterProceduralSkyComponent() const;
+    void RegisterHDRISkyComponent() const;
 
-    void RegisterTonemapComponent();
-    void RegisterBloomComponent();
-    void RegisterGTAOComponent();
-    void RegisterSSRComponent();
+    void RegisterTonemapComponent() const;
+    void RegisterBloomComponent() const;
+    void RegisterGTAOComponent() const;
+    void RegisterSSRComponent() const;
 
-    void RegisterEntity();
+    void RegisterEntity() const;
 
-    void RegisterScene();
+    void RegisterScene() const;
 
 private:
     std::vector<ScriptAssetPtr> scripts;

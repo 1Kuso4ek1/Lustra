@@ -12,9 +12,9 @@ void TransformComponent::SetTransform(const glm::mat4& transform)
     glm::vec3 position;
     glm::vec3 skew;
     glm::vec4 perspective;
-    
+
     glm::decompose(transform, scale, rotation, position, skew, perspective);
-    
+
     this->position = position;
     this->rotation = glm::degrees(glm::eulerAngles(rotation));
     this->scale = scale;
@@ -62,7 +62,7 @@ void LightComponent::SetupShadowMap(const LLGL::Extent2D& resolution)
 
 void LightComponent::CreateDepth(const LLGL::Extent2D& resolution)
 {
-    LLGL::TextureDescriptor depthDesc =
+    const LLGL::TextureDescriptor depthDesc =
     {
         .type = LLGL::TextureType::Texture2D,
         .bindFlags = LLGL::BindFlags::DepthStencilAttachment | LLGL::BindFlags::Sampled,

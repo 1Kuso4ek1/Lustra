@@ -15,7 +15,7 @@
 namespace lustra
 {
 
-class ModelLoader : public AssetLoader, public Singleton<ModelLoader>
+class ModelLoader final : public AssetLoader, public Singleton<ModelLoader>
 {
 public:
     AssetPtr Load(
@@ -28,12 +28,12 @@ private:
     void LoadDefaultData();
 
 private:
-    void ImportModel(const std::filesystem::path& path, ModelAssetPtr modelAsset);
+    void ImportModel(const std::filesystem::path& path, const ModelAssetPtr& modelAsset);
 
-    void ProcessNode(aiNode* node, const aiScene* scene, ModelAssetPtr modelAsset);
-    void ProcessMaterial(aiMaterial* material, ModelAssetPtr modelAsset);
-    
-    MeshPtr ProcessMesh(aiMesh* mesh, const aiScene* scene);
+    void ProcessNode(const aiNode* node, const aiScene* scene, const ModelAssetPtr& modelAsset);
+    void ProcessMaterial(aiMaterial* material, const ModelAssetPtr& modelAsset);
+
+    static MeshPtr ProcessMesh(const aiMesh* mesh, const aiScene* scene);
 
 private:
     MeshPtr cube, plane;

@@ -8,10 +8,10 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
 {
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 
-    LLGL::Extent2D scaledResolution = 
+    const LLGL::Extent2D scaledResolution =
     {
-        (uint32_t)(resolution.width / resolutionScale),
-        (uint32_t)(resolution.height / resolutionScale)
+        static_cast<uint32_t>(static_cast<float>(resolution.width) / resolutionScale),
+        static_cast<uint32_t>(static_cast<float>(resolution.height) / resolutionScale)
     };
 
     gtao = std::make_shared<PostProcessing>(
@@ -60,11 +60,11 @@ GTAOComponent::GTAOComponent(const LLGL::Extent2D& resolution)
     );
 }
 
-GTAOComponent::GTAOComponent(GTAOComponent&& other)
+GTAOComponent::GTAOComponent(GTAOComponent&& other) noexcept
     : ComponentBase("GTAOComponent"),
-      resolution(other.resolution), gtao(std::move(other.gtao)), boxBlur(std::move(other.boxBlur)),
-      resolutionScale(other.resolutionScale), samples(other.samples), limit(other.limit), radius(other.radius),
-      falloff(other.falloff), thicknessMix(other.thicknessMix), maxStride(other.maxStride)
+      resolutionScale(other.resolutionScale), samples(other.samples), limit(other.limit),
+      radius(other.radius), falloff(other.falloff), thicknessMix(other.thicknessMix), maxStride(other.maxStride),
+      resolution(other.resolution), gtao(std::move(other.gtao)), boxBlur(std::move(other.boxBlur))
 {
     EventManager::Get().AddListener(Event::Type::WindowResize, this);
 }
@@ -74,12 +74,12 @@ GTAOComponent::~GTAOComponent()
     EventManager::Get().RemoveListener(Event::Type::WindowResize, this);
 }
 
-void GTAOComponent::SetupPostProcessing()
+void GTAOComponent::SetupPostProcessing() const
 {
-    LLGL::Extent2D scaledResolution = 
+    const LLGL::Extent2D scaledResolution =
     {
-        (uint32_t)(resolution.width / resolutionScale),
-        (uint32_t)(resolution.height / resolutionScale)
+        static_cast<uint32_t>(static_cast<float>(resolution.width) / resolutionScale),
+        static_cast<uint32_t>(static_cast<float>(resolution.height) / resolutionScale)
     };
 
     WindowResizeEvent newEvent(scaledResolution);
@@ -92,7 +92,7 @@ void GTAOComponent::OnEvent(Event& event)
 {
     if(event.GetType() == Event::Type::WindowResize)
     {
-        auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
+        const auto resizeEvent = dynamic_cast<WindowResizeEvent*>(&event);
 
         resolution = resizeEvent->GetSize();
 

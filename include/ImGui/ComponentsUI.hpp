@@ -26,13 +26,11 @@ inline void DrawComponentUI(TransformComponent& component, entt::entity entity)
 inline void DrawComponentUI(MeshComponent& component, entt::entity)
 {
     ImGui::Button(component.model ? component.model->path.filename().string().c_str() : "(Empty)##MeshComponent", ImVec2(128.0f, 128.0f));
-    
+
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("MODEL");
-
-        if(payload)
-            component.model = *(ModelAssetPtr*)payload->Data;
+        if(const auto payload = ImGui::AcceptDragDropPayload("MODEL"))
+            component.model = *static_cast<ModelAssetPtr*>(payload->Data);
 
         ImGui::EndDragDropTarget();
     }
@@ -42,8 +40,8 @@ inline void DrawComponentUI(MeshComponent& component, entt::entity)
 
 inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entity)
 {
-    float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
-    int cols = std::max(1, (int)(regionWidth / 128.0f));
+    const float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
+    const int cols = std::max(1, static_cast<int>(regionWidth / 128.0f));
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
@@ -57,37 +55,35 @@ inline void DrawComponentUI(MeshRendererComponent& component, entt::entity entit
             ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(128.0f, 128.0f));
         else
         {
-            ImVec4 color = ImVec4(
+            const auto color = ImVec4(
                 component.materials[i]->albedo.value.x,
                 component.materials[i]->albedo.value.y,
                 component.materials[i]->albedo.value.z,
                 component.materials[i]->albedo.value.w
             );
-            
+
             ImGui::PushStyleColor(ImGuiCol_Button, color);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
-            
+
             ImGui::Button("##Asset", ImVec2(128.0f, 128.0f));
-            
-            ImGui::PopStyleColor(3); 
+
+            ImGui::PopStyleColor(3);
         }
 
         if(ImGui::BeginDragDropTarget())
         {
-            auto payload = ImGui::AcceptDragDropPayload("MATERIAL");
-
-            if(payload)
-                component.materials[i] = *(MaterialAssetPtr*)payload->Data;
+            if(const auto payload = ImGui::AcceptDragDropPayload("MATERIAL"))
+                component.materials[i] = *static_cast<MaterialAssetPtr*>(payload->Data);
 
             ImGui::EndDragDropTarget();
         }
 
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            MaterialAssetPtr* payload = &component.materials[i];
-            
-            ImGui::SetDragDropPayload("MATERIAL", payload, 8);    
+            const auto payload = &component.materials[i];
+
+            ImGui::SetDragDropPayload("MATERIAL", payload, 8);
             ImGui::Image(component.materials[i]->albedo.texture->nativeHandle, ImVec2(64,64));
             ImGui::Text("Material");
 
@@ -117,11 +113,9 @@ inline void DrawComponentUI(PipelineComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("VS");
-
-        if(payload)
+        if(const auto payload = ImGui::AcceptDragDropPayload("VS"))
         {
-            component.vertexShader = *(VertexShaderAssetPtr*)payload->Data;
+            component.vertexShader = *static_cast<VertexShaderAssetPtr*>(payload->Data);
             component.SetupPipeline();
         }
 
@@ -134,11 +128,9 @@ inline void DrawComponentUI(PipelineComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("FS");
-
-        if(payload)
+        if(const auto payload = ImGui::AcceptDragDropPayload("FS"))
         {
-            component.fragmentShader = *(FragmentShaderAssetPtr*)payload->Data;
+            component.fragmentShader = *static_cast<FragmentShaderAssetPtr*>(payload->Data);
             component.SetupPipeline();
         }
 
@@ -164,7 +156,7 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     ImGui::DragFloat("Intensity", &component.intensity, 0.05f, 0.0f, 100.0f);
     ImGui::DragFloat("Cutoff", &component.cutoff, 0.05f, 0.0f, 360.0f);
     ImGui::DragFloat("Outer Cutoff", &component.outerCutoff, 0.05f, 0.0f, 360.0f);
-    
+
     if(ImGui::Checkbox("Shadow map", &component.shadowMap))
         if(!component.renderTarget)
             component.SetupShadowMap(component.resolution);
@@ -172,7 +164,7 @@ inline void DrawComponentUI(LightComponent& component, entt::entity entity)
     ImGui::Checkbox("Orthographic", &component.orthographic);
     ImGui::DragFloat("Ortho Extent", &component.orthoExtent, 0.05f, 0.0f, 200.0f);
 
-    static const uint32_t min = 128, max = 8192;
+    static constexpr uint32_t min = 128, max = 8192;
 
     ImGui::DragScalarN("Resolution", ImGuiDataType_U32, &component.resolution.width, 2, 1.0f, &min, &max);
     ImGui::DragFloat("Bias", &component.bias, 0.0001f, 0.0f, 1.0f);
@@ -190,14 +182,12 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("SCRIPT");
-
-        if(payload)
+        if(const auto payload = ImGui::AcceptDragDropPayload("SCRIPT"))
         {
             if(component.script)
                 ScriptManager::Get().RemoveScript(component.script);
 
-            component.script = *(ScriptAssetPtr*)payload->Data;
+            component.script = *static_cast<ScriptAssetPtr*>(payload->Data);
             component.moduleIndex = component.script->modulesCount++;
 
             ScriptManager::Get().AddScript(component.script);
@@ -212,7 +202,7 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
     {
         static std::vector<std::string> input;
 
-        auto variables = ScriptManager::Get().GetGlobalVariables(component.script, component.moduleIndex);
+        const auto variables = ScriptManager::Get().GetGlobalVariables(component.script, component.moduleIndex);
 
         input.resize(variables.size());
 
@@ -225,12 +215,12 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
             ImGui::TableNextRow();
 
             int id = 0;
-            for(auto& i : variables)
+            for(const auto& [name, var] : variables)
             {
                 ImGui::PushID(id);
 
                 ImGui::TableNextColumn();
-                ImGui::Text("%s", i.first.data());
+                ImGui::Text("%s", name.data());
 
                 ImGui::TableNextColumn();
                 ImGui::SetNextItemWidth(-FLT_MIN);
@@ -238,19 +228,19 @@ inline void DrawComponentUI(ScriptComponent& component, entt::entity entity)
 
                 if(!input[id].empty() && input[id] != "(entity)")
                 {
-                    auto type = i.first.substr(0, i.first.find(' '));
-                    if(type == "int") *(int32_t*)(i.second) = std::stoi(input[id]);
-                    if(type == "int8") *(int8_t*)(i.second) = std::stoi(input[id]);
-                    if(type == "int16") *(int16_t*)(i.second) = std::stoi(input[id]);
-                    if(type == "int64") *(int64_t*)(i.second) = std::stoi(input[id]);
-                    if(type == "uint") *(uint32_t*)(i.second) = std::stoul(input[id]);
-                    if(type == "uint8") *(uint8_t*)(i.second) = std::stoul(input[id]);
-                    if(type == "uint16") *(uint16_t*)(i.second) = std::stoul(input[id]);
-                    if(type == "uint64") *(uint64_t*)(i.second) = std::stoul(input[id]);
-                    if(type == "float") *(float*)(i.second) = std::stof(input[id]);
-                    if(type == "double") *(double*)(i.second) = std::stod(input[id]);
-                    if(type == "bool") *(bool*)(i.second) = input[id] == "true" ? true : false;
-                    if(type == "string") *(std::string*)(i.second) = input[id];
+                    auto type = name.substr(0, name.find(' '));
+                    if(type == "int") *static_cast<int32_t*>(var) = std::stoi(input[id]);
+                    if(type == "int8") *static_cast<int8_t*>(var) = std::stoi(input[id]);
+                    if(type == "int16") *static_cast<int16_t*>(var) = std::stoi(input[id]);
+                    if(type == "int64") *static_cast<int64_t*>(var) = std::stoi(input[id]);
+                    if(type == "uint") *static_cast<uint32_t*>(var) = std::stoul(input[id]);
+                    if(type == "uint8") *static_cast<uint8_t*>(var) = std::stoul(input[id]);
+                    if(type == "uint16") *static_cast<uint16_t*>(var) = std::stoul(input[id]);
+                    if(type == "uint64") *static_cast<uint64_t*>(var) = std::stoul(input[id]);
+                    if(type == "float") *static_cast<float*>(var) = std::stof(input[id]);
+                    if(type == "double") *static_cast<double*>(var) = std::stod(input[id]);
+                    if(type == "bool") *static_cast<bool*>(var) = input[id] == "true" ? true : false;
+                    if(type == "string") *static_cast<std::string*>(var) = input[id];
                 }
 
                 ImGui::PopID();
@@ -308,10 +298,8 @@ inline void DrawComponentUI(TonemapComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
-        
-        if(payload)
-            component.lut = *(TextureAssetPtr*)payload->Data;
+        if(const auto payload = ImGui::AcceptDragDropPayload("TEXTURE"))
+            component.lut = *static_cast<TextureAssetPtr*>(payload->Data);
 
         ImGui::EndDragDropTarget();
     }
@@ -332,7 +320,7 @@ inline void DrawComponentUI(BloomComponent& component, entt::entity entity)
 inline void DrawComponentUI(GTAOComponent& component, entt::entity entity)
 {
     ImGui::DragFloat("Resolution Scale##GTAO", &component.resolutionScale, 0.1f, 1.0f, 10.0f);
-    
+
     ImGui::DragInt("Samples", &component.samples, 1, 1, 1024);
     ImGui::DragFloat("Limit", &component.limit, 0.1f, 0.0f, 1000.0f);
     ImGui::DragFloat("Radius", &component.radius, 0.1f, 0.0f, 100.0f);
@@ -364,8 +352,8 @@ inline void DrawComponentUI(ProceduralSkyComponent& component, entt::entity enti
     ImGui::DragFloat("Time", &component.time, 0.1f, 0.0f, 1000.0f);
     ImGui::DragFloat("Cirrus", &component.cirrus, 0.001f, 0.0f, 1.0f);
     ImGui::DragFloat("Cumulus", &component.cumulus, 0.001f, 0.0f, 1.0f);
-    
-    static const uint32_t min = 128, max = 8192;
+
+    static constexpr uint32_t min = 128, max = 8192;
 
     if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
         component.resolution.height = component.resolution.width;
@@ -381,11 +369,9 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("TEXTURE");
-        
-        if(payload)
+        if(const auto payload = ImGui::AcceptDragDropPayload("TEXTURE"))
         {
-            component.environmentMap = *(TextureAssetPtr*)payload->Data;
+            component.environmentMap = *static_cast<TextureAssetPtr*>(payload->Data);
 
             Multithreading::Get().AddJob({ {}, [&]() { component.Build(); } });
         }
@@ -393,7 +379,7 @@ inline void DrawComponentUI(HDRISkyComponent& component, entt::entity entity)
         ImGui::EndDragDropTarget();
     }
 
-    static const uint32_t min = 128, max = 8192;
+    static constexpr uint32_t min = 128, max = 8192;
 
     if(ImGui::DragScalar("Resolution", ImGuiDataType_U32, &component.resolution.width, 8.0f, &min, &max))
         component.resolution.height = component.resolution.width;
@@ -406,16 +392,16 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 {
     static glm::vec3 scale(1.0);
 
-    int motionType = (int)component.body->GetMotionType();
+    int motionType = static_cast<int>(component.body->GetMotionType());
 
-    static const std::vector<const char*> motionTypes =
+    static const std::vector motionTypes =
     {
         "Static",
         "Kinematic",
         "Dynamic"
     };
 
-    static const std::vector<const char*> shapeTypes =
+    static const std::vector shapeTypes =
     {
         "Empty",
         "Box",
@@ -438,7 +424,7 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
     if(ImGui::Combo("Motion type", &motionType, motionTypes.data(), motionTypes.size()))
         PhysicsManager::Get().GetBodyInterface().SetMotionType(
             component.body->GetID(),
-            (JPH::EMotionType)motionType,
+            static_cast<JPH::EMotionType>(motionType),
             JPH::EActivation::Activate
         );
 
@@ -549,15 +535,13 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                 if(ImGui::BeginDragDropTarget())
                 {
-                    auto payload = ImGui::AcceptDragDropPayload("MODEL");
-
-                    if(payload)
+                    if(const auto payload = ImGui::AcceptDragDropPayload("MODEL"))
                     {
-                        model = *(ModelAssetPtr*)payload->Data;
+                        model = *static_cast<ModelAssetPtr*>(payload->Data);
 
                         JPH::TriangleList list;
 
-                        for(auto& mesh : model->meshes)
+                        for(const auto& mesh : model->meshes)
                         {
                             auto vertices = mesh->GetVertices();
                             auto indices = mesh->GetIndices();
@@ -566,9 +550,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                             for(size_t i = 0; i < indices.size(); i += 3)
                             {
-                                auto pos0 = vertices[indices[i]].position;
-                                auto pos1 = vertices[indices[i + 1]].position;
-                                auto pos2 = vertices[indices[i + 2]].position;
+                                const auto pos0 = vertices[indices[i]].position;
+                                const auto pos1 = vertices[indices[i + 1]].position;
+                                const auto pos2 = vertices[indices[i + 2]].position;
 
                                 list.emplace_back(
                                     JPH::Float3(pos0.x, pos0.y, pos0.z),
@@ -590,6 +574,7 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
 
                 break;
             }
+            default: break;
         }
 
         ImGui::Separator();
@@ -597,9 +582,9 @@ inline void DrawComponentUI(RigidBodyComponent& component, entt::entity entity)
         if(ImGui::Button("Update shape") && settings)
         {
             component.settings = tempSettings;
-            
-            auto body = component.body;
-            auto bodyId = body->GetID();
+
+            const auto body = component.body;
+            const auto bodyId = body->GetID();
 
             PhysicsManager::Get().GetBodyInterface().SetShape(
                 bodyId,
@@ -637,10 +622,8 @@ inline void DrawComponentUI(SoundComponent& component, entt::entity entity)
 
     if(ImGui::BeginDragDropTarget())
     {
-        auto payload = ImGui::AcceptDragDropPayload("SOUND");
-
-        if(payload)
-            component.sound = *(SoundAssetPtr*)payload->Data;
+        if(const auto payload = ImGui::AcceptDragDropPayload("SOUND"))
+            component.sound = *static_cast<SoundAssetPtr*>(payload->Data);
 
         ImGui::EndDragDropTarget();
     }
@@ -739,13 +722,13 @@ void DrawEntityUI(entt::registry& registry, entt::entity entity)
 
     auto draw = [&]<typename Component>(Component* component)
     {
-        ImGui::PushID((entt::id_type)entity);
+        ImGui::PushID(static_cast<entt::id_type>(entity));
 
         if constexpr (HasComponentUI<Component>::value)
             if(ImGui::CollapsingHeader(component->componentName.data()))
             {
                 DrawComponentUI(*component, entity);
-                
+
                 ImGui::PushID(component->componentName.data());
 
                 if(ImGui::Button("Remove"))
@@ -759,10 +742,9 @@ void DrawEntityUI(entt::registry& registry, entt::entity entity)
 
     ([&]<typename Component>()
     {
-        Component* component = registry.try_get<Component>(entity);
-        if(component)
+        if(auto component = registry.try_get<Component>(entity))
             draw(component);
-    }.template operator()<Components>(), ...); 
+    }.template operator()<Components>(), ...);
 }
 
 }

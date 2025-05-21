@@ -1,12 +1,9 @@
 #include <Mouse.hpp>
 
-namespace lustra
+namespace lustra::Mouse
 {
 
-namespace Mouse
-{
-
-void SetCursorVisible(bool visible)
+void SetCursorVisible(const bool visible)
 {
     glfwSetInputMode(Window::GetLastCreatedGLFWWindow(), GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }
@@ -37,8 +34,6 @@ glm::vec2 GetPosition()
     glfwGetCursorPos(Window::GetLastCreatedGLFWWindow(), &x, &y);
 
     return { x, y };
-}
-
 }
 
 }

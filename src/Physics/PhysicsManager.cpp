@@ -45,13 +45,13 @@ void PhysicsManager::Init()
     physicsSystem->SetContactListener(collisionListener.get());
 }
 
-void PhysicsManager::Update(float deltaTime)
+void PhysicsManager::Update(const float deltaTime) const
 {
     physicsSystem->OptimizeBroadPhase();
     physicsSystem->Update(deltaTime, 1, tempAllocator.get(), jobSystem.get());
 }
 
-void PhysicsManager::DestroyBody(const JPH::BodyID& bodyId)
+void PhysicsManager::DestroyBody(const JPH::BodyID& bodyId) const
 {
     GetBodyInterface().RemoveBody(bodyId);
     GetBodyInterface().DestroyBody(bodyId);
@@ -59,26 +59,24 @@ void PhysicsManager::DestroyBody(const JPH::BodyID& bodyId)
 
 JPH::Shape* PhysicsManager::CreateBoxShape(const JPH::BoxShapeSettings& settings)
 {
-    JPH::ShapeSettings::ShapeResult result = settings.Create();
-
-    return result.Get();
+    return settings.Create().Get();
 }
 
-JPH::Body* PhysicsManager::CreateBody(const JPH::BodyCreationSettings& settings)
+JPH::Body* PhysicsManager::CreateBody(const JPH::BodyCreationSettings& settings) const
 {
-    auto body = GetBodyInterface().CreateBody(settings);
-    
+    const auto body = GetBodyInterface().CreateBody(settings);
+
     GetBodyInterface().AddBody(body->GetID(), JPH::EActivation::Activate);
-    
+
     return body;
 }
 
-JPH::PhysicsSystem& PhysicsManager::GetPhysicsSystem()
+JPH::PhysicsSystem& PhysicsManager::GetPhysicsSystem() const
 {
     return *physicsSystem;
 }
 
-JPH::BodyInterface& PhysicsManager::GetBodyInterface()
+JPH::BodyInterface& PhysicsManager::GetBodyInterface() const
 {
     return physicsSystem->GetBodyInterface();
 }

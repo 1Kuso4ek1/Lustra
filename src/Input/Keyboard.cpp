@@ -1,9 +1,6 @@
 #include <Keyboard.hpp>
 
-namespace lustra
-{
-
-namespace Keyboard
+namespace lustra::Keyboard
 {
 
 bool IsKeyPressed(Key key)
@@ -19,8 +16,6 @@ bool IsKeyReleased(Key key)
 bool IsKeyRepeated(Key key)
 {
     return glfwGetKey(Window::GetLastCreatedGLFWWindow(), static_cast<int>(key)) == GLFW_REPEAT;
-}
-
 }
 
 }

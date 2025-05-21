@@ -11,10 +11,10 @@
 namespace lustra
 {
 
-class DeferredRenderer : public RendererBase, public EventListener, public Singleton<DeferredRenderer>
+class DeferredRenderer final : public RendererBase, public EventListener, public Singleton<DeferredRenderer>
 {
 public:
-    ~DeferredRenderer();
+    ~DeferredRenderer() override;
 
     void Draw(
         const std::unordered_map<uint32_t, LLGL::Resource*>& resources,
@@ -42,7 +42,7 @@ private:
     FragmentShaderAssetPtr lightingPass;
 
     LLGL::PipelineLayoutDescriptor layoutDesc;
-    
+
     LLGL::Texture* gBufferPosition;
     LLGL::Texture* gBufferAlbedo;
     LLGL::Texture* gBufferNormal;

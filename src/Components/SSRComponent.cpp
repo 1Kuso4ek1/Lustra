@@ -41,7 +41,7 @@ SSRComponent::SSRComponent(const LLGL::Extent2D& resolution)
     );
 }
 
-SSRComponent::SSRComponent(SSRComponent&& other)
+SSRComponent::SSRComponent(SSRComponent&& other) noexcept
     : ComponentBase("SSRComponent"),
       resolution(other.resolution),
       resolutionScale(other.resolutionScale),

@@ -16,7 +16,7 @@ Sound::~Sound()
         ma_sound_uninit(sound.get());
 }
 
-void Sound::Play()
+void Sound::Play() const
 {
     if(ma_sound_is_playing(sound.get()))
         ma_sound_seek_to_pcm_frame(sound.get(), 0);
@@ -24,34 +24,34 @@ void Sound::Play()
     ma_sound_start(sound.get());
 }
 
-void Sound::Stop()
+void Sound::Stop() const
 {
     ma_sound_stop(sound.get());
 }
 
-void Sound::SetPosition(const glm::vec3& position)
+void Sound::SetPosition(const glm::vec3& position) const
 {
     ma_sound_set_position(sound.get(), position.x, position.y, position.z);
 }
 
-void Sound::SetVelocity(const glm::vec3& velocity)
+void Sound::SetVelocity(const glm::vec3& velocity) const
 {
     ma_sound_set_velocity(sound.get(), velocity.x, velocity.y, velocity.z);
 }
 
-void Sound::SetOrientation(const glm::quat& orientation)
+void Sound::SetOrientation(const glm::quat& orientation) const
 {
-    glm::vec3 forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
+    const auto forward = orientation * glm::vec3(0.0f, 0.0f, -1.0f);
 
     ma_sound_set_direction(sound.get(), forward.x, forward.y, forward.z);
 }
 
-void Sound::SetDirection(const glm::vec3& direction)
+void Sound::SetDirection(const glm::vec3& direction) const
 {
     ma_sound_set_direction(sound.get(), direction.x, direction.y, direction.z);
 }
 
-void Sound::SetCone(const Cone& cone)
+void Sound::SetCone(const Cone& cone) const
 {
     ma_sound_set_cone(
         sound.get(),
@@ -61,111 +61,111 @@ void Sound::SetCone(const Cone& cone)
     );
 }
 
-void Sound::SetDirectionalAttenuationFactor(float factor)
+void Sound::SetDirectionalAttenuationFactor(const float factor) const
 {
     ma_sound_set_directional_attenuation_factor(sound.get(), factor);
 }
 
-void Sound::SetDopplerFactor(float factor)
+void Sound::SetDopplerFactor(const float factor) const
 {
     ma_sound_set_doppler_factor(sound.get(), factor);
 }
 
-void Sound::SetFade(float volumeBegin, float volumeEnd, uint64_t lengthMillis)
+void Sound::SetFade(const float volumeBegin, const float volumeEnd, const uint64_t lengthMillis) const
 {
     ma_sound_set_fade_in_milliseconds(sound.get(), volumeBegin, volumeEnd, lengthMillis);
 }
 
-void Sound::SetRolloff(float rolloff)
+void Sound::SetRolloff(const float rolloff) const
 {
     ma_sound_set_rolloff(sound.get(), rolloff);
 }
 
-void Sound::SetStartTime(uint64_t timeMillis)
+void Sound::SetStartTime(const uint64_t millis) const
 {
     ma_sound_set_start_time_in_milliseconds(
         sound.get(),
-        ma_engine_get_time_in_milliseconds(sound->engineNode.pEngine) + timeMillis
+        ma_engine_get_time_in_milliseconds(sound->engineNode.pEngine) + millis
     );
 }
 
-void Sound::SetStopTime(uint64_t timeMillis)
+void Sound::SetStopTime(const uint64_t millis) const
 {
     ma_sound_set_stop_time_in_milliseconds(
         sound.get(),
-        ma_engine_get_time_in_milliseconds(sound->engineNode.pEngine) + timeMillis
+        ma_engine_get_time_in_milliseconds(sound->engineNode.pEngine) + millis
     );
 }
 
-void Sound::SetMaxDistance(float distance)
+void Sound::SetMaxDistance(const float distance) const
 {
     ma_sound_set_max_distance(sound.get(), distance);
 }
 
-void Sound::SetMinDistance(float distance)
+void Sound::SetMinDistance(const float distance) const
 {
     ma_sound_set_min_distance(sound.get(), distance);
 }
 
-void Sound::SetMaxGain(float gain)
+void Sound::SetMaxGain(const float gain) const
 {
     ma_sound_set_max_gain(sound.get(), gain);
 }
 
-void Sound::SetMinGain(float gain)
+void Sound::SetMinGain(const float gain) const
 {
     ma_sound_set_min_gain(sound.get(), gain);
 }
 
-void Sound::SetPan(float pan)
+void Sound::SetPan(const float pan) const
 {
     ma_sound_set_pan(sound.get(), pan);
 }
 
-void Sound::SetPitch(float pitch)
+void Sound::SetPitch(const float pitch) const
 {
     ma_sound_set_pitch(sound.get(), pitch);
 }
 
-void Sound::SetVolume(float volume)
+void Sound::SetVolume(const float volume) const
 {
     ma_sound_set_volume(sound.get(), volume);
 }
 
-void Sound::SetLooping(bool looping)
+void Sound::SetLooping(const bool looping) const
 {
     ma_sound_set_looping(sound.get(), looping);
 }
 
-void Sound::SetSpatializationEnabled(bool enabled)
+void Sound::SetSpatializationEnabled(const bool enabled) const
 {
     ma_sound_set_spatialization_enabled(sound.get(), enabled);
 }
 
 glm::vec3 Sound::GetPosition() const
 {
-    auto position = ma_sound_get_position(sound.get());
+    const auto [x, y, z] = ma_sound_get_position(sound.get());
 
-    return { position.x, position.y, position.z };
+    return { x, y, z };
 }
 
 glm::vec3 Sound::GetVelocity() const
 {
-    auto velocity = ma_sound_get_velocity(sound.get());
+    const auto [x, y, z] = ma_sound_get_velocity(sound.get());
 
-    return { velocity.x, velocity.y, velocity.z };
+    return { x, y, z };
 }
 
 glm::vec3 Sound::GetDirection() const
 {
-    auto direction = ma_sound_get_direction(sound.get());
+    const auto [x, y, z] = ma_sound_get_direction(sound.get());
 
-    return { direction.x, direction.y, direction.z };
+    return { x, y, z };
 }
 
 Sound::Cone Sound::GetCone() const
 {
-    Cone cone;
+    Cone cone{};
 
     ma_sound_get_cone(sound.get(), &cone.inner, &cone.outer, &cone.outerGain);
 

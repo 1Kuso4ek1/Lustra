@@ -58,7 +58,8 @@ void Window::SetFullscreen(const bool fullscreen)
 {
     this->fullscreen = fullscreen;
 
-    glfwSetWindowMonitor(window, fullscreen ? glfwGetPrimaryMonitor() : nullptr, 0, 0, size.width, size.height, GLFW_DONT_CARE);
+    glfwSetWindowMonitor(window, fullscreen ? glfwGetPrimaryMonitor() : nullptr, 0, 0,
+        static_cast<int>(size.width), static_cast<int>(size.height), GLFW_DONT_CARE);
 }
 
 void Window::Maximize() const
@@ -121,7 +122,7 @@ bool Window::GetNativeHandle(void* nativeHandle, const size_t size)
 
 bool Window::AdaptForVideoMode(LLGL::Extent2D* resolution, bool* fullscreen)
 {
-    glfwSetWindowSize(window, resolution->width, resolution->height);
+    glfwSetWindowSize(window, static_cast<int>(resolution->width), static_cast<int>(resolution->height));
 
     return true;
 }
@@ -141,7 +142,9 @@ LLGL::Display* Window::FindResidentDisplay() const
 
 GLFWwindow* Window::CreateWindow() const
 {
-    const auto window = glfwCreateWindow(size.width, size.height, title.data(), fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
+    const auto window =
+        glfwCreateWindow(static_cast<int>(size.width), static_cast<int>(size.height),
+            title.data(), fullscreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
 
     if(!window)
         throw std::runtime_error("Failed to create GLFW window");

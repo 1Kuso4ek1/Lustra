@@ -14,7 +14,7 @@
 namespace lustra
 {
 
-class ImGuiManager : public Singleton<ImGuiManager>
+class ImGuiManager final : public Singleton<ImGuiManager>
 {
 public:
     void Init(
@@ -22,15 +22,16 @@ public:
         const std::filesystem::path& fontPath = {},
         const std::filesystem::path& iniPath = {}
     );
-    void NewFrame();
-    void Render();
+
+    static void NewFrame();
+    static void Render();
     void Destroy();
 
 public:
     void SetIniPath(const std::filesystem::path& path);
 
 private:
-    void SetupStyle();
+    static void SetupStyle();
 
 private:
     bool initialized = false;

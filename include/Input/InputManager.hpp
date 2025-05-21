@@ -8,7 +8,7 @@
 namespace lustra
 {
 
-class InputManager : public Singleton<InputManager>
+class InputManager final : public Singleton<InputManager>
 {
 public:
     void Update();

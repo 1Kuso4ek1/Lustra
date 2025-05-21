@@ -1,8 +1,8 @@
 #include <Launcher.hpp>
 
-Launcher::Launcher(const lustra::Config& config) : lustra::Application(config)
+Launcher::Launcher(const lustra::Config& config) : Application(config)
 {
-    Init();
+    Launcher::Init();
 }
 
 void Launcher::Init()
@@ -12,7 +12,7 @@ void Launcher::Init()
     lustra::EventManager::Get().AddListener(lustra::Event::Type::WindowFocus, this);
 
     lustra::PhysicsManager::Get().Init();
-    
+
     sceneAsset = lustra::AssetManager::Get().Load<lustra::SceneAsset>(config.mainScene, true);
 
     scene = sceneAsset->scene;
@@ -34,7 +34,7 @@ void Launcher::Init()
     scene->Start();
 }
 
-void Launcher::Update(float deltaTime)
+void Launcher::Update(const float deltaTime)
 {
     scene->Update(deltaTime);
 }
@@ -48,7 +48,7 @@ void Launcher::OnEvent(lustra::Event& event)
 {
     if(event.GetType() == lustra::Event::Type::WindowFocus)
     {
-        auto focusEvent = dynamic_cast<lustra::WindowFocusEvent*>(&event);
+        const auto focusEvent = dynamic_cast<lustra::WindowFocusEvent*>(&event);
 
         if(focusEvent->IsFocused())
             lustra::Renderer::Get().GetSwapChain()->SetVsyncInterval(config.vsync ? 1 : 0);

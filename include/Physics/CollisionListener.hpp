@@ -8,14 +8,14 @@
 namespace lustra
 {
 
-class CollisionEvent : public Event
+class CollisionEvent final : public Event
 {
 public:
     CollisionEvent(JPH::Body* body1, JPH::Body* body2, const JPH::ContactManifold& manifold)
         : Event(Type::Collision), body1(body1), body2(body2)
     {
         JPH::RVec3 point1, point2;
-        
+
         if(manifold.mRelativeContactPointsOn1.size() > 0)
             point1 = manifold.GetWorldSpaceContactPointOn1(0);
         if(manifold.mRelativeContactPointsOn2.size() > 0)
@@ -53,7 +53,7 @@ private:
     float penetrationDepth;
 };
 
-class CollisionListener : public JPH::ContactListener
+class CollisionListener final : public JPH::ContactListener
 {
 public:
     virtual JPH::ValidateResult OnContactValidate(
@@ -77,9 +77,9 @@ public:
     }
 
 private:
-    void ProcessCollision(
+    static void ProcessCollision(
         const JPH::Body& body1,
-        const JPH::Body& body2, 
+        const JPH::Body& body2,
         const JPH::ContactManifold& manifold
     )
     {

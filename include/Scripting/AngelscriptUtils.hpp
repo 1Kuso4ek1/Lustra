@@ -15,10 +15,7 @@
 #include <ScriptManager.hpp>
 #include <Random.hpp>
 
-namespace lustra
-{
-
-namespace as
+namespace lustra::as
 {
 
 struct RayCastResult
@@ -85,44 +82,44 @@ inline Camera* GetCamera(CameraComponent* comp)
     return &(comp->camera);
 }
 
-inline void MakeExtent2D(uint32_t width, uint32_t height, LLGL::Extent2D* extent)
+inline void MakeExtent2D(const uint32_t width, const uint32_t height, LLGL::Extent2D* extent)
 {
     new(extent) LLGL::Extent2D(width, height);
 }
 
-inline void MakeVec2(float x, float y, glm::vec2* vec)
+inline void MakeVec2(const float x, const float y, glm::vec2* vec)
 {
     new(vec) glm::vec2(x, y);
 }
 
-inline void MakeVec2Scalar(float scalar, glm::vec2* vec)
+inline void MakeVec2Scalar(const float scalar, glm::vec2* vec)
 {
     new(vec) glm::vec2(scalar);
 }
 
-inline void MakeVec3(float x, float y, float z, glm::vec3* vec)
+inline void MakeVec3(const float x, const float y, const float z, glm::vec3* vec)
 {
     new(vec) glm::vec3(x, y, z);
 }
 
-inline void MakeVec3Scalar(float scalar, glm::vec3* vec)
+inline void MakeVec3Scalar(const float scalar, glm::vec3* vec)
 {
     new(vec) glm::vec3(scalar);
 }
 
-inline void MakeVec4(float x, float y, float z, float w, glm::vec4* vec)
+inline void MakeVec4(const float x, const float y, const float z, const float w, glm::vec4* vec)
 {
     new(vec) glm::vec4(x, y, z, w);
 }
 
-inline void MakeVec4Scalar(float scalar, glm::vec4* vec)
+inline void MakeVec4Scalar(const float scalar, glm::vec4* vec)
 {
     new(vec) glm::vec4(scalar);
 }
 
-inline void MakeQuat(float x, float y, float z, float w, glm::quat* quat)
+inline void MakeQuat(const float x, const float y, const float z, const float w, glm::quat* quat)
 {
-    new(quat) glm::quat(x, y, z, w);
+    new(quat) glm::quat(w, x, y, z);
 }
 
 inline void MakeQuatFromEuler(const glm::vec3& euler, glm::quat* quat)
@@ -155,12 +152,12 @@ inline glm::vec2 Vec2DivAssign(const glm::vec2& src, glm::vec2& dst)
     return dst /= src;
 }
 
-inline glm::vec2 Vec2MulAssignScalar(float src, glm::vec2* dst)
+inline glm::vec2 Vec2MulAssignScalar(const float src, glm::vec2* dst)
 {
     return *dst *= src;
 }
 
-inline glm::vec2 Vec2DivAssignScalar(float src, glm::vec2* dst)
+inline glm::vec2 Vec2DivAssignScalar(const float src, glm::vec2* dst)
 {
     return *dst /= src;
 }
@@ -185,12 +182,12 @@ inline glm::vec3 Vec3DivAssign(const glm::vec3& src, glm::vec3* dst)
     return *dst /= src;
 }
 
-inline glm::vec3 Vec3MulAssignScalar(float src, glm::vec3* dst)
+inline glm::vec3 Vec3MulAssignScalar(const float src, glm::vec3* dst)
 {
     return *dst *= src;
 }
 
-inline glm::vec3 Vec3DivAssignScalar(float src, glm::vec3* dst)
+inline glm::vec3 Vec3DivAssignScalar(const float src, glm::vec3* dst)
 {
     return *dst /= src;
 }
@@ -215,85 +212,85 @@ inline glm::vec4 Vec4DivAssign(const glm::vec4& src, glm::vec4* dst)
     return *dst /= src;
 }
 
-inline glm::vec4 Vec4MulAssignScalar(float src, glm::vec4* dst)
+inline glm::vec4 Vec4MulAssignScalar(const float src, glm::vec4* dst)
 {
     return *dst *= src;
 }
 
-inline glm::vec4 Vec4DivAssignScalar(float src, glm::vec4* dst)
+inline glm::vec4 Vec4DivAssignScalar(const float src, glm::vec4* dst)
 {
     return *dst /= src;
 }
 
-inline glm::vec3 GetPosition(JPH::Body* body)
+inline glm::vec3 GetPosition(const JPH::Body* body)
 {
-    auto pos = body->GetPosition();
-    
+    const auto pos = body->GetPosition();
+
     return { pos.GetX(), pos.GetY(), pos.GetZ() };
 }
 
-inline glm::quat GetRotation(JPH::Body* body)
+inline glm::quat GetRotation(const JPH::Body* body)
 {
-    auto rot = body->GetRotation();
+    const auto rot = body->GetRotation();
 
-    return { rot.GetX(), rot.GetY(), rot.GetZ(), rot.GetW() };
+    return { rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ() };
 }
 
-inline void SetPosition(const glm::vec3& pos, JPH::Body* body)
+inline void SetPosition(const glm::vec3& pos, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetPosition(body->GetID(), { pos.x, pos.y, pos.z }, JPH::EActivation::Activate);
 }
 
-inline void SetRotation(const glm::quat& rot, JPH::Body* body)
+inline void SetRotation(const glm::quat& rot, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetRotation(body->GetID(), { rot.x, rot.y, rot.z, rot.w }, JPH::EActivation::Activate);
 }
 
-inline void SetPositionAndRotation(const glm::vec3& pos, const glm::quat& rot, JPH::Body* body)
+inline void SetPositionAndRotation(const glm::vec3& pos, const glm::quat& rot, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetPositionAndRotation(body->GetID(), { pos.x, pos.y, pos.z }, { rot.x, rot.y, rot.z, rot.w }, JPH::EActivation::Activate);
 }
 
-inline void AddForce(const glm::vec3& force, JPH::Body* body)
+inline void AddForce(const glm::vec3& force, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().AddForce(body->GetID(), { force.x, force.y, force.z });
 }
 
-inline void AddTorque(const glm::vec3& torque, JPH::Body* body)
+inline void AddTorque(const glm::vec3& torque, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().AddTorque(body->GetID(), { torque.x, torque.y, torque.z });
 }
 
-inline void AddImpulse(const glm::vec3& impulse, JPH::Body* body)
+inline void AddImpulse(const glm::vec3& impulse, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().AddImpulse(body->GetID(), { impulse.x, impulse.y, impulse.z });
 }
 
-inline void SetLinearVelocity(const glm::vec3& velocity, JPH::Body* body)
+inline void SetLinearVelocity(const glm::vec3& velocity, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetLinearVelocity(body->GetID(), { velocity.x, velocity.y, velocity.z });
 }
 
-inline void SetAngularVelocity(const glm::vec3& velocity, JPH::Body* body)
+inline void SetAngularVelocity(const glm::vec3& velocity, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetAngularVelocity(body->GetID(), { velocity.x, velocity.y, velocity.z });
 }
 
-inline glm::vec3 GetLinearVelocity(JPH::Body* body)
+inline glm::vec3 GetLinearVelocity(const JPH::Body* body)
 {
-    auto vel = body->GetLinearVelocity();
-    
-    return { vel.GetX(), vel.GetY(), vel.GetZ() };
-}
-
-inline glm::vec3 GetAngularVelocity(JPH::Body* body)
-{
-    auto vel = body->GetAngularVelocity();
+    const auto vel = body->GetLinearVelocity();
 
     return { vel.GetX(), vel.GetY(), vel.GetZ() };
 }
 
-inline glm::mat4 GetWorldTransform(Entity entity, Scene* scene)
+inline glm::vec3 GetAngularVelocity(const JPH::Body* body)
+{
+    const auto vel = body->GetAngularVelocity();
+
+    return { vel.GetX(), vel.GetY(), vel.GetZ() };
+}
+
+inline glm::mat4 GetWorldTransform(const Entity& entity, Scene* scene)
 {
     return scene->GetWorldTransform(entity);
 }
@@ -317,12 +314,12 @@ inline RayCastResult CastRay(const glm::vec3& origin, const glm::vec3& direction
     return ret;
 }
 
-inline void MapAction(const std::string& action, Keyboard::Key key)
+inline void MapAction(const std::string& action, const Keyboard::Key key)
 {
     InputManager::Get().MapAction(action, key);
 }
 
-inline void MapAction(const std::string& action, Mouse::Button button)
+inline void MapAction(const std::string& action, const Mouse::Button button)
 {
     InputManager::Get().MapAction(action, button);
 }
@@ -333,35 +330,35 @@ inline bool IsActionPressed(const std::string& action)
 }
 
 template<class T>
-inline std::shared_ptr<T> Load(
+std::shared_ptr<T> Load(
     const std::string& path,
-    bool relativeToAssetsDir = false,
-    bool useCache = true,
-    bool async = true
+    const bool relativeToAssetsDir = false,
+    const bool useCache = true,
+    const bool async = true
 )
 {
     return AssetManager::Get().Load<T>(path, relativeToAssetsDir, useCache, async);
 }
 
 template<class T>
-inline T* GetAssetPtr(std::shared_ptr<T>* asset)
+T* GetAssetPtr(std::shared_ptr<T>* asset)
 {
     return asset->get();
 }
 
-inline MaterialAssetPtr& MaterialListAt(uint64_t index, MeshRendererComponent* component)
+inline MaterialAssetPtr& MaterialListAt(const uint64_t index, MeshRendererComponent* component)
 {
     return component->materials[index];
 }
 
-inline void ExecuteFunction(ScriptAssetPtr script, const std::string& declaration, uint32_t moduleIndex)
+inline void ExecuteFunction(const ScriptAssetPtr& script, const std::string& declaration, const uint32_t moduleIndex)
 {
     Multithreading::Get().AddJob(
         { nullptr, [&]() { ScriptManager::Get().ExecuteFunction(script, declaration, nullptr, moduleIndex); } }
     );
 }
 
-inline void RandomSetSeed(uint32_t seed)
+inline void RandomSetSeed(const uint32_t seed)
 {
     Random::Get().SetSeed(seed);
 }
@@ -371,31 +368,29 @@ inline float RandomValue()
     return Random::Get().Value();
 }
 
-inline float RandomRange(float min, float max)
+inline float RandomRange(const float min, const float max)
 {
     return Random::Get().Range(min, max);
 }
 
-inline int RandomRange(int min, int max)
+inline int RandomRange(const int min, const int max)
 {
     return Random::Get().Range(min, max);
 }
 
-inline void SetGravityFactor(float factor, JPH::Body* body)
+inline void SetGravityFactor(const float factor, const JPH::Body* body)
 {
     PhysicsManager::Get().GetBodyInterface().SetGravityFactor(body->GetID(), factor);
 }
 
-inline void SetMass(float mass, JPH::Body* body)
+inline void SetMass(const float mass, JPH::Body* body)
 {
     JPH::MassProperties newProperties;
     newProperties.mMass = mass;
     newProperties.mInertia = JPH::Mat44::sIdentity();
 
-    auto properties = body->GetMotionProperties();
+    const auto properties = body->GetMotionProperties();
     properties->SetMassProperties(JPH::EAllowedDOFs::All, newProperties);
-}
-
 }
 
 }

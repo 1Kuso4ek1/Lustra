@@ -4,7 +4,7 @@
 namespace lustra
 {
 
-class BroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface
+class BroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface
 {
 public:
     BroadPhaseLayerInterface()
@@ -13,22 +13,22 @@ public:
 		mObjectToBroadPhase[Layers::moving] = BroadPhaseLayers::moving;
 	}
 
-	virtual uint32_t GetNumBroadPhaseLayers() const override
+    uint32_t GetNumBroadPhaseLayers() const override
 	{
 		return BroadPhaseLayers::numLayers;
 	}
 
-	virtual JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override
+    JPH::BroadPhaseLayer GetBroadPhaseLayer(const JPH::ObjectLayer inLayer) const override
 	{
 		return mObjectToBroadPhase[inLayer];
 	}
 
-    virtual const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override
+    const char* GetBroadPhaseLayerName(const JPH::BroadPhaseLayer inLayer) const override
 	{
-		switch ((JPH::BroadPhaseLayer::Type)inLayer)
+		switch (static_cast<JPH::BroadPhaseLayer::Type>(inLayer))
 		{
-		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::nonMoving: return "Non moving";
-		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::moving: return "Moving";
+		case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayers::nonMoving): return "Non moving";
+		case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayers::moving): return "Moving";
 
 		default: return "Invalid";
 		}

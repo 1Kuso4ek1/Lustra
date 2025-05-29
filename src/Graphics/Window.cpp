@@ -1,4 +1,5 @@
 #include <Window.hpp>
+#include <Mouse.hpp>
 
 namespace lustra
 {
@@ -89,6 +90,8 @@ GLFWwindow* Window::GetLastCreatedGLFWWindow()
 
 bool Window::PollEvents() const
 {
+    Mouse::Scroll::offset = {};
+
     glfwPollEvents();
 
     return !glfwWindowShouldClose(window);
@@ -153,6 +156,7 @@ GLFWwindow* Window::CreateWindow() const
 
     glfwSetFramebufferSizeCallback(window, OnWindowResize);
     glfwSetWindowFocusCallback(window, OnWindowFocus);
+    glfwSetScrollCallback(window, Mouse::ScrollCallback);
 
     return window;
 }

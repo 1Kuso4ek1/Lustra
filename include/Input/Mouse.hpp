@@ -7,6 +7,11 @@
 namespace lustra::Mouse
 {
 
+struct Scroll
+{
+    static glm::vec2 offset;
+};
+
 enum class Button
 {
     Left = GLFW_MOUSE_BUTTON_LEFT,
@@ -19,6 +24,8 @@ enum class Button
     MButton8 = GLFW_MOUSE_BUTTON_8,
     Last = GLFW_MOUSE_BUTTON_LAST
 };
+
+void ScrollCallback(GLFWwindow* window, double x, double y);
 
 void SetCursorVisible(bool visible = true);
 

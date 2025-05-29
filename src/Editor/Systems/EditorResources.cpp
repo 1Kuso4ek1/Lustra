@@ -129,7 +129,8 @@ void Editor::UpdateEditorCameraScript()
     {
         auto& transform = entity.GetComponent<lustra::TransformComponent>();
 
-        static float speed = 0.0f;
+        static auto speed = 0.0f;
+        static auto multiplier = 1.0f;
 
         static auto movement = glm::vec3(0.0f);
 
@@ -150,11 +151,14 @@ void Editor::UpdateEditorCameraScript()
             if(lustra::Keyboard::IsKeyPressed(lustra::Keyboard::Key::D))
                 input += rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 
+            if(const auto scroll = lustra::Mouse::Scroll::offset.y; scroll != 0.0f)
+                multiplier = glm::clamp(multiplier * (scroll > 0.0 ? 1.2f : 0.9f), 0.1f, 60.0f);
+
             const float lerpSpeed = glm::clamp(deltaTime * 5.0f, 0.0f, 1.0f);
 
             if(glm::length(input) > 0.1f)
             {
-                speed = glm::mix(speed, 3.0f, lerpSpeed);
+                speed = glm::mix(speed, 3.0f * multiplier, lerpSpeed);
                 movement = input;
             }
             else
@@ -165,7 +169,7 @@ void Editor::UpdateEditorCameraScript()
             if(speed > 0.0f)
                 transform.position += deltaPosition;
 
-            lustra::Listener::Get().SetVelocity(deltaPosition / deltaTime);
+            lustra::Listener::SetVelocity(deltaPosition / deltaTime);
 
             const glm::vec2 center(
                 static_cast<float>(window->GetContentSize().width) / 2.0f,
@@ -182,7 +186,7 @@ void Editor::UpdateEditorCameraScript()
         }
         else
         {
-            lustra::Listener::Get().SetVelocity(glm::vec3(0.0f));
+            lustra::Listener::SetVelocity(glm::vec3(0.0f));
             lustra::Mouse::SetCursorVisible();
         }
     };

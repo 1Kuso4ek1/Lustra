@@ -19,7 +19,7 @@ public:
     void RenderImGui() override;
 
 private:
-    bool CheckShortcut(const std::initializer_list<lustra::Keyboard::Key> shortcut);
+    static bool CheckShortcut(std::initializer_list<lustra::Keyboard::Key> shortcut);
 
     void LoadIcons();
 
@@ -96,7 +96,7 @@ private:
     lustra::Timer keyboardTimer, sceneSaveTimer;
 
 private:
-    GLuint nativeViewportAttachment;
+    GLuint nativeViewportAttachment{};
 
     LLGL::Texture* viewportAttachment{};
     LLGL::RenderTarget* viewportRenderTarget{};

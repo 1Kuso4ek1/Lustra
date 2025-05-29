@@ -102,7 +102,7 @@ void LightComponent::CreatePipeline()
             },
             .rasterizer = LLGL::RasterizerDescriptor
             {
-                .cullMode = LLGL::CullMode::Back,
+                .cullMode = LLGL::CullMode::Disabled, // Make it configurable in future?
                 .depthBias =
                 {
                     .constantFactor = 4.0f,

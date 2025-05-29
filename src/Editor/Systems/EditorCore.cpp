@@ -134,7 +134,7 @@ bool Editor::CheckShortcut(const std::initializer_list<lustra::Keyboard::Key> sh
     if(timer.GetElapsedSeconds() < 0.2f)
         return false;
 
-    for(auto key: shortcut)
+    for(const auto key : shortcut)
         if(!lustra::Keyboard::IsKeyPressed(key))
             return false;
 

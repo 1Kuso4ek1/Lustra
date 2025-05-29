@@ -78,7 +78,7 @@ AssetPtr TextureLoader::Load(
         {
             textureAsset->texture = Renderer::Get().CreateTexture(textureAsset->textureDesc, &textureAsset->imageView);
 
-            LLGL::OpenGL::ResourceNativeHandle nativeHandle;
+            LLGL::OpenGL::ResourceNativeHandle nativeHandle{};
             textureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
             textureAsset->nativeHandle = nativeHandle.id;
 
@@ -141,12 +141,7 @@ void TextureLoader::Reset()
 
 void TextureLoader::LoadDefaultData()
 {
-    LLGL::SamplerDescriptor samplerDesc;
-    samplerDesc.maxAnisotropy = 8;
-    anisotropySampler = Renderer::Get().CreateSampler(samplerDesc);
-
-    LLGL::TextureDescriptor textureDesc;
-    textureDesc.extent = { 1, 1, 1 };
+    anisotropySampler = Renderer::Get().CreateSampler({ .maxAnisotropy = 16 });
 
     constexpr unsigned char defaultData[] = { 255, 20, 147, 255 };
     constexpr unsigned char emptyData[] = { 0, 0, 0, 255 };
@@ -157,12 +152,12 @@ void TextureLoader::LoadDefaultData()
     imageView.format = LLGL::ImageFormat::RGBA;
     imageView.dataType = LLGL::DataType::UInt8;
 
-    defaultTexture = Renderer::Get().CreateTexture(textureDesc, &imageView);
+    defaultTexture = Renderer::Get().CreateTexture({ .extent = { 1, 1, 1 } }, &imageView);
 
     defaultTextureAsset = std::make_shared<TextureAsset>(defaultTexture);
     defaultTextureAsset->sampler = anisotropySampler;
 
-    LLGL::OpenGL::ResourceNativeHandle nativeHandle;
+    LLGL::OpenGL::ResourceNativeHandle nativeHandle{};
     defaultTextureAsset->texture->GetNativeHandle(&nativeHandle, sizeof(nativeHandle));
     defaultTextureAsset->nativeHandle = nativeHandle.id;
 
@@ -170,7 +165,7 @@ void TextureLoader::LoadDefaultData()
 
     imageView.data = emptyData;
 
-    emptyTexture = Renderer::Get().CreateTexture(textureDesc, &imageView);
+    emptyTexture = Renderer::Get().CreateTexture({ .extent = { 1, 1, 1 } }, &imageView);
 
     emptyTextureAsset = std::make_shared<TextureAsset>(emptyTexture);
     emptyTextureAsset->sampler = anisotropySampler;

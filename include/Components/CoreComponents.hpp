@@ -185,7 +185,7 @@ public:
     LLGL::PipelineState* shadowMapPipeline{};
 
     // Make it a single light space matrix
-    glm::mat4 projection;
+    glm::mat4 projection{};
 
 private:
     void CreateDepth(const LLGL::Extent2D& resolution);

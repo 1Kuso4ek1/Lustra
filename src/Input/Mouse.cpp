@@ -3,6 +3,13 @@
 namespace lustra::Mouse
 {
 
+glm::vec2 Scroll::offset = {};
+
+void ScrollCallback(GLFWwindow* window, double x, double y)
+{
+    Scroll::offset = { x, y };
+}
+
 void SetCursorVisible(const bool visible)
 {
     glfwSetInputMode(Window::GetLastCreatedGLFWWindow(), GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);

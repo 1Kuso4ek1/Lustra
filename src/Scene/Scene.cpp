@@ -475,8 +475,8 @@ void Scene::SetupCamera()
 
             cameraPosition = cameraTransform.position;
 
-            Listener::Get().SetPosition(cameraPosition);
-            Listener::Get().SetOrientation(glm::radians(cameraTransform.rotation));
+            Listener::SetPosition(cameraPosition);
+            Listener::SetOrientation(glm::radians(cameraTransform.rotation));
         }
     }
 

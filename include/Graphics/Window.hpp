@@ -16,6 +16,14 @@
 #include <LLGL/Surface.h>
 #include <LLGL/Platform/NativeHandle.h>
 
+// Windows.h macros that interfere with fields and methods of some classes
+#ifdef _WIN32
+    #undef CreateWindow
+    #undef near
+    #undef far
+    #undef AddJob
+#endif
+
 namespace lustra
 {
 

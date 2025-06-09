@@ -4,6 +4,12 @@
 #include <future>
 #include <vector>
 
+// Jesus Christ, ANOTHER Windows compatibility bullshit.
+// TODO: Resolve dependencies so the Windows.h doesn't get included in non-related files
+#ifdef _WIN32
+    #undef AddJob
+#endif
+
 using namespace std::chrono_literals;
 
 namespace lustra

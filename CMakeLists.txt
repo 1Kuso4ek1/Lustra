@@ -77,6 +77,7 @@ set(
 set(
     EXTERNAL_INCLUDE_DIRS
 
+	libraries/cereal/include
     libraries/stb
     libraries/imgui
     libraries/imgui/backends
@@ -157,6 +158,14 @@ target_link_libraries(
     ${ANGELSCRIPT_LIBRARY_NAME}
     miniaudio
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if(MSVC)
+		target_compile_options(Engine PRIVATE /bigobj)
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND WIN32)
+		target_compile_options(Engine PRIVATE "-Wa,-mbig-obj")
+	endif()
+endif()
 
 add_executable(
     Editor

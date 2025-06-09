@@ -38,7 +38,7 @@ void Editor::DrawAssetBrowser()
     const float regionWidth = ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
     const int cols = std::max(1, static_cast<int>(regionWidth / 128.0f));
 
-    ImGui::Text("%s", currentDirectory.c_str());
+    ImGui::Text("%s", currentDirectory.string().c_str());
 
     ImGui::SameLine();
 
@@ -57,7 +57,7 @@ void Editor::DrawAssetBrowser()
 
     for(const auto& entry : std::filesystem::directory_iterator(currentDirectory))
     {
-        ImGui::PushID(entry.path().c_str());
+        ImGui::PushID(entry.path().string().c_str());
 
         if(entry.is_directory())
         {
@@ -75,8 +75,7 @@ void Editor::DrawAssetBrowser()
         {
             if(filter.empty() || entry.path().filename().string().find(filter) != std::string::npos)
             {
-                auto it = assets.find(entry.path());
-                if(it != assets.end())
+                if(auto it = assets.find(entry.path()); it != assets.end())
                     DrawAsset(entry.path(), it->second.second);
                 else
                     DrawUnloadedAsset(entry.path());

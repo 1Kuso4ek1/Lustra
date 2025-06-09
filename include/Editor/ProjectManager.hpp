@@ -18,7 +18,7 @@ public:
     static bool IsProjectOpened();
 
 private:
-    void CreateProject(const std::filesystem::path& path);
+    void CreateProject(const std::filesystem::path& path) const;
 
 private:
     std::vector<std::filesystem::path> recentProjects;

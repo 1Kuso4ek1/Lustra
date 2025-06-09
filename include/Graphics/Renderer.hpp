@@ -12,6 +12,9 @@
 namespace lustra
 {
 
+template<class T>
+concept LLGLResource = requires { std::is_base_of<T, LLGL::Resource>(); };
+
 class Renderer final : public Singleton<Renderer>
 {
 public: // Public methods
@@ -38,12 +41,8 @@ public: // Public methods
 
     void GenerateMips(LLGL::Texture* texture);
 
-    // BRUH
-    template<class T>
-    void Release(T* resource)
-    {
-        renderSystem->Release(*resource);
-    }
+    template<LLGLResource T>
+    void Release(T* resource) { renderSystem->Release(*resource); }
 
     void Unload();
 

@@ -219,7 +219,8 @@ LLGL::Buffer* Renderer::CreateBuffer(const std::string& name, const LLGL::Buffer
 
 LLGL::Shader* Renderer::CreateShader(const LLGL::ShaderType& type, const std::filesystem::path& path, const std::vector<LLGL::VertexAttribute>& attributes) const
 {
-    LLGL::ShaderDescriptor shaderDesc = { type, path.c_str() };
+    const auto strPath = path.string();
+    LLGL::ShaderDescriptor shaderDesc{ type, strPath.c_str() };
 
     if(type == LLGL::ShaderType::Vertex)
         shaderDesc.vertex.inputAttribs = attributes.empty() ? defaultVertexFormat.attributes : attributes;

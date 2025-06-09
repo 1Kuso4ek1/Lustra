@@ -5,7 +5,7 @@ namespace fs = std::filesystem;
 bool ProjectManager::projectOpened = false;
 
 ProjectManager::ProjectManager()
-    : lustra::Application(lustra::Config{
+    : Application(lustra::Config{
         .resolution = { 1280, 720 },
         .vsync = true,
         .title = "Lustra project manager",
@@ -20,10 +20,8 @@ ProjectManager::~ProjectManager()
 {
     lustra::AssetManager::Get().Unload(logo->path);
     lustra::AssetManager::Get().RemoveLoader<lustra::TextureAsset>();
-    
-    std::ofstream file(EDITOR_ROOT"/resources/config/recent.json");
 
-    if(file.is_open())
+    if(std::ofstream file(EDITOR_ROOT"/resources/config/recent.json"); file.is_open())
     {
         cereal::JSONOutputArchive archive(file);
 
@@ -38,7 +36,7 @@ void ProjectManager::Stop()
 {
     projectOpened = true;
 
-    lustra::Application::Stop();
+    Application::Stop();
 }
 
 void ProjectManager::Init()
@@ -75,7 +73,7 @@ void ProjectManager::RenderImGui()
 {
     lustra::Renderer::Get().ClearRenderTarget();
     
-    lustra::ImGuiManager::Get().NewFrame();
+    lustra::ImGuiManager::NewFrame();
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
@@ -100,14 +98,22 @@ void ProjectManager::RenderImGui()
     if(ImGui::Button("New Project", ImVec2(200.0f, 40.0f))) {
         showCreatePopup = true;
         newProjectName.clear();
+#ifdef _WIN32
+        newProjectPath = getenv("USERPROFILE");
+#else
         newProjectPath = getenv("HOME");
+#endif
     }
     
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200.0f) * 0.5f);
     if(ImGui::Button("Open Project", ImVec2(200.0f, 40.0f))) {
         showOpenPopup = true;
         newProjectName.clear();
+#ifdef _WIN32
+        newProjectPath = getenv("USERPROFILE");
+#else
         newProjectPath = getenv("HOME");
+#endif
     }
 
     ImGui::PopStyleColor(2);
@@ -190,7 +196,7 @@ void ProjectManager::RenderImGui()
 
             if(ImGui::Button("Browse...")) { /* use https://github.com/samhocevar/portable-file-dialogs.git? */ }
 
-            bool canOpen = !newProjectPath.empty() && fs::exists(newProjectPath);
+            const bool canOpen = !newProjectPath.empty() && fs::exists(newProjectPath);
             if(!canOpen)
                 ImGui::BeginDisabled();
 
@@ -198,8 +204,7 @@ void ProjectManager::RenderImGui()
             {
                 fs::current_path(newProjectPath);
 
-                auto it = std::find(recentProjects.begin(), recentProjects.end(), newProjectPath);
-                if(it != recentProjects.end())
+                if(const auto it = std::ranges::find(recentProjects, newProjectPath); it != recentProjects.end())
                     recentProjects.erase(it);
 
                 recentProjects.insert(recentProjects.begin(), fs::path(newProjectPath));
@@ -230,9 +235,9 @@ void ProjectManager::RenderImGui()
     ImGui::Text("Recent Projects");
 
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-    const ImVec4 evenColor = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
-    const ImVec4 oddColor = ImVec4(0.16f, 0.16f, 0.16f, 1.0f);
-    const ImVec4 hoverColor = ImVec4(0.5, 0.5f, 0.5f, 0.5f);
+    constexpr auto evenColor = ImVec4(0.13f, 0.13f, 0.13f, 1.0f);
+    constexpr auto oddColor = ImVec4(0.16f, 0.16f, 0.16f, 1.0f);
+    constexpr auto hoverColor = ImVec4(0.5, 0.5f, 0.5f, 0.5f);
 
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 500.0f) * 0.5f);
     ImGui::BeginChild("Recent projects", { 500.0f, 200 }, ImGuiChildFlags_FrameStyle);
@@ -293,7 +298,7 @@ void ProjectManager::RenderImGui()
     ImGui::End();
     ImGui::PopStyleVar();
 
-    lustra::ImGuiManager::Get().Render();
+    lustra::ImGuiManager::Render();
 }
 
 bool ProjectManager::IsProjectOpened()
@@ -301,7 +306,7 @@ bool ProjectManager::IsProjectOpened()
     return projectOpened;
 }
 
-void ProjectManager::CreateProject(const fs::path& path)
+void ProjectManager::CreateProject(const fs::path& path) const
 {
     fs::create_directory(path);
     fs::create_directory(path / "assets");

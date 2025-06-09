@@ -1,4 +1,5 @@
 #include <Camera.hpp>
+#include <Window.hpp>
 
 namespace lustra
 {

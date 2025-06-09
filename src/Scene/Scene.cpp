@@ -605,17 +605,16 @@ void Scene::RenderMeshes()
 
 void Scene::RenderToShadowMap()
 {
-    Renderer::Get().Begin();
-
+    // TODO: What??? It segfaults on Windows...
     const auto meshesView =
         registry.view<
             TransformComponent,
-            MeshComponent,
-            MeshRendererComponent,
-            PipelineComponent
+            MeshComponent
         >(entt::exclude<PrefabComponent>);
 
     const auto lightsView = registry.view<LightComponent, TransformComponent>(entt::exclude<PrefabComponent>);
+
+    Renderer::Get().Begin();
 
     for(const auto light : lightsView)
     {
@@ -633,8 +632,8 @@ void Scene::RenderToShadowMap()
 
             for(const auto mesh : meshesView)
             {
-                auto [transform, meshComp, meshRenderer, pipeline] =
-                        meshesView.get<TransformComponent, MeshComponent, MeshRendererComponent, PipelineComponent>(mesh);
+                auto [transform, meshComp] =
+                        meshesView.get<TransformComponent, MeshComponent>(mesh);
 
                 Renderer::Get().GetMatrices()->PushMatrix();
                 Renderer::Get().GetMatrices()->GetModel() = GetWorldTransform(mesh);

@@ -204,7 +204,9 @@ void ProjectManager::RenderImGui()
             {
                 fs::current_path(newProjectPath);
 
-                if(const auto it = std::ranges::find(recentProjects, newProjectPath); it != recentProjects.end())
+                const auto it = std::find(recentProjects.begin(), recentProjects.end(), newProjectPath);
+
+                if(it != recentProjects.end())
                     recentProjects.erase(it);
 
                 recentProjects.insert(recentProjects.begin(), fs::path(newProjectPath));

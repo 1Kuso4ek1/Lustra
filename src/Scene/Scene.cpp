@@ -605,7 +605,6 @@ void Scene::RenderMeshes()
 
 void Scene::RenderToShadowMap()
 {
-    // TODO: What??? It segfaults on Windows...
     const auto meshesView =
         registry.view<
             TransformComponent,

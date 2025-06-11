@@ -113,8 +113,19 @@ bool Window::GetNativeHandle(void* nativeHandle, const size_t size)
         #elif __APPLE__
             nativeHandlePtr->responder = glfwGetCocoaWindow(window);
         #elif __linux__
-            nativeHandlePtr->window = glfwGetX11Window(window);
-            nativeHandlePtr->display = glfwGetX11Display();
+            #ifdef LLGL_LINUX_ENABLE_WAYLAND
+                if(getenv("WAYLAND_DISPLAY"))
+                {
+                    nativeHandlePtr->wayland.window = glfwGetWaylandWindow(window);
+                    nativeHandlePtr->wayland.display = glfwGetWaylandDisplay();
+                }
+                else
+            #else
+                {
+                    nativeHandlePtr->x11.window = glfwGetX11Window(window);
+                    nativeHandlePtr->x11.display = glfwGetX11Display();
+                }
+            #endif
         #endif
 
         return true;

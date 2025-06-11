@@ -50,6 +50,8 @@ public: // Public methods
 
     void SetViewportResolution(const LLGL::Extent2D& resolution);
 
+    void PrintRendererInfo() const;
+
     LLGL::Extent2D GetViewportResolution() const;
 
     LLGL::Buffer* CreateBuffer(const LLGL::BufferDescriptor& bufferDesc, const void* initialData = nullptr) const;

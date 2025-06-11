@@ -6,6 +6,10 @@
     #define GLFW_EXPOSE_NATIVE_COCOA
 #elif __linux__
     #define GLFW_EXPOSE_NATIVE_X11
+
+    #ifdef LLGL_LINUX_ENABLE_WAYLAND
+        #define GLFW_EXPOSE_NATIVE_WAYLAND
+    #endif
 #endif
 
 #include <EventManager.hpp>

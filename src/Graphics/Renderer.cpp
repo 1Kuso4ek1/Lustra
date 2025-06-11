@@ -28,26 +28,6 @@ void Renderer::Init()
         return;
     }
 
-    const LLGL::RendererInfo& info = renderSystem->GetRendererInfo();
-
-    LLGL::Log::Printf(
-        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue,
-        "Render system:\n"
-    );
-
-    LLGL::Log::Printf(
-        LLGL::Log::ColorFlags::Blue,
-        "*  Graphics API:       %s\n"
-        "*  Device:             %s\n"
-        "*  Vendor:             %s\n"
-        "*  Shading language:   %s\n"
-        "\n",
-        info.rendererName.c_str(),
-        info.deviceName.c_str(),
-        info.vendorName.c_str(),
-        info.shadingLanguageName.c_str()
-    );
-
     if(!matrices)
         matrices = std::make_shared<Matrices>();
 }
@@ -191,6 +171,29 @@ void Renderer::WriteTexture(LLGL::Texture& texture, const LLGL::TextureRegion& t
 void Renderer::SetViewportResolution(const LLGL::Extent2D& resolution)
 {
     viewportResolution = resolution;
+}
+
+void Renderer::PrintRendererInfo() const
+{
+    const LLGL::RendererInfo& info = renderSystem->GetRendererInfo();
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Bold | LLGL::Log::ColorFlags::Blue,
+        "Render system:\n"
+    );
+
+    LLGL::Log::Printf(
+        LLGL::Log::ColorFlags::Blue,
+        "*  Graphics API:       %s\n"
+        "*  Device:             %s\n"
+        "*  Vendor:             %s\n"
+        "*  Shading language:   %s\n"
+        "\n",
+        info.rendererName.c_str(),
+        info.deviceName.c_str(),
+        info.vendorName.c_str(),
+        info.shadingLanguageName.c_str()
+    );
 }
 
 LLGL::Extent2D Renderer::GetViewportResolution() const

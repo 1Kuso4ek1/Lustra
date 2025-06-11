@@ -72,7 +72,7 @@ void ProjectManager::Render() {}
 void ProjectManager::RenderImGui()
 {
     lustra::Renderer::Get().ClearRenderTarget();
-    
+
     lustra::ImGuiManager::NewFrame();
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
@@ -94,7 +94,7 @@ void ProjectManager::RenderImGui()
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.4f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.26f, 0.59f, 0.98f, 0.6f));
-    
+
     if(ImGui::Button("New Project", ImVec2(200.0f, 40.0f))) {
         showCreatePopup = true;
         newProjectName.clear();
@@ -104,7 +104,7 @@ void ProjectManager::RenderImGui()
         newProjectPath = getenv("HOME");
 #endif
     }
-    
+
     ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200.0f) * 0.5f);
     if(ImGui::Button("Open Project", ImVec2(200.0f, 40.0f))) {
         showOpenPopup = true;
@@ -135,10 +135,10 @@ void ProjectManager::RenderImGui()
 
             ImGui::TextDisabled("(a folder \"%s\" will be created in this directory)", newProjectName.c_str());
 
-            bool canCreate = !newProjectName.empty() && !newProjectPath.empty() && fs::exists(newProjectPath);
+            const bool canCreate = !newProjectName.empty() && !newProjectPath.empty() && fs::exists(newProjectPath);
             if(!canCreate)
                 ImGui::BeginDisabled();
-            
+
             if(ImGui::Button("Create"))
             {
                 try
@@ -149,7 +149,7 @@ void ProjectManager::RenderImGui()
 
                     fs::current_path(path);
 
-                    auto it = std::find(recentProjects.begin(), recentProjects.end(), path);
+                    const auto it = std::ranges::find(recentProjects, path);
                     if(it != recentProjects.end())
                         recentProjects.erase(it);
 
@@ -171,7 +171,7 @@ void ProjectManager::RenderImGui()
 
             if(!canCreate)
                 ImGui::EndDisabled();
-            
+
             ImGui::SameLine();
 
             if(ImGui::Button("Cancel"))
@@ -187,7 +187,7 @@ void ProjectManager::RenderImGui()
     if(showOpenPopup)
     {
         ImGui::OpenPopup("Open Project");
-        
+
         if(ImGui::BeginPopupModal("Open Project", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::InputText("Project Path", &newProjectPath);
@@ -322,7 +322,7 @@ void ProjectManager::CreateProject(const fs::path& path) const
             path / "assets" / file,
             fs::copy_options::overwrite_existing
         );
-    
+
     for(auto& shader : fs::directory_iterator(EDITOR_ROOT / fs::path("resources/shaders")))
     {
         if(shader.is_regular_file())

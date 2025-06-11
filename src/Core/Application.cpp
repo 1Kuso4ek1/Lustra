@@ -18,6 +18,8 @@ Application::Application(const Config& config) : config(config)
 
     Renderer::Get().InitSwapChain(window);
 
+    Renderer::Get().PrintRendererInfo();
+
     if(config.vsync)
         Renderer::Get().GetSwapChain()->SetVsyncInterval(1);
 

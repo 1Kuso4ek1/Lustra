@@ -22,6 +22,12 @@
 - Scripting with **Angelscript**
 - And much more...
 
+## Editor showcase
+> A fairly complex scene with lots of light sources with shadows, rigid bodies and reflective materials
+> ![](resources/screenshots/scr1.png)
+> The same scene after playing around with physics
+> ![](resources/screenshots/scr2.png)
+
 ## Building
 Every direct dependency is included within this repository as a submodule:
 ```bash

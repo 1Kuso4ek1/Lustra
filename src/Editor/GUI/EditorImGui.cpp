@@ -123,7 +123,7 @@ void Editor::DrawSceneTree()
         if(CheckShortcut({ lustra::Keyboard::Key::LeftControl, lustra::Keyboard::Key::V }))
         {
             if(buffer)
-                list.push_back(scene->CloneEntity(buffer));
+                list.push_back(selectedEntity = scene->CloneEntity(buffer));
 
             keyboardTimer.Reset();
         }
@@ -324,15 +324,18 @@ void Editor::DrawImGuizmoControls()
 {
     ImGui::Begin("ImGuizmo Controls");
 
-    if(ImGui::RadioButton("Translate", currentOperation == ImGuizmo::OPERATION::TRANSLATE))
+    if(ImGui::RadioButton("Translate", currentOperation == ImGuizmo::OPERATION::TRANSLATE)
+        || CheckShortcut({ lustra::Keyboard::Key::LeftAlt, lustra::Keyboard::Key::T }))
         currentOperation = ImGuizmo::OPERATION::TRANSLATE;
 
     ImGui::SameLine();
-    if(ImGui::RadioButton("Rotate", currentOperation == ImGuizmo::OPERATION::ROTATE))
+    if(ImGui::RadioButton("Rotate", currentOperation == ImGuizmo::OPERATION::ROTATE)
+        || CheckShortcut({ lustra::Keyboard::Key::LeftAlt, lustra::Keyboard::Key::R }))
         currentOperation = ImGuizmo::OPERATION::ROTATE;
 
     ImGui::SameLine();
-    if(ImGui::RadioButton("Scale", currentOperation == ImGuizmo::OPERATION::SCALE))
+    if(ImGui::RadioButton("Scale", currentOperation == ImGuizmo::OPERATION::SCALE)
+        || CheckShortcut({ lustra::Keyboard::Key::LeftAlt, lustra::Keyboard::Key::S }))
         currentOperation = ImGuizmo::OPERATION::SCALE;
 
     ImGui::DragFloat3("Snap", snap, 0.1f, 0.0f, 45.0f);

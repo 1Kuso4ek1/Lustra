@@ -165,12 +165,10 @@ vec3 ApplySSR(vec3 color, vec2 texelSize)
 
 vec3 ApplyColorGrading(vec3 color)
 {
-    float lumaA = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    float lumaB = dot(colorGrading, vec3(0.2126, 0.7152, 0.0722));
-    
-    vec3 mixed = mix(color, colorGrading, colorGradingIntensity);
+    const vec3 lumaWeights = vec3(0.2126, 0.7152, 0.0722);
+    float luma = dot(color, lumaWeights);
 
-    color = mixed * (mix(lumaA, lumaB, colorGradingIntensity) / (dot(mixed, vec3(0.2126, 0.7152, 0.0722)) + 1e-5));
+    color = mix(color, luma * colorGrading, colorGradingIntensity);
 
     color *= brightness;
 

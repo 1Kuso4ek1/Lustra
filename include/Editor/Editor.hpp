@@ -79,7 +79,7 @@ private:
 
 private:
     ImGuizmo::OPERATION currentOperation = ImGuizmo::OPERATION::TRANSLATE;
-    float snap[3] = { 1.0f, 1.0f, 1.0f };
+    float snap[3] = { 0.5f, 0.5f, 0.5f };
 
 private:
     bool canMoveCamera = false;

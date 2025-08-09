@@ -6,25 +6,47 @@ void Editor::LoadIcons()
 
     lustra::AssetManager::Get().SetAssetsDirectory(EDITOR_ROOT / std::filesystem::path("resources"));
 
-    fileIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/file.png", true);
-    folderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/folder.png", true);
-    textureIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/texture.png", true);
-    materialIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/material.png", true);
-    modelIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/model.png", true);
-    scriptIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/script.png", true);
-    sceneIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/scene.png", true);
+    const auto fileIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/file.png", true);
+    const auto folderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/folder.png", true);
+    const auto textureIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/texture.png", true);
+    const auto materialIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/material.png", true);
+    const auto modelIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/model.png", true);
+    const auto scriptIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/script.png", true);
+    const auto sceneIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/scene.png", true);
 
-    playIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/play.png", true);
-    pauseIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/pause.png", true);
-    stopIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/stop.png", true);
-    buildIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/build.png", true);
+    const auto playIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/play.png", true);
+    const auto pauseIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/pause.png", true);
+    const auto stopIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/stop.png", true);
+    const auto buildIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/build.png", true);
 
-    lightIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/light.png", true);
-    soundIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/sound.png", true);
-    cameraIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/camera.png", true);
+    const auto lightIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/light.png", true);
+    const auto soundIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/sound.png", true);
+    const auto cameraIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/camera.png", true);
 
-    vertexShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/vertexShader.png", true);
-    fragmentShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/fragmentShader.png", true);
+    const auto vertexShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/vertexShader.png", true);
+    const auto fragmentShaderIcon = lustra::AssetManager::Get().Load<lustra::TextureAsset>("icons/fragmentShader.png", true);
+
+    icons = {
+        { "file", fileIcon },
+        { "folder", folderIcon },
+        { "texture", textureIcon },
+        { "material", materialIcon },
+        { "model", modelIcon },
+        { "script", scriptIcon },
+        { "scene", sceneIcon },
+
+        { "play", playIcon },
+        { "pause", pauseIcon },
+        { "stop", stopIcon },
+        { "build", buildIcon },
+
+        { "light", lightIcon },
+        { "sound", soundIcon },
+        { "camera", cameraIcon },
+
+        { "vertexShader", vertexShaderIcon },
+        { "fragmentShader", fragmentShaderIcon }
+    };
 
     assetIcons =
     {
@@ -192,13 +214,13 @@ void Editor::UpdateEditorCameraScript()
     };
 }
 
-void Editor::SwitchScene(const lustra::SceneAssetPtr& scene)
+void Editor::SwitchScene(const lustra::SceneAssetPtr& newScene)
 {
-    this->scene = scene->scene;
+    this->scene = newScene->scene;
 
-    sceneAsset = scene;
+    sceneAsset = newScene;
 
-    if(scene->scene->GetRegistry().storage().begin() == scene->scene->GetRegistry().storage().end())
+    if(newScene->scene->GetRegistry().storage().begin() == newScene->scene->GetRegistry().storage().end())
         CreateDefaultEntities();
 
     UpdateList();

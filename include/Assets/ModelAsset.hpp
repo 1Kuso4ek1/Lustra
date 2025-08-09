@@ -6,7 +6,7 @@
 namespace lustra
 {
 
-struct ModelAsset final : public Asset
+struct ModelAsset final : Asset
 {
     ModelAsset() : Asset(Type::Model) {};
     explicit ModelAsset(const std::vector<MeshPtr>& meshes) : Asset(Type::Model), meshes(meshes) {}

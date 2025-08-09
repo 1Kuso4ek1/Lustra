@@ -6,7 +6,7 @@
 namespace lustra
 {
 
-struct VertexShaderAsset final : public Asset
+struct VertexShaderAsset final : Asset
 {
     explicit VertexShaderAsset(LLGL::Shader* shader)
         : Asset(Type::VertexShader), shader(shader) {}
@@ -14,7 +14,7 @@ struct VertexShaderAsset final : public Asset
     LLGL::Shader* shader{};
 };
 
-struct FragmentShaderAsset final : public Asset
+struct FragmentShaderAsset final : Asset
 {
     explicit FragmentShaderAsset(LLGL::Shader* shader)
         : Asset(Type::FragmentShader), shader(shader) {}

@@ -5,12 +5,17 @@
 #include <LLGL/Sampler.h>
 #include <LLGL/Texture.h>
 
+#ifdef __linux__
+    // Workaround for an issue with "unknown type name 'Status'" in the glxext.h
+    #define Status int
+#endif
+
 #include <LLGL/Backend/OpenGL/NativeHandle.h>
 
 namespace lustra
 {
 
-struct TextureAsset final : public Asset
+struct TextureAsset final : Asset
 {
     TextureAsset(const LLGL::TextureDescriptor& textureDesc, const LLGL::ImageView* imageView)
         : Asset(Type::Texture), textureDesc(textureDesc)

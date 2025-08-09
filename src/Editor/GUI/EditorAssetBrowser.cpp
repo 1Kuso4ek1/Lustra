@@ -63,7 +63,7 @@ void Editor::DrawAssetBrowser()
         {
             if(filter.empty() || entry.path().filename().string().find(filter) != std::string::npos)
             {
-                if(ImGui::ImageButton("##Directory", folderIcon->nativeHandle, ImVec2(128.0f, 128.0f)))
+                if(ImGui::ImageButton("##Directory", icons.at("folder")->nativeHandle, ImVec2(128.0f, 128.0f)))
                     currentDirectory = entry.path();
 
                 ImGui::Text("%s", entry.path().filename().string().c_str());
@@ -146,14 +146,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         {
             const auto model = std::dynamic_pointer_cast<lustra::ModelAsset>(asset);
 
-            ImGui::ImageButton("##Asset", modelIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("model")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &model;
 
                 ImGui::SetDragDropPayload("MODEL", payload, 8);
-                ImGui::Image(modelIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("model")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Model: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -166,14 +166,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         {
             const auto script = std::dynamic_pointer_cast<lustra::ScriptAsset>(asset);
 
-            ImGui::ImageButton("##Asset", scriptIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("script")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &script;
 
                 ImGui::SetDragDropPayload("SCRIPT", payload, 8);
-                ImGui::Image(scriptIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("script")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Script: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -186,14 +186,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         {
             const auto scene = std::dynamic_pointer_cast<lustra::SceneAsset>(asset);
 
-            ImGui::ImageButton("##Asset", sceneIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("scene")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &scene;
 
                 ImGui::SetDragDropPayload("SCENE", payload, 8);
-                ImGui::Image(scriptIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("scene")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Scene: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -205,14 +205,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         case lustra::Asset::Type::Sound:
         {
             const auto sound = std::dynamic_pointer_cast<lustra::SoundAsset>(asset);
-            ImGui::ImageButton("##Asset", soundIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("sound")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &sound;
 
                 ImGui::SetDragDropPayload("SOUND", payload, 8);
-                ImGui::Image(soundIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("sound")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Sound: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -224,14 +224,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         case lustra::Asset::Type::VertexShader:
         {
             const auto shader = std::dynamic_pointer_cast<lustra::VertexShaderAsset>(asset);
-            ImGui::ImageButton("##Asset", vertexShaderIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("vertexShader")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &shader;
 
                 ImGui::SetDragDropPayload("VS", payload, 8);
-                ImGui::Image(vertexShaderIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("vertexShader")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Vertex shader: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();
@@ -243,14 +243,14 @@ void Editor::DrawAsset(const std::filesystem::path& entry, const lustra::AssetPt
         case lustra::Asset::Type::FragmentShader:
         {
             const auto shader = std::dynamic_pointer_cast<lustra::FragmentShaderAsset>(asset);
-            ImGui::ImageButton("##Asset", fragmentShaderIcon->nativeHandle, ImVec2(128.0f, 128.0f));
+            ImGui::ImageButton("##Asset", icons.at("fragmentShader")->nativeHandle, ImVec2(128.0f, 128.0f));
 
             if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
                 const auto payload = &shader;
 
                 ImGui::SetDragDropPayload("FS", payload, 8);
-                ImGui::Image(fragmentShaderIcon->nativeHandle, ImVec2(64,64));
+                ImGui::Image(icons.at("fragmentShader")->nativeHandle, ImVec2(64,64));
                 ImGui::Text("Fragment shader: %s", entry.filename().string().c_str());
 
                 ImGui::EndDragDropSource();

@@ -10,7 +10,7 @@
 namespace lustra
 {
 
-struct MaterialAsset final : public Asset
+struct MaterialAsset final : Asset
 {
     struct Property
     {

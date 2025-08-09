@@ -144,6 +144,15 @@ add_library(
     ${ANGELSCRIPT_ADD_ON_SOURCES}
 )
 
+add_subdirectory(libraries/glfw)
+add_subdirectory(libraries/glm)
+add_subdirectory(libraries/LLGL)
+add_subdirectory(libraries/assimp)
+add_subdirectory(libraries/JoltPhysics/Build)
+add_subdirectory(libraries/Angelscript/sdk/angelscript/projects/cmake)
+add_subdirectory(libraries/cereal)
+add_subdirectory(libraries/miniaudio)
+
 target_include_directories(Engine PUBLIC ${INCLUDE_DIRS})
 target_link_libraries(
     Engine
@@ -186,16 +195,7 @@ set_target_properties(Editor Launcher Engine PROPERTIES CXX_STANDARD 20 CXX_STAN
 include_directories(${INCLUDE_DIRS})
 
 target_include_directories(Editor PUBLIC include)
-target_link_libraries(Editor Engine)
+target_link_libraries(Editor PUBLIC Engine)
 
 target_include_directories(Launcher PUBLIC include)
-target_link_libraries(Launcher Engine)
-
-add_subdirectory(libraries/glfw)
-add_subdirectory(libraries/glm)
-add_subdirectory(libraries/LLGL)
-add_subdirectory(libraries/assimp)
-add_subdirectory(libraries/JoltPhysics/Build)
-add_subdirectory(libraries/Angelscript/sdk/angelscript/projects/cmake)
-add_subdirectory(libraries/cereal)
-add_subdirectory(libraries/miniaudio)
+target_link_libraries(Launcher PUBLIC Engine)

@@ -4,7 +4,7 @@
 namespace lustra
 {
 
-struct ScriptAsset final : public Asset
+struct ScriptAsset final : Asset
 {
     ScriptAsset() : Asset(Type::Script) {}
 

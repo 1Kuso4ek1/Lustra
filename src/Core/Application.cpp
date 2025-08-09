@@ -14,7 +14,7 @@ Application::Application(const Config& config) : config(config)
     Renderer::Get().Init();
 
     if(!Renderer::Get().IsInit())
-        return;
+        exit(EXIT_FAILURE);
 
     Renderer::Get().InitSwapChain(window);
 

@@ -6,7 +6,7 @@
 namespace lustra
 {
 
-struct EnvironmentAsset final : public Asset
+struct EnvironmentAsset final : Asset
 {
     EnvironmentAsset() : Asset(Type::Environment) {}
 

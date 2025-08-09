@@ -413,7 +413,7 @@ void Editor::DrawExecutionControl()
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
     }
 
-    if(ImGui::ImageButton("##Play", playIcon->nativeHandle, { 20, 20 }))
+    if(ImGui::ImageButton("##Play", icons.at("play")->nativeHandle, { 20, 20 }))
     {
         // Save scene state
         if(!paused)
@@ -443,7 +443,7 @@ void Editor::DrawExecutionControl()
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
     }
 
-    if(ImGui::ImageButton("##Pause", pauseIcon->nativeHandle, { 20, 20 }))
+    if(ImGui::ImageButton("##Pause", icons.at("pause")->nativeHandle, { 20, 20 }))
     {
         paused = true;
         scene->SetIsRunning(false);
@@ -462,7 +462,7 @@ void Editor::DrawExecutionControl()
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
     }
 
-    if(ImGui::ImageButton("##Stop", stopIcon->nativeHandle, { 20, 20 }))
+    if(ImGui::ImageButton("##Stop", icons.at("stop")->nativeHandle, { 20, 20 }))
     {
         playing = false;
         paused = false;
@@ -488,7 +488,7 @@ void Editor::DrawExecutionControl()
 
     ImGui::SameLine();
 
-    if(ImGui::ImageButton("##Build", buildIcon->nativeHandle, { 20, 20 }))
+    if(ImGui::ImageButton("##Build", icons.at("build")->nativeHandle, { 20, 20 }))
         lustra::ScriptManager::Get().Build();
 
     ImGui::End();
@@ -593,7 +593,7 @@ void Editor::DrawOnScreenIcons()
             lustra::TransformComponent transform;
             transform.SetTransform(scene->GetWorldTransform(entity));
 
-            drawOnScreen(transform.position, static_cast<int>(entity), lightIcon, light.color);
+            drawOnScreen(transform.position, static_cast<int>(entity), icons.at("light"), light.color);
         }
 
         for(auto entity : sounds)
@@ -601,7 +601,7 @@ void Editor::DrawOnScreenIcons()
             lustra::TransformComponent transform;
             transform.SetTransform(scene->GetWorldTransform(entity));
 
-            drawOnScreen(transform.position, static_cast<int>(entity), soundIcon);
+            drawOnScreen(transform.position, static_cast<int>(entity), icons.at("sound"));
         }
 
         for(auto entity : cameras)
@@ -614,7 +614,7 @@ void Editor::DrawOnScreenIcons()
             lustra::TransformComponent transform;
             transform.SetTransform(scene->GetWorldTransform(entity));
 
-            drawOnScreen(transform.position, static_cast<int>(entity), cameraIcon);
+            drawOnScreen(transform.position, static_cast<int>(entity), icons.at("camera"));
         }
     }
 }

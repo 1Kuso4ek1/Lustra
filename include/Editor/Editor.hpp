@@ -33,7 +33,7 @@ private:
     void UpdateList();
     void UpdateEditorCameraScript();
 
-    void SwitchScene(const lustra::SceneAssetPtr& scene);
+    void SwitchScene(const lustra::SceneAssetPtr& newScene);
 
     void CreateModelEntity(const lustra::ModelAssetPtr& model, bool relativeToCamera = false);
 
@@ -104,13 +104,6 @@ private:
 private:
     lustra::AssetPtr selectedAsset;
 
-    lustra::TextureAssetPtr texture, metal, wood,
-                            fileIcon, folderIcon, textureIcon,
-                            materialIcon, modelIcon, scriptIcon,
-                            playIcon, pauseIcon, stopIcon,
-                            buildIcon, lightIcon, sceneIcon,
-                            soundIcon, vertexShaderIcon, fragmentShaderIcon,
-                            cameraIcon;
-
+    std::unordered_map<std::string, lustra::TextureAssetPtr> icons;
     std::unordered_map<lustra::Asset::Type, lustra::TextureAssetPtr> assetIcons;
 };

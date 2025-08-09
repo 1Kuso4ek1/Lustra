@@ -28,6 +28,7 @@ public:
     {
         return std::uniform_int_distribution(min, max)(generator);
     }
+
 private:
     friend class Singleton<Random>;
 

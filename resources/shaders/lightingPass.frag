@@ -138,6 +138,24 @@ float CalculateShadows(vec4 position)
     return ret;
 }
 
+// https://github.com/glslify/glsl-diffuse-oren-nayar
+float OrenNayarDiffuse(
+    float LdotV,
+    float NdotV,
+    float NdotL,
+    float roughness,
+    float albedo
+) {
+    float s = LdotV - NdotL * NdotV;
+    float t = mix(1.0, max(max(NdotL, NdotV), 0.001), step(0.0, s));
+
+    float sigma2 = pow(roughness, 2.0);
+    float A = 1.0 + sigma2 * (albedo / (sigma2 + 0.13) + 0.5 / (sigma2 + 0.33));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    return albedo * max(0.0, NdotL) * (A + B * s / t) / PI;
+}
+
 vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, float metallic, float roughness)
 {
     float theta = dot(normalize(lights[index].position - worldPosition), normalize(-lights[index].direction));
@@ -161,8 +179,12 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);
 
+    float LdotV = max(dot(L, V), 0.0);
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
+
+    float luminance = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+    float orenNayar = OrenNayarDiffuse(LdotV, NdotV, NdotL, roughness, luminance);
 
     vec3 numerator = NDF * G * F;
     float denominator = 4.0 * NdotV * NdotL + 0.0001;
@@ -171,8 +193,10 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
 
     vec3 kS = F;
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
-    
-    return (kD * albedo / PI + specular) * radiance * NdotL;
+
+    vec3 diffuse = kD * orenNayar * (luminance > 0.001 ? albedo / luminance : albedo);
+
+    return (diffuse + specular) * radiance;
 }
 
 void CalculateLights(

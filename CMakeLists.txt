@@ -159,6 +159,7 @@ target_link_libraries(
 
     assimp
     LLGL
+	LLGL_OpenGL # Just so the OpenGL module compiles alongside with the Engine target
     Threads::Threads
     stdc++fs
     glm

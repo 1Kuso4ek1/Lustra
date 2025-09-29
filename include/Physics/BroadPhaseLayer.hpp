@@ -35,7 +35,7 @@ public:
 	}
 
 private:
-	JPH::BroadPhaseLayer mObjectToBroadPhase[Layers::numLayers];
+	JPH::BroadPhaseLayer mObjectToBroadPhase[Layers::numLayers]{};
 };
 
 }

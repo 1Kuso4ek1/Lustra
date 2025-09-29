@@ -109,11 +109,11 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
 
     A /= float(sampleCount);
     B /= float(sampleCount);
-    
+
     return vec2(A, B);
 }
 
-void main() 
+void main()
 {
     fragColor = vec4(IntegrateBRDF(coord.x, coord.y), 0.0, 1.0);
 }

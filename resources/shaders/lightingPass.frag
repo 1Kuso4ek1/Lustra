@@ -1,5 +1,11 @@
 #version 460 core
 
+#define LAMBERT_DIFFUSE 0
+#define OREN_NAYAR_DIFFUSE 1
+#define BURLEY_DIFFUSE 2
+
+#define DIFFUSE_METHOD BURLEY_DIFFUSE
+
 const float PI = 3.14159265359;
 
 const float maxReflectionLod = 8.0;
@@ -16,7 +22,7 @@ struct Light
     vec3 position;
     vec3 direction;
     vec3 color;
-    
+
     float intensity, cutoff, outerCutoff;
 };
 
@@ -67,6 +73,11 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+float FresnelSchlick(float f0, float f90, float VdotH)
+{
+    return f0 + (f90 - f0) * pow(1.0 - VdotH, 5.0);
+}
+
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
@@ -78,11 +89,11 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
     float a2 = a * a;
     float NdotH = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
-	
+
     float num = a2;
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
-	
+
     return num / denom;
 }
 
@@ -93,7 +104,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
     float num = NdotV;
     float denom = NdotV * (1.0 - k) + k;
-	
+
     return num / denom;
 }
 
@@ -104,7 +115,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
     float ggx1 = GeometrySchlickGGX(NdotL, roughness);
     float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-	
+
     return ggx1 * ggx2;
 }
 
@@ -117,7 +128,7 @@ float CalculateShadow(int index, vec4 position)
 
     if(projCoords.z > 1.0)
         return 0.0;
-    
+
     projCoords.z -= shadows[index].bias;
 
     return 1.0 - texture(shadowMaps[index], projCoords);
@@ -130,7 +141,7 @@ float CalculateShadows(vec4 position)
     for(int i = 0; i < numShadows; i++)
     {
         float tmp = CalculateShadow(i, position);
-        
+
         if(ret < tmp)
             ret = tmp;
     }
@@ -156,14 +167,25 @@ float OrenNayarDiffuse(
     return albedo * max(0.0, NdotL) * (A + B * s / t) / PI;
 }
 
+// https://github.com/google/filament/blob/436dffcbb39f8fa8741b8cc68cdd5776f2a98901/shaders/src/surface_brdf.fs#L241
+float BurleyDiffuse(float NdotV, float NdotL, float LdotH, float roughness)
+{
+    // Burley 2012, "Physically-Based Shading at Disney"
+    float f90 = 0.5 + 2.0 * roughness * pow(LdotH, 2.0);
+    float lightScatter = FresnelSchlick(1.0, f90, NdotL);
+    float viewScatter  = FresnelSchlick(1.0, f90, NdotV);
+
+    return lightScatter * viewScatter * (1.0 / PI);
+}
+
 vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, float metallic, float roughness)
 {
     float theta = dot(normalize(lights[index].position - worldPosition), normalize(-lights[index].direction));
     float intensity = 1.0;
-    
+
     if(lights[index].cutoff != 1.0)
         intensity = clamp((theta - lights[index].outerCutoff) / (lights[index].cutoff - lights[index].outerCutoff), 0.0, 1.0);
-    
+
     if(theta < lights[index].cutoff && intensity <= 0.0)
         return vec3(0.0);
 
@@ -179,12 +201,8 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);
 
-    float LdotV = max(dot(L, V), 0.0);
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
-
-    float luminance = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
-    float orenNayar = OrenNayarDiffuse(LdotV, NdotV, NdotL, roughness, luminance);
 
     vec3 numerator = NDF * G * F;
     float denominator = 4.0 * NdotV * NdotL + 0.0001;
@@ -194,9 +212,25 @@ vec3 CalculateLight(int index, vec3 worldPosition, vec3 V, vec3 N, vec3 albedo, 
     vec3 kS = F;
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
-    vec3 diffuse = kD * orenNayar * (luminance > 0.001 ? albedo / luminance : albedo);
+#if DIFFUSE_METHOD == BURLEY_DIFFUSE
+    float LdotH = max(dot(L, H), 0.0);
 
-    return (diffuse + specular) * radiance;
+    float burley = BurleyDiffuse(NdotV, NdotL, LdotH, roughness);
+
+    return (kD * albedo * burley + specular) * radiance * NdotL;
+#elif DIFFUSE_METHOD == OREN_NAYAR_DIFFUSE
+    float LdotV = max(dot(L, V), 0.0);
+
+    vec3 orenNayar = vec3(
+        OrenNayarDiffuse(LdotV, NdotV, NdotL, roughness, albedo.r),
+        OrenNayarDiffuse(LdotV, NdotV, NdotL, roughness, albedo.g),
+        OrenNayarDiffuse(LdotV, NdotV, NdotL, roughness, albedo.b)
+    );
+
+    return (kD * orenNayar + specular) * radiance;
+#elif DIFFUSE_METHOD == LAMBERT_DIFFUSE
+    return (kD * albedo / PI + specular) * radiance * NdotL;
+#endif
 }
 
 void CalculateLights(
@@ -208,7 +242,7 @@ void CalculateLights(
     for(int i = 0; i < numLights; i++)
     {
         vec3 res = CalculateLight(i, worldPosition, V, N, albedo, metallic, roughness);
-        
+
         if(lights[i].shadow == 1)
             totalLighting += res;
         else
@@ -248,14 +282,14 @@ void main()
 
     vec3 kS = F;
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
-    
+
     vec3 irradiance = texture(irradiance, vec4(normal, 0.0)).rgb;
     vec3 diffuse = irradiance * albedo;
-    
+
     vec3 prefilteredColor = textureLod(prefiltered, vec4(R, 0.0), roughness * maxReflectionLod).rgb;
     vec2 envBRDF = texture(brdf, vec2(NdotV, roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
-    
+
     vec3 ambient = (kD * diffuse + specular);
 
     vec3 finalColor = (((ambient + totalLighting) * (1.0 - shadow)) + totalNoShadow + emission + (ambient / 5.0) * shadow) * ao;
